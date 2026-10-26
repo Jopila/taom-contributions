@@ -35,6 +35,12 @@ LOCK_STALE_SECONDS = 1800
 LOG_CAP = 1_000_000
 REASON_MAX = 200
 VERSION_RE = re.compile(r"v\d+\.\d+\.\d+")  # the same expression session-start.sh greps
+ARCHIVE_NAME_RE = re.compile(
+    r"^TaleWorlds\.Native\.v(\d+)\.(\d+)\.(\d+)\.([A-Za-z0-9_]+)(?:\.([0-9a-f]{16}))?\.dll$")
+MATCH_TOOL = Path(__file__).resolve().parent / "native_build_match.py"
+ORACLE_TIMEOUT = 600
+ORACLE_RE = re.compile(r"oracle: \d+ single-owner methods: correct (\d+) \(hash \d+, strings \d+\), "
+                       r"wrong (\d+), ambiguous (\d+), unknown (\d+)")
 
 
 class Build:
@@ -98,13 +104,23 @@ def _stat_matches(entry, dll: Path) -> bool:
 
 
 def _failed_steps(entry) -> list:
-    return [(step, str(entry.get(step))[len("failed: "):]) for step in ("map", "index")
-            if str(entry.get(step, "")).startswith("failed: ")]
+    steps = [(step, str(entry.get(step))[len("failed: "):]) for step in ("map", "index")
+             if str(entry.get(step, "")).startswith("failed: ")]
+    o = entry.get("oracle")
+    if isinstance(o, dict) and o.get("status") == "failed":
+        steps.append(("oracle", str(o.get("reason"))))
+    return steps
+
+
+def _oracle_pending(entry) -> bool:
+    """No oracle result yet (a build archived before the oracle step existed) or a failed one."""
+    o = entry.get("oracle")
+    return not isinstance(o, dict) or o.get("status") == "failed"
 
 
 def _needs_work(entry, dll: Path) -> bool:
-    return (not _stat_matches(entry, dll)
-            or entry.get("map") != "ok" or entry.get("index") != "ok")
+    return (not _stat_matches(entry, dll) or entry.get("map") != "ok"
+            or entry.get("index") != "ok" or _oracle_pending(entry))
 
 
 # --- lock ----------------------------------------------------------------------------------
@@ -194,6 +210,84 @@ def _build_index(archived: Path):
     nbm.load_index(archived, nd.DEFAULT_PROJECT_DIR, True)
 
 
+def _version_tuple(version: str):
+    m = re.fullmatch(r"v(\d+)\.(\d+)\.(\d+)", version)
+    return tuple(int(g) for g in m.groups()) if m else None
+
+
+def previous_build(archive: Path, tag: str, version: str, current_name: str):
+    """(version, file name) of the archived build of this tag with the highest version strictly
+    below `version`, or None. A sha-suffixed copy ranks below the plain name of its version."""
+    current = _version_tuple(version)
+    if current is None:
+        return None
+    best, best_key = None, None
+    for path in archive.glob("TaleWorlds.Native.*.dll"):
+        m = ARCHIVE_NAME_RE.match(path.name)
+        if not m or m.group(4) != tag or path.name == current_name:
+            continue
+        found = tuple(int(g) for g in m.groups()[:3])
+        if found >= current:
+            continue
+        try:
+            mtime = path.stat().st_mtime
+        except OSError:
+            continue
+        key = (found, m.group(5) is None, mtime)
+        if best_key is None or key > best_key:
+            best, best_key = (f"v{found[0]}.{found[1]}.{found[2]}", path.name), key
+    return best
+
+
+def parse_oracle(text: str):
+    m = ORACLE_RE.search(text or "")
+    if not m:
+        return None
+    correct, wrong, ambiguous, unknown = (int(g) for g in m.groups())
+    return {"correct": correct, "wrong": wrong, "ambiguous": ambiguous, "unknown": unknown}
+
+
+def _oracle_result(against: str, against_file: str, status: str, reason: str = "", counts=None) -> dict:
+    counts = counts or {"correct": 0, "wrong": 0, "ambiguous": 0, "unknown": 0}
+    return {"against": against, "against_file": against_file, "status": status, **counts,
+            "reason": reason, "reported": False}
+
+
+def run_oracle(archive: Path, tag: str, version: str, archived_as: str) -> dict:
+    """Score the matcher on the pair (previous archived build of this tag, this one)."""
+    if _version_tuple(version) is None:
+        return _oracle_result("none", "", "unscored", f"unknown version {version}")
+    prev = previous_build(archive, tag, version, archived_as)
+    if prev is None:
+        return _oracle_result("none", "", "unscored", "no earlier archived build")
+    against, prev_name = prev
+    cmd = [sys.executable, str(MATCH_TOOL), "--old", str(archive / prev_name),
+           "--new", str(archive / archived_as), "--oracle"]
+
+    def result(status, reason="", counts=None):
+        return _oracle_result(against, prev_name, status, reason, counts)
+
+    try:
+        proc = subprocess.run(cmd, capture_output=True, text=True, errors="replace",
+                              timeout=ORACLE_TIMEOUT, cwd=archive)
+    except subprocess.TimeoutExpired:
+        return result("failed", f"timed out after {ORACLE_TIMEOUT} s")
+    except OSError as exc:
+        return result("failed", _reason(exc))
+    stderr_lines = [l.strip() for l in (proc.stderr or "").splitlines() if l.strip()]
+    if proc.returncode == 2:
+        errors = [l for l in stderr_lines if l.startswith("ERROR:")]
+        return result("unscored", _reason(errors[-1][len("ERROR:"):] if errors else
+                                          (stderr_lines[-1] if stderr_lines else "exit 2")))
+    if proc.returncode in (0, 1):
+        counts = parse_oracle(proc.stdout)
+        if counts is None:
+            return result("failed", f"exit {proc.returncode} with no oracle summary line")
+        return result("ok" if proc.returncode == 0 else "wrong", counts=counts)
+    tail = stderr_lines[-1] if stderr_lines else "no output"
+    return result("failed", _reason(f"exit {proc.returncode}: {tail}"))
+
+
 def _step(label: str, fn, arg: Path, log) -> str:
     try:
         fn(arg)
@@ -210,6 +304,7 @@ def process(build: Build, archive: Path, state: dict, log) -> None:
     st = os.stat(build.dll)
     entry = _entry(state, build)
     same = _stat_matches(entry, build.dll)
+    old_oracle = entry.get("oracle") if same else None
     archived_as = entry.get("archived_as") if same else None
     if not (archived_as and (archive / archived_as).is_file()):
         sha = _sha256(build.dll)
@@ -223,6 +318,8 @@ def process(build: Build, archive: Path, state: dict, log) -> None:
              "version": version, "tag": build.tag, "archived_as": archived_as,
              "map": entry.get("map", "pending") if same else "pending",
              "index": entry.get("index", "pending") if same else "pending"}
+    if same and isinstance(old_oracle, dict):
+        entry["oracle"] = old_oracle
     state[build.key] = entry
     save_state(archive, state)  # the copy is safe on disk before the slow steps start
     if entry["map"] != "ok":
@@ -231,6 +328,13 @@ def process(build: Build, archive: Path, state: dict, log) -> None:
     if entry["index"] != "ok":
         entry["index"] = _step(f"{version} {build.tag} index", _build_index,
                                archive / archived_as, log)
+        save_state(archive, state)
+    if entry["map"] == "ok" and entry["index"] == "ok" and _oracle_pending(entry):
+        entry["oracle"] = run_oracle(archive, build.tag, version, archived_as)
+        o = entry["oracle"]
+        log(f"{version} {build.tag} oracle {o['status']} against {o['against']}: "
+            f"correct {o['correct']}, wrong {o['wrong']}, ambiguous {o['ambiguous']}, "
+            f"unknown {o['unknown']}" + (f" ({o['reason']})" if o["reason"] else ""))
         save_state(archive, state)
 
 
@@ -273,20 +377,73 @@ def _spawn_detached(cmd: list, log: Path, cwd: Path) -> None:
                          cwd=cwd, close_fds=True, **kwargs)
 
 
+def _oracle_line(archive: Path, entry: dict, build: Build):
+    """(text, quiet_after_reporting) for a finished oracle result, or None when there is nothing
+    to say (failed results go through _failed_steps)."""
+    o = entry.get("oracle")
+    if not isinstance(o, dict):
+        return None
+    version, tag = entry.get("version") or build.version(), build.tag
+    pair = f"{o.get('against')} -> {version} {tag}"
+    if o.get("status") == "wrong":
+        return (f"NOTE: native archive: matcher oracle {pair}: {o.get('wrong')} WRONG matches; "
+                "do not carry addresses on this pair (python tools/native_build_match.py --old "
+                f"{(archive / str(o.get('against_file'))).as_posix()} --new "
+                f"{(archive / str(entry.get('archived_as'))).as_posix()} --oracle)"), False
+    if o.get("status") == "ok":
+        return (f"native archive: matcher oracle {pair}: {o.get('correct')} correct, "
+                f"{o.get('wrong')} wrong, {o.get('ambiguous')} ambiguous, "
+                f"{o.get('unknown')} unknown"), True
+    if o.get("status") == "unscored":
+        return f"native archive: matcher oracle {pair} unscored: {o.get('reason')}", True
+    return None
+
+
+def _mark_reported(archive: Path, builds: list) -> bool:
+    """Mark these builds' oracle results reported, unless a child holds the lock (it rewrites
+    the state, and a write here could race it)."""
+    if _lock_is_fresh(archive):
+        return False
+    state = load_state(archive)
+    for b in builds:
+        o = (state.get(b.key) or {}).get("oracle")
+        if isinstance(o, dict):
+            o["reported"] = True
+    try:
+        save_state(archive, state)
+    except OSError:
+        return False
+    return True
+
+
 def detach(builds: list, archive: Path, state: dict, game: Path) -> int:
     if _lock_is_fresh(archive):
         return 0  # another session is archiving
-    fresh, failed = [], []
+    fresh, notes, reports, work_needed = [], [], [], False
     for b in builds:
         entry = _entry(state, b)
         if not _stat_matches(entry, b.dll):
             fresh.append(b)
-        elif _needs_work(entry, b.dll):
-            failed.append((b, _failed_steps(entry)))
-    for b, steps in failed:
-        for step, reason in steps:
-            print(f"NOTE: native archive: {b.version()} {b.tag} {step} failed: {reason} "
-                  "(see the log)")
+            work_needed = True
+            continue
+        work_needed = work_needed or _needs_work(entry, b.dll)
+        version = entry.get("version") or b.version()
+        for step, reason in _failed_steps(entry):
+            notes.append(f"NOTE: native archive: {version} {b.tag} {step} failed: {reason} "
+                         "(see the log)")
+        line = _oracle_line(archive, entry, b)
+        if line and line[1] and not entry["oracle"].get("reported"):
+            reports.append((b, line[0]))
+        elif line and not line[1]:
+            notes.append(line[0])  # a wrong match is repeated every session, never marked quiet
+    if reports and not _mark_reported(archive, [b for b, _ in reports]):
+        reports = []  # unmarked it would repeat, and a held lock means say nothing about it
+    for note in notes:
+        print(note)
+    for _, text in reports:
+        print(text)
+    if not work_needed:
+        return 0
     log = archive / LOG_NAME
     cmd = [sys.executable, str(Path(__file__).resolve()), "--game-dir", str(game),
            "--archive-dir", str(archive)]
@@ -303,6 +460,18 @@ def detach(builds: list, archive: Path, state: dict, game: Path) -> int:
 
 # --- entry point ---------------------------------------------------------------------------
 
+def _oracle_status(o) -> str:
+    if not isinstance(o, dict):
+        return "oracle=none"
+    text = f"oracle={o.get('status')} vs {o.get('against')}"
+    if o.get("status") in ("ok", "wrong"):
+        text += (f" ({o.get('correct')} correct, {o.get('wrong')} wrong, "
+                 f"{o.get('ambiguous')} ambiguous, {o.get('unknown')} unknown)")
+    elif o.get("reason"):
+        text += f" ({o.get('reason')})"
+    return text
+
+
 def status(archive: Path) -> int:
     state = load_state(archive)
     rows = sorted((e for e in state.values() if isinstance(e, dict)),
@@ -311,7 +480,8 @@ def status(archive: Path) -> int:
         print(f"native archive: nothing archived yet ({archive.as_posix()})")
     for e in rows:
         print(f"{e.get('version')} {e.get('tag')}: {e.get('archived_as')} "
-              f"sha16={e.get('sha16')} map={e.get('map')} index={e.get('index')}")
+              f"sha16={e.get('sha16')} map={e.get('map')} index={e.get('index')} "
+              + _oracle_status(e.get("oracle")))
     return 0
 
 
@@ -330,9 +500,11 @@ def run(args) -> int:
         print(f"NOTE: native archive UNCHECKED: {_reason(exc)}")
         return 0
     state = load_state(archive)
+    if args.detach:
+        return detach(builds, archive, state, game)
     if not any(_needs_work(_entry(state, b), b.dll) for b in builds):
         return 0
-    return detach(builds, archive, state, game) if args.detach else work(builds, archive)
+    return work(builds, archive)
 
 
 def main(argv=None) -> int:

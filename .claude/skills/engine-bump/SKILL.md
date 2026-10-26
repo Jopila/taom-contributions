@@ -48,7 +48,9 @@ misattributed crashes) or we migrate deliberately. The session-start hook warns 
    reads every id. Fix the sweep before trusting native answers for that build. Native offsets quoted in
    docs and RCAs belong to their old binary; re-derive one by engine method or string, not by
    offset ([ghidra-native-decompile.md](../../../docs/features/ghidra-native-decompile.md)), or
-   carry it: run `python tools/native_build_match.py --old <archived old client DLL> --oracle` once
+   carry it. The session-start archive scores the new pair on its own (`python tools/native_archive.py
+   --status` shows `oracle=ok vs <old>`, or a banner NOTE names WRONG matches); without that result, run
+   `python tools/native_build_match.py --old <archived old client DLL> --oracle` once
    (exit 1, a wrong match: do not use it on this pair; exit 2, no map for the old build: the pair is
    unscored), then `--rva <old offset>`. Only `MATCHED ... (hash)` gives an exact offset, and it
    means identical code, not proven identity: read the new address with `native_decompile.py --rva`

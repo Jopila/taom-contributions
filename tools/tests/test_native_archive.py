@@ -64,6 +64,11 @@ class ArchiveCase(unittest.TestCase):
             rc = na.main(["--game-dir", str(self.game), "--archive-dir", str(self.archive), *extra])
         return rc, buf.getvalue()
 
+    def settle(self):
+        """Run --detach once so the one-time oracle lines are reported, and drop them."""
+        with mock.patch("subprocess.Popen"):
+            self.run_main("--detach")
+
     def state(self) -> dict:
         return json.loads((self.archive / na.STATE_NAME).read_text(encoding="utf-8"))
 
@@ -137,6 +142,7 @@ class ForegroundTests(ArchiveCase):
         self.assertNotIn("NOTE", out)
         self.assertNotIn("wEditor", out)
         self.assertEqual(self.names(), ["TaleWorlds.Native.v1.5.5.client.dll"])
+        self.settle()
         with mock.patch("subprocess.Popen") as popen:
             self.assertEqual(self.run_main("--detach"), (0, ""))
         self.assertEqual(popen.call_count, 0)
@@ -180,6 +186,7 @@ class FailureTests(ArchiveCase):
         self.run_main()
         self.assertEqual(self.state()[self.client.as_posix()]["map"], "ok")
         self.assertTrue(copy.is_file())
+        self.settle()
         with mock.patch("subprocess.Popen") as popen:
             self.assertEqual(self.run_main("--detach"), (0, ""))
         self.assertEqual(popen.call_count, 0)
@@ -252,6 +259,7 @@ class DetachTests(ArchiveCase):
 
     def test_detach_with_nothing_to_do_starts_nothing(self):
         self.run_main()
+        self.settle()
         with mock.patch("subprocess.Popen") as popen:
             self.assertEqual(self.run_main("--detach"), (0, ""))
         self.assertEqual(popen.call_count, 0)
@@ -293,6 +301,248 @@ class StatusTests(ArchiveCase):
         rc, out = self.run_main("--status")
         self.assertEqual(rc, 0)
         self.assertIn("nothing archived", out)
+
+
+SUMMARY = ("oracle: 120 single-owner methods: correct 100 (hash 90, strings 10), wrong {w}, "
+           "ambiguous 15, unknown 5")
+
+
+def oracle_proc(rc=0, wrong=0, stderr=""):
+    out = f"old: x\n  units: a\nnew: y\n  units: b\n{SUMMARY.format(w=wrong)}\n"
+    return subprocess.CompletedProcess([], rc, stdout=out, stderr=stderr)
+
+
+class PreviousBuildTests(ArchiveCase):
+    def _files(self, *names):
+        self.archive.mkdir(exist_ok=True)
+        for n in names:
+            (self.archive / n).write_bytes(n.encode())
+
+    def test_picks_the_highest_lower_version_of_the_same_tag(self):
+        self._files("TaleWorlds.Native.v1.5.2.client.dll", "TaleWorlds.Native.v1.5.10.client.dll",
+                    "TaleWorlds.Native.v1.5.4.client.dll", "TaleWorlds.Native.v1.5.9.client.dll",
+                    "TaleWorlds.Native.v1.5.6.wEditor.dll", "TaleWorlds.Native.v1.5.11.client.dll")
+        got = na.previous_build(self.archive, "client", "v1.5.10", "TaleWorlds.Native.v1.5.10.client.dll")
+        self.assertEqual(got, ("v1.5.9", "TaleWorlds.Native.v1.5.9.client.dll"))
+
+    def test_ignores_the_other_tag(self):
+        self._files("TaleWorlds.Native.v1.5.4.wEditor.dll")
+        self.assertIsNone(na.previous_build(self.archive, "client", "v1.5.5", "x.dll"))
+
+    def test_ignores_a_suffixed_copy_of_the_same_build(self):
+        self._files("TaleWorlds.Native.v1.5.5.client.dll",
+                    "TaleWorlds.Native.v1.5.5.client.0123456789abcdef.dll",
+                    "TaleWorlds.Native.v1.5.4.client.dll")
+        got = na.previous_build(self.archive, "client", "v1.5.5",
+                                "TaleWorlds.Native.v1.5.5.client.0123456789abcdef.dll")
+        self.assertEqual(got, ("v1.5.4", "TaleWorlds.Native.v1.5.4.client.dll"))
+
+    def test_prefers_the_plain_name_over_a_suffixed_one_of_the_previous_version(self):
+        self._files("TaleWorlds.Native.v1.5.4.client.0123456789abcdef.dll",
+                    "TaleWorlds.Native.v1.5.4.client.dll")
+        got = na.previous_build(self.archive, "client", "v1.5.5", "x.dll")
+        self.assertEqual(got[1], "TaleWorlds.Native.v1.5.4.client.dll")
+
+    def test_none_when_nothing_is_lower(self):
+        self._files("TaleWorlds.Native.v1.5.5.client.dll", "TaleWorlds.Native.v1.5.6.client.dll")
+        self.assertIsNone(na.previous_build(self.archive, "client", "v1.5.5", "x.dll"))
+
+    def test_never_returns_the_build_itself_under_an_older_name(self):
+        self._files("TaleWorlds.Native.v1.5.4.client.dll")
+        self.assertIsNone(na.previous_build(self.archive, "client", "v1.5.5",
+                                            "TaleWorlds.Native.v1.5.4.client.dll"))
+
+
+class ParseOracleTests(unittest.TestCase):
+    def test_the_summary_line_is_parsed(self):
+        got = na.parse_oracle("noise\n" + SUMMARY.format(w=3) + "\nWRONG x\n")
+        self.assertEqual(got, {"correct": 100, "wrong": 3, "ambiguous": 15, "unknown": 5})
+
+    def test_no_summary_is_none(self):
+        self.assertIsNone(na.parse_oracle("old: x\nnothing here\n"))
+
+
+class OracleCase(ArchiveCase):
+    def setUp(self):
+        super().setUp()
+        self.archive.mkdir()
+        self.prev_client = self.archive / "TaleWorlds.Native.v1.5.4.client.dll"
+        self.prev_client.write_bytes(b"older client")
+        (self.archive / "TaleWorlds.Native.v1.5.4.wEditor.dll").write_bytes(b"older editor")
+        self.this_client = self.archive / "TaleWorlds.Native.v1.5.5.client.dll"
+
+    def oracle(self) -> dict:
+        return self.state()[self.client.as_posix()]["oracle"]
+
+    def run_with(self, proc, *extra):
+        if isinstance(proc, Exception):
+            patch = mock.patch("subprocess.run", side_effect=proc)
+        else:
+            patch = mock.patch("subprocess.run", return_value=proc)
+        with patch as run:
+            result = self.run_main(*extra)
+        return run, result
+
+    def detach_out(self):
+        with mock.patch("subprocess.Popen"):
+            return self.run_main("--detach")[1].splitlines()
+
+
+class OracleStepTests(OracleCase):
+    def test_exit_0_is_ok_and_runs_the_matcher_with_the_pair(self):
+        run, _ = self.run_with(oracle_proc(0))
+        o = self.oracle()
+        self.assertEqual((o["status"], o["against"], o["correct"], o["wrong"], o["ambiguous"],
+                          o["unknown"], o["reported"]), ("ok", "v1.5.4", 100, 0, 15, 5, False))
+        cmds = [c for c in run.call_args_list if "--oracle" in c.args[0]]
+        self.assertEqual(len(cmds), 2)  # client and wEditor
+        first = next(c for c in cmds if str(self.this_client) in c.args[0])
+        tool = str(Path(na.__file__).resolve().parent / "native_build_match.py")
+        self.assertEqual(first.args[0], [sys.executable, tool, "--old", str(self.prev_client),
+                                         "--new", str(self.this_client), "--oracle"])
+        self.assertEqual(first.kwargs["timeout"], 600)
+        self.assertEqual(first.kwargs["cwd"], self.archive)
+
+    def test_exit_1_is_wrong(self):
+        self.run_with(oracle_proc(1, wrong=3))
+        o = self.oracle()
+        self.assertEqual((o["status"], o["wrong"]), ("wrong", 3))
+
+    def test_exit_2_is_unscored_with_the_error_line(self):
+        self.run_with(oracle_proc(2, stderr="ERROR: no engine-method map for old.dll\n"))
+        o = self.oracle()
+        self.assertEqual((o["status"], o["reason"]), ("unscored", "no engine-method map for old.dll"))
+
+    def test_a_timeout_is_failed(self):
+        self.run_with(subprocess.TimeoutExpired(["x"], 600))
+        o = self.oracle()
+        self.assertEqual(o["status"], "failed")
+        self.assertIn("600", o["reason"])
+
+    def test_another_exit_code_is_failed(self):
+        self.run_with(oracle_proc(3, stderr="Traceback boom"))
+        o = self.oracle()
+        self.assertEqual(o["status"], "failed")
+        self.assertIn("boom", o["reason"])
+
+    def test_an_unparseable_summary_is_failed(self):
+        self.run_with(subprocess.CompletedProcess([], 0, stdout="no summary", stderr=""))
+        self.assertEqual(self.oracle()["status"], "failed")
+
+    def test_no_earlier_build_is_unscored_without_running_anything(self):
+        self.prev_client.unlink()
+        run, _ = self.run_with(oracle_proc(0))
+        o = self.oracle()
+        self.assertEqual((o["status"], o["reason"]), ("unscored", "no earlier archived build"))
+        self.assertEqual([c for c in run.call_args_list if str(self.this_client) in c.args[0]], [])
+
+    def test_an_unknown_version_is_skipped_with_a_reason(self):
+        (self.client.parent / "Version.xml").write_text("<Version/>", encoding="utf-8")
+        self.run_with(oracle_proc(0))
+        o = self.oracle()
+        self.assertEqual(o["status"], "unscored")
+        self.assertIn("unknown", o["reason"])
+
+    def test_no_oracle_while_the_map_failed(self):
+        self.load_or_build.side_effect = RuntimeError("no ilspycmd")
+        run, _ = self.run_with(oracle_proc(0))
+        self.assertNotIn("oracle", self.state()[self.client.as_posix()])
+        self.assertEqual(run.call_count, 0)
+
+
+class OracleBackfillTests(OracleCase):
+    def test_an_entry_without_an_oracle_is_backfilled_once(self):
+        self.run_with(oracle_proc(0))
+        state = self.state()
+        del state[self.client.as_posix()]["oracle"]
+        (self.archive / na.STATE_NAME).write_text(json.dumps(state), encoding="utf-8")
+        calls = (self.load_or_build.call_count, self.load_index.call_count)
+        run, _ = self.run_with(oracle_proc(0))
+        self.assertEqual(len([c for c in run.call_args_list if "--oracle" in c.args[0]]), 1)
+        self.assertEqual(self.oracle()["status"], "ok")
+        self.assertEqual((self.load_or_build.call_count, self.load_index.call_count), calls)
+        run, _ = self.run_with(oracle_proc(0))
+        self.assertEqual(run.call_count, 0)
+
+    def test_the_detach_parent_spawns_for_a_backfill_and_prints_nothing(self):
+        self.run_with(oracle_proc(0))
+        state = self.state()
+        for e in state.values():
+            e["oracle"]["reported"] = True
+        state[self.client.as_posix()].pop("oracle")
+        (self.archive / na.STATE_NAME).write_text(json.dumps(state), encoding="utf-8")
+        with mock.patch("subprocess.Popen") as popen:
+            self.assertEqual(self.run_main("--detach"), (0, ""))
+        self.assertEqual(popen.call_count, 1)
+
+    def test_ok_wrong_and_unscored_results_are_not_rerun(self):
+        for proc in (oracle_proc(0), oracle_proc(1, wrong=2),
+                     oracle_proc(2, stderr="ERROR: no map\n")):
+            state_file = self.archive / na.STATE_NAME
+            if state_file.exists():
+                state_file.unlink()
+            self.run_with(proc)
+            run, _ = self.run_with(proc)
+            self.assertEqual(run.call_count, 0)
+
+    def test_a_failed_oracle_is_retried(self):
+        self.run_with(subprocess.TimeoutExpired(["x"], 600))
+        self.assertEqual(self.oracle()["status"], "failed")
+        run, _ = self.run_with(oracle_proc(0))
+        self.assertEqual(self.oracle()["status"], "ok")
+        self.assertGreaterEqual(run.call_count, 1)
+
+
+class OracleReportTests(OracleCase):
+    def setUp(self):
+        super().setUp()
+        self.editor.unlink()  # one build keeps the lines easy to read
+
+    def test_ok_is_printed_once_then_silent(self):
+        self.run_with(oracle_proc(0))
+        out = self.detach_out()
+        self.assertEqual(out, ["native archive: matcher oracle v1.5.4 -> v1.5.5 client: "
+                               "100 correct, 0 wrong, 15 ambiguous, 5 unknown"])
+        self.assertTrue(self.oracle()["reported"])
+        self.assertEqual(self.detach_out(), [])
+
+    def test_unscored_is_printed_once(self):
+        self.run_with(oracle_proc(2, stderr="ERROR: no engine-method map for old\n"))
+        out = self.detach_out()
+        self.assertEqual(out, ["native archive: matcher oracle v1.5.4 -> v1.5.5 client unscored: "
+                               "no engine-method map for old"])
+        self.assertEqual(self.detach_out(), [])
+
+    def test_wrong_is_printed_every_session(self):
+        self.run_with(oracle_proc(1, wrong=3))
+        want = ("NOTE: native archive: matcher oracle v1.5.4 -> v1.5.5 client: 3 WRONG matches; "
+                "do not carry addresses on this pair (python tools/native_build_match.py --old "
+                f"{self.prev_client.as_posix()} --new {self.this_client.as_posix()} --oracle)")
+        for _ in range(3):
+            self.assertEqual(self.detach_out(), [want])
+
+    def test_failed_follows_the_failed_step_note_and_retries(self):
+        self.run_with(subprocess.TimeoutExpired(["x"], 600))
+        with mock.patch("subprocess.Popen") as popen:
+            out = self.run_main("--detach")[1].splitlines()
+        self.assertEqual(popen.call_count, 1)
+        self.assertEqual(len(out), 1)
+        self.assertTrue(out[0].startswith("NOTE: native archive: v1.5.5 client oracle failed: "), out)
+        self.assertTrue(out[0].endswith("(see the log)"))
+
+    def test_a_held_lock_prints_nothing_about_the_oracle_and_marks_nothing(self):
+        self.run_with(oracle_proc(0))
+        (self.archive / na.LOCK_NAME).write_text("1 1\n", encoding="utf-8")
+        self.assertEqual(self.detach_out(), [])
+        self.assertFalse(self.oracle()["reported"])
+        (self.archive / na.LOCK_NAME).unlink()
+        self.assertEqual(len(self.detach_out()), 1)
+
+    def test_status_shows_the_oracle(self):
+        self.run_with(oracle_proc(0))
+        line = self.run_main("--status")[1].strip()
+        self.assertIn("oracle=ok", line)
+        self.assertIn("v1.5.4", line)
 
 
 if __name__ == "__main__":

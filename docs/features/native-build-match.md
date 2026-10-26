@@ -124,7 +124,10 @@ the offset carried. Run `--oracle` on the pair first, and read the new address w
 **A player's crash from an older build.** Run `native_crash_triage.py --dump` against the archived
 DLL of the report's build, then carry the fault RVA to the installed build.
 
-**Check a new pair of builds.** Run `--oracle` once per new build. Exit 1 means a wrong match:
+**Check a new pair of builds.** The session-start archive (`tools/native_archive.py`, #1004) runs
+`--oracle` for each new client or wEditor build against the previous archived build of the same
+kind, and the banner reports it; `python tools/native_archive.py --status` shows the stored result.
+By hand, run `--oracle` once per new build. Exit 1 means a wrong match:
 do not use the tool on that pair until the cause is found. Exit 2 with no engine-method map (v1.5.2
 has none) means the pair is unscored: decompile and compare every carried address.
 
@@ -139,6 +142,7 @@ Measured 2026-10-24 on the desktop, archived client DLLs:
 |---|---|
 | Oracle, v1.5.4 to v1.5.5 | 2,060 methods: correct 1,802 (hash 1,797, strings 5), **wrong 0**, ambiguous 253, unknown 5 |
 | Oracle, v1.5.3 to v1.5.4 | 2,060 methods: correct 1,803 (hash 1,798, strings 5), **wrong 0**, ambiguous 253, unknown 4 |
+| Oracle, wEditor v1.5.4 to v1.5.5 (the archive's first automatic run, 2026-10-26) | correct 1,892, **wrong 0**, ambiguous 253, unknown 10; about 57 s with a cold index |
 | Negative control, v1.5.5 client to v1.5.5 wEditor | 2,061 methods: correct 152 (hash 149, strings 3), **wrong 0**, ambiguous 428, unknown 1,481 (15 wrong before the shift check) |
 | Units per binary | about 18,870 primary, 10,600 chained, 16,020 leaf |
 | Index build | about 87 s for three DLLs, cold; about 1 s warm per run |
