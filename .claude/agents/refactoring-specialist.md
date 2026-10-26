@@ -51,7 +51,7 @@ a Harmony patch class, however thin: patch structure is intentional. Never remov
 
 1. **Confirm tests green.** `dotnet test TAOM.Tests` must pass. If not, fix first.
 
-2. **Identify ONE refactoring at a time.** Compose multiple small ones; never bundle into a single sweeping change. Before a rename, move, extract or inline of a type or public member, list everything that must move with it (mandatory, #677): `python tools/graphify_taom.py refresh --if-stale`, then `python tools/graphify_taom.py affected "<Type>" --depth 2` (on "Ambiguous", rerun with the repo-relative `.cs` path it lists). More than five dependent files means the "refactor" is a design change: stop and escalate (see "When NOT to invoke"). The graph has no docs, so step 6's sweep still greps.
+2. **Identify ONE refactoring at a time.** Compose multiple small ones; never bundle into a single sweeping change. Before a rename, move, extract or inline of a type or public member, list everything that must move with it (mandatory, #677): `python tools/graphify_taom.py refresh --if-stale`, then `python tools/graphify_taom.py affected "<Type>" --depth 2` (on "Ambiguous", rerun with the repo-relative `.cs` path it lists). More than five dependent files means the "refactor" is a design change: stop and escalate (see "When NOT to invoke"). The graph has no docs, so step 6's sweep still greps. Between small steps, `python tools/graphify_taom.py tests "<Type>"` prints the filtered test run; the full suite proves green before and after.
 
 3. **Apply the refactoring** using the smallest possible Edit.
 

@@ -64,7 +64,7 @@ internal static class {FeatureName}IoC
 
 ## Iterative Retrieval
 
-Before you change any existing TAOM type, map it (mandatory, #677): `python tools/graphify_taom.py refresh --if-stale`, then `python tools/graphify_taom.py affected "<Type>" --depth 2` for its dependents and `explain "<Type>"` for its dependencies. On "Ambiguous", rerun with the repo-relative `.cs` path it lists. Never run `graphify` itself; a hook denies its write verbs. Report the dependents you checked.
+Before you change any existing TAOM type, map it (mandatory, #677): `python tools/graphify_taom.py refresh --if-stale`, then `python tools/graphify_taom.py affected "<Type>" --depth 2` for its dependents and `explain "<Type>"` for its dependencies. On "Ambiguous", rerun with the repo-relative `.cs` path it lists. Never run `graphify` itself; a hook denies its write verbs. Report the dependents you checked. While iterating, `python tools/graphify_taom.py tests "<Type>"` prints the filtered `dotnet test` line for the tests your change reaches; run the full suite before you report done.
 
 ## Scope-lock during implementation
 

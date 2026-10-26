@@ -107,6 +107,7 @@ is ever treated as a token, which is what keeps the bare word "Alliance" from ma
 | Stuck Battle Guard v1.0.0 (a TAOM player's workaround module) | `StuckBattleGuard` `stuckbattle.` | UNKNOWN | behavioural-port | the stuck AI battle sweep in `Main/Features/MapEventGuard/` and `Main/Adapters/StuckBattle*Adapter.cs`; see detail | uncleared |
 | Kingdom Borders (Nexus mod 10699) | `Kingdom Borders` `KingdomBorders` | UNKNOWN | behavioural-port | `Main/Adapters/BorderRenderAdapter.cs`; the Heraldic layout in `Main/Features/RealmBorders/Domain/BorderPainter.cs`; the module-id check in `Main/Features/RealmBorders/Hooks/RealmBordersCampaignBehavior.cs` (interop); see detail | uncleared |
 | rtk (Rust Token Killer) | `rtk` `rtk-ai/rtk` `Rust Token Killer` | Apache-2.0 (the CLI in `src/`; `engine/` and `proxy/` are BUSL-1.1 and nothing derives from them) | behavioural-port | `.claude/hooks/_shellwords.py` (`command_index`, `peel`); `tools/harness_retro.py` (`command_family`, report section 9) | cleared |
+| CodeGraph | `codegraph` `colbymchenry/codegraph` `@colbymchenry/codegraph` | MIT | behavioural-port | `tools/graphify_taom.py` (interface callers in `affected`, the `tests` verb, answer-scoped staleness, `refresh --detach`); see detail | cleared |
 
 <!-- provenance-register-end -->
 
@@ -882,6 +883,16 @@ Code transcripts, which became section 9 of `tools/harness_retro.py`. No rtk cod
 copied, so no Apache-2.0 notice is carried. The rtk v1.0.1 binary was run once, offline, on
 2026-10-23 to measure it (Mike's explicit trial decision): checksum-verified, never initialised,
 never in a hook or on PATH, then deleted. Record: [`docs/reviews/adopt-rtk-2026-10-23.md`](../reviews/adopt-rtk-2026-10-23.md).
+
+### CodeGraph
+
+Upstream: https://github.com/colbymchenry/codegraph · MIT. Four behaviours described in its README
+were reproduced in `tools/graphify_taom.py`, written from TAOM's own design and tests (#995): call
+paths that follow a class to its interface, a changed-file-to-test-file mapping, a staleness warning
+that names only the pending files an answer cites, and an index that refreshes itself. Its
+`src/telemetry/index.ts`, `install.ps1` and `package.json` were read for the security pass only. No
+CodeGraph code or text was copied, so no MIT notice is carried. Nothing was installed or run.
+Record: [`docs/reviews/adopt-codegraph-2026-10-24.md`](../reviews/adopt-codegraph-2026-10-24.md).
 
 ---
 

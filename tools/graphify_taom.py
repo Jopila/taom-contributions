@@ -20,8 +20,9 @@ silent trap:
 
 Usage:
     python tools/graphify_taom.py status [--brief]           # exit 0 fresh, 1 stale, 2 missing
-    python tools/graphify_taom.py refresh [--if-stale] [--force]
-    python tools/graphify_taom.py affected "IModLogger" --depth 2
+    python tools/graphify_taom.py refresh [--if-stale] [--force] [--detach]
+    python tools/graphify_taom.py affected "IModLogger" --depth 2 [--no-interfaces]
+    python tools/graphify_taom.py tests "TaomPartySizeModel" [--depth 2]   # dotnet test filter
     python tools/graphify_taom.py explain "TaomPartySizeModel"
     python tools/graphify_taom.py god-nodes --top 15
     python tools/graphify_taom.py path "A" "B"
@@ -44,7 +45,9 @@ import re
 import shutil
 import subprocess
 import sys
+import threading
 import time
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
@@ -553,26 +556,515 @@ def cmd_refresh(args) -> int:
         release_lock(out)
 
 
-def cmd_query(verb: str, rest: list) -> int:
-    gdir = graph_dir(out_root())
+# --- graph-aware answers: supertypes, candidates, answer-scoped staleness (#995) -----------
+
+SUPER_RELATIONS = frozenset({"implements", "inherits", "extends"})
+MEMBER_CALL_RELATIONS = frozenset({"calls", "references"})
+MAX_HOP_FILES = 8
+NO_MATCH = "No unique node match"
+MAX_CANDIDATES = 10
+MAX_SUPERTYPES = 6
+STALE_NAMED = 10
+
+
+def _is_repo_path(source_file: str) -> bool:
+    """A node defined in TAOM's own code: a relative path with a code extension. Reference nodes
+    for engine types (MissionLogic, MobileParty) carry no source file."""
+    if not source_file or source_file.startswith(("/", "\\", "..")) or ":" in source_file[:3]:
+        return False
+    return _is_code(source_file)
+
+
+class GraphData:
+    """The parts of graph.json the wrapper reads: every node by id, and the 1,700 or so
+    implements / inherits / extends links. One load per call (about 0.7 s for 150 MB)."""
+
+    def __init__(self, nodes: dict, super_links: list, members=None, callers=None):
+        self.nodes = nodes
+        self.super_links = super_links
+        self.members = members or {}   # type id -> ids of its member nodes (`method` links)
+        self.callers = callers or {}   # member id -> [(caller id, relation, file, location)]
+
+    @classmethod
+    def load(cls, path: Path):
+        try:
+            raw = json.loads(Path(path).read_text(encoding="utf-8"))
+            nodes = {n["id"]: n for n in raw["nodes"]}
+            links = [(l["source"], l["target"]) for l in raw["links"]
+                     if l.get("relation") in SUPER_RELATIONS]
+            members = {}
+            for l in raw["links"]:
+                if l.get("relation") == "method":
+                    members.setdefault(l["source"], []).append(l["target"])
+            member_ids = {m for ids in members.values() for m in ids}
+            callers = {}
+            for l in raw["links"]:
+                if l.get("relation") in MEMBER_CALL_RELATIONS and l["target"] in member_ids:
+                    callers.setdefault(l["target"], []).append(
+                        (l["source"], l["relation"], l.get("source_file") or "",
+                         l.get("source_location") or ""))
+        except (OSError, ValueError, KeyError, TypeError):
+            return None
+        return cls(nodes, links, members, callers)
+
+    def _seeds(self, query: str) -> list:
+        q = query.replace("\\", "/").rstrip("/")
+        if q in self.nodes:
+            return [q]
+        low = q.lower()
+        in_file = [i for i, n in self.nodes.items()
+                   if (n.get("source_file") or "").replace("\\", "/").lower() == low]
+        if in_file:
+            return in_file
+        named = [i for i, n in self.nodes.items() if str(n.get("label", "")).lower() == low]
+        defined = [i for i in named if self.nodes[i].get("source_file")]
+        return defined or named
+
+    def supertypes(self, query: str) -> list:
+        """(label, defining path) of each TAOM type the query's node implements or inherits."""
+        seeds = set(self._seeds(query))
+        found = []
+        for src, tgt in self.super_links:
+            if src not in seeds or tgt in seeds:
+                continue
+            node = self.nodes.get(tgt)
+            if not node:
+                continue
+            sf = (node.get("source_file") or "").replace("\\", "/")
+            item = (str(node.get("label", tgt)), sf)
+            if _is_repo_path(sf) and item not in found:
+                found.append(item)
+        return found
+
+    def member_callers(self, query: str):
+        """(type label, lines): who calls or references the members of the type the query names.
+        graphify's `affected` stops at the type node, so a caller that only uses an interface's
+        methods (and never names the interface) is invisible there. A type's own members calling
+        each other are left out."""
+        owners = [i for i in self._seeds(query) if i in self.members]
+        if not owners:
+            return "", []
+        member_ids = {m for o in owners for m in self.members[o]}
+        lines = []
+        for member in sorted(member_ids):
+            mlabel = str(self.nodes[member].get("label", member)).lstrip(".")
+            for src, rel, sf, loc in self.callers.get(member, []):
+                if src in member_ids or src in owners:
+                    continue
+                node = self.nodes.get(src, {})
+                where = f"{sf or node.get('source_file') or '-'}:{loc or node.get('source_location') or '-'}"
+                line = f"- {str(node.get('label', src)).lstrip('.')} [{rel} {mlabel}] {where}"
+                if line not in lines:
+                    lines.append(line)
+        return str(self.nodes[owners[0]].get("label", query)), lines
+
+    @staticmethod
+    def _bare(name: str) -> str:
+        return re.split(r"[\\/]", name.strip())[-1]
+
+    def candidates(self, name: str) -> list:
+        low = self._bare(name).lower()
+        ranked = []
+        for nid, n in self.nodes.items():
+            label = str(n.get("label", "")).lower()
+            norm = str(n.get("norm_label") or label)
+            exact = label in (low, low + ".cs") or nid == name
+            if not exact and low not in norm:
+                continue
+            sf = n.get("source_file") or ""
+            rank = (0 if sf else 1) if exact else (2 if sf else 3)
+            ranked.append((rank, sf, str(nid), n))
+        ranked.sort(key=lambda r: r[:3])
+        return [r[3] for r in ranked[:MAX_CANDIDATES]]
+
+    def sole_definition(self, name: str):
+        """The one .cs path defining a type of this name, else None (none, or several)."""
+        if re.search(r"[\\/]", name):
+            return None
+        low = name.lower()
+        files = {n.get("source_file") for n in self.nodes.values()
+                 if n.get("source_file") and str(n.get("label", "")).lower() in (low, low + ".cs")}
+        return next(iter(files)) if len(files) == 1 else None
+
+    def classes_in(self, source_file: str) -> list:
+        want = source_file.replace("\\", "/")
+        return sorted({str(n["label"]) for n in self.nodes.values()
+                       if n.get("_callable_class")
+                       and (n.get("source_file") or "").replace("\\", "/") == want
+                       and not str(n["label"]).endswith(".cs")})
+
+
+class GraphCache:
+    """Loads graph.json at most once per wrapper call, and only when a feature needs it."""
+
+    def __init__(self, path: Path):
+        self.path = path
+        self._tried = False
+        self._data = None
+        self.seconds = 0.0
+        self._lock = threading.Lock()
+
+    def get(self):
+        with self._lock:
+            if not self._tried:
+                self._tried = True
+                started = time.monotonic()
+                self._data = GraphData.load(self.path)
+                self.seconds = time.monotonic() - started
+        return self._data
+
+
+def _capture(cmd: list, env: dict):
+    proc = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8",
+                          errors="replace", env=env)
+    return proc.returncode, proc.stdout or "", proc.stderr or ""
+
+
+def _candidate_block(data: GraphData, name: str) -> str:
+    found = data.candidates(name)
+    if not found:
+        return f"graphify_taom: No node label contains '{name}'. Check the spelling.\n"
+    lines = [f"Candidates for {name}: rerun with the repo-relative .cs path or an id:"]
+    for n in found:
+        loc = f"{n.get('source_file') or '-'}:{n.get('source_location') or '-'}"
+        lines.append(f"  {n['id']}  {n.get('label', '')}  {loc}")
+    return "\n".join(lines) + "\n"
+
+
+def _via_blocks(exe, gpath, env, rest, out, supers) -> str:
+    seen = {l for l in out.splitlines() if l.startswith("- ")}
+    text = []
+    picked = supers[:MAX_SUPERTYPES]
+    # Each graphify call re-reads the whole graph (about 3 s), so the supertypes run side by side.
+    with ThreadPoolExecutor(max_workers=len(picked) or 1) as pool:
+        answers = list(pool.map(
+            lambda sp: _capture(query_command(exe, "affected", [sp[1], *rest[1:]], gpath), env),
+            picked))
+    for (label, path), (rc, sub, _) in zip(picked, answers):
+        text.append(f"Via {label} ({path}):")
+        new = [l for l in sub.splitlines() if l.startswith("- ") and l not in seen]
+        seen.update(new)
+        text.extend(new if new else ["  (nothing new)"])
+    if len(supers) > MAX_SUPERTYPES:
+        text.append(f"NOTE: {len(supers) - MAX_SUPERTYPES} more supertype(s) not queried.")
+    return "\n".join(text) + "\n" if text else ""
+
+
+def _member_blocks(data, queries, printed) -> str:
+    seen = {l for l in printed.splitlines() if l.startswith("- ")}
+    text = []
+    for query in queries:
+        label, lines = data.member_callers(query)
+        new = [l for l in lines if l not in seen]
+        seen.update(new)
+        if new:
+            text.append(f"Member callers of {label}:")
+            text.extend(new)
+    return "\n".join(text) + "\n" if text else ""
+
+
+def affected_answer(exe, gpath, env, rest, interfaces, cache):
+    """graphify's `affected`, plus callers of the target's TAOM supertypes and, for a name that
+    does not resolve, a candidate list or one retry with its defining file. Returns
+    (exit code, stdout text, stderr text). Everything beyond graphify's own answer is advisory,
+    so a bug or an unreadable graph.json adds a NOTE line and keeps graphify's output."""
+    with ThreadPoolExecutor(max_workers=1) as loader:
+        loader.submit(cache.get)  # reads graph.json while graphify answers
+        rc, out, err = _capture(query_command(exe, "affected", rest, gpath), env)
+    target = rest[0] if rest and not rest[0].startswith("-") else None
+    if target is None:
+        return rc, out, err
+    extra = ""
+    try:
+        if NO_MATCH in out:
+            data = cache.get()
+            if data is None:
+                extra += "NOTE: graphify_taom: graph.json could not be read, so no candidates.\n"
+            else:
+                retry = data.sole_definition(target)
+                if retry and retry != target:
+                    out = (f"graphify_taom: no unique node match for {target}; retrying with "
+                           f"{retry} (the file that defines it)\n")
+                    rest = [retry, *rest[1:]]
+                    rc, again, err2 = _capture(query_command(exe, "affected", rest, gpath), env)
+                    out += again
+                    err += err2
+                    target = retry
+                if NO_MATCH in out:
+                    extra += _candidate_block(data, target)
+        if "Affected nodes for" in out:
+            data = cache.get()
+            if data is None:
+                extra += ("NOTE: graphify_taom: graph.json could not be read, so callers of "
+                          "interfaces, base classes and members are not added." + "\n")
+            else:
+                supers = data.supertypes(target) if interfaces else []
+                extra += _via_blocks(exe, gpath, env, [target, *rest[1:]], out, supers)
+                queries = [target] + [path for _, path in supers[:MAX_SUPERTYPES]]
+                extra += _member_blocks(data, queries, out + extra)
+    except Exception as exc:  # advisory layer: never lose graphify's own answer
+        extra += f"NOTE: graphify_taom: extra lookups failed ({type(exc).__name__}: {exc}).\n"
+    return rc, out + ("" if out.endswith("\n") or not out else "\n") + extra, err
+
+
+def stale_in_answer(detail: list, text: str) -> list:
+    norm = text.replace("\\", "/")
+    return [f for f in detail if f in norm]
+
+def stale_warning(detail: list, text: str) -> list:
+    """Warning lines for a stale graph: the changed files this answer mentions first, because
+    those are the ones the answer can be wrong about, then the total and the refresh command."""
+    lines = []
+    hits = stale_in_answer(detail, text)
+    if hits:
+        shown = ", ".join(hits[:STALE_NAMED])
+        if len(hits) > STALE_NAMED:
+            shown += f" and {len(hits) - STALE_NAMED} more"
+        lines.append(f"STALE in this answer: {shown}: Read them directly before acting.")
+    lines.append(f"graphify_taom: the graph is STALE ({len(detail)} code file(s) changed since the "
+                 "build); answers can miss them. Refresh: python tools/graphify_taom.py refresh")
+    return lines
+
+
+# --- the tests verb ----------------------------------------------------------------------
+
+TEST_ROOT = "TAOM.Tests/"
+
+
+def hit_files(text: str) -> list:
+    """Repo paths of the `- Label [relation] path:Lnn` lines of an affected answer."""
+    files = []
+    for line in text.splitlines():
+        if not line.startswith("- "):
+            continue
+        token = line.rsplit(" ", 1)[-1]
+        match = re.match(r"^(.*\.\w+):[^:]*$", token)
+        path = (match.group(1) if match else token).replace("\\", "/")
+        if path not in files:
+            files.append(path)
+    return files
+
+
+def member_caller_files(text: str) -> list:
+    """Paths named in the `Member callers of ...` sections of an affected answer."""
+    lines, in_section = [], False
+    for line in text.splitlines():
+        if line.startswith("Member callers of "):
+            in_section = True
+        elif not line.startswith("- "):
+            in_section = False
+        elif in_section:
+            lines.append(line)
+    return hit_files("\n".join(lines))
+
+
+def test_filter_command(classes: list) -> str:
+    flt = "|".join(f"FullyQualifiedName~{c}" for c in classes)
+    return f'dotnet test TAOM.Tests -p:DisableModuleCopy=true -p:ModuleId= --filter "{flt}"'
+
+
+def tests_for(inputs: list, exe, gpath, env, depth: int, interfaces: bool):
+    """(note, command): the test classes that depend on the inputs. One of the two is None
+    unless some input would not resolve, which adds its own note beside a command."""
+    cache = GraphCache(gpath)
+    cache.get()
+    files, notes, hop = [], [], []
+
+    def collect(out, extra=()):
+        paths = hit_files(out) + list(extra)
+        files.extend(p for p in dict.fromkeys(paths) if p.startswith(TEST_ROOT) and p not in files)
+
+    for item in inputs:
+        _, out, _ = affected_answer(exe, gpath, env, [item, "--depth", str(depth)], interfaces,
+                                    cache)
+        if NO_MATCH in out:
+            notes.append(f"NOTE: graphify_taom: '{item}' did not resolve; see "
+                         "`affected` for candidates.")
+        item_path = item.replace("\\", "/")
+        collect(out, [item_path])
+        hop += [f for f in member_caller_files(out)
+                if not f.startswith(TEST_ROOT) and f not in hop and f != item_path]
+    # A production caller of a member is itself a dependent: the tests that reach it count too.
+    with ThreadPoolExecutor(max_workers=max(1, len(hop[:MAX_HOP_FILES]))) as pool:
+        for _, out, _ in pool.map(
+                lambda f: affected_answer(exe, gpath, env, [f, "--depth", str(depth)], False,
+                                          cache), hop[:MAX_HOP_FILES]):
+            collect(out)
+    if len(hop) > MAX_HOP_FILES:
+        notes.append(f"NOTE: graphify_taom: {len(hop) - MAX_HOP_FILES} more member caller "
+                     "file(s) not followed.")
+    classes = set()
+    data = cache.get() if files else None
+    for path in files:
+        found = data.classes_in(path) if data else []
+        classes.update(found or [Path(path).stem])
+    if not classes:
+        notes.insert(0, "NOTE: graphify_taom: no test in TAOM.Tests reaches "
+                        + ", ".join(inputs) + " at this depth; run the filtered suite for the "
+                        "area by hand.")
+        return "\n".join(notes), None
+    return ("\n".join(notes) or None), test_filter_command(sorted(classes))
+
+
+# --- refresh --detach --------------------------------------------------------------------
+
+DETACH_BUDGET = 1.5
+
+
+def _bannerlord_running(timeout: float):
+    """True or False, or None when the check could not be made in time."""
+    try:
+        proc = subprocess.run(["tasklist", "/FI", "IMAGENAME eq Bannerlord.exe", "/NH"],
+                              capture_output=True, text=True, timeout=timeout,
+                              errors="replace")
+    except (subprocess.TimeoutExpired, OSError):
+        return None
+    if proc.returncode != 0:
+        return None
+    return "bannerlord.exe" in (proc.stdout or "").lower()
+
+
+AUTOREFRESH_LOG_CAP = 1_000_000
+
+
+def _spawn_detached(cmd: list, log: Path) -> int:
+    log.parent.mkdir(parents=True, exist_ok=True)
+    try:  # every stale session appends a refresh, so keep one previous log and no more
+        if log.stat().st_size > AUTOREFRESH_LOG_CAP:
+            os.replace(log, log.with_name(log.name + ".1"))
+    except OSError:
+        pass
+    kwargs = {}
+    if os.name == "nt":
+        kwargs["creationflags"] = (getattr(subprocess, "DETACHED_PROCESS", 0x8)
+                                   | getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0x200))
+    else:
+        kwargs["start_new_session"] = True
+    with open(log, "ab") as sink:
+        proc = subprocess.Popen(cmd, stdin=subprocess.DEVNULL, stdout=sink,
+                                stderr=subprocess.STDOUT, cwd=REPO, close_fds=True, **kwargs)
+    return proc.pid
+
+
+def _refresh_detached(args) -> int:
+    """Start `refresh` as a detached child and return at once (the SessionStart hook's call).
+    Every reason not to start is printed and exits 0: it is advice, never a failure."""
+    started = time.monotonic()
+    out = out_root()
+    try:
+        validate_out_root(out, REPO)
+    except ValueError as exc:
+        print(f"graphify_taom: {exc}", file=sys.stderr)
+        return EXIT_ENV
+    gdir = graph_dir(out)
+    skip = "graphify_taom: background refresh not started: "
+    if os.environ.get("TAOM_GRAPHIFY_AUTOREFRESH") == "0":
+        print(skip + "TAOM_GRAPHIFY_AUTOREFRESH=0.")
+        return 0
+    lock = out / LOCK_NAME
+    try:
+        if time.time() - lock.stat().st_mtime < LOCK_STALE_SECONDS:
+            print(skip + f"another refresh holds {lock}.")
+            return 0
+    except OSError:
+        pass
+    try:
+        state, detail = staleness(REPO, gdir)
+    except (OSError, subprocess.CalledProcessError) as exc:
+        print(skip + f"staleness could not be checked ({exc}).")
+        return 0
+    if state == "fresh":
+        print(skip + _summary_line(state, detail, read_stamp(gdir)))
+        return 0
+    running = _bannerlord_running(max(0.3, DETACH_BUDGET - (time.monotonic() - started)))
+    if running is None:
+        print(skip + "the Bannerlord process check was skipped (timeout or error).")
+        return 0
+    if running:
+        print(skip + "Bannerlord is running; a refresh would compete with it for the disk.")
+        return 0
+    if not _graphify_exe():
+        return EXIT_ENV
+    cmd = [sys.executable, str(Path(__file__).resolve()), "refresh"]
+    cmd += ["--if-stale"] if args.if_stale else []
+    cmd += ["--force"] if args.force else []
+    log = gdir / "autorefresh.log"
+    try:
+        pid = _spawn_detached(cmd, log)
+    except OSError as exc:
+        print(skip + f"the child could not be started ({exc}).")
+        return 0
+    print(f"graphify_taom: background refresh started (pid {pid}, log {log}).")
+    return 0
+
+
+def _stale_or_missing(gdir: Path):
+    """(rc, detail): rc is EXIT_MISSING with the message printed, else None; detail lists the
+    stale files (empty when fresh)."""
     state, detail = staleness(REPO, gdir)
     if state == "missing":
         print(f"graphify_taom: {detail[0]}. Build it first: python tools/graphify_taom.py "
               "refresh", file=sys.stderr)
-        return EXIT_MISSING
-    if state == "stale":
-        print(f"graphify_taom: the graph is STALE ({len(detail)} code file(s) changed since the "
-              "build, e.g. " + ", ".join(detail[:3]) + "); answers can miss them. Refresh: "
-              "python tools/graphify_taom.py refresh", file=sys.stderr)
+        return EXIT_MISSING, []
+    return None, detail if state == "stale" else []
+
+
+def cmd_query(verb: str, rest: list) -> int:
+    gdir = graph_dir(out_root())
+    missing, stale = _stale_or_missing(gdir)
+    if missing:
+        return missing
     exe = _graphify_exe()
     if not exe:
         return EXIT_ENV
+    env = graphify_env(out_root())
+    gpath = gdir / "graph.json"
     try:
-        cmd = query_command(exe, verb, rest, gdir / "graph.json")
+        if verb == "affected":
+            interfaces = "--no-interfaces" not in rest
+            rest = [a for a in rest if a != "--no-interfaces"]
+            rc, out, err = affected_answer(exe, gpath, env, rest, interfaces, GraphCache(gpath))
+        else:
+            rc, out, err = _capture(query_command(exe, verb, rest, gpath), env)
     except ValueError as exc:
         print(f"graphify_taom: {exc}", file=sys.stderr)
         return 2
-    return subprocess.run(cmd, env=graphify_env(out_root())).returncode
+    if stale:
+        print("\n".join(stale_warning(stale, out)), file=sys.stderr)
+    sys.stdout.write(out)
+    sys.stderr.write(err)
+    return rc
+
+
+def cmd_tests(rest: list) -> int:
+    depth, interfaces, inputs, i = 2, True, [], 0
+    while i < len(rest):
+        if rest[i] == "--depth" and i + 1 < len(rest):
+            depth, i = rest[i + 1], i + 1
+        elif rest[i] == "--no-interfaces":
+            interfaces = False
+        else:
+            inputs.append(rest[i])
+        i += 1
+    if not inputs:
+        print("graphify_taom: tests needs at least one type name or .cs path.", file=sys.stderr)
+        return 2
+    gdir = graph_dir(out_root())
+    missing, stale = _stale_or_missing(gdir)
+    if missing:
+        return missing
+    exe = _graphify_exe()
+    if not exe:
+        return EXIT_ENV
+    note, command = tests_for(inputs, exe, gdir / "graph.json", graphify_env(out_root()),
+                              int(depth), interfaces)
+    if stale:
+        print("\n".join(stale_warning(stale, "")), file=sys.stderr)
+    if note:
+        print(note)
+    if command:
+        print(command)
+    return 0
 
 
 def main(argv=None) -> int:
@@ -591,6 +1083,8 @@ def main(argv=None) -> int:
         return 0
     if argv and argv[0] in QUERY_VERBS:
         return cmd_query(argv[0], argv[1:])
+    if argv and argv[0] == "tests":
+        return cmd_tests(argv[1:])
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -600,14 +1094,17 @@ def main(argv=None) -> int:
     rf.add_argument("--if-stale", action="store_true", help="do nothing when current")
     rf.add_argument("--force", action="store_true",
                     help="full rescan, ignoring graphify's incremental cache")
+    rf.add_argument("--detach", action="store_true",
+                    help="start the refresh as a background process and return at once")
     sub.add_parser("report", help="print the GRAPH_REPORT.md path")
+    sub.add_parser("tests", help="the dotnet test filter for the tests that reach the inputs")
     for verb in QUERY_VERBS:
         sub.add_parser(verb, help=f"graphify {verb} against the TAOM graph")
     args = ap.parse_args(argv)
     if args.cmd == "status":
         return cmd_status(args)
     if args.cmd == "refresh":
-        return cmd_refresh(args)
+        return _refresh_detached(args) if args.detach else cmd_refresh(args)
     if args.cmd == "report":
         report = graph_dir(out_root()) / "GRAPH_REPORT.md"
         print(report)
