@@ -154,4 +154,4 @@ both new addresses hold the same `movzx eax, byte [rbx]; test al, al; jne` loop
 ## GitHub Issue
 
 - **Issue:** #997, [tools: carry native addresses across engine builds](https://github.com/haterade22/TAOM/issues/997)
-- **Status:** Open
+- **Status:** Closed (merged in fc5408508)
