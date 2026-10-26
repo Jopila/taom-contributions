@@ -510,8 +510,10 @@ from that menu. The wait menu shows no `isLeave` option while anyone serves, so 
 a map event. The coercion stays (a transient state has no business in a save). The re-derivation
 it was always supposed to rest on was finally written on 2026-09-12 (#577):
 `EnlistmentLoadNormalizer` restores `EnlistedBattle` at load when the record reads
-`EnlistedAttached` but the party is still in a map event, or its battle encounter is still open
-(`PlayerEncounter.Battle` set, the aftermath window), and leaves a settlement encounter alone.
+`EnlistedAttached` but the party is still in a map event, and leaves an encounter with no map event
+behind it alone. A settlement encounter is the reconciler's; a leftover whose encountered party is a
+mobile opposing leader outside a settlement stays until a discharge or the stale-latch recovery closes it
+(R4 returns `SkipNotOurs`, #1021 item 1).
 Without it every gate keyed on `EnlistedBattle` read the wrong state for the battle the player
 saved in: the deployment-screen model and the role strip deferred to vanilla, and the presence
 hold did not fire.
@@ -1364,10 +1366,11 @@ inside `ParkNear` and `RestorePresence`).
 
 Two defects, both fixed 2026-09-12:
 
-- **`Assess` admitted `EnlistedBattle` and fell through to `AttachRequired` in the aftermath
-  window.** `MapEventSide.Clear()` nulls `MainParty.MapEvent` BEFORE the encounter closes, so the
-  loot and aftermath window reads as "no battle anywhere" to every rule in `Assess`, and the
-  reconciler's `AttachRequired` arm parked the party with no encounter guard (the `noBattleAnywhere`
+- **`Assess` admitted `EnlistedBattle` and fell through to `AttachRequired` inside
+  `PlayerEncounter.Finish`.** Inside `PlayerEncounter.Finish`, after `FinalizeEvent` has taken the party out of its map
+  event and before the encounter is cleared, the state reads as "no battle anywhere" to every rule in
+  `Assess`. A reconcile raised there by TAOM's own army leave reached the reconciler's `AttachRequired`
+  arm, which parked the party with no encounter guard (the `noBattleAnywhere`
   guard above it covered `LeaveArmy` and the state demotion, never the `Assess` switch). `Assess`
   now returns `Blocked(BattleEncounterOpen)` whenever `state == EnlistedBattle &&
   player.HasPlayerEncounter`, placed right after captivity and ABOVE commander fitness and the
@@ -1392,14 +1395,14 @@ Two defects, both fixed 2026-09-12:
   unparked Attached soldier: the deployment-screen model and the role strip deferred to vanilla
   for that battle, and `Assess` returned `AttachRequired`, parking the party out of its live
   encounter. `EnlistmentLoadNormalizer` now restores `EnlistedBattle` at load when the party is in
-  a map event or its battle encounter is still open, before the reconcile runs
+  a map event, before the reconcile runs
   (`EnlistmentLoadNormalizerTests`, three rows).
 
 Two paths still detach with an open encounter, both pre-existing, both recorded on #577 rather
 than fixed here: the MCM master switch turned off mid-battle runs the discharge (RestorePresence,
 LeaveArmy, ClearArmyAttachment) before the ownership policy closes the encounter, by the documented
 "discharge outranks ownership" rule; and a failed join's rollback can leave the encounter open
-under R1b (once #796 turns it on; dormant until then) while `ReassertServiceMenu` re-inits the wait
+when the encounter's party is the opposing leader (R4 skips it) while `ReassertServiceMenu` re-inits the wait
 menu, whose init parks unconditionally on `EnlistedAttached`.
 
 Why x64 exposed it: `Campaign.TickMapTime` yields 1080 x multiplier campaign seconds per real
@@ -1808,55 +1811,22 @@ cleared unconditionally at the end, so the party does leave and the encounter st
 Since #510 every TAOM settlement placement opens an encounter deliberately, so this is the ordinary
 path. A siege supplies the long map event that holds the state in `EnlistedBattle`.
 
-### The correction that matters most: deleting the state gate alone would have been worse
+### The state gate, the map event and #796
 
 The first version of this fix removed the `EnlistedAttached` gate on the reasoning that "the state was
-never the real guard". **That was wrong, and a review caught it.** The state gate WAS load-bearing,
-because `EnlistedBattle` is exactly the state the loot/aftermath window lives in.
-
-`MapEventSide.Clear()` nulls `MainParty.MapEvent` **before** the encounter closes, so between those
-two moments the aftermath menus run inside a still-open encounter that reads as "no battle anywhere"
-to every guard in the sweep. This file already believed that in two other places:
-`EnlistmentReconciler.noBattleAnywhere` includes `!_encounter.HasCurrent`, and
-`ServiceBattleService.OnCommanderBattleEnded` returns early on `_encounter.HasCurrent` with the
-comment *"Loot/aftermath menus run inside the still-open encounter."* The sweep's guard set was that
-predicate minus its `!HasCurrent` term, so it was defined to operate precisely inside the window the
-rest of the feature declares off-limits. It would have torn down the player's own siege loot screen,
-and `PlayerEncounter.Finish` additionally forces `TimeControlMode.Stop` and `GameMenu.ExitToLast()`.
-
-The replacement names the real condition instead of proxying it: `EncounterOwnershipSnapshot`
-gained **`IsBattleEncounter`** (`PlayerEncounter.Battle != null || Current.IsJoinedBattle`) and the
-policy gained **R1b**, which defers for every intent. By design that protects a battle encounter in
-every state rather than only while the state happens to read `EnlistedAttached`; in production it
-protects nothing yet.
-
-**R1b is dormant in production (#796).** `EncounterAdapter.GetOwnership` computes
-`isBattleEncounter` and does not pass it to the `EncounterOwnershipSnapshot` constructor, whose
-parameter defaults to false. No live snapshot has reported a battle encounter since the rule landed
-in `b54f845cb`, so R1b and the load normalizer's mid-battle check (`EnlistmentLoadNormalizer`) run
-only in tests. Passing the flag is one line, and it waits until two cleanup paths keep their
-obligation when R1b defers (Codex adversarial review, 2026-10-15, both HIGH):
-
-- **Rollback (`ServiceBattleService`):** a failed join's rollback finishes the encounter only on a
-  `Finish` verdict but moves to `EnlistedAttached` either way, so a deferred battle encounter stays
-  open in a state where the stale-latch recovery, which requires `EnlistedBattle`, never runs.
-- **Discharge (`DischargeService`):** discharge logs R1b's deferral, then resets the record and
-  returns success, so nothing enlisted remains to retry the cleanup and the open encounter blocks
-  every later main-party encounter.
-
-**The #551 latch never needed R1b.** In that crash the policy was not the guard that held: the
-sweep returned on `commanderInMapEvent` and `TryBreakBattleLatch` on `HasPlayerEncounter` before
-either asked it. In a joined field battle the encountered party is the opposing side's leader
-(v1.5.5 `PlayerEncounter.cs:910`), never the commander, so a sweep or rollback call without R1b
-skips at R2 (a conversation) or R4 (`SkipNotOurs`); a `Discharge` call finishes it unless a
-conversation is running. The stale-latch recovery passes through R1c, which sits above R1b, so it does not depend
-on R1b either.
+never the real guard", and a review argued the gate was load-bearing for the loot window. That premise was wrong (#796, 2026-10-26). The main party stays in its map event through the
+loot and aftermath screens; on that path vanilla removes it inside `PlayerEncounter.Finish` (v1.5.5
+`MapEvent.cs:1743`, `MapEventSide.cs:434`), so the sweep's `presence.IsInMapEvent` guard already keeps it
+out of that window. Other exits remove it with the encounter still open: a defender's repulsed assault
+(`SiegeAssaultEventComponent.OnPlayerEncounterContinueBattle`), an army leader leaving the event
+(`PartyBase.cs:323-326`), and `LeaveBattle`. The R1b rule and the `IsBattleEncounter` snapshot field written for it never ran in a
+game, because the adapter never passed the flag, and both were deleted in #796. Behaviour for players is
+unchanged: trunk never passed the flag, so every consumer already read false.
 
 ### The rules that changed
 
 | Rule | Change |
 |---|---|
-| **R1b** (new, universal; dormant until #796) | An encounter belonging to a battle is never finished, by any intent including `Discharge`. Handing the player back is urgent; deleting the battle result they are reading is worse, and every caller retries. The adapter never sets the flag, so the rule has not run in a real game. |
 | **R2c** (new) | `StrandedOutsideSettlement` inverts R3 the way `ShoreLeaveEnd` does, but from the other direction: the encounter outlived the settlement. It requires `!PlayerInsideSettlement` **itself**, read fresh by the adapter, rather than trusting the caller. |
 | `ShoreLeaveEnd` | No longer the only intent that treats a settlement-shaped encounter as ours. Its doc said so and is corrected. |
 
@@ -1999,16 +1969,15 @@ live `PlayerEncounter` and the commander still fighting. Nothing in the feature 
 |---|---|
 | `TryBreakBattleLatch` returns on `HasPlayerEncounter` or `commander.PartyIsInMapEvent` | Both true |
 | `SweepStrandedEncounter` returns on `commanderInMapEvent` | The commander was still fighting |
-| R1b defers for every intent, `Discharge` included | Designed to, since `PlayerEncounter.Battle != null` reads as the player's own loot screen; in production it never fired, because the adapter drops the flag (#796), and the two guards above returned before the policy was asked |
+| The ownership policy skips the sweep's intents | The encountered party is the opposing leader, not the commander (R4) |
 | `ServiceBattleService.TryJoin` refuses every rejoin | The state is not `EnlistedAttached` |
 
 **#538's fix does not cover this shape.** Its sweep is gated on `!commanderInMapEvent`, which is
-exactly the leg this crash sets, and R1b, added by that same fix, was meant to make the encounter
-untouchable but is dormant until #796. Three live guards, a fourth on paper, and no exit between
+exactly the leg this crash sets. Four guards, and no exit between
 them.
 
-The discriminator is **time**, and only time: R1b justifies itself on the loot window being short and
-every caller retrying. `EnlistmentReconciler.BreakStaleBattleLatch` times one continuous episode of
+The discriminator is time: the loot screens do not have this shape, so time is a
+conservative margin. `EnlistmentReconciler.BreakStaleBattleLatch` times one continuous episode of
 (`EnlistedBattle`, encounter open, player in no map event) and, past
 `EnlistmentCoreConfig.StaleBattleLatchDays` (one in-game hour), takes the new `StaleBattleLatch`
 intent that R1c lets through. It runs before the assessment so the recovery lands in the same pass,
@@ -2019,9 +1988,8 @@ player turns out to be in a map event after all. Like R2c, R1c enforces its own
 **The anchor is not persisted, and that is not the same as safe.** The reconciler is
 `Reuse.Singleton`, so it outlives the campaign, and the anchor is an ABSOLUTE campaign day. A campaign
 that ends while latched leaves a finite value behind; load a later save and the elapsed time is
-enormous, so the recovery fires on the very first latched tick and finishes what may be a genuine loot
-screen with no real waiting at all. That is the destructive `Finish` R1b exists to prevent, committed
-by the safety net written to prevent it. Two guards. `IEnlistmentReconciler.ResetForNewSession` is
+enormous, so the recovery fires on the very first latched tick and finishes an encounter with no real
+waiting at all. That defeats the margin, committed by the safety net written to provide it. Two guards. `IEnlistmentReconciler.ResetForNewSession` is
 called from `ServiceMaintenanceService.ResetSessionCaches` (the feature's one place that knows this
 lifetime, which is also why the army handle is dropped there rather than from the load hook), and
 that reset now runs on a load and on a new campaign. A backwards-clock re-anchor inside
@@ -2434,7 +2402,7 @@ and the translation caches).
 - **Gates.** `ContractRenewalPolicy.IsDue` is the cheap gate (attached, end day reached, no offer already
   made for this end day) and runs before any adapter read. Then the service waits unless the commander
   exists, is alive and is not a prisoner, and waits while the commander is in a map event, the player is in
-  a map event, a battle encounter is open (dormant until #796: the adapter does not pass it yet; the map-event and attached gates still hold), the ownership read failed or a conversation is in progress. A
+  a map event, the ownership read failed or a conversation is in progress. A
   settlement encounter alone does not block, because a soldier held in the commander's town always has
   one. A blocked offer retries on the next daily tick. The choice lands on a later frame, so the callbacks
   re-check the authority and that the soldier is still enlisted.
@@ -2660,6 +2628,15 @@ cleanup* — **that model no longer exists.** Duties never spawn or destroy anyt
 
 What actually remains, each a state no test can reach:
 
+- **Encounter after a battle (#796).** (1) Enlisted, join and win a field battle with loot and
+  prisoners and read every screen to the end: back on the service menu, and no "closing" line from
+  `[EnlistDiag]` until the screens close. (2) The same during a siege assault the commander wins.
+  (3) If an assault is repulsed with your commander ATTACKING: within one in-game hour the service menu
+  is back, and the log shows "breaking a stale EnlistedBattle latch" or "a PlayerEncounter is open with
+  no battle in progress". A defending commander's repulse is #1021 item 2 (no automatic exit), not a
+  pass or fail condition here.
+  (4) Right after a battle, discharge from the service menu, then click a settlement and a lord:
+  encounters start.
 - **Quartermaster answers (#829).** Draw a kit (expect the issued line), ask again at the same rank
   (expect "already drawn"), and if reachable trigger empty stores and a co-op client (expect the
   stores and host-only lines). Check each text; the three new keys show English until the paid

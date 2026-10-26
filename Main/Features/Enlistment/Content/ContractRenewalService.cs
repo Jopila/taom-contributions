@@ -76,7 +76,7 @@ public sealed class ContractRenewalService
         if (snapshot == null || !snapshot.Exists || !snapshot.IsAlive || snapshot.IsPrisoner)
             return false;
         var own = _encounter.GetOwnership(snapshot.PartyId);
-        if (snapshot.PartyIsInMapEvent || own.PlayerInMapEvent || own.IsBattleEncounter || own.ReadFailed || own.ConversationInProgress)
+        if (snapshot.PartyIsInMapEvent || own.PlayerInMapEvent || own.ReadFailed || own.ConversationInProgress)
             return false;
 
         var config = _config.GetConfig();
