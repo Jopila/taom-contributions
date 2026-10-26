@@ -43,6 +43,8 @@ Get new player-facing text into all 12 supported languages (BR, CNs, CNt, DE, FR
 - `LanguageFileCoverageTests` — every key the English source declares has a row in all 12 language files. Red here means you registered but never propagated: run the translator with `--sync-ids`.
 - `UnregisteredLocalizationKeyBaselineTests` — no `{=taom_*}` literal in C# lacks a ModuleData row. Red means you skipped step 2; `python tools/harvest_literal_loc_keys.py --apply` does it.
 
+Then, after translating, run `python tools/loc_length_report.py --since <base>`: it lists translations much longer than their English. For each flagged key shown in a fixed-size Gauntlet widget, check that screen in game in that language, or record it under `Not-tested:` in the commit body. A key counted as "untranslated or identical to English" is checked after its translation lands.
+
 ## Gotchas
 - Morphologically-rich languages (RU/JP/KO/TR/CN) hit gender-agreement rejections that fall back to English — flag for human polish (no auto-fix).
 - Two external modules also have loc (`TAOM_Map`, `LOTRLOME_Armory`) deployed straight to the game install, not in the repo.
