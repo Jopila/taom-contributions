@@ -12,7 +12,9 @@ compare with the snapshot under docs/reference/ when one exists.
 FIRST: which machine is this (docs/reference/development-machines.md)? On the laptop the live
 installs are partial, so broken refs into them are environment gaps, not defects.
 
-1. RUN THE GATES. Read `.claude/rules/moduledata-validation.md` "Gate per file kind" and run
+1. RUN THE GATES. Use the "Gate per file kind" section of `.claude/rules/moduledata-validation.md`
+   (the rule loads with any ModuleData XML you Read in the repo; if it has not, Read only that
+   section: Grep `^## Gate per file kind`, then Read from that line) and run
    every gate its table lists for the kinds of file in scope; always run
    `python tools/validate_xml_schemas.py <every changed engine XML file>` (it finds each file's
    module itself; add that module's SubModule.xml to the list when it changed). Quote each

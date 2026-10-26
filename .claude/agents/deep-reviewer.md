@@ -49,6 +49,11 @@ completely, in the output format it gives.
   `.claude/rules/simplicity-criterion.md`.
 - Engine signatures come from the installed DLLs (`taom-src` / `ilspycmd`), never from the
   decompile dump alone; the dump can lag an engine bump.
+- A rule with `paths:` loads by itself when you Read a matching file in the repo, so "read the
+  relevant rules" means make sure you have them. Read a `.claude/rules/` file only if it has not
+  arrived in your context, and then only the section you need (Grep its heading, Read that range):
+  `csharp-architecture.md` (29 KB) and `moduledata-validation.md` (41 KB) were read whole by
+  reviewers about 270 times in October 2026, mostly after they had already loaded (#1003).
 
 ## Evidence
 

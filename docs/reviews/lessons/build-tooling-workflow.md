@@ -4460,3 +4460,9 @@ rule for start in camp because "many" starts were near a town; all 25 were, so t
 - **Prevent:** put each direction word of a plan (cost, gain, cap, floor, never) in a test name. Before a plan
   decision rests on a count word, run the measurement on the shipped data and write the number in the plan.
 - **Source:** [rca-camp-work-2026-10-26.md](../rca-camp-work-2026-10-26.md) findings 1, 3.
+
+### "Read the rules" sends an agent to a rule its `paths:` trigger already loaded (#1003, 2026-10-26)
+Since 2026-10-01, `deep-reviewer` agents read `csharp-architecture.md` (29 KB) whole 142 times and `moduledata-validation.md` (41 KB) 127 times; in 131 of the C# reads the agent had already read a `.cs` file, which loads that rule by itself. AGENTS.md step 3 ("read the relevant linked rules") is written for every AI client, and Codex gets no path rules, so a Claude agent followed it literally. The data-flow lens was 2.1% of all Read output on its own, mostly incident history that already had a committed record, and its check 10 still demanded the `<DependedModule>` rows the maintainer decided against on 2026-09-21.
+- **Why missed:** nothing measured which files agents read until section 9 of `tools/harness_retro.py` gained its "Top files read" table (#1002); a lens grows one "Why this rule exists" paragraph per incident and nothing pushes back.
+- **Prevent:** an agent definition or lens says "make sure you have the rule", never "read it": Read a `paths:` rule only if it has not arrived, and then only its section (`deep-reviewer.md`, agent operating manual item 6). A lens keeps the check and one `Source:` pointer; the history stays in the RCA or lessons file. The weekly retro's file growth table shows a regression.
+- **Source:** [adopt-context-mode-2026-10-26.md](../adopt-context-mode-2026-10-26.md); issue #1003.

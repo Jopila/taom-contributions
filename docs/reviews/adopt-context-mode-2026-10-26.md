@@ -72,7 +72,7 @@ week to 2026-10-26, `5-data-flow.md` was 3.4% of Read output, `csharp-architectu
 | # | Item | Decision |
 |---|---|---|
 | A1 | Show which files the Read tool spends output on | Adopted (#1002): section 9 of `tools/harness_retro.py` gains "Top files read" with a growth check against the previous run, so the weekly retro sees it without a manual step |
-| A2 | Slim the review lens files | Issue #1003; the trim is its own reviewed change |
+| A2 | Slim the review lens files | Done (#1003): `5-data-flow.md` 28,949 to about 19,800 bytes, history replaced by `Source:` pointers and checked by an independent comparison; its check 10 no longer asks for `<DependedModule>` rows (standing decision of 2026-09-21); `deep-reviewer.md`, the XML lens and the agent operating manual stop reading a `paths:` rule that already loaded, the larger share (about 270 reviewer reads of two rules in October); memory-file pointers removed from two lenses |
 | A3 | "Think in code": a script prints the result instead of files being read into the conversation | Adopted as item 6 of `docs/ai-includes/agent-operating-manual.md` |
 | X1 | Install context-mode, its MCP server or its hooks | Declined: bypasses the git gates, rewrites agent briefs, installs at run time |
 | X2 | SQLite session continuity after compaction | Declined: re-reads are 0.3%; TAOM has PreCompact and PostCompact hooks and memory resume cards |
