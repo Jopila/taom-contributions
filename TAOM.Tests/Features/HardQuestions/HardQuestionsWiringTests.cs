@@ -43,6 +43,17 @@ public class HardQuestionsWiringTests
     }
 
     [TestMethod]
+    public void CaptiveLordAdapter_ReadsTheRansomScreenFromTheWholeStateStack()
+    {
+        var src = RepoPaths.ReadSource("Main/Adapters/CaptiveLordAdapter.cs", stripComments: true);
+
+        StringAssert.Contains(src, "LastOrDefault<PartyState>()");
+        StringAssert.Contains(src, "PartyScreenHelper.PartyScreenMode.Ransom");
+        Assert.IsFalse(src.Contains("ActiveState"), "the conversation's MissionState sits above the screen");
+        Assert.IsFalse(src.Contains("GetActivePartyState"), "the conversation's MissionState sits above the screen");
+    }
+
+    [TestMethod]
     public void IoC_DoesNotRegisterTheFeatureByHand()
     {
         var src = RepoPaths.ReadSource("Main/IoC.cs", stripComments: true);

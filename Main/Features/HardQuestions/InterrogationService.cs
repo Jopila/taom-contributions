@@ -149,7 +149,7 @@ public sealed class InterrogationService
     private CaptiveSnapshot? Eligible(string? partnerId)
     {
         if (string.IsNullOrEmpty(partnerId) || !_settings.IsEnabled || _coop.ShouldDeferToHost
-            || _captives.IsPrisonerDecisionContext)
+            || _captives.IsPrisonerDecisionContext || _captives.IsRansomScreenOpen)
             return null;
         var snapshot = _captives.Snapshot(partnerId!);
         return snapshot != null && snapshot.CaptorIsPlayerClan && !snapshot.IsInPlayerClan ? snapshot : null;

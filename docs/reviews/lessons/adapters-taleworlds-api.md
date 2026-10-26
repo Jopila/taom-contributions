@@ -1447,6 +1447,18 @@ second time.
   first `PartyState` you find. Any new forced Done goes through that helper.
 - **Source:** `docs/reviews/rca-sworn-anew-2026-10-24.md` finding 2 (a second occurrence of
   `rca-hard-questions-2026-10-19.md` H4).
+
+### A conversation can open from the ransom screen: refuse a deed that its cloned rosters would undo (#1001, 2026-10-26)
+The backstreet ransom screen lists clones of the party rosters, never writes them back, and allows Talk. Hard Questions
+killed a captive from it; he stayed listed, and selling him ransomed him back to life (`ChangeState(Released)` has no
+dead-hero guard) and paid for him. Sworn Anew already refused on that screen; Hard Questions, written first, did not.
+- **Why missed:** the commit lesson above taught when to force Done; nobody listed which screens a conversation can
+  open from, and the one that can never be committed.
+- **Prevent:** a conversation line that changes a hero or a roster refuses while the top `PartyState` is in ransom mode
+  (`LastOrDefault<PartyState>()`, never `ActiveState`: the conversation is a mission pushed above the screen), and a
+  source pin holds the probe. A gift that writes the live rosters after the talk hides itself under any open party
+  screen instead (Notable Services, #899).
+- **Source:** `docs/reviews/rca-hq-ransom-screen-2026-10-26.md` finding 1.
 ### A bulk engine action prices and notifies per unit: quote from the same per-unit model (Provender-master, 2026-10-23)
 `SellItemsAction.ApplyInternal` re-prices every unit, and a town re-stocks after each one (`RosterUpdatedEvent` to
 `TownMarketData.AddNumberInStore`), so n units cost more than n times the first price; every call the player pays also shows

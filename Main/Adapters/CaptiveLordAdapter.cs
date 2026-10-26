@@ -1,9 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Helpers;
 using TaleWorlds.CampaignSystem;
 using TaleWorlds.CampaignSystem.CharacterDevelopment;
+using TaleWorlds.CampaignSystem.GameState;
 using TaleWorlds.CampaignSystem.Party;
+using TaleWorlds.Core;
 using TAOM.Core.Logging;
 using TAOM.Features.HardQuestions.Domain;
 
@@ -30,6 +33,9 @@ public sealed class CaptiveLordAdapter : ICaptiveLordAdapter
     public bool IsPrisonerDecisionContext =>
         Campaign.Current?.CurrentConversationContext is ConversationContext.CapturedLord
             or ConversationContext.FreeOrCapturePrisonerHero;
+
+    public bool IsRansomScreenOpen =>
+        GameStateManager.Current?.LastOrDefault<PartyState>()?.PartyScreenMode == PartyScreenHelper.PartyScreenMode.Ransom;
 
     public bool IsAlive(string heroId) => Find(heroId)?.IsAlive ?? false;
 

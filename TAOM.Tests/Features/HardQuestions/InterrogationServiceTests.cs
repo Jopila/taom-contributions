@@ -30,6 +30,41 @@ public class InterrogationServiceTests
     }
 
     [TestMethod]
+    public void CanAskAndCanStrip_RansomScreenOpen_AreFalse()
+    {
+        _f.Captive();
+        _f.Captives.IsRansomScreenOpen.Returns(true);
+
+        Assert.IsFalse(_f.Service.CanAsk(HardQuestionTopic.Clan, "lord1"));
+        Assert.IsFalse(_f.Service.CanAsk(HardQuestionTopic.Kingdom, "lord1"));
+        Assert.IsFalse(_f.Service.CanStrip("lord1"));
+        Assert.AreEqual(0, _f.Service.Quote(HardQuestionTopic.Clan, "lord1"));
+    }
+
+    [TestMethod]
+    public void RansomScreenOpen_NoDeedRuns()
+    {
+        // A wounded lord rolling under the death chance would die to the kingdom topic's force, so the kill assert can fail.
+        _f.Captive().IsWounded = true;
+        _f.Random.NextDouble().Returns(0.04);
+        _f.Actions.KillByWounds("lord1").Returns(true);
+        _f.Captives.IsRansomScreenOpen.Returns(true);
+
+        Assert.IsFalse(_f.Service.PayBribe(HardQuestionTopic.Clan, "lord1"));
+        _f.Service.QueueForce(HardQuestionTopic.Kingdom, "lord1");
+        _f.Service.CompletePending();
+        _f.Service.QueueStrip("lord1");
+        _f.Service.CompletePending();
+
+        _f.Actions.DidNotReceiveWithAnyArgs().KillByWounds(default!);
+        _f.Actions.DidNotReceiveWithAnyArgs().PayGold(default!, default);
+        _f.Actions.DidNotReceiveWithAnyArgs().LoseRenown(default);
+        _f.Actions.DidNotReceive().CommitOpenPartyScreen();
+        Assert.IsFalse(_f.State.IsAsked(HardQuestionTopic.Kingdom, "lord1"));
+        Assert.IsFalse(_f.State.IsStripped("lord1"));
+    }
+
+    [TestMethod]
     public void CanAsk_NoPartnerId_IsFalse()
     {
         Assert.IsFalse(_f.Service.CanAsk(HardQuestionTopic.Clan, null));

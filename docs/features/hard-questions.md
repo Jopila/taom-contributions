@@ -49,6 +49,7 @@ All of these must hold (`InterrogationService.Eligible`; the used-topic check ru
 - The MCM toggle is on.
 - TAOM does not have to defer to a co-op host (`ICoopSessionProvider.ShouldDeferToHost` is false). The options are hidden whenever TAOM must defer, including under a co-op mod whose role TAOM cannot read.
 - The conversation is not one of the prisoner-decision contexts (`CapturedLord`, `FreeOrCapturePrisonerHero`).
+- No ransom screen is open (`ICaptiveLordAdapter.IsRansomScreenOpen`: the top `PartyState` is in `PartyScreenMode.Ransom`). That screen holds cloned rosters and never writes them back, a lord killed while it is open stays on it, and selling him there ransoms him back to life and pays for him; the strip and the bribe are hidden too, so one rule covers every line (#1001). The normal party screen binds the live rosters and keeps the lines.
 - The hero is a living prisoner whose captor is a party or a settlement of the player's clan, and he is not in the player's clan.
 - The topic is unused for this captivity, and for the kingdom topic the lord has a kingdom.
 
@@ -61,7 +62,7 @@ All of these must hold (`InterrogationService.Eligible`; the used-topic check ru
   - Traits: Mercy -160 or -300, Honor -100 or -200, scaled by side. The player gains 80 or 150 Roguery experience.
   - Companions with Mercy above 0 lose relation: the cap (-2) at Mercy level 2, half of it (-1) at level 1.
   - Outcome: on the kingdom topic, an already wounded lord dies with a 5% roll. The Honor cost of the death (200 extra experience) is charged only when the lord really dies; the engine may refuse the kill, and then the lands are revealed as for any survivor. A death reveals nothing, and a dungeon death also removes the dead lord's character from the prison location. Otherwise a lord who is not wounded has a 15% roll to be wounded (his hit points are set to 1), on either topic.
-- **Party screen:** a conversation opened from the party screen leaves the screen's pre-conversation snapshot alive, and closing the screen with Escape refills the prison and item rosters from it. After a force or a strip, `CommitOpenPartyScreen` goes through the shared `PartyScreenCommit.CommitIfMainParty`: it finds the open `PartyState` on the game-state stack and, only when the screen's right owner is the main party, calls `PartyScreenLogic.DoneLogic(true)` (vanilla commits unguarded when a companion is removed under the screen). The one skipped case is the ransom broker's screen with prisoners on the broker's side: it binds the live item roster but cloned troop rosters, and its Done handler sells the broker's side again.
+- **Party screen:** a conversation opened from the party screen leaves the screen's pre-conversation snapshot alive, and closing the screen with Escape refills the prison and item rosters from it. After a force or a strip, `CommitOpenPartyScreen` goes through the shared `PartyScreenCommit.CommitIfMainParty`: it finds the open `PartyState` on the game-state stack and, only when the screen's right owner is the main party, calls `PartyScreenLogic.DoneLogic(true)` (vanilla commits unguarded when a companion is removed under the screen). The one skipped case is the ransom broker's screen with prisoners on the broker's side: it binds the live item roster but cloned troop rosters, and its Done handler sells the broker's side again. That skip no longer applies to Hard Questions, which offers no lines on the ransom screen (#1001); it still serves the gifts and Provender (Sworn Anew refuses a defection on the ransom screen itself).
 
 ## The strip
 
@@ -116,7 +117,7 @@ Every number above is a field. Chances are in [0, 1], penalties are at most 0 (a
 | [HardQuestionsDialogBehavior.cs](../../Main/Features/HardQuestions/Hooks/HardQuestionsDialogBehavior.cs) | Dialog conditions and consequences |
 | [HardQuestionsDialogLines.cs](../../Main/Features/HardQuestions/Hooks/HardQuestionsDialogLines.cs) | The conversation tree |
 | [HardQuestionsCampaignBehavior.cs](../../Main/Features/HardQuestions/Hooks/HardQuestionsCampaignBehavior.cs) | SyncData, release, death |
-| [CaptiveLordAdapter.cs](../../Main/Adapters/CaptiveLordAdapter.cs) | Captive snapshot (cheap), circle (per deed), conversation context |
+| [CaptiveLordAdapter.cs](../../Main/Adapters/CaptiveLordAdapter.cs) | Captive snapshot (cheap), circle (per deed), conversation context, `IsRansomScreenOpen` |
 | [LordEquipmentAdapter.cs](../../Main/Adapters/LordEquipmentAdapter.cs) | Equipment sets with the shared-set guard, slot-wise re-kit |
 | [MapRevealAdapter.cs](../../Main/Adapters/MapRevealAdapter.cs) | Tracking marks on settlements, known heroes |
 | [HardQuestionsActionAdapter.cs](../../Main/Adapters/HardQuestionsActionAdapter.cs) | Relation, relation summary line, gold, wound, death, renown, reproach, party-screen commit |
@@ -158,7 +159,7 @@ If Armour Acquisition's gate fails at game init (it logs when it does), named pi
 10. After a force and after a strip, the summary line appears once, with the right lord count (singular for one lord).
 11. A dungeon death: before you leave, note whether his standing figure still offers a conversation; then leave and re-enter the dungeon: he is gone.
 12. In German, the 19 lines show English seed text with `{PRICE}`, `{COMPANION}` and `{COUNT}` filled.
-13. In the ransom broker's sell-prisoners screen, put a prisoner up for sale, then talk to a captive lord there, strip them and leave with Escape: the sale pays once, not twice (the commit skips this screen while prisoners are on the broker's side, because forcing it done reruns its sale handler). Then open the ransom screen with nothing for sale, and the alley screen, strip a captive, move a troop and press Escape: the kit stays gone.
+13. Ransom screen: no lines (#1001). The backstreet ransom screen hides the lines: open it and talk to a captive lord, and no Hard Questions line shows. The tavern broker's screen does not allow Talk, because a mission is running. Open the normal party screen and talk to a captive lord: the lines show.
 14. Neutral realm (owed, #957): as a player whose clan serves a Neutral realm (Khand, Umbar, Shaghana or Abanissa) with a Free-culture hero, force a clan topic on a Free captive and on an Evil captive: both read the Neutral multiplier (Honor and Mercy at the base amount), not the same-side 1.5 times.
 
 ## Translations
@@ -167,6 +168,7 @@ The 19 `taom_hq_*` keys are registered and seeded in English in all 12 languages
 
 ## Changelog
 
+- 2026-10-26 (#1001): every line and the strip are unavailable while the ransom screen is open; the screen's cloned rosters could sell, ransom back to life and pay for a lord killed from it.
 - 2026-10-20 (#957, part 2): the executor, the victim and the evaluators are `SideIds` (the realm's id with the realm's culture); `LordRef.CultureId` is replaced by `Side` and the trait multiplier reads the same pairs.
 - 2026-10-20: restored the clan-leader force hit and the clan-lords strip hit after Personal Relations moved the relation owner onto each lord, extended the Neutral floor to his clan, and made the summary count lords (#948; `docs/reviews/rca-hard-questions-2026-10-19.md`, Round 3).
 - 2026-10-20: the reveal marks towns and castles with the map tracker instead of the unused visited flag.

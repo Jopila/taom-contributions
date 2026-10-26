@@ -125,7 +125,7 @@ With the switch off, the model answers vanilla for every hero (a prisoner never 
 - **The postfix also hides vanilla's prisoner line in two cases vanilla allows:** a prisoner whose clan is under mercenary service, and a prisoner already in the player's own faction. The full verdict is applied, not the alignment alone: a mercenary clan's lord who joined through the line would raise `JoinAsMercenary` and never arm the party-screen commit. Vanilla's other terms for the line are unchanged.
 - **A switch-off restores vanilla's prisoner line untouched.** With the feature off the postfix hides nothing, so the line is offered to any prisoner vanilla offers it to, whatever the realm. The diplomacy option stays hidden for a prisoner.
 - **The commit skips the ransom screen with prisoners on the broker's side.** That screen binds cloned troop rosters and its Done handler sells the broker's side again, so it is left as it was; its prisoners are sold once when the player leaves with Escape. Every other screen whose right owner is the main party is committed, which keeps the item roster.
-- **On the ransom screen the offer is not made.** A Hard Questions captive killed while a ransom screen is open is still listed in that screen's cloned roster (pre-existing; owned by Hard Questions).
+- **On the ransom screen the offer is not made.** Hard Questions offers no lines on the ransom screen since #1001.
 - **Lore is the uncapturable registry's, by design.** Sauron and the Nine are covered; a lord a future list adds there is covered too; a lord who is not on it but belongs to a lore group is not.
 - **Co-op:** a peer that defers to the host, and a dedicated server, get vanilla's behavior from the model and the commit; the postfix's veto of the prisoner line still runs on every peer, because it hides a line only on that machine. BannerlordCoop does not disable `LordDefectionCampaignBehavior` (its `LordBarterPatch` routes the defection barter to the server), so the host's flow is the single-player flow; that has not been exercised in a session.
 - **Persuasion can fail.** The option opens vanilla's persuasion, so a lord can refuse, and vanilla's cooldown on a refused attempt applies.
@@ -149,7 +149,7 @@ Setup: a campaign with cheat mode on; `campaign.declare_war` to put the player a
 13. **Second campaign.** Start a new campaign in the same session and repeat step 3: the commit still happens once, with nothing carried over from the first.
 14. **Co-op host.** If a session is available: the host offers the option; a client does not.
 15. **Ransom broker screen.** Hold two prisoners besides the lord and open the ransom broker's sell-prisoners screen. If the screen allows a conversation, talk to the lord from it: neither the diplomacy option nor the ruler's prisoner line is offered. Leave the screen with Escape: the other prisoners are sold once, not twice (check the gold), and the screen is not committed.
-16. **Ransom screen with nothing for sale, and the alley screen.** Open each, talk to the lord from it: the offer is still absent. Then use Hard Questions or a gift from the same screen (strip a captive, give an item), move one troop and press Escape: the kit or the item stays gone.
+16. **Ransom screen with nothing for sale, and the alley screen.** Open each, talk to the lord from it: the offer is still absent. Then use a gift from the same screen (give an item), move one troop and press Escape: the item stays gone.
 
 ## Changelog
 
