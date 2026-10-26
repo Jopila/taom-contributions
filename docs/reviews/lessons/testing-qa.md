@@ -329,6 +329,10 @@ window open in the very writer whose fix was meant to close it.
   `RequiresGameIL`, so the reference-assembly gate would run it on a `throw null` stub. The builder brief again did not
   name the category. Every builder brief that asks for binding tests now says: a test that calls, constructs or reads
   the value of an engine member carries `RequiresGameIL`; one that only reflects over signatures does not. Source: [rca-harvest-road-2026-10-26.md](../rca-harvest-road-2026-10-26.md) finding 2.
+- **Recurrence (2026-10-26, Many Hammers):** three adapter tests built `Crafting.RefiningFormula` (engine code, a
+  `throw null` stub in the reference assemblies) with no `RequiresGame`. A builder brief must name the rule: a test
+  that calls, constructs or reads an engine member carries `RequiresGame` (or `RequiresGameIL` when it reads IL or
+  vanilla data). Source: [rca-many-hammers-2026-10-26.md](../rca-many-hammers-2026-10-26.md) finding 4.
 
 ### An in-game check names the log line it expects and traces the trigger that produces it (2026-10-08)
 - **Why missed:** the mission-start guard's "guard off" step promised an endless loading loop, but the QA trigger

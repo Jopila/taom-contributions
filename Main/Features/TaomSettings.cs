@@ -2809,8 +2809,8 @@ public class TaomSettings : AttributeGlobalSettings<TaomSettings>
     //
     // Read through SmithsMeasureSettingsProvider's one cached settings reference: the smelt cap whenever TaomSmithingModel
     // answers a smelting output (the smelting list and preview, and the smelt itself), the Make Tools switch whenever the
-    // refinement tab refreshes. None needs a restart. GroupOrder 74 is the group's first property here and also names the
-    // group in #911's bulk smelting (MCM keeps the first order it meets). Order 0 to 9 is this feature's; #911 takes 10 and up.
+    // refinement tab refreshes. None needs a restart. GroupOrder 74 sits on the group's first property, here; Many
+    // Hammers (#911) adds its two settings to the group without one (MCM keeps the first order it meets). Order 0 to 9 is this feature's; #911 takes 10 and up.
     // The text is the {=KEY}English form, as Telchar's Mark does. All three are new settings, so the defaults reach every install.
 
     [SettingPropertyGroup("Smithing", GroupOrder = 74)]
@@ -2827,4 +2827,22 @@ public class TaomSettings : AttributeGlobalSettings<TaomSettings>
     [SettingPropertyBool("{=taom_sm_mcm_make_tools}Enable Make Tools", Order = 2, RequireRestart = false,
         HintText = "{=taom_sm_mcm_make_tools_hint}Adds a Make Tools button to the Refine tab of the smithing screen: one Iron and one Hardwood make one Tools, for smithy stamina and a little Smithing experience. Not shown in a co-op session. Default: on.")]
     public bool SmithsMeasureMakeTools { get; set; } = TAOM.Features.SmithsMeasure.SmithsMeasureSettingsProvider.DefaultMakeTools;
+
+    // --- Many Hammers (docs/features/many-hammers.md, #911) ---
+    //
+    // Read at each smithy click and each smelting-list rebuild, through ManyHammersSettingsProvider's one cached settings
+    // reference, so RequireRestart = false. The "Smithing" group belongs to Smith's Measure (#910), whose first property
+    // carries GroupOrder 74 (MCM ignores it on any later one), so these carry none. Order 10 and 11 leave the low numbers to
+    // the group's other features. Both are new settings, so the default (on) reaches every install. The defaults live in
+    // ManyHammersSettingsProvider so the fallback before MCM is up cannot drift.
+
+    [SettingPropertyGroup("Smithing")]
+    [SettingPropertyBool("{=taom_mh_mcm_bulk}Bulk Smelting and Refining", Order = 10, RequireRestart = false,
+        HintText = "{=taom_mh_mcm_bulk_hint}In the smithy, hold Shift while you smelt or refine to do five at once, or Ctrl to do the whole stack (Ctrl wins when both are held). It stops when your stamina or the charcoal or materials run out, and each unit costs what a single one would. Applies at once, no restart. Default: on.")]
+    public bool ManyHammersBulkEnabled { get; set; } = TAOM.Features.ManyHammers.ManyHammersSettingsProvider.DefaultBulkEnabled;
+
+    [SettingPropertyGroup("Smithing")]
+    [SettingPropertyBool("{=taom_mh_mcm_hide_locked}Hide Locked Items from Smelting", Order = 11, RequireRestart = false,
+        HintText = "{=taom_mh_mcm_hide_locked_hint}Weapons you locked in the inventory no longer appear in the smithy's smelting list, so they cannot be smelted by accident. Unlock one in the inventory to smelt it. A weapon you lock inside the smithy leaves the list at your next smelt or tab switch. No restart. Default: on.")]
+    public bool ManyHammersHideLockedEnabled { get; set; } = TAOM.Features.ManyHammers.ManyHammersSettingsProvider.DefaultHideLockedEnabled;
 }

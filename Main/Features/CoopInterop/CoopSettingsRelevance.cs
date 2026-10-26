@@ -145,6 +145,10 @@ public static class CoopSettingsRelevance
         // Whether YOUR smithing screen shows the Make Tools card (#910). The card is suppressed under co-op and a dedicated
         // server never loads Client, so no peer ever reads the switch.
         "SmithsMeasureMakeTools",
+        // Whether YOUR Shift or Ctrl click in the smithy repeats a smelt or a refine (Many Hammers, #911). It gates only the
+        // local player's own click, through the engine's own crafting calls; a co-op guest stands down (ShouldDeferToHost),
+        // so peers holding different values never simulate differently.
+        "ManyHammersBulkEnabled",
         // Whether YOUR client pops the shore-leave offer when the column halts. The pass it
         // offers is host-gated in EnlistmentWaitMenuPresenter.OfferTownLeave, so two peers
         // disagreeing about the prompt cannot make them simulate differently (#512).
@@ -164,6 +168,9 @@ public static class CoopSettingsRelevance
         // never grants (CoopSessionPolicy.MayWriteSaveBackedState), so peers disagreeing about the toggle cannot
         // make the simulation differ.
         "HiddenHostsEnabled",
+        // Many Hammers (#911): whether YOUR smelting list leaves out the weapons you locked. A view filter on one client's
+        // list; no campaign state is read or written.
+        "ManyHammersHideLockedEnabled",
         "SupplyShowRouteVisual",
         "NameplateFadeFarDistance", "NameplateFadeNearDistance",
         "EnableNameplateRelationColors", "NameplateRelationTintStrength",

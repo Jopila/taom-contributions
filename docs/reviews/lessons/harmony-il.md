@@ -1246,3 +1246,16 @@ record the same clash for Patch105 and Patch106.
   method names so a renumber at merge stays small, and run `PatchCategoryNumberTests` after every rebase.
 - **Source:** `docs/reviews/rca-alignment-scoring-2026-10-23.md` finding 1. Resolved at the B08 rebase: Messengers
   became Patch117, after a grep of every worktree and remote branch found no number above 116.
+
+### A postfix that edits a view model's list or selection re-establishes every invariant its caller relies on next (#911, 2026-10-26)
+Many Hammers' `RefreshList` postfix removed locked rows from the smelting list. Vanilla's `RefreshList` clears the
+selection only when its own list is empty (`SmeltingVM.cs:207-210`), before the postfix runs, so smelting the last
+unlocked weapon left a gone row selected in a now empty list. `SmeltSelectedItems` then picked `FirstOrDefault()` and
+`OnItemSelection(null)` threw at `:222`, inside vanilla, past every TAOM catch, after the weapon was consumed. The same
+throw ran on a co-op guest through BannerlordCoop's refresh handler.
+- **Why missed:** the rule was written as "move a locked selection"; nobody read what the caller does with the list
+  after the postfix returns.
+- **Prevent:** before a postfix changes a list, a selection or a flag, read every caller's lines after the call (here
+  `SmeltingVM.cs:273-279`, `CraftingVM.ExecuteSwitchToSmelting`, the co-op handler) and restore the invariant they
+  assume; test the state at that point on real view models (`SmeltingListFilterTests`).
+- **Source:** [rca-many-hammers-2026-10-26.md](../rca-many-hammers-2026-10-26.md) finding 1.

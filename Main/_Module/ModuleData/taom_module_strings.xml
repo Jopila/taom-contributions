@@ -4048,4 +4048,11 @@
 	<string id="taom_sm_mcm_make_tools" text="{=taom_sm_mcm_make_tools}Enable Make Tools" />
 	<string id="taom_sm_mcm_make_tools_hint" text="{=taom_sm_mcm_make_tools_hint}Adds a Make Tools button to the Refine tab of the smithing screen: one Iron and one Hardwood make one Tools, for smithy stamina and a little Smithing experience. Not shown in a co-op session. Default: on." />
 
+	<!-- harvested by tools/harvest_literal_loc_keys.py -->
+	<!-- TaomSettings.cs -->
+	<string id="taom_mh_mcm_bulk" text="{=taom_mh_mcm_bulk}Bulk Smelting and Refining" />
+	<string id="taom_mh_mcm_bulk_hint" text="{=taom_mh_mcm_bulk_hint}In the smithy, hold Shift while you smelt or refine to do five at once, or Ctrl to do the whole stack (Ctrl wins when both are held). It stops when your stamina or the charcoal or materials run out, and each unit costs what a single one would. Applies at once, no restart. Default: on." />
+	<string id="taom_mh_mcm_hide_locked" text="{=taom_mh_mcm_hide_locked}Hide Locked Items from Smelting" />
+	<string id="taom_mh_mcm_hide_locked_hint" text="{=taom_mh_mcm_hide_locked_hint}Weapons you locked in the inventory no longer appear in the smithy's smelting list, so they cannot be smelted by accident. Unlock one in the inventory to smelt it. A weapon you lock inside the smithy leaves the list at your next smelt or tab switch. No restart. Default: on." />
+
 </strings>

@@ -87,5 +87,6 @@ internal static class FeatureModules
         new Features.NotableServices.NotableServicesModule(),
         new Features.HarvestRoad.HarvestRoadModule(),
         new Features.SmithsMeasure.SmithsMeasureModule(),
+        new Features.ManyHammers.ManyHammersModule(),
     };
 }
