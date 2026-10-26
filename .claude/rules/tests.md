@@ -3,6 +3,7 @@ paths:
   - "TAOM.Tests/**"
   - "**/*Tests.cs"
   - "**/*Test.cs"
+  - "tools/tests/**"
 ---
 
 # Testing Rules (TDD Mandatory)
@@ -13,6 +14,14 @@ paths:
 3. Refactor while keeping tests green
 
 Judge every test by the two-edit test: break the behaviour (it must fail), change only the internals (it must pass); see `4-completeness.md` item 9 in `.claude/skills/deep-review/lenses/`.
+
+For `tools/tests/**` (Python `unittest`), only this workflow and the gate rule below apply: a test
+method must be named `test_*` or it never runs; the naming, framework and layout sections are C#.
+
+A gate (a test that lints or audits the repo) is proven on the states it will meet, not the one it
+was written in: a fresh checkout (`git check-attr text eol` on every file its tool reads), an
+untracked new file, a deleted one, a non-ASCII path, a run from a subfolder, a missing tool, and an
+empty input that must not read as a pass (lesson in `docs/reviews/lessons/build-tooling-workflow.md`).
 
 ## Naming Convention
 `MethodName_StateUnderTest_ExpectedBehavior`

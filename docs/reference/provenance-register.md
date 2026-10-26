@@ -115,6 +115,12 @@ is ever treated as a token, which is what keeps the bare word "Alliance" from ma
 | Agent Reach | `Agent-Reach` `Panniantong/Agent-Reach` `agent-reach` | MIT | comparison-only | `tools/ingame_ledger.py` and `/release` Phase 1 item 7 and Phase 5 (the idea of a per-release acceptance ledger, from its release gate; TAOM's tool, its non-blocking design and its text are TAOM's own) | cleared |
 | Paperclip | `paperclip` `paperclipai/paperclip` | MIT | behavioural-port | `tools/harness_retro.py` (section 10: tokens by agent type and model, model overrides, costliest transcripts, token growth) | cleared |
 | claude-hud | `claude-hud` `jarrodwatts/claude-hud` | MIT | behavioural-port | `.claude/statusline.sh` (the usage line) | cleared |
+| ralph-claude-code | `ralph-claude-code` `frankbria/ralph-claude-code` | MIT | behavioural-port | `.claude/rules/working-discipline.md` (no-progress breaker), `tools/loop_progress.py`, `.claude/skills/improve/workflows/execute.js` (run breaker), the Dead ends sections, `.claude/rules/hook-authoring.md` (digits-only arithmetic) (#996, #998) | cleared |
+| impeccable | `impeccable` `pbakaus/impeccable` | Apache-2.0 | behavioural-port | `docs/reference/gauntlet-screen-checklist.md` (condensed from `critique.md`, `craft-floor.md`, `harden.md`), `tools/loc_length_report.py` (the translation-budget idea) (#1007) | cleared |
+| dev-quality-gates | `dev-quality-gates` `mokevnin/dev-quality-gates` | CC0-1.0 | comparison-only | (none: the five gates of #1020 are TAOM's own, chosen from its list and patterns) | cleared |
+| ShellCheck | `ShellCheck` `koalaman/shellcheck` | GPL-3.0 | interop-only | `tools/tests/test_shell_lint_gate.py` runs the installed tool (see detail) | cleared |
+| Gitleaks | `Gitleaks` `gitleaks/gitleaks` | MIT | interop-only | `/security-scan` runs the installed tool; `.gitleaksignore` (see detail) | cleared |
+| Ruff | `Ruff` `astral-sh/ruff` | MIT | interop-only | `ruff.toml`, `tools/tests/test_python_lint_gate.py` (see detail) | cleared |
 
 <!-- provenance-register-end -->
 
@@ -804,6 +810,23 @@ PyGhidra's public API and copies no Ghidra code; PyGhidra's `api.py` and `core.p
 choose the calls. Nothing from Ghidra ships in a TAOM release, so no `THIRD-PARTY-LICENSES.txt` entry
 is owed. Remove with the two `E:\Tools` folders; the tool then exits 2 naming the setup doc. Adoption
 record: [`docs/reviews/adopt-ghidra-hindsight-2026-09-26.md`](../reviews/adopt-ghidra-hindsight-2026-09-26.md).
+
+### ShellCheck, Gitleaks and Ruff
+
+Installed 2026-10-26 on the desktop for the #1020 gates; nothing from any of them ships in a TAOM
+release, so no `THIRD-PARTY-LICENSES.txt` entry is owed.
+
+- **ShellCheck** (https://github.com/koalaman/shellcheck · GPL-3.0): 0.11.0 at
+  `E:\Tools\shellcheck-0.11.0`, from `shellcheck-v0.11.0.zip`, SHA-256 checked against the digest
+  GitHub publishes for the asset. TAOM runs the binary and links nothing, so GPL-3.0 places no
+  obligation on TAOM's code.
+- **Gitleaks** (https://github.com/gitleaks/gitleaks · MIT): 8.30.1 at `E:\Tools\gitleaks-8.30.1`,
+  from `gitleaks_8.30.1_windows_x64.zip`, checked against the release's `checksums.txt`.
+- **Ruff** (https://github.com/astral-sh/ruff · MIT): 0.17.2 from PyPI into the user site of the
+  system Python, run as `python -m ruff`.
+
+Setup on another machine: [`development-machines.md`](development-machines.md). Adoption record:
+[`docs/reviews/adopt-dev-quality-gates-2026-10-26.md`](../reviews/adopt-dev-quality-gates-2026-10-26.md).
 
 ### Hindsight
 

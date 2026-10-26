@@ -86,6 +86,29 @@ python tools/audit_claude_config.py --root /path/to/foreign-skill --external
 
 For deeper coverage (LLM intent analysis, taint tracking, OSV CVE lookups) the heavyweight option is NVIDIA SkillSpector itself, run **static-only** (`skillspector scan <dir>`, no API key) in an **isolated venv/Docker** — never installed into TAOM's harness. See `docs/ai-includes/external-repo-adoption.md`.
 
+## Git history (Gitleaks)
+
+The sweep above reads the current tree only; a secret committed and later deleted lives on in
+history. Each `/security-scan` run (see "When to use") scans the history too
+(about 100 s for 2,700 commits, so give the Bash call a 300 s timeout; offline, values redacted):
+
+```bash
+root=$(git rev-parse --show-toplevel) && "${TAOM_GITLEAKS:-E:/Tools/gitleaks-8.30.1/gitleaks.exe}" git --redact --no-banner --exit-code 2 --gitleaks-ignore-path "$root/.gitleaksignore" "$root"
+```
+
+Gitleaks 8.30.1 sits on the desktop at `E:\Tools\gitleaks-8.30.1` (release zip checked against its
+SHA-256). Read the summary before the exit code:
+
+- `N commits scanned` must be close to `git rev-list --all --no-merges --count` (2,746 of 2,777 on
+  2026-10-26: Gitleaks skips merges and a few others). Gitleaks reports
+  `0 commits scanned` and `no leaks found` with exit 0 when git fails, which is a failed scan.
+- Exit 2 is a new finding: read the redacted match and the line with `git show <commit>:<file>`.
+  A real secret is rotated, then purged. A false positive goes into `.gitleaksignore` as its
+  fingerprint, under the header's rule.
+- Exit 1 with an `FTL` line means Gitleaks itself failed.
+
+The baseline (#1020, 2026-10-26): 19 false positives, no real secret.
+
 ## Reading findings
 
 - **CRITICAL / HIGH** — fix before commit. A committed secret means rotate the credential, then purge it.

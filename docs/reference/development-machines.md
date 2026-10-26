@@ -20,7 +20,7 @@ the only one holding all of it.
 
 ## How a path resolves, and where it does not
 
-Three environment variables carry the difference. Set them per machine; never hardcode a drive
+These environment variables carry the difference. Set them per machine; never hardcode a drive
 letter into new code.
 
 | Variable | Set where | Read by |
@@ -30,6 +30,9 @@ letter into new code.
 | `TAOM_PYBIN` | `.claude/settings.json` env block | `.claude/hooks/_pybin.sh`. The same value works on both machines because Python lives at `C:\Python314` on each; a stale pin degrades to discovery rather than failing |
 | `GHIDRA_INSTALL_DIR` | Windows user env var, desktop only | `tools/native_decompile.py` and PyGhidra (see "Ghidra" below) |
 | `TAOM_GHIDRA_PYTHON` | optional; unset on the desktop | `tools/native_decompile.py`: the interpreter that has PyGhidra, default `E:\Tools\ghidra-venv\Scripts\python.exe` |
+| `TAOM_SHELLCHECK` | optional; unset on the desktop | `tools/tests/test_shell_lint_gate.py`: the binary, else `shellcheck` on PATH, else the `E:\Tools` default (see "Lint gates" below) |
+| `TAOM_GITLEAKS` | optional; unset on the desktop | the `/security-scan` history step: the binary, else the `E:\Tools` default (no PATH lookup) |
+| `TAOM_ALLOW_NO_RUFF`, `TAOM_ALLOW_NO_YAML`, `TAOM_ALLOW_NO_SHELLCHECK` | set only on a machine that lacks the tool | turn that lint gate's failure into a reported skip |
 
 **Three things ignore all of that** and need the path passed by hand:
 
@@ -103,6 +106,9 @@ Known gaps on the laptop, both deliberate:
   account for: [tools/README.md](../../tools/README.md), "Which TpacTool the PowerShell tools load".
 - **Ghidra** is desktop-only (below). On the laptop `tools/native_decompile.py` exits 2 naming this
   page, and `/native-crash-triage` falls back to hand-decoding the disassembly.
+- **The lint gates' tools** (Ruff, ShellCheck, Gitleaks) were installed on the desktop only
+  (below). Without them the Python suite fails those gates by design; install them, or set the
+  matching `TAOM_ALLOW_NO_*` variable so the gate reports a skip.
 
 ## Ghidra, desktop only (installed 2026-09-26, #688)
 
@@ -118,6 +124,23 @@ Known gaps on the laptop, both deliberate:
 
 A reinstall of Ghidra has to repeat the four `launch.properties` edits (`JAVA_HOME_OVERRIDE` and the
 three directory lines).
+
+## Lint gates, desktop (installed 2026-10-26, #1020)
+
+The Python suite (`/verify` Step 2b) runs three gates that need these tools, and `/security-scan`
+runs Gitleaks. Ruff and PyYAML are found by Python's import. ShellCheck is found through
+`TAOM_SHELLCHECK`, then PATH, then its default; Gitleaks through `TAOM_GITLEAKS`, then its default.
+Neither binary is on PATH here.
+
+| Tool | Where | Install on another machine |
+|---|---|---|
+| Ruff 0.17.2 | user site of `C:\Python314` | `python -m pip install --user ruff` |
+| PyYAML | user site of `C:\Python314` | `python -m pip install --user pyyaml` |
+| ShellCheck 0.11.0 | `E:\Tools\shellcheck-0.11.0\shellcheck.exe` | `shellcheck-v0.11.0.zip` from https://github.com/koalaman/shellcheck/releases, SHA-256 checked against the asset's digest, unzipped to a folder named for the version; set `TAOM_SHELLCHECK` when it is not at the default |
+| Gitleaks 8.30.1 | `E:\Tools\gitleaks-8.30.1\gitleaks.exe` | `gitleaks_8.30.1_windows_x64.zip` from https://github.com/gitleaks/gitleaks/releases, checked against `checksums.txt`; set `TAOM_GITLEAKS` when it is not at the default |
+
+Check: `python -m unittest tools.tests.test_python_lint_gate tools.tests.test_claude_config_lint tools.tests.test_shell_lint_gate`
+passes. Ruff and PyYAML live in the user site, so `python -I` and `python -s` cannot see them.
 
 ## Writing docs and tools on either machine
 

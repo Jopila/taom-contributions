@@ -24,6 +24,18 @@ while Bannerlord is running (AGENTS.md "Commands"). Never `./build.ps1` here.
 
 If it fails, report errors and **STOP** (no point running tests on broken build).
 
+## Step 1b: NuGet audit
+
+```bash
+dotnet restore TAOM.sln --force-evaluate 2>&1
+```
+
+`Directory.Build.props` makes a high or critical advisory (NU1903, NU1904) a restore error (#1020),
+but NuGet skips the audit on a no-op restore, so an unchanged checkout never hears of a new
+advisory. `--force-evaluate` makes this restore a full one. An NU1903 or NU1904 error is a FAIL.
+NU1900 means the vulnerability data could not be fetched (offline): report the audit as
+UNCHECKED, not as a pass.
+
 ## Step 2: Test Suite
 
 ```bash
@@ -52,6 +64,11 @@ minutes on the desktop with the live install; tests that need the install skip w
 
 Report `Ran N tests` and the failures. No `Ran N tests` line, or fewer than 2,500 tests, means
 discovery broke: not a pass.
+
+The suite includes the lint gates (#1020), which need Ruff (`python -m ruff`), PyYAML and
+ShellCheck (`E:\Tools\shellcheck-0.11.0`). A missing tool fails its gate; a run with
+`TAOM_ALLOW_NO_RUFF`, `TAOM_ALLOW_NO_YAML` or `TAOM_ALLOW_NO_SHELLCHECK` set reports that gate as
+skipped, never as passed.
 
 ## Step 2c: Canary
 

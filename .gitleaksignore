@@ -1,0 +1,24 @@
+# Gitleaks fingerprints reviewed as false positives (#1020, 2026-10-26).
+# The full-history scan of 2,735 commits found 19 generic-api-key matches and no real secret:
+# save-data key constants ("_taom_fire_and_tribute_v1"), localization ids that contain "key"
+# in translation caches and feature docs, and a variable in vendored BCL code.
+# Format: <commit>:<file>:<rule>:<line>. Add a line only after reading the match.
+066dcaf01ed6ac62a561097d09e067a2a8069fa7:Dependencies/ThirdParty/Harmony/System.Buffers/TlsOverPerCoreLockedStacksArrayPool.cs:generic-api-key:303
+0bd6abf330bbe8a605fdfef459ecdbb36aa8614d:tools/translation_cache/it.json:generic-api-key:5905
+0bd6abf330bbe8a605fdfef459ecdbb36aa8614d:tools/translation_cache/pl.json:generic-api-key:5913
+203f7b1adc71417d93f1272488b53cde98c373e7:tools/translation_cache/fr.json:generic-api-key:3832
+203f7b1adc71417d93f1272488b53cde98c373e7:tools/translation_cache/it.json:generic-api-key:3677
+203f7b1adc71417d93f1272488b53cde98c373e7:tools/translation_cache/it.json:generic-api-key:4267
+21e0807f98599b7c8bcf81c370f3d352d7d8de22:Main/Features/FireAndTribute/Hooks/FireAndTributeBehavior.cs:generic-api-key:20
+21e0807f98599b7c8bcf81c370f3d352d7d8de22:docs/features/fire-and-tribute.md:generic-api-key:120
+43206df6d0964365b7c1b748fefa73b81f67aed5:Dependencies/ThirdParty/Harmony/System.Buffers/TlsOverPerCoreLockedStacksArrayPool.cs:generic-api-key:303
+bc356f5d7ac9ec61e7964ca30b4ed7240c78c7ce:tools/translation_cache/pl.json:generic-api-key:3697
+bc356f5d7ac9ec61e7964ca30b4ed7240c78c7ce:tools/translation_cache/pl.json:generic-api-key:4096
+bfc43bbb3a4fea4d9ebeaa02e7c6215c153ac17a:tools/translation_cache/pl.json:generic-api-key:3697
+bfc43bbb3a4fea4d9ebeaa02e7c6215c153ac17a:tools/translation_cache/pl.json:generic-api-key:4096
+c3246f607b5d3d332f18ebfe2ab5f5c8dde32239:docs/features/fire-and-tribute.md:generic-api-key:147
+d340a725cf479580d22f40015df2b2bc2e4e317a:Main/Features/WarChronicle/WarChronicleBehavior.cs:generic-api-key:19
+d340a725cf479580d22f40015df2b2bc2e4e317a:Main/Features/WarChronicle/WarChronicleBehavior.cs:generic-api-key:20
+db69d837f89474f6c4b0b725d1aa9f14a4e52e69:tools/translation_cache/fr.json:generic-api-key:7944
+db69d837f89474f6c4b0b725d1aa9f14a4e52e69:tools/translation_cache/it.json:generic-api-key:7860
+dca7fa41d5dc1addda1b725db063516513298444:tools/translation_cache/it.json:generic-api-key:8776

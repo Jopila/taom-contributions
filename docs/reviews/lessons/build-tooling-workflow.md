@@ -4500,3 +4500,18 @@ there still loads (a prefab by its bare file name, a brush file by name), so a d
 - **Prevent:** when a change deletes a file under `Main/_Module/`, delete the installed copy too after a byte comparison
   with its git blob, and say so in the commit body; the deploy guard is tracked in #1024.
 - **Source:** [rca-previewpanel-dead-prefab-2026-10-26.md](../rca-previewpanel-dead-prefab-2026-10-26.md) finding 6.
+### Prove a gate on the states it will meet, not the one it was written in
+
+The five #1020 gates all passed on the worktree that built them and failed on states a later run
+meets. A ShellCheck rc file written LF became CRLF on checkout (the third LF-only-by-accident file,
+after the hooks and the Howdah snapshot), a new script was not linted until staged, a new Python
+folder escaped a hand-kept list, an unchanged checkout skipped the NuGet audit, and a history scan
+run from a subfolder or outside the repo reported "no leaks" with exit 0.
+- **Why missed:** each gate was run once, on its author's state: every file tracked, LF and in a
+  known folder, a full restore, the repo root as working directory.
+- **Prevent:** before review, run a new gate on a fresh checkout (`git check-attr text eol` on each
+  file its tool reads), an untracked new file, a file deleted but not removed, a non-ASCII path, a
+  run from a subfolder, a missing tool, and an empty input (a tool that finds nothing to check must
+  not read as a pass). Prefer passing a tool's options on the command line over a tracked config
+  file that a CR-intolerant tool reads.
+- **Source:** `docs/reviews/rca-quality-gates-2026-10-26.md` findings 1 to 4, 6 and 11 (#1020).

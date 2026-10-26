@@ -127,7 +127,10 @@ On 2026-08-31 a pass that added timeouts to all 27 registrations killed two gate
 `bash tools/test_hooks.sh` enforces this: no registration without a timeout, no external tool
 without an inner bound below it, (4b) every PreToolUse gate answers a commit inside 80% of its
 registration, and (7j) every registration is anchored on `"$CLAUDE_PROJECT_DIR"` (a relative one
-dies after a `cd`, #690). Run it before committing `.claude/hooks/`.
+dies after a `cd`, #690). Run it before committing `.claude/hooks/`, with
+`python -m unittest tools.tests.test_shell_lint_gate` (#1020): ShellCheck at warning level over
+every `.sh`, allowing SC2206 only on a line that starts `set -f;` (the split rule below). A deliberate
+finding takes `# shellcheck disable=SCnnnn  # reason` on the line before that command.
 
 ## Prove a gate live (EMPIRICAL: TAOM 2026-09-23, #647)
 
