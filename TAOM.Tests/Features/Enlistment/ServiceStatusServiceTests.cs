@@ -41,6 +41,7 @@ public class ServiceStatusServiceTests
         _writer = Substitute.For<IServiceStatusTextWriter>();
         _config = Substitute.For<IEnlistmentContentConfigProvider>();
         _config.GetConfig().Returns(EnlistmentContentConfigProvider.BuildDefaults());
+        _config.GetDuties().Returns(new EnlistmentDutiesConfig());
         _skillXp = Substitute.For<IHeroSkillXpAdapter>();
         _playerParty = Substitute.For<IPlayerPartyAdapter>();
         // What service pays today: the rank's table wage, as ServiceRewardService.GetDailyWage answers it.
@@ -58,7 +59,7 @@ public class ServiceStatusServiceTests
         _store.Record.EnlistedHeroId = "main_hero";
         _store.Record.CommanderHeroId = "lord_1";
 
-        _sut = new ServiceStatusService(_store, _content, _commander, _writer, _promotion, _wagePreview, new TAOM.Features.Enlistment.Equipment.PersistedEquipmentIssueLedger(_content), _playerParty);
+        _sut = new ServiceStatusService(_store, _content, _commander, _writer, _promotion, _wagePreview, new TAOM.Features.Enlistment.Equipment.PersistedEquipmentIssueLedger(_content), _playerParty, _config);
     }
 
     private void Commander(
@@ -473,6 +474,31 @@ public class ServiceStatusServiceTests
     }
 
     [TestMethod]
+    public void Build_ActiveFieldDuty_CarriesTheLoadedRowsOwnTitle()
+    {
+        _config.GetDuties().Returns(new EnlistmentDutiesConfig
+        {
+            FieldDuties = { new DutyDefinition { Id = "recon_sweep", Title = "{=taom_enlist_duty_recon_sweep_title}a reconnaissance sweep" } },
+        });
+        _content.Record.ActiveDutyId = "recon_sweep";
+
+        var model = _sut.Build();
+
+        Assert.AreEqual("recon_sweep", model.ActiveDutyId);
+        Assert.AreEqual("{=taom_enlist_duty_recon_sweep_title}a reconnaissance sweep", model.ActiveDutyTitle);
+    }
+
+    [TestMethod]
+    public void Build_ActiveDutyWhoseRowIsGone_CarriesTheComposedFallback_AndNoDutyHasNone()
+    {
+        _content.Record.ActiveDutyId = "removed_duty";
+        Assert.AreEqual("{=taom_enlist_duty_removed_duty_title}a task for the company", _sut.Build().ActiveDutyTitle);
+
+        _content.Record.ActiveDutyId = null;
+        Assert.IsNull(_sut.Build().ActiveDutyTitle);
+    }
+
+    [TestMethod]
     public void TheBoardWriter_AppendsTheColumnLine_OnlyWhenThereIsText_WithoutChangingTheBoardTemplate()
     {
         var src = RepoPaths.ReadSource("Main/Features/Enlistment/Presentation/ServiceStatusTextWriter.cs", stripComments: true);
@@ -480,7 +506,7 @@ public class ServiceStatusServiceTests
         StringAssert.Contains(src, "ColumnText");
         StringAssert.Contains(src, "string.IsNullOrEmpty(status.ColumnText)");
         StringAssert.Contains(src, "SetTextVariable(\"ACTIVITY\", WithColumnLine(ActivityLine(status), status))");
-        StringAssert.Contains(src, "SetTextVariable(\"DUTY\", WithKitLine(DutyLine(status.ActiveDutyId), status))");
+        StringAssert.Contains(src, "SetTextVariable(\"DUTY\", WithKitLine(DutyLine(status.ActiveDutyTitle), status))");
         StringAssert.Contains(src, "{ACTIVITY}{NEWLINE}{NEWLINE}Rank: {RANK} · {SECTION}{NEWLINE}Days served: {DAYS} · Standing: {TRUST}{NEWLINE}Service record: {XP} XP · Daily pay: {WAGE}{COIN}{LADDER}{ARREARS}{DUTY}\"");
     }
 
@@ -556,6 +582,7 @@ public class ServiceStatusModelEqualityTests
     [DataRow("kitWaits")]
     [DataRow("columnText")]
     [DataRow("retinueWage")]
+    [DataRow("activeDutyTitle")]
     public void Equals_IsFalse_WhenAnySingleFieldDiffers(string field)
     {
         var other = new ServiceStatusModel(
@@ -575,7 +602,8 @@ public class ServiceStatusModelEqualityTests
             nextRequirementTarget: field == "nextRequirementTarget" ? 800 : 350,
             kitWaits: field == "kitWaits",
             columnText: field == "columnText" ? "Besieging Osgiliath." : null,
-            retinueWage: field == "retinueWage" ? 90 : 0);
+            retinueWage: field == "retinueWage" ? 90 : 0,
+            activeDutyTitle: field == "activeDutyTitle" ? "{=taom_enlist_duty_recon_sweep_title}a reconnaissance sweep" : null);
 
         Assert.IsFalse(Base().Equals(other), $"'{field}' is missing from Equals — its changes would never reach the screen");
     }
@@ -593,6 +621,7 @@ public class ServiceStatusModelEqualityTests
     [DataRow("kitWaits")]
     [DataRow("columnText")]
     [DataRow("retinueWage")]
+    [DataRow("activeDutyTitle")]
     public void GetHashCode_Differs_WhenANewFieldDiffers(string field)
     {
         var other = new ServiceStatusModel(
@@ -606,7 +635,8 @@ public class ServiceStatusModelEqualityTests
             nextRequirementTarget: field == "nextRequirementTarget" ? 800 : 350,
             kitWaits: field == "kitWaits",
             columnText: field == "columnText" ? "Besieging Osgiliath." : null,
-            retinueWage: field == "retinueWage" ? 90 : 0);
+            retinueWage: field == "retinueWage" ? 90 : 0,
+            activeDutyTitle: field == "activeDutyTitle" ? "{=taom_enlist_duty_recon_sweep_title}a reconnaissance sweep" : null);
 
         Assert.AreNotEqual(Base().GetHashCode(), other.GetHashCode(), $"'{field}' is missing from GetHashCode");
     }

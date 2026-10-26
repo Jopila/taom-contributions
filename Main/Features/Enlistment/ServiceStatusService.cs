@@ -49,6 +49,7 @@ public class ServiceStatusService : IServiceStatusService
     private readonly IEnlistmentWagePreview _wagePreview;
     private readonly Equipment.IEquipmentIssueLedger _ledger;
     private readonly IPlayerPartyAdapter _playerParty;
+    private readonly Content.IEnlistmentContentConfigProvider _config;
 
     private ServiceStatusModel _last;
 
@@ -60,7 +61,8 @@ public class ServiceStatusService : IServiceStatusService
         IPromotionService promotion,
         IEnlistmentWagePreview wagePreview,
         Equipment.IEquipmentIssueLedger ledger,
-        IPlayerPartyAdapter playerParty)
+        IPlayerPartyAdapter playerParty,
+        Content.IEnlistmentContentConfigProvider config)
     {
         _store = store;
         _content = content;
@@ -70,6 +72,7 @@ public class ServiceStatusService : IServiceStatusService
         _wagePreview = wagePreview;
         _ledger = ledger;
         _playerParty = playerParty;
+        _config = config;
     }
 
     public ServiceStatusModel Build()
@@ -112,8 +115,17 @@ public class ServiceStatusService : IServiceStatusService
             columnText: commander.HasParty && !commander.PartyIsInSettlement
                 ? _commander.GetPartyBehaviorText(record.CommanderHeroId)
                 : null,
-            retinueWage: _playerParty.GetMainPartyDailyWage());
+            retinueWage: _playerParty.GetMainPartyDailyWage(),
+            activeDutyTitle: ActiveDutyTitle(content.ActiveDutyId));
     }
+
+    /// <summary>The active field duty's title string: its loaded row's own, or the composed key with generic English when the row is gone; null when no duty is active.</summary>
+    private string ActiveDutyTitle(string activeDutyId)
+        => string.IsNullOrEmpty(activeDutyId)
+            ? null
+            : Content.Domain.DutyText.Source(
+                _config.GetDuties().FieldDuties.Find(d => d.Id == activeDutyId)?.Title,
+                activeDutyId, Content.Domain.DutyText.TitleSuffix, "a task for the company");
 
     /// <summary>
     /// Order matters: a village raid (#831) outranks the battle check, since the soldier is not in it;

@@ -288,7 +288,7 @@ while the other sixteen were complete.
 **The fix is structural, and there are exactly two acceptable owners for a composed-key family:**
 
 1. **A generator** that walks the data and emits every row, hard-failing on an unauthored one rather
-   than emitting a placeholder (`generate_enlistment_duty_strings.py`). A generator that
+   than emitting a placeholder (`tools/harvest_duty_strings.py`, which reads the JSON rows). A generator that
    *silently defaults* is worse than none — it converts a loud gap into a raw id in the UI.
 2. **A test** that cross-references the data source against the registry
    (`NarrativeStringRegistrationTests`). Pin **value drift as well as presence**: a registered row
@@ -1306,3 +1306,14 @@ purpose; removing it by hand makes the next harvest produce a whitespace diff (d
   position (first, last) rather than to the block; pin the last block's bottom margin. Leave generator output in a
   strings file as the generator writes it.
 - **Source:** [rca-encyclopedia-filters-2026-10-26.md](../rca-encyclopedia-filters-2026-10-26.md) findings 4 and 6.
+### A registered key does not reach English: the inline text after `{=key}` is what English players read (#845, 2026-10-26)
+Field duties composed `{=taom_enlist_duty_<id>_title}a task for the company` from the row id. The key was
+registered and translated, so every gate passed, yet English players read the generic inline text for every
+duty: for English, `MBTextManager.GetLocalizedText` returns the inline text and never looks the key up
+(v1.5.5 `MBTextManager.cs:264-268`).
+- **Why missed:** the localization gates check that a key has a row and a translation, not that the inline
+  English at the call site is the row's English.
+- **Prevent:** a composed key must carry the row's own English inline (read it from the data that owns it);
+  a generic inline fallback is for a row that no longer exists, never the normal path. Test the English
+  path by asserting the source string, not only the key.
+- **Source:** [rca-enlistment-duty-text-2026-10-26.md](../rca-enlistment-duty-text-2026-10-26.md) F1, F2.

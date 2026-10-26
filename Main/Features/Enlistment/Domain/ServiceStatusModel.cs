@@ -43,6 +43,9 @@ public sealed class ServiceStatusModel : IEquatable<ServiceStatusModel>
     /// <summary>Data-row id of the active duty, or null. Rendered via its own localized name.</summary>
     public string ActiveDutyId { get; }
 
+    /// <summary>The active field duty's <c>{=key}English</c> title (its row's own, or the generic fallback when the row is gone), or null when no duty is active. A string, so it compares by value.</summary>
+    public string ActiveDutyTitle { get; }
+
     /// <summary>Service XP earned so far — the promotion ladder's main currency, and until now the
     /// one the player had no way at all to see.</summary>
     public int ServiceXp { get; }
@@ -96,7 +99,8 @@ public sealed class ServiceStatusModel : IEquatable<ServiceStatusModel>
         int nextRequirementTarget = 0,
         bool kitWaits = false,
         string columnText = null,
-        int retinueWage = 0)
+        int retinueWage = 0,
+        string activeDutyTitle = null)
     {
         CommanderName = commanderName;
         Activity = activity;
@@ -115,6 +119,7 @@ public sealed class ServiceStatusModel : IEquatable<ServiceStatusModel>
         KitWaits = kitWaits;
         ColumnText = columnText;
         RetinueWage = retinueWage;
+        ActiveDutyTitle = activeDutyTitle;
     }
 
     public bool Equals(ServiceStatusModel other)
@@ -138,7 +143,8 @@ public sealed class ServiceStatusModel : IEquatable<ServiceStatusModel>
             && NextRequirementTarget == other.NextRequirementTarget
             && KitWaits == other.KitWaits
             && string.Equals(ColumnText, other.ColumnText, StringComparison.Ordinal)
-            && RetinueWage == other.RetinueWage;
+            && RetinueWage == other.RetinueWage
+            && string.Equals(ActiveDutyTitle, other.ActiveDutyTitle, StringComparison.Ordinal);
     }
 
     public override bool Equals(object obj) => Equals(obj as ServiceStatusModel);
@@ -164,6 +170,7 @@ public sealed class ServiceStatusModel : IEquatable<ServiceStatusModel>
             hash = (hash * 397) ^ (KitWaits ? 1 : 0);
             hash = (hash * 397) ^ (ColumnText?.GetHashCode() ?? 0);
             hash = (hash * 397) ^ RetinueWage;
+            hash = (hash * 397) ^ (ActiveDutyTitle?.GetHashCode() ?? 0);
             return hash;
         }
     }

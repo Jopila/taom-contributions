@@ -920,8 +920,7 @@ over.
 
 Be precise about what that does and does not justify, because the first version of this paragraph
 said the popup "stated the stakes" and it does not. `InteractiveDutyPresenter.PresentIncident` passes
-`ShowTwoOptionInquiry` exactly four strings: a title and body from the static `DutyCopy` table, and
-`Humanize(option.Key)` for each button. No difficulty, no skill name, no trust delta reaches the
+`ShowTwoOptionInquiry` exactly four strings: the row's title and body, and each option's label. No difficulty, no skill name, no trust delta reaches the
 player. The exemption rests on the choice being the player's, nothing more. Making the stakes legible
 would be a real improvement and is not in this change.
 
@@ -2844,18 +2843,37 @@ Specifically owed, because each is a state a test structurally cannot reach:
   2026-08-09; the #828, #829 and #936 strings (the seven rank names and the best-kit answer among
   them) ship English until the next paid translation run, tracked in #939.
 
-  The **97 runtime-built duty keys** are the reason
-  `tools/generate_enlistment_duty_strings.py` exists: `InteractiveDutyPresenter` and
-  `ServiceStatusTextWriter` assemble ids as `taom_enlist_duty_<row id>_<suffix>` at runtime, so a
-  literal `{=key}` grep — the discovery mechanism `/localize` relies on — finds none of them. The
-  generator enumerates them from the data rows instead. 84 are the 14 interactive-duty/incident
-  rows × 6 suffixes; **13 are the field-duty `_title`s, added 2026-08-08** after the first pass
-  derived its key set from `interactiveDuties` + `incidents` only and left all 13 field duties
-  rendering as their raw snake_case id ("You have orders: recon_sweep") in every language.
+  **Duty text has one source (#845).** `enlistment_duties.json` carries the English of every duty
+  row as `{=taom_enlist_duty_<id>_<suffix>}English` strings: `title` on every row, `success` and
+  `failure` result lines on a field duty, and `body` plus a `label` on each of `optionA` and
+  `optionB` (keys `_opta` and `_optb`) on an interactive duty or incident. The code shows the row's
+  own strings, because for an English game `MBTextManager.GetLocalizedText` returns the inline text
+  after `{=key}` and never reads the registered row: `InteractiveDutyPresenter` passes the popup
+  strings to the inquiry, `FieldDutyRuntime` renders the row's title and result line in its two
+  toasts, and the status board gets the active duty's title through `ServiceStatusModel.ActiveDutyTitle`.
+  All keys come from one formula, `DutyText.KeyFor`. A generic text applies only to a duty whose row
+  is no longer loaded.
+  `EnlistmentContentConfigProvider` skips a row whose text is missing, is not keyed exactly
+  `taom_enlist_duty_<id>_<suffix>`, or has no English, and logs a warning naming the row. The keys
+  are composed at runtime, so a grep for a literal `{=key}` cannot find them:
+  `tools/harvest_duty_strings.py` reads the JSON and adds or updates the matching rows in
+  `taom_enlistment_strings.xml`, which stays the translation registry (`--check` exits 1 on drift,
+  `--apply` writes). `DutyTextTests.EveryShippedDutyString_MatchesTheRegisteredRowByteForByte`
+  pins the two files together, and `UnregisteredLocalizationKeyBaselineTests` covers the rest.
+  An interactive duty or incident has no result strings of its own: its `_success` and `_failure`
+  rows hold the two shared sentences ("It went well.", "It didn't go as planned."), which the
+  presenter shows with the same inline text, and they stay hand-registered rows that the harvester
+  only checks for.
 
-  Two guards now stop that recurring: the generator **hard-fails** on a field-duty row with no
-  authored title, and `ServiceStatusTextWriter`'s fallback is prose rather than the row id, so a
-  future miss degrades quietly for the player instead of printing an internal symbol.
+  **To add a duty:** add the row to `enlistment_duties.json` with its strings (`title`, plus
+  `success` and `failure` on a field duty, or `body` and both option `label`s on an interactive duty
+  or incident), run `python tools/harvest_duty_strings.py --apply`, then seed or translate the new
+  keys (`translate_with_claude.py --sync-ids`). A new interactive duty or incident needs its
+  shared `_success` and `_failure` rows registered by hand FIRST (`--apply` refuses, and `--check`
+  fails, until both exist under their own keys), then run the harvester.
+  Changing the English of an existing string rewrites its registered row and makes the 12
+  translations of it stale: the harvester lists every changed key, and the follow-up is the
+  checklist in the translator guide, "The checklist when you edit an existing English string".
 - **One entry point remains over the ADR-002 ceiling**, pre-dating this arc:
   `EnlistmentBattleBehavior` (157). `EnlistmentMeritMissionBehavior` was the other (163); the
   left-the-field fix paid that down to 139 by extracting its inline geometry into
