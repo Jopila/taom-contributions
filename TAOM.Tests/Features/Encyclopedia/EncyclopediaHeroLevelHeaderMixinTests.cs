@@ -56,8 +56,7 @@ public class EncyclopediaHeroLevelHeaderMixinTests
         var source = ReadSource(Source, stripComments: true);
         var refresh = source.Substring(source.IndexOf("public override void OnRefresh()"));
         StringAssert.DoesNotMatch(refresh, new Regex(@"IoC\.Resolve"));
-        var constructor = Regex.Match(source, @"public \w+\([^)]*\)\s*:\s*base\([^)]*\)\s*\{(?<body>.*?)
-    \}", RegexOptions.Singleline);
+        var constructor = Regex.Match(source, @"public \w+\([^)]*\)\s*:\s*base\([^)]*\)\s*\{(?<body>.*?)\r?\n    \}", RegexOptions.Singleline);
         StringAssert.Contains(constructor.Groups["body"].Value, "IoC.Resolve<IModLogger>()");
     }
 }
