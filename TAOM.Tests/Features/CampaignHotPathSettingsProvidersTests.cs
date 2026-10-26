@@ -132,6 +132,8 @@ public class CampaignHotPathSettingsProvidersTests
     [DataRow(typeof(CastlePatrolSettingsProvider))]
     // Watch-Silver and Tidings of the Lists: read when a conversation or an arena menu is built; the accessor takes the settings once.
     [DataRow(typeof(TAOM.Features.SettlementServices.SettlementServicesSettingsProvider))]
+    // Notable Services: read by each of three dialog conditions when a conversation is built; the accessor takes the settings once.
+    [DataRow(typeof(TAOM.Features.NotableServices.NotableServicesSettingsProvider))]
     // #873: not a hot path (read a few times per party row when the Army Management screen opens); it still takes the settings once.
     [DataRow(typeof(RedArrowSettingsProvider))]
     // #867: not a hot path; read once when a clan signs on as a mercenary. The accessor still takes the settings once.
@@ -194,6 +196,7 @@ public class CampaignHotPathSettingsProvidersTests
 
     [DataRow(typeof(ISeasonedHostsSettingsProvider), typeof(SeasonedHostsSettingsProvider))]
     [DataRow(typeof(IKingsMusterSettingsProvider), typeof(KingsMusterSettingsProvider))]
+    [DataRow(typeof(TAOM.Features.NotableServices.INotableServicesSettingsProvider), typeof(TAOM.Features.NotableServices.NotableServicesSettingsProvider))]
     public void Provider_ResolvesFromARealContainer(Type service, Type implementation)
     {
         using var container = new Container();

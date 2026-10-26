@@ -5,7 +5,7 @@
 A Bannerlord dedicated server does not load MCM, so TAOM's settings pages do not exist there. This feature
 gives the server a JSON file, `taom-server-settings.json`, that carries any TAOM setting the operator wants
 to change. Every key the file leaves out stays at its server default: the compiled MCM default, except the
-hitch probe, which a server keeps off. The four TAOM settings classes have 487 properties: 483 are settable from
+hitch probe, which a server keeps off. The four TAOM settings classes have 488 properties: 484 are settable from
 the file, plus 2 buttons and 2 parked settings. It is ADR-013 decision 2
 ([ADR-013](../adrs/013-server-safe-core-client-ui-submodule.md)).
 

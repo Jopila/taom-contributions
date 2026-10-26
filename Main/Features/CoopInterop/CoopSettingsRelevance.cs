@@ -129,6 +129,10 @@ public static class CoopSettingsRelevance
         // Watch-Silver and Tidings of the Lists (#859): each switch only gates a player's click, and every write (a fief's loyalty,
         // the player's gold) is behind the single-player predicate, so peers holding different values never compute differently.
         "EnableWatchSilver", "EnableTidingsOfTheLists",
+        // Notable Services (#899): the switch only gates a player's click, and every write (the player's gold, a settlement's militia,
+        // hearth or prosperity, met flags, tracker marks, relation, Roguery experience and the given rosters) is behind the
+        // single-player predicate in NotableServicesService.
+        "EnableNotableServices",
         "EnableQuickActions", "EnableInventorySearch", "QuickActionsShowConfirmation",
         "QuickActionsPlaySounds", "DamagedQualityDropdown", "DamagedThreshold",
         "UseCustomThreshold", "ExcludeDamagedHorses",

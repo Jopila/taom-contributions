@@ -1,0 +1,14 @@
+{
+  "introducePrice": 50,
+  "revealPrice": 100,
+  "revealCount": 3,
+  "revealMaxDiagonalFraction": 0.2,
+  "revealMinRelation": 0,
+  "gainPerMan": 0.5,
+  "maxGainPerGift": 20,
+  "militiaPerTroop": 1,
+  "hearthPerPrisoner": 1,
+  "prosperityPerPrisoner": 1,
+  "rogueryXpPerPrisoner": 10,
+  "maxMenPerGift": 100
+}

@@ -1256,6 +1256,14 @@ public class TaomSettings : AttributeGlobalSettings<TaomSettings>
         HintText = "When enabled, you can ask a free lord about his clan's holdings. A lord who knows you well enough names them and they are marked on your map; a lord who does not refuses, and a lord whose clan holds nothing says so, each at a small cost in relation. Lords at war with you and your own clan never answer. When off, the line does not appear.")]
     public bool EnableDomainReveal { get; set; } = true;
 
+    // --- World / Notable Services (#899) ---
+
+    // GroupOrder 77: 0-5, 9, 10, 15, 19-71, 76 and 100 were taken as of 2026-10-24 (the highest below the Map Tools sentinel is 76).
+    [SettingPropertyGroup("World/Notable Services", GroupOrder = 77)]
+    [SettingPropertyBool("Enable Notable Services", Order = 0, RequireRestart = false,
+        HintText = "When enabled, a notable of the settlement you stand in (an artisan, gang leader, merchant, rural notable or headman, but not a preacher) offers three lines in conversation: give men to the settlement (troops raise its militia, prisoners its hearth in a village or its prosperity in a town; a castle takes troops only), pay to be introduced to the other notables there, and pay to have the nearest towns and castles marked on your map. Single player only; all three lines are hidden during a messenger conversation. At war with the settlement's realm only the gift line is hidden: the introduction still works and the holds question is refused. The gift line is also hidden while a party screen is open or when you hold no regular troop or prisoner. Amounts are in notable_services.json. When off, none of the lines appear. Default: on.")]
+    public bool EnableNotableServices { get; set; } = true;
+
     // --- Prisoner Recruitment ---
 
     [SettingPropertyGroup("World/Prisoner Recruitment", GroupOrder = 39)]

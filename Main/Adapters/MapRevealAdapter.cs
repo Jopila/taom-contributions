@@ -35,18 +35,54 @@ public sealed class MapRevealAdapter : IMapRevealAdapter
         Track(kingdom.Settlements);
     }
 
-    private static void Track(IEnumerable<Settlement> settlements)
+    public IReadOnlyList<RevealCandidate> FortificationsAround(string settlementId)
     {
+        var found = new List<RevealCandidate>();
+        var origin = string.IsNullOrEmpty(settlementId) ? null : Settlement.Find(settlementId);
+        var tracker = Campaign.Current?.VisualTrackerManager;
+        if (origin == null || tracker == null)
+            return found;
+
+        var here = origin.GetPosition2D;
+        foreach (var fief in Town.AllFiefs)
+        {
+            var settlement = fief.Settlement;
+            if (settlement == origin)
+                continue;
+            found.Add(new RevealCandidate(settlement.StringId, here.Distance(settlement.GetPosition2D), tracker.CheckTracked(settlement)));
+        }
+        return found;
+    }
+
+    public int Track(IReadOnlyList<string> settlementIds)
+    {
+        var settlements = new List<Settlement>(settlementIds.Count);
+        foreach (var id in settlementIds)
+        {
+            var settlement = string.IsNullOrEmpty(id) ? null : Settlement.Find(id);
+            if (settlement != null)
+                settlements.Add(settlement);
+        }
+        return Track(settlements);
+    }
+
+    private static int Track(IEnumerable<Settlement> settlements)
+    {
+        var marked = 0;
         var tracker = Campaign.Current?.VisualTrackerManager;
         if (tracker == null)
-            return;
+            return marked;
         foreach (var settlement in settlements)
         {
             // A tracked nameplate is drawn every map frame, outside the vanilla distance cull and the Nameplate Cull
             // patch, so only towns and castles are marked; villages stay unmarked.
             if (settlement.IsFortification && !tracker.CheckTracked(settlement))
+            {
                 tracker.RegisterObject(settlement);
+                marked++;
+            }
         }
+        return marked;
     }
 
     private static void MarkKnown(IEnumerable<Hero> heroes)

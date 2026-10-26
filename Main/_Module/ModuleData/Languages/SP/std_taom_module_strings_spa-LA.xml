@@ -6823,6 +6823,42 @@
     <string id="taom_ency_age_elder" text="Elder" />
 
     <string id="taom_ency_age_venerable" text="Venerable" />
+    <string id="taom_ns_screen_header" text="Give Men" />
+
+    <string id="taom_ns_gift_notice" text="{SETTLEMENT} takes in the {COUNT} {?IS_PLURAL}people{?}person{\?} you gave." />
+
+
+    <string id="taom_ns_roguery_notice" text="Dealing in prisoners teaches you something of the trade (+{XP} {SKILL_NAME} experience)." />
+
+    <string id="taom_ns_introduced_notice" text="You are introduced to {COUNT} more {?IS_PLURAL}notables{?}notable{\?} here." />
+
+    <string id="taom_ns_holds_notice" text="{COUNT} {?IS_PLURAL}holds{?}hold{\?} marked on your map." />
+
+    <string id="taom_ns_gift_cap" text="They can take in only so many at once." />
+
+    <string id="taom_ns_gift_no_talk" text="You cannot talk to anyone while giving men." />
+
+    <string id="taom_ns_gift" text="I have men to spare for your people." />
+
+    <string id="taom_ns_gift_reply" text="That is a generous thought. Bring them forward and let us see them." />
+
+    <string id="taom_ns_introduce_done" text="Gladly. Come, and I will name you to them." />
+
+    <string id="taom_ns_introduce_failed" text="That cannot be done just now." />
+
+    <string id="taom_ns_reveal_done" text="Mark these well. You will find them as I say." />
+
+    <string id="taom_ns_reveal_war" text="We are at war with your realm. I will tell you nothing of our roads." />
+
+    <string id="taom_ns_reveal_cold" text="I do not know you well enough to speak of such things." />
+
+    <string id="taom_ns_reveal_nothing" text="I have nothing more to tell you of the holds around here." />
+
+    <string id="taom_ns_reveal_failed" text="That cannot be done just now." />
+
+    <string id="taom_ns_introduce" text="Introduce me to the other {?IS_PLURAL}notables{?}notable{\?} here ({PRICE}{GOLD_ICON})." />
+
+    <string id="taom_ns_reveal" text="Point me to the holds near here ({PRICE}{GOLD_ICON})." />
 
   </strings>
 

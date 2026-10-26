@@ -84,5 +84,6 @@ internal static class FeatureModules
         new Features.KingsMuster.KingsMusterModule(),
         new Features.FieldCamp.Activities.CampActivitiesModule(),
         new Features.Encyclopedia.EncyclopediaFiltersModule(),
+        new Features.NotableServices.NotableServicesModule(),
     };
 }

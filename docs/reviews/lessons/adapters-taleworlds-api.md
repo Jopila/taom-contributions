@@ -1510,3 +1510,22 @@ encyclopedia characters" setting (on by default) masked the leak in normal play.
 - **Prevent:** before a feature reads a hero fact the player sees (age, traits, relations, wealth), find where vanilla
   displays it and copy its visibility check into the new reader; test with a hero the player does not know.
 - **Source:** [rca-encyclopedia-filters-2026-10-26.md](../rca-encyclopedia-filters-2026-10-26.md) finding 1.
+### A party screen's mode decides what it lists: TroopsManage hides every prisoner (Notable Services, #899, 2026-10-26)
+The Give Men screen moved troops and prisoners but opened in `PartyScreenMode.TroopsManage`, copied from a troops-only
+gift. `PartyVM` sets `ArePrisonersRelevantOnCurrentMode` false for TroopsManage and QuestTroopManage (`PartyVM.cs:2059`),
+and the prefab hides both prisoner panels; only the D hotkey still moved prisoners, unseen. Half the feature was
+unreachable while every service test passed.
+- **Why missed:** the mode was copied with the screen, and the tests drive the done delegate directly.
+- **Prevent:** choose the mode from what the screen must list: TroopsManage for troops only, PrisonerManage for
+  prisoners only, Shared for both (it differs from TroopsManage only in that flag; Normal unlocks the map bar, Loot adds
+  leaving prompts). Pin the mode in a wiring test, and put "prisoners show on both sides" in the in-game checklist.
+- **Source:** `docs/reviews/rca-notable-services-2026-10-26.md` finding 1.
+
+### Show the relation change the grant returns, not the change you asked for (Notable Services, #899, 2026-10-26)
+The gift notice printed the requested gain. `ChangeRelationAction` passes every change through
+`DiplomacyModel.GetEffectiveRelationChange` (Charm, perks, Honor) and the relation caps at 100, so the change that lands
+differs; `IRelationGrantService.Grant` returns it.
+- **Why missed:** the test fake returned the ask, so asked and landed were always equal.
+- **Prevent:** a notice reads the value `Grant` returns, and a test fakes a landed value that differs from the ask.
+  Prefer vanilla's localized `str_your_relation_increased_with_notable` text (as Tokens of Esteem does) over a new key.
+- **Source:** `docs/reviews/rca-notable-services-2026-10-26.md` finding 3.
