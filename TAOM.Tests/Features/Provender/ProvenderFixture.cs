@@ -6,6 +6,7 @@ using TAOM.Adapters;
 using TAOM.Core.Logging;
 using TAOM.Features.CoopInterop;
 using TAOM.Features.Enlistment;
+using TAOM.Features.Execution;
 using TAOM.Features.Provender;
 using TAOM.Features.Provender.Models;
 
@@ -30,6 +31,8 @@ internal sealed class ProvenderFixture
     public ICoopSessionProvider Coop { get; } = Substitute.For<ICoopSessionProvider>();
     public IEnlistmentStateQuery Enlistment { get; } = Substitute.For<IEnlistmentStateQuery>();
     public IDedicatedServerProvider Server { get; } = Substitute.For<IDedicatedServerProvider>();
+    public IProvenderSaleAdapter Sale { get; } = Substitute.For<IProvenderSaleAdapter>();
+    public IAlignmentService Alignment { get; } = Substitute.For<IAlignmentService>();
     public IModLogger Logger { get; } = Substitute.For<IModLogger>();
 
     public ProvenderSettings Settings { get; set; } = new(true, 3, 2, 50, 5, 100, 10, 3);
@@ -65,6 +68,8 @@ internal sealed class ProvenderFixture
     }
 
     public ProvenderService Service() => new(World, SettingsProvider, Rations, Xp, Items, Coop, Enlistment, Server, Logger);
+
+    public ProvenderSaleService SaleService() => new(Sale, World, Service(), SettingsProvider, Alignment, Xp);
 
     public static RationCatalog Catalog() => new(new[]
     {
@@ -114,6 +119,7 @@ internal sealed class ProvenderFixture
         public Dictionary<string, int> RaceCounts = new() { ["human"] = 40 };
         public string? LeaderCulture = "gondor";
         public bool CampReady;
+        public bool InEncounter;
 
         public ProvenderPartyFacts Build() => new()
         {
@@ -133,6 +139,7 @@ internal sealed class ProvenderFixture
             RaceCounts = RaceCounts.ToDictionary(p => p.Key, p => p.Value),
             LeaderCulture = LeaderCulture,
             CampReady = CampReady,
+            InEncounter = InEncounter,
         };
     }
 

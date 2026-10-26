@@ -161,7 +161,8 @@ Wiring: `Main/IoC.cs`, `Main/SubModule.cs` (`Patch68_EconomyDiagnostics` in the 
   `InventoryLogic.DoneLogic` → `MerchantInventoryListener.SetGold` and land in `Other`. **A large
   `Other` is therefore not evidence of a workshop drain; check your own trading first.** The one
   player-side `SellItemsAction` caller is the Provender-master's food and ration purchases
-  (`ProvenderWorldAdapter.Buy`), which land in `Trade`. Note the
+  (`ProvenderWorldAdapter.Buy`), which land in `Trade`. Its remote sales (`ProvenderSaleAdapter`) go through the
+  trade screen and land in `Other`, like the player's own trade-screen sales. Note the
   asymmetry: a player *sale* is clamped by the zero-floor, but a player *purchase* credits the town
   uncapped and can mask a real drain in the NET line. If splitting is ever warranted the target is
   the public `InventoryLogic.DoneLogic`, never the private nested listener.

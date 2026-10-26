@@ -1212,3 +1212,11 @@ inherited the previous campaign's history, and fixed lord ids made the old entri
   load-without-data paths, not only the save round trip.
 - **Source:** `docs/reviews/rca-enlistment-past-service-2026-10-24.md` F1. A repeat of the #861 singleton-state
   lesson above.
+
+### A close step that moves goods after payment never drops a stack and always commits (Provender-master remote selling, 2026-10-24)
+After a trade screen has paid the player, one exception in the step that moves the sold goods into the town skipped the
+rest of the goods and the party-screen commit; Escape on the party screen underneath then restored goods already paid for.
+Move each stack on its own, run the commit in a `finally`, and treat a stack that cannot move as the payer's: handing paid goods back to the seller keeps the payment too, and a failure that repeats becomes a loop that sells the same goods again.
+- **Why missed:** the step was one try block around gold, goods and commit, written for the happy path.
+- **Prevent:** a step that runs after money has moved is written so that any one failure leaves goods with an owner.
+- **Source:** `docs/reviews/rca-provender-sale-2026-10-24.md` row 1.

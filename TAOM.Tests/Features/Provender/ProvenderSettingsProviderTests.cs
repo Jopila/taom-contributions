@@ -70,6 +70,20 @@ public class ProvenderSettingsProviderTests
     }
 
     [TestMethod]
+    public void From_TheSaleCuts_AreClamped_AndTheSmallestIsNeverReadAboveTheLargest()
+    {
+        var s = ProvenderSettingsProvider.From(new TaomSettings { ProvenderSaleMaxFeePercent = 20, ProvenderSaleMinFeePercent = 60 });
+        Assert.AreEqual(20, s.SaleMaxFeePercent);
+        Assert.AreEqual(20, s.SaleMinFeePercent);
+
+        var wild = ProvenderSettingsProvider.From(new TaomSettings { ProvenderSaleMaxFeePercent = 500, ProvenderSaleMinFeePercent = -5, ProvenderSaleTownCount = 99 });
+        Assert.AreEqual(90, wild.SaleMaxFeePercent);
+        Assert.AreEqual(0, wild.SaleMinFeePercent);
+        Assert.AreEqual(5, wild.SaleTownCount);
+        Assert.AreEqual(1, ProvenderSettingsProvider.From(new TaomSettings { ProvenderSaleTownCount = 0 }).SaleTownCount);
+    }
+
+    [TestMethod]
     public void From_NoSettings_KeepsTheDefaultWageDays()
     {
         Assert.AreEqual(ProvenderSettingsProvider.DefaultWageDaysKept, ProvenderSettingsProvider.From(null).WageDaysKept);
@@ -154,7 +168,7 @@ public class ProvenderSettingsProviderTests
         Assert.AreEqual(1, source.Split(new[] { "GroupOrder = 70" }, StringSplitOptions.None).Length - 1, "GroupOrder 70 is used by another group");
 
         var grouped = Properties();
-        Assert.AreEqual(8, grouped.Length, "enable, low food days, livestock kept, the two pay tiers' gold and morale, and the wage days kept");
+        Assert.AreEqual(11, grouped.Length, "enable, low food days, livestock kept, the two pay tiers' gold and morale, the wage days kept and the three remote-sale values");
         foreach (var property in grouped)
         {
             Assert.AreEqual("Provender-master", Read(Attribute(property, "SettingPropertyGroupAttribute"), "GroupName"), property.Name);
@@ -170,6 +184,9 @@ public class ProvenderSettingsProviderTests
     [DataRow(nameof(TaomSettings.ProvenderSmallPayMorale), ProvenderSettingsProvider.MinPayMorale, ProvenderSettingsProvider.MaxPayMorale)]
     [DataRow(nameof(TaomSettings.ProvenderLargePayMorale), ProvenderSettingsProvider.MinPayMorale, ProvenderSettingsProvider.MaxPayMorale)]
     [DataRow(nameof(TaomSettings.ProvenderWageDaysKept), ProvenderSettingsProvider.MinWageDaysKept, ProvenderSettingsProvider.MaxWageDaysKept)]
+    [DataRow(nameof(TaomSettings.ProvenderSaleMaxFeePercent), ProvenderSettingsProvider.MinSaleFeePercent, ProvenderSettingsProvider.MaxSaleFeePercent)]
+    [DataRow(nameof(TaomSettings.ProvenderSaleMinFeePercent), ProvenderSettingsProvider.MinSaleFeePercent, ProvenderSettingsProvider.MaxSaleFeePercent)]
+    [DataRow(nameof(TaomSettings.ProvenderSaleTownCount), ProvenderSettingsProvider.MinSaleTownCount, ProvenderSettingsProvider.MaxSaleTownCount)]
     public void TheSliderRange_IsTheProvidersClampRange(string property, int min, int max)
     {
         var attribute = ValueAttribute(typeof(TaomSettings).GetProperty(property)!);
@@ -189,6 +206,9 @@ public class ProvenderSettingsProviderTests
         StringAssert.Contains(Hint(nameof(TaomSettings.ProvenderLargePayGold)), $"Default: {ProvenderSettingsProvider.DefaultLargePayGold}.");
         StringAssert.Contains(Hint(nameof(TaomSettings.ProvenderLargePayMorale)), $"Default: {ProvenderSettingsProvider.DefaultLargePayMorale}.");
         StringAssert.Contains(Hint(nameof(TaomSettings.ProvenderWageDaysKept)), $"Default: {ProvenderSettingsProvider.DefaultWageDaysKept}.");
+        StringAssert.Contains(Hint(nameof(TaomSettings.ProvenderSaleMaxFeePercent)), $"Default: {ProvenderSettingsProvider.DefaultSaleMaxFeePercent}.");
+        StringAssert.Contains(Hint(nameof(TaomSettings.ProvenderSaleMinFeePercent)), $"Default: {ProvenderSettingsProvider.DefaultSaleMinFeePercent}.");
+        StringAssert.Contains(Hint(nameof(TaomSettings.ProvenderSaleTownCount)), $"Default: {ProvenderSettingsProvider.DefaultSaleTownCount}.");
     }
 
     [TestMethod]
@@ -197,6 +217,9 @@ public class ProvenderSettingsProviderTests
         StringAssert.Contains(Hint(nameof(TaomSettings.ProvenderKeepPerType)), $"Between {ProvenderSettingsProvider.MinKeepPerType} and {ProvenderSettingsProvider.MaxKeepPerType}.");
         StringAssert.Contains(Hint(nameof(TaomSettings.ProvenderLowFoodDays)), $"Between {ProvenderSettingsProvider.MinLowFoodDays} and {ProvenderSettingsProvider.MaxLowFoodDays}.");
         StringAssert.Contains(Hint(nameof(TaomSettings.ProvenderWageDaysKept)), $"Between {ProvenderSettingsProvider.MinWageDaysKept} and {ProvenderSettingsProvider.MaxWageDaysKept}.");
+        foreach (var name in new[] { nameof(TaomSettings.ProvenderSaleMaxFeePercent), nameof(TaomSettings.ProvenderSaleMinFeePercent) })
+            StringAssert.Contains(Hint(name), $"Between {ProvenderSettingsProvider.MinSaleFeePercent} and {ProvenderSettingsProvider.MaxSaleFeePercent}.");
+        StringAssert.Contains(Hint(nameof(TaomSettings.ProvenderSaleTownCount)), $"Between {ProvenderSettingsProvider.MinSaleTownCount} and {ProvenderSettingsProvider.MaxSaleTownCount}.");
         foreach (var name in new[] { nameof(TaomSettings.ProvenderSmallPayGold), nameof(TaomSettings.ProvenderLargePayGold) })
             StringAssert.Contains(Hint(name), $"Between {ProvenderSettingsProvider.MinPayGold} and {ProvenderSettingsProvider.MaxPayGold}.");
         foreach (var name in new[] { nameof(TaomSettings.ProvenderSmallPayMorale), nameof(TaomSettings.ProvenderLargePayMorale) })
@@ -220,6 +243,9 @@ public class ProvenderSettingsProviderTests
         Assert.AreEqual(100, ProvenderSettingsProvider.DefaultLargePayGold);
         Assert.AreEqual(10, ProvenderSettingsProvider.DefaultLargePayMorale);
         Assert.AreEqual(3, ProvenderSettingsProvider.DefaultWageDaysKept);
+        Assert.AreEqual(30, ProvenderSettingsProvider.DefaultSaleMaxFeePercent);
+        Assert.AreEqual(10, ProvenderSettingsProvider.DefaultSaleMinFeePercent);
+        Assert.AreEqual(3, ProvenderSettingsProvider.DefaultSaleTownCount);
         Assert.IsTrue(ProvenderSettingsProvider.DefaultEnabled);
     }
 }

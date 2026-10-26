@@ -2,7 +2,7 @@
 
 ## Overview
 
-The companion the player names Quartermaster in the clan screen becomes the party's Provender-master and takes standing orders in conversation. Two orders run on their own once given: buy food whenever the party enters or leaves a market, and slaughter livestock when the stores run low. A third choice lifts the host's spirits on the spot, with pay for every soldier or with drink (or meat) shared out, in a settlement or a ready [field camp](field-camp.md).
+The companion the player names Quartermaster in the clan screen becomes the party's Provender-master and takes standing orders in conversation. Two orders run on their own once given: buy food whenever the party enters or leaves a market, and slaughter livestock when the stores run low. A third choice lifts the host's spirits on the spot, with pay for every soldier or with drink (or meat) shared out, in a settlement or a ready [field camp](field-camp.md). A fourth sends loot to be sold at a nearby town for the Provender-master's cut ([Remote selling](#remote-selling), #909).
 
 ## Why This Exists
 
@@ -70,6 +70,20 @@ RationCatalogProvider          ProvenderSettingsProvider (clamps)
 
 There is no mead item in the game, so there is no mead ration. Beer and meat are also food, so a handout of either eats into the stores.
 
+### Remote selling
+
+"I have goods I need sold." (in a settlement or a ready field camp) lists the nearest towns that will buy, up to Remote Sale: Towns Offered (3). A town is offered only when it is not the one the party stands in, not at war with the player, not barring the player at its gate, not besieged, holds at least 5,000 gold, and is not of the opposing alignment (both sides Free or Evil and different; Neutral trades with anyone). The filter runs before the count, so an ineligible town never takes a slot. Towns are ranked by the engine's travel distance (`DistanceHelper.FindClosestDistanceFromMobilePartyToSettlement`).
+
+The cut is Remote Sale: Largest Cut (30) falling to Remote Sale: Smallest Cut (10) as the officer's Trade rises to 250, plus 5 percent for each town further down the list. Picking a town ends the talk and opens vanilla's trade screen titled with that town, with an empty merchant side: the player can only sell, and buy back what was sold there at the price it fetched. Every sale price is the town's price less the cut (never below 1). The screen sells into a roster of its own, so the value of what it has taken so far is added to the category's store value: the price falls with each sale exactly as it would in the town. The officer earns Trade XP of gold/100.
+
+The gold follows `InventoryLogic.DoneLogic` (v1.5.5): the player is paid from nothing (:552). Inside a settlement the engine then calls the screen's gold listener, which debits the chosen town (:585-587). Outside one the engine debits no one, so the feature debits the town by what the player gained; it refuses a camp with a live encounter, because then the engine would settle with that party (:589-600). The sold goods go into the town's own stock. In the Economy Diagnostics ledger this town gold records as `Other`, like the player's own trade-screen sales.
+
+A town the engine cannot reach (it comes back as a huge placeholder distance, 1e30 from the native path search) is never offered, nor is one at a distance of 0 or less. Picking a row opens the town that row named, re-checked on a fresh quote: if it has dropped out since, the officer says the market will not have you. In a ready camp with a live encounter the line is greyed: "Not while another party stands before us." The close step moves the goods one stack at a time; a stack that cannot be moved is logged as lost (the player was paid for it, so it is not handed back), and the party screen under the conversation is committed whatever happens. The screen stays in Trade mode on purpose: that locks the map bar's inventory exit, which would close it without the close step.
+
+Vanilla side effects that come with the trade screen: the player also earns vanilla's trade-profit XP on goods bought earlier, quests that count sales count these, and the game shows its own gold notice beside the Provender-master's message.
+
+**Known limitations:** the screen's town gold reads 0 until the first sale, because a screen title skips the line that fills it (`SPInventoryVM.UpdateLeftCharacter`). Vanilla's Transfer All caps a batch by that figure, so a first Transfer All moves every item whatever the town's purse; the gold still balances, because Done warns about a short purse from the real figure and the town pays at most what it holds. In a settlement-scene conversation, gear sold from a hero's equipment slots stays on the agent's visuals until the scene reloads.
+
 ### MCM: "Provender-master" (GroupOrder 70)
 
 | Setting | Default | Range |
@@ -80,6 +94,8 @@ There is no mead item in the game, so there is no mead ration. Beer and meat are
 | Small Pay: Gold Per Soldier / Morale Gained | 50 / 5 | 10 to 500 / 1 to 30 |
 | Large Pay: Gold Per Soldier / Morale Gained | 100 / 10 | 10 to 500 / 1 to 30, never read below the small tier |
 | Wage Days Kept | 3 | 0 to 30; the food order never spends this many days of wages (0 = the whole purse) |
+| Remote Sale: Largest Cut (%) / Smallest Cut (%) | 30 / 10 | 0 to 90; the smallest is never read above the largest |
+| Remote Sale: Towns Offered | 3 | 1 to 5 |
 
 ## Key Files
 
@@ -97,6 +113,9 @@ There is no mead item in the game, so there is no mead ration. Beer and meat are
 | `Main/Features/TaomSettings.cs` | The "Provender-master" MCM group |
 | `Main/Features/Provender/ProvenderModule.cs` | Registration (one line in `Main/Composition/FeatureModules.cs`) |
 | `Main/Adapters/IProvenderWorldAdapter.cs`, `ProvenderWorldAdapter.cs` | Party and market facts, purchases, slaughter, pay, morale, messages |
+| `Main/Features/Provender/ProvenderSaleService.cs`, `ProvenderSaleRules.cs`, `Models/ProvenderSaleFacts.cs` | Remote selling: the offer, the cut, the ranking and the town's gold change |
+| `Main/Features/Provender/Hooks/ProvenderSaleDialogLines.cs` | The sale lines on the hub |
+| `Main/Adapters/IProvenderSaleAdapter.cs`, `ProvenderSaleAdapter.cs` | The towns' facts and the sell-only trade screen (fee market data, gold listener, close step) |
 | `Main/_Module/ModuleData/provender/rations.json` | The rations |
 
 ## Dependencies
@@ -111,6 +130,7 @@ There is no mead item in the game, so there is no mead ration. Beer and meat are
 - `TAOM.Tests/Features/Provender/ProvenderRulesTests.cs`: the arithmetic, including zero, overflow and non-finite food burn
 - `ProvenderServiceFoodTests.cs`: buying and slaughter, one test per skip state
 - `ProvenderServiceMoraleTests.cs`: pay and drink, every closed state, short writes give no morale
+- `ProvenderSaleRulesTests.cs`, `ProvenderSaleServiceTests.cs`: the cut, the ranking, each ineligible town, the alignment rule, the closed states, the XP
 - `ProvenderConversationFlowTests.cs`, `RationCatalogProviderTests.cs` (its shipped-file test reads the installed `skins.xml`: `LiveInstall`), `ProvenderSettingsProviderTests.cs`
 - `ProvenderBehaviorTests.cs`, `ProvenderWorldAdapterTests.cs` (`RequiresGame`): the save round trip and the greyed reasons; no engine object kept in a singleton
 - The settings provider is a row in `CampaignHotPathSettingsProvidersTests`
@@ -125,9 +145,10 @@ There is no mead item in the game, so there is no mead ration. Beer and meat are
 
 ## Changelog
 
+- 2026-10-24: remote selling at the nearest eligible towns for a cut (#909).
 - 2026-10-23: first version: food and slaughter orders, pay and drink morale options (#908).
 
 ## GitHub Issue
 
-- **Issue:** #908, [Provender-master orders](https://github.com/haterade22/TAOM/issues/908)
+- **Issue:** #908, [Provender-master orders](https://github.com/haterade22/TAOM/issues/908); #909, remote selling
 - **Status:** Open

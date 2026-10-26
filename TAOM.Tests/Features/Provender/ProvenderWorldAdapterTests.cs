@@ -43,6 +43,8 @@ public class ProvenderWorldAdapterTests
     [DataRow(typeof(ProvenderService))]
     [DataRow(typeof(RationCatalogProvider))]
     [DataRow(typeof(ProvenderSettingsProvider))]
+    [DataRow(typeof(ProvenderSaleAdapter))]
+    [DataRow(typeof(ProvenderSaleService))]
     public void TheSingleton_HoldsNoEngineReferenceBetweenCalls(Type singleton)
     {
         if (!_gameLoaded) Assert.Inconclusive("Game assemblies not loaded: " + string.Join("; ", GameAssemblies.Diagnostics));

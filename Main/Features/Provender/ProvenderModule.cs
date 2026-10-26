@@ -12,15 +12,15 @@ namespace TAOM.Features.Provender;
 /// singleton is constructed once per process), so the module owns save data and fails closed. The shared pieces come from
 /// other registrations and are never registered here: <c>IHeroSkillXpAdapter</c>, <c>IPartyItemRosterAdapter</c> and
 /// <c>IEnlistmentStateQuery</c> (<c>EnlistmentIoC</c>), <c>ICampService</c> (<c>FieldCampIoC</c>), <c>ICoopSessionProvider</c>
-/// and <c>IDedicatedServerProvider</c> (<c>CoopInteropIoC</c>), and <c>IRaceManager</c>, <c>IPathService</c> and
-/// <c>IModLogger</c> (<c>IoC.cs</c>).
+/// and <c>IDedicatedServerProvider</c> (<c>CoopInteropIoC</c>), <c>IAlignmentService</c> (<c>ExecutionIoC</c>), and
+/// <c>IRaceManager</c>, <c>IPathService</c> and <c>IModLogger</c> (<c>IoC.cs</c>).
 /// </summary>
 internal sealed class ProvenderModule : TaomFeatureModule
 {
     private static readonly CampaignBehaviorDecl[] Behaviors =
     {
         CampaignBehaviorDecl.Of(r => new ProvenderBehavior(
-            r.Resolve<ProvenderService>(), r.Resolve<IProvenderWorldAdapter>())),
+            r.Resolve<ProvenderService>(), r.Resolve<ProvenderSaleService>(), r.Resolve<IProvenderWorldAdapter>())),
     };
 
     public override string Id => "Provender";
@@ -34,6 +34,8 @@ internal sealed class ProvenderModule : TaomFeatureModule
         registrator.Register<IProvenderSettingsProvider, ProvenderSettingsProvider>(Reuse.Singleton);
         registrator.Register<IRationCatalogProvider, RationCatalogProvider>(Reuse.Singleton);
         registrator.Register<ProvenderService>(Reuse.Singleton);
+        registrator.Register<IProvenderSaleAdapter, ProvenderSaleAdapter>(Reuse.Singleton);
+        registrator.Register<ProvenderSaleService>(Reuse.Singleton);
     }
 
     public override IReadOnlyList<CampaignBehaviorDecl> CampaignBehaviors => Behaviors;

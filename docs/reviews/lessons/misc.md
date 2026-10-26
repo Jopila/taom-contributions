@@ -678,3 +678,10 @@ bundle players upload.
   executes and the data it publishes. Read only TAOM's own objects there; anything else is snapshotted on the main
   thread at a normal moment, filtered, or left out.
 - **Source:** [rca-982-collector-instance-2026-10-23.md](../rca-982-collector-instance-2026-10-23.md) findings 1 and 2.
+
+### Carry the id the player saw, not an index into a recomputed list (Provender-master remote selling, 2026-10-24)
+A dialog row showed the n-th town of one quote, and the click re-quoted and opened the n-th town of the new list, which can
+differ if anything changed in between. Pass the chosen object's id through, and re-check that id on the fresh data.
+- **Why missed:** the safety re-check on Open was added without carrying the player's choice into it.
+- **Prevent:** a re-validation step looks the choice up by its id; an index is only valid against the list it came from.
+- **Source:** `docs/reviews/rca-provender-sale-2026-10-24.md` row 2.

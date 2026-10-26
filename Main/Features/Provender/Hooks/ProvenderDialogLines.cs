@@ -17,7 +17,7 @@ namespace TAOM.Features.Provender.Hooks;
 internal static class ProvenderDialogLines
 {
     internal const string HubToken = "taom_provender_orders";
-    private const string GreetToken = "taom_provender_greet";
+    internal const string GreetToken = "taom_provender_greet";
     private const string AckToken = "taom_provender_ack";
     private const string MoraleToken = "taom_provender_morale";
     private const string MoraleAskToken = "taom_provender_morale_ask";
@@ -48,6 +48,7 @@ internal static class ProvenderDialogLines
         s.AddPlayerLine("taom_provender_morale", HubToken, MoraleAskToken,
             "{=taom_provender_morale}The host needs its spirits lifted.",
             null, null, Priority + 3);
+        ProvenderSaleDialogLines.Register(s, f, Priority + 2);
         s.AddPlayerLine("taom_provender_done", HubToken, "lord_pretalk",
             "{=taom_provender_done}That is all.",
             null, null, 1);
@@ -111,6 +112,8 @@ internal static class ProvenderDialogLines
         ProvenderBlock.NoGold => new TextObject("{=taom_provender_block_gold}You do not carry enough gold."),
         ProvenderBlock.NoStock => new TextObject("{=taom_provender_block_stock}The stores and the market here do not hold enough."),
         ProvenderBlock.NoMarket => new TextObject("{=taom_provender_block_market}The stores do not hold enough, and there is no market here to buy the rest."),
+        ProvenderBlock.NoBuyer => new TextObject("{=taom_provender_block_buyer}No town within reach will buy from us."),
+        ProvenderBlock.InEncounter => new TextObject("{=taom_provender_block_encounter}Not while another party stands before us."),
         _ => new TextObject("{=taom_provender_block_closed}This cannot be done now."),
     };
 

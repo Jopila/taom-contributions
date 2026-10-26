@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using TaleWorlds.CampaignSystem;
 using TaleWorlds.CampaignSystem.Actions;
 using TaleWorlds.CampaignSystem.ComponentInterfaces;
+using TaleWorlds.CampaignSystem.Encounters;
 using TaleWorlds.CampaignSystem.Extensions;
 using TaleWorlds.CampaignSystem.Party;
 using TaleWorlds.CampaignSystem.Roster;
@@ -96,6 +97,7 @@ public sealed class ProvenderWorldAdapter : IProvenderWorldAdapter
                 RaceCounts = ReadRaceCounts(main.MemberRoster),
                 LeaderCulture = player.Culture?.StringId,
                 CampReady = camp != null && camp.IsReady,
+                InEncounter = PlayerEncounter.Current != null || main.MapEvent != null,
             };
         }
         catch (Exception ex)
@@ -289,6 +291,7 @@ public sealed class ProvenderWorldAdapter : IProvenderWorldAdapter
                 ProvenderAnnouncement.BoughtFood => new TextObject("{=taom_provender_msg_food}Your Provender-master bought {COUNT} food for {GOLD} gold."),
                 ProvenderAnnouncement.Slaughtered => new TextObject("{=taom_provender_msg_slaughter}Your Provender-master slaughtered {COUNT} head of livestock for meat."),
                 ProvenderAnnouncement.PaidTroops => new TextObject("{=taom_provender_msg_paid}You paid your soldiers {GOLD} gold. Morale rises by {COUNT}."),
+                ProvenderAnnouncement.Sold => new TextObject("{=taom_provender_msg_sold}Your Provender-master sold {COUNT} of your goods for {GOLD} gold."),
                 _ => new TextObject("{=taom_provender_msg_drank}The host shares out {COUNT} of the stores. Spirits rise, but the camp falls into disorder."),
             };
             text.SetTextVariable("COUNT", count);
@@ -319,7 +322,7 @@ public sealed class ProvenderWorldAdapter : IProvenderWorldAdapter
     /// The player lacks full access: vanilla's own access model (the same call the gate menu makes), for a town or a village
     /// only, since any other settlement type asserts there.
     /// </summary>
-    private static bool RefusesPlayer(Settlement settlement)
+    internal static bool RefusesPlayer(Settlement settlement)
     {
         if (!settlement.IsTown && !settlement.IsVillage)
             return false;

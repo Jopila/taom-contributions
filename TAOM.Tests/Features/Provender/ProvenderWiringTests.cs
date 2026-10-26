@@ -10,6 +10,7 @@ using TAOM.Core.Infrastructure;
 using TAOM.Core.Logging;
 using TAOM.Features.CoopInterop;
 using TAOM.Features.Enlistment;
+using TAOM.Features.Execution;
 using TAOM.Features.FieldCamp;
 using TAOM.Features.Provender;
 using TAOM.Features.Provender.Hooks;
@@ -95,7 +96,7 @@ public class ProvenderWiringTests
     [TestMethod]
     public void EntryPoints_StayUnder150Lines()
     {
-        foreach (var file in new[] { "Hooks/ProvenderBehavior.cs", "Hooks/ProvenderDialogLines.cs" })
+        foreach (var file in new[] { "Hooks/ProvenderBehavior.cs", "Hooks/ProvenderDialogLines.cs", "Hooks/ProvenderSaleDialogLines.cs" })
         {
             var lines = RepoPaths.ReadSource(Root + file).Split('\n').Length;
             Assert.IsTrue(lines < 150, $"{file} is {lines} lines (ADR-002)");
@@ -158,14 +159,41 @@ public class ProvenderWiringTests
     }
 
     [TestMethod]
+    public void SaleLines_JoinTheHub_EndTheTalk_AndGiveEachTownRowItsOwnVariable()
+    {
+        var src = RepoPaths.ReadSource(Root + "Hooks/ProvenderSaleDialogLines.cs", stripComments: true);
+
+        StringAssert.Contains(src, "ProvenderDialogLines.HubToken");
+        StringAssert.Contains(src, "\"close_window\"");
+        StringAssert.Contains(src, "var variable = \"PROV_SELL_ROW_\" + rank;");
+        StringAssert.Contains(src, "rank < ProvenderSettingsProvider.MaxSaleTownCount");
+        var ids = Regex.Matches(src, @"Add(?:Player|Dialog)Line\(\s*""([^""]+)""").Cast<Match>().Select(m => m.Groups[1].Value).ToList();
+        Assert.IsTrue(ids.All(id => id.StartsWith("taom_provender_sell")), string.Join(", ", ids));
+        StringAssert.Contains(RepoPaths.ReadSource(Root + "Hooks/ProvenderDialogLines.cs", stripComments: true), "ProvenderSaleDialogLines.Register(s, f,");
+    }
+
+    [TestMethod]
+    public void TheSaleScreen_IsTradeMode_AndTheCloseStepAlwaysCommitsThePartyScreen()
+    {
+        // Trade mode locks the map bar's inventory exit, which would run DoneLogic without the close step; the commit in a
+        // finally keeps a failed close from leaving a party-screen snapshot that brings the sold goods back on Escape.
+        var src = RepoPaths.ReadSource("Main/Adapters/ProvenderSaleAdapter.cs", stripComments: true);
+
+        StringAssert.Contains(src, "state.InventoryMode = InventoryScreenHelper.InventoryMode.Trade;");
+        Assert.IsTrue(Regex.IsMatch(src, @"finally\s*\{\s*PartyScreenCommit\.CommitIfMainParty\(_logger, ""Provender""\);\s*\}"),
+            "the party-screen commit runs in a finally");
+    }
+
+    [TestMethod]
     public void EveryPlayerFacingKey_IsAProvenderKey()
     {
         foreach (var file in new[] { Root + "Hooks/ProvenderDialogLines.cs", Root + "Hooks/ProvenderBehavior.cs", Root + "ProvenderService.cs",
-                     Root + "ProvenderConversationFlow.cs", "Main/Adapters/ProvenderWorldAdapter.cs" })
+                     Root + "ProvenderConversationFlow.cs", "Main/Adapters/ProvenderWorldAdapter.cs", Root + "Hooks/ProvenderSaleDialogLines.cs",
+                     Root + "ProvenderSaleService.cs", "Main/Adapters/ProvenderSaleAdapter.cs" })
         {
             var src = RepoPaths.ReadSource(file, stripComments: true);
             foreach (Match key in Regex.Matches(src, @"\{=([A-Za-z0-9_!]+)\}"))
-                Assert.IsTrue(key.Groups[1].Value.StartsWith("taom_provender_"), file + ": " + key.Value);
+                Assert.IsTrue(key.Groups[1].Value == "!" || key.Groups[1].Value.StartsWith("taom_provender_"), file + ": " + key.Value);
         }
     }
 
@@ -193,6 +221,7 @@ public class ProvenderWiringTests
         container.RegisterInstance(Substitute.For<ICoopSessionProvider>());
         container.RegisterInstance(Substitute.For<IEnlistmentStateQuery>());
         container.RegisterInstance(Substitute.For<IDedicatedServerProvider>());
+        container.RegisterInstance(Substitute.For<IAlignmentService>());
         var module = new ProvenderModule();
 
         module.RegisterServices(container);

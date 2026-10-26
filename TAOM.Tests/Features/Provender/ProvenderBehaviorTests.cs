@@ -20,7 +20,7 @@ public class ProvenderBehaviorTests
     [TestInitialize]
     public void Setup() => _f = new ProvenderFixture();
 
-    private ProvenderBehavior Build() => new(_f.Service(), _f.World);
+    private ProvenderBehavior Build() => new(_f.Service(), _f.SaleService(), _f.World);
 
     [DataTestMethod]
     [DataRow(false, false)]
@@ -74,7 +74,11 @@ public class ProvenderBehaviorTests
         Assert.IsNull(ProvenderDialogLines.BlockExplanation(ProvenderBlock.None));
 
         var seen = new System.Collections.Generic.HashSet<string>();
-        foreach (var block in new[] { ProvenderBlock.NotInPlace, ProvenderBlock.NoTroops, ProvenderBlock.NoGold, ProvenderBlock.NoStock, ProvenderBlock.NoMarket })
+        foreach (var block in new[]
+                 {
+                     ProvenderBlock.NotInPlace, ProvenderBlock.NoTroops, ProvenderBlock.NoGold, ProvenderBlock.NoStock, ProvenderBlock.NoMarket,
+                     ProvenderBlock.NoBuyer, ProvenderBlock.InEncounter,
+                 })
         {
             var text = ProvenderDialogLines.BlockExplanation(block)!.ToString();
             Assert.IsFalse(string.IsNullOrEmpty(text), block.ToString());

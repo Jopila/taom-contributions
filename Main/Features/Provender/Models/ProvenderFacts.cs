@@ -74,6 +74,9 @@ public sealed class ProvenderPartyFacts
     /// <summary>The player's field camp stands and its raise is finished.</summary>
     public bool CampReady { get; init; }
 
+    /// <summary>A player encounter or a map event is live: a trade screen would settle its gold with that party.</summary>
+    public bool InEncounter { get; init; }
+
     public bool OfficerIsValid => HasParty && !string.IsNullOrEmpty(OfficerId) && !OfficerIsPlayer && OfficerInParty;
 
     public bool InPlace => !string.IsNullOrEmpty(SettlementId) || CampReady;
@@ -125,6 +128,8 @@ public enum ProvenderBlock
     NoRation,
     NoStock,
     NoMarket,
+    NoBuyer,
+    InEncounter,
 }
 
 /// <summary>The three ways the player can lift the host's spirits.</summary>
@@ -164,4 +169,5 @@ public enum ProvenderAnnouncement
     Slaughtered,
     PaidTroops,
     Drank,
+    Sold,
 }

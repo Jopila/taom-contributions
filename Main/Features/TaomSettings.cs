@@ -2649,7 +2649,7 @@ public class TaomSettings : AttributeGlobalSettings<TaomSettings>
 
     [SettingPropertyGroup("Provender-master", GroupOrder = 70)]
     [SettingPropertyBool("Enable Provender-master", Order = 0, RequireRestart = false,
-        HintText = "Lets the hero you name Quartermaster (never you, and only while that hero is in your party) take standing orders in conversation: buy food at markets, slaughter livestock when the stores run low, and lift the host's spirits with pay or drink. Orders stand down for an enlisted player and for a co-op client. Default: on.")]
+        HintText = "Lets the hero you name Quartermaster (never you, and only while that hero is in your party) take standing orders in conversation: buy food at markets, slaughter livestock when the stores run low, lift the host's spirits with pay or drink, and sell your goods at a nearby town for a cut. Orders stand down for an enlisted player and for a co-op client. Default: on.")]
     public bool ProvenderEnabled { get; set; } = TAOM.Features.Provender.ProvenderSettingsProvider.DefaultEnabled;
 
     [SettingPropertyGroup("Provender-master")]
@@ -2686,6 +2686,21 @@ public class TaomSettings : AttributeGlobalSettings<TaomSettings>
     [SettingPropertyInteger("Wage Days Kept", TAOM.Features.Provender.ProvenderSettingsProvider.MinWageDaysKept, TAOM.Features.Provender.ProvenderSettingsProvider.MaxWageDaysKept, Order = 7, RequireRestart = false,
         HintText = "The food order never spends the gold your party needs for this many days of wages, so buying food cannot leave your troops unpaid. 0 lets it spend the whole purse. Morale purchases are not limited: they show their price. Between 0 and 30. Default: 3.")]
     public int ProvenderWageDaysKept { get; set; } = TAOM.Features.Provender.ProvenderSettingsProvider.DefaultWageDaysKept;
+
+    [SettingPropertyGroup("Provender-master")]
+    [SettingPropertyInteger("Remote Sale: Largest Cut (%)", TAOM.Features.Provender.ProvenderSettingsProvider.MinSaleFeePercent, TAOM.Features.Provender.ProvenderSettingsProvider.MaxSaleFeePercent, Order = 8, RequireRestart = false,
+        HintText = "The Provender-master's cut, in percent of a town's price, when you send goods to be sold there and the Provender-master has no Trade skill. It falls to the smallest cut at Trade 250, and each town further down the list adds 5. Between 0 and 90. Default: 30.")]
+    public int ProvenderSaleMaxFeePercent { get; set; } = TAOM.Features.Provender.ProvenderSettingsProvider.DefaultSaleMaxFeePercent;
+
+    [SettingPropertyGroup("Provender-master")]
+    [SettingPropertyInteger("Remote Sale: Smallest Cut (%)", TAOM.Features.Provender.ProvenderSettingsProvider.MinSaleFeePercent, TAOM.Features.Provender.ProvenderSettingsProvider.MaxSaleFeePercent, Order = 9, RequireRestart = false,
+        HintText = "The Provender-master's cut at Trade 250. Never read above the largest cut. Between 0 and 90. Default: 10.")]
+    public int ProvenderSaleMinFeePercent { get; set; } = TAOM.Features.Provender.ProvenderSettingsProvider.DefaultSaleMinFeePercent;
+
+    [SettingPropertyGroup("Provender-master")]
+    [SettingPropertyInteger("Remote Sale: Towns Offered", TAOM.Features.Provender.ProvenderSettingsProvider.MinSaleTownCount, TAOM.Features.Provender.ProvenderSettingsProvider.MaxSaleTownCount, Order = 10, RequireRestart = false,
+        HintText = "How many of the nearest towns that will buy from you the Provender-master offers. A town at war with you, of the opposing alignment, besieged, barring you or short of gold is never offered. Between 1 and 5. Default: 3.")]
+    public int ProvenderSaleTownCount { get; set; } = TAOM.Features.Provender.ProvenderSettingsProvider.DefaultSaleTownCount;
 
     // --- Bond of Hire (docs/features/bond-of-hire.md, #867) ---
     //

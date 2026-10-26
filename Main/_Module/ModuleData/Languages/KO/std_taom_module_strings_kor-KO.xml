@@ -6672,6 +6672,24 @@
 
     <string id="taom_boh_term_unknown" text="It is not known how long these mercenaries will serve" />
 
+    <string id="taom_provender_msg_sold" text="Your Provender-master sold {COUNT} of your goods for {GOLD} gold." />
+
+    <string id="taom_provender_block_buyer" text="No town within reach will buy from us." />
+
+    <string id="taom_provender_sell" text="I have goods I need sold." />
+
+    <string id="taom_provender_sell_ask" text="I know the markets within reach. The farther the town, the bigger my cut." />
+
+    <string id="taom_provender_sell_back" text="Not now." />
+
+    <string id="taom_provender_sell_go" text="Show me what you want sold, and I will take it to market." />
+
+    <string id="taom_provender_sell_failed" text="That market will not have us just now." />
+
+    <string id="taom_provender_sell_row" text="{TOWN}, for a cut of {FEE} percent." />
+
+    <string id="taom_provender_block_encounter" text="Not while another party stands before us." />
+
   </strings>
 
 </base>

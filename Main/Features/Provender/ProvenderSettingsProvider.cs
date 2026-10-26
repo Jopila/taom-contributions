@@ -24,6 +24,13 @@ public sealed class ProvenderSettingsProvider : IProvenderSettingsProvider
     public const int DefaultWageDaysKept = 3;
     public const int MinWageDaysKept = 0;
     public const int MaxWageDaysKept = 30;
+    public const int DefaultSaleMaxFeePercent = 30;
+    public const int DefaultSaleMinFeePercent = 10;
+    public const int MinSaleFeePercent = 0;
+    public const int MaxSaleFeePercent = 90;
+    public const int DefaultSaleTownCount = 3;
+    public const int MinSaleTownCount = 1;
+    public const int MaxSaleTownCount = 5;
 
     private TaomSettings? _settings;
 
@@ -44,6 +51,7 @@ public sealed class ProvenderSettingsProvider : IProvenderSettingsProvider
         var smallMorale = SettingClamp.Clamp(s?.ProvenderSmallPayMorale, DefaultSmallPayMorale, MinPayMorale, MaxPayMorale);
         var largeGold = SettingClamp.Clamp(s?.ProvenderLargePayGold, DefaultLargePayGold, MinPayGold, MaxPayGold);
         var largeMorale = SettingClamp.Clamp(s?.ProvenderLargePayMorale, DefaultLargePayMorale, MinPayMorale, MaxPayMorale);
+        var saleMax = SettingClamp.Clamp(s?.ProvenderSaleMaxFeePercent, DefaultSaleMaxFeePercent, MinSaleFeePercent, MaxSaleFeePercent);
         return new ProvenderSettings(
             s?.ProvenderEnabled ?? DefaultEnabled,
             SettingClamp.Clamp(s?.ProvenderLowFoodDays, DefaultLowFoodDays, MinLowFoodDays, MaxLowFoodDays),
@@ -52,6 +60,9 @@ public sealed class ProvenderSettingsProvider : IProvenderSettingsProvider
             smallMorale,
             Math.Max(largeGold, smallGold),
             Math.Max(largeMorale, smallMorale),
-            SettingClamp.Clamp(s?.ProvenderWageDaysKept, DefaultWageDaysKept, MinWageDaysKept, MaxWageDaysKept));
+            SettingClamp.Clamp(s?.ProvenderWageDaysKept, DefaultWageDaysKept, MinWageDaysKept, MaxWageDaysKept),
+            saleMax,
+            Math.Min(SettingClamp.Clamp(s?.ProvenderSaleMinFeePercent, DefaultSaleMinFeePercent, MinSaleFeePercent, MaxSaleFeePercent), saleMax),
+            SettingClamp.Clamp(s?.ProvenderSaleTownCount, DefaultSaleTownCount, MinSaleTownCount, MaxSaleTownCount));
     }
 }

@@ -3889,6 +3889,7 @@
 	<string id="taom_provender_msg_slaughter" text="{=taom_provender_msg_slaughter}Your Provender-master slaughtered {COUNT} head of livestock for meat." />
 	<string id="taom_provender_msg_paid" text="{=taom_provender_msg_paid}You paid your soldiers {GOLD} gold. Morale rises by {COUNT}." />
 	<string id="taom_provender_msg_drank" text="{=taom_provender_msg_drank}The host shares out {COUNT} of the stores. Spirits rise, but the camp falls into disorder." />
+	<string id="taom_provender_msg_sold" text="{=taom_provender_msg_sold}Your Provender-master sold {COUNT} of your goods for {GOLD} gold." />
 	<!-- Provender -->
 	<string id="taom_provender_entry" text="{=taom_provender_entry}I have orders for you, Provender-master." />
 	<string id="taom_provender_greet" text="{=taom_provender_greet}The stores are in my keeping. What would you have me do?" />
@@ -3926,4 +3927,12 @@
 	<string id="taom_boh_term_days" text="{=taom_boh_term_days}These mercenaries agreed to serve for at least {DAYS} more {?IS_PLURAL}days{?}day{\?}" />
 	<string id="taom_boh_term_unknown" text="{=taom_boh_term_unknown}It is not known how long these mercenaries will serve" />
 
+	<string id="taom_provender_block_buyer" text="{=taom_provender_block_buyer}No town within reach will buy from us." />
+	<string id="taom_provender_block_encounter" text="{=taom_provender_block_encounter}Not while another party stands before us." />
+	<string id="taom_provender_sell" text="{=taom_provender_sell}I have goods I need sold." />
+	<string id="taom_provender_sell_ask" text="{=taom_provender_sell_ask}I know the markets within reach. The farther the town, the bigger my cut." />
+	<string id="taom_provender_sell_back" text="{=taom_provender_sell_back}Not now." />
+	<string id="taom_provender_sell_go" text="{=taom_provender_sell_go}Show me what you want sold, and I will take it to market." />
+	<string id="taom_provender_sell_failed" text="{=taom_provender_sell_failed}That market will not have us just now." />
+	<string id="taom_provender_sell_row" text="{=taom_provender_sell_row}{TOWN}, for a cut of {FEE} percent." />
 </strings>

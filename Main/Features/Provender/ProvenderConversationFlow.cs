@@ -13,11 +13,14 @@ namespace TAOM.Features.Provender;
 public sealed class ProvenderConversationFlow
 {
     private readonly ProvenderService _service;
+    private readonly ProvenderSaleService _sale;
     private readonly IProvenderWorldAdapter _world;
+    private SaleQuote _saleQuote = SaleQuote.Closed(ProvenderBlock.NoBuyer);
 
-    public ProvenderConversationFlow(ProvenderService service, IProvenderWorldAdapter world)
+    public ProvenderConversationFlow(ProvenderService service, ProvenderSaleService sale, IProvenderWorldAdapter world)
     {
         _service = service;
+        _sale = sale;
         _world = world;
     }
 
@@ -58,4 +61,20 @@ public sealed class ProvenderConversationFlow
     public string ItemName(string itemId) => string.IsNullOrEmpty(itemId) ? string.Empty : _world.ItemName(itemId);
 
     public void Buy(MoraleOption option) => LastBuyLifted = _service.Buy(option);
+
+    /// <summary>Whether the last chosen town's sale screen will open, for the officer's answer.</summary>
+    public bool LastSaleOpened { get; private set; }
+
+    /// <summary>The towns on offer now, or why selling is closed: the hub line's greyed reason.</summary>
+    public SaleQuote QuoteSale() => _sale.Quote();
+
+    /// <summary>Takes the quote once, when the player asks to sell, so the town rows that follow read one list.</summary>
+    public void PrepareSale() => _saleQuote = _sale.Quote();
+
+    /// <summary>The offer a town row shows, or null when the list is shorter.</summary>
+    public SaleOffer? SaleOfferAt(int rank) =>
+        rank >= 0 && rank < _saleQuote.Offers.Count ? _saleQuote.Offers[rank] : null;
+
+    /// <summary>Opens the sale screen for the town the row showed; the service re-checks every gate and that town first.</summary>
+    public void Sell(int rank) => LastSaleOpened = SaleOfferAt(rank) is { } offer && _sale.Open(offer.TownId);
 }

@@ -1480,3 +1480,12 @@ troop and inventory exchange, companion recall, a gift line).
   every reachable dialog consequence for the same writes. Gate the feature's lines on one shared "remote
   conversation" flag rather than one check per feature.
 - **Source:** `docs/reviews/rca-messenger-session-rules-2026-10-23.md` findings 1 and 4.
+
+### A substitute for an engine object keeps the engine object's side effects (Provender-master remote selling, 2026-10-24)
+A trade screen built over a roster of its own lost what the town's roster did in vanilla's screen: every sale raises the
+category's store value (`RosterUpdatedEvent` to `TownMarketData.OnTownInventoryUpdated`) and lowers the next price, so a
+player could sell hundreds of items at full price. The fix adds the session's sold value to the store value in the market
+data. Before replacing an engine object (a roster, a listener, a close path), list what it does besides its main job.
+- **Why missed:** the plan copied a reference shape (an empty merchant roster) without asking what vanilla's roster did.
+- **Prevent:** for each substituted engine object, the plan names its events and side effects and how each is kept.
+- **Source:** `docs/reviews/rca-provender-sale-2026-10-24.md` row S1.

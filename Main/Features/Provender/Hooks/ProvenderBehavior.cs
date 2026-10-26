@@ -19,10 +19,10 @@ public sealed class ProvenderBehavior : CampaignBehaviorBase
     private readonly ProvenderService _service;
     private readonly ProvenderConversationFlow _flow;
 
-    public ProvenderBehavior(ProvenderService service, IProvenderWorldAdapter world)
+    public ProvenderBehavior(ProvenderService service, ProvenderSaleService sale, IProvenderWorldAdapter world)
     {
         _service = service;
-        _flow = new ProvenderConversationFlow(service, world);
+        _flow = new ProvenderConversationFlow(service, sale, world);
     }
 
     internal ProvenderOrders Orders => _flow.Orders;
