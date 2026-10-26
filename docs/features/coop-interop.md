@@ -808,6 +808,9 @@ Owed by the #966 work (Batch B, co-op player attribution), none of it run in gam
 13. A guest sees no camp button and no enlist offer; a player host still sees both.
 14. A remote player's troops do not desert for alignment and are not shed for weight across a
     day tick, while an AI lord of the same kingdom still loses opposed troops.
+15. A two-client test on a save that restores races: the steps are in the co-op paragraph of
+    [hero-race.md](hero-race.md) (`Restored race for N heroes`, zero
+    `Client updated managed BasicCharacterObject.Race` lines, restored living and dead heroes match on both clients).
 
 ---
 

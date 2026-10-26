@@ -71,9 +71,8 @@ public class RacePersistenceBehaviorTests
     [TestMethod]
     public void OnSessionLaunched_RestoresThenCaptures()
     {
-        // A co-op host's save transfer to a joining client never raises OnBeforeSaveEvent, so without
-        // a capture here the race map is empty when the world is serialized and the joiner receives
-        // no race data at all.
+        // A co-op transfer save raises OnBeforeSaveEvent today (SaveInterface.cs:109); this capture is a
+        // backup for a transfer path that skips it, where the race map would be empty when serialized.
         _sut.OnSessionLaunched();
 
         Received.InOrder(() =>
