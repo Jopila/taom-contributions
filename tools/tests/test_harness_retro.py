@@ -505,6 +505,115 @@ class OutputSizeTests(Base):
         self.assertEqual(names, ["Read", "Bash", "(other)"])
 
 
+class TokenTests(Base):
+    def usage_rec(self, uuid, request, inp=1, out=1, read=0, create=0, session="s1", stop=None, **extra):
+        u = {"input_tokens": inp, "output_tokens": out, "cache_read_input_tokens": read,
+             "cache_creation_input_tokens": create}
+        return rec("assistant", session, uuid=uuid, requestId=request,
+                   message={"id": "msg_" + request, "usage": u, "content": [], "stop_reason": stop}, **extra)
+
+    def skill_call(self, request="r0"):
+        return rec("assistant", uuid="u_" + request, requestId=request, message={
+            "id": "msg_" + request, "usage": {"output_tokens": 2}, "stop_reason": "tool_use",
+            "content": [{"type": "tool_use", "id": "t1", "name": "Skill", "input": {"skill": "verify"}}]})
+
+    def _skill_then_human(self, turn):
+        self.env.write("a.jsonl", [self.skill_call(), tool_result("t1", "ok", error=False),
+                                   self.usage_rec("u1", "r1", out=30, stop="end_turn"), turn,
+                                   self.usage_rec("u2", "r2", out=500, stop="end_turn")])
+        self.env.run()
+        return {r["name"]: r["total"] for r in self.tokens()["skills"]}
+
+    def test_human_message_ends_skill_attribution(self):
+        self.assertEqual(self._skill_then_human(human("now do something else")), {"verify": 31})
+
+    def test_queued_command_attachment_ends_skill_attribution(self):
+        turn = attachment(type="queued_command", humanTurn=True, prompt="typed while busy")
+        self.assertEqual(self._skill_then_human(turn), {"verify": 31})
+
+    def test_output_partial_counts_requests_without_a_final_stop_reason(self):
+        self.env.write("a.jsonl", [self.usage_rec("u1", "r1", inp=10, out=5, read=100),
+                                   self.usage_rec("u2", "r1", inp=10, out=9, read=100)])
+        self.env.run()
+        t = self.tokens()
+        self.assertEqual((t["output_partial"], t["requests"], t["input"], t["cache_read"]), (1, 1, 10, 100))
+        self.assertIn("Output is a floor: 1 requests (100%) were written mid-stream with no final count.",
+                      self.env.report())
+
+    def test_request_with_a_final_record_is_not_partial(self):
+        self.env.write("a.jsonl", [self.usage_rec("u1", "r1", out=5),
+                                   self.usage_rec("u2", "r1", out=40, stop="tool_use")])
+        self.env.run()
+        self.assertEqual(self.tokens()["output_partial"], 0)
+        self.assertNotIn("Output is a floor", self.env.report())
+
+    def test_final_stop_reason_on_a_non_max_record_is_not_partial(self):
+        self.env.write("a.jsonl", [self.usage_rec("u1", "r1", out=40),
+                                   self.usage_rec("u2", "r1", out=5, stop="end_turn")])
+        self.env.run()
+        self.assertEqual(self.tokens()["output_partial"], 0)
+
+    def tokens(self):
+        return self.env.signals()["tokens"]
+
+    def test_duplicate_request_keeps_max_output(self):
+        self.env.write("a.jsonl", [self.usage_rec("u1", "r1", inp=10, out=5, read=100),
+                                   self.usage_rec("u2", "r1", inp=10, out=40, read=100),
+                                   self.usage_rec("u3", "r1", inp=10, out=20, read=100)])
+        self.env.run()
+        t = self.tokens()
+        self.assertEqual((t["requests"], t["input"], t["output"], t["cache_read"]), (1, 10, 40, 100))
+
+    def test_request_copied_into_another_file_counted_once(self):
+        self.env.write("a.jsonl", [self.usage_rec("u1", "r1", out=7)])
+        self.env.write("b.jsonl", [self.usage_rec("u1", "r1", out=7, session="s2"),
+                                   self.usage_rec("u2", "r2", out=3, session="s2")])
+        self.env.run()
+        t = self.tokens()
+        self.assertEqual((t["requests"], t["output"]), (2, 10))
+
+    def test_subagent_attributed_by_meta_else_unattributed(self):
+        self.env.write("a.jsonl", [self.usage_rec("u1", "r1", out=1)])
+        self.env.write("a/subagents/agent-1.jsonl", [self.usage_rec("u2", "r2", out=100)])
+        (self.env.tr / "a" / "subagents" / "agent-1.meta.json").write_text(
+            json.dumps({"agentType": "deep-reviewer"}), encoding="utf-8")
+        self.env.write("a/subagents/agent-2.jsonl", [self.usage_rec("u3", "r3", out=50)])
+        self.env.run()
+        t = self.tokens()
+        by = {r["name"]: r["total"] for r in t["subagent_types"]}
+        self.assertEqual(by, {"deep-reviewer": 101, "subagents (unattributed)": 51})
+        self.assertIn("## 10. Tokens and cache", self.env.report())
+
+    def test_skill_gets_the_tokens_after_its_invocation(self):
+        skill = rec("assistant", uuid="u0", requestId="r0", message={
+            "id": "msg_r0", "usage": {"output_tokens": 2},
+            "content": [{"type": "tool_use", "id": "t1", "name": "Skill", "input": {"skill": "verify"}}]})
+        self.env.write("a.jsonl", [skill, self.usage_rec("u1", "r1", out=30)])
+        self.env.run()
+        self.assertEqual({r["name"]: r["total"] for r in self.tokens()["skills"]}, {"verify": 31})
+
+    def test_cache_break_counted_above_100k_creation(self):
+        self.env.write("a.jsonl", [self.usage_rec("u1", "r1", create=100001),
+                                   self.usage_rec("u2", "r2", create=100000),
+                                   self.usage_rec("u3", "r3", read=500000)])
+        self.env.run()
+        t = self.tokens()
+        self.assertEqual(t["cache_breaks"], 1)
+        self.assertAlmostEqual(t["cache_read_share"], 500000 / (100001 + 100000 + 500000 + 3), places=4)
+
+    def test_missing_usage_is_zero_and_none_says_no_usage_data(self):
+        bare = rec("assistant", uuid="u9", requestId="r9", message={"id": "msg_r9", "content": []})
+        self.env.write("a.jsonl", [bare, tool_use("t1", "Skill", skill="x")])
+        code, _ = self.env.run()
+        self.assertEqual(code, 0)
+        self.assertEqual(self.tokens()["requests"], 0)
+        self.assertIn("no usage data", self.env.report())
+        odd = rec("assistant", uuid="u8", requestId="r8", message={"id": "m", "usage": {"output_tokens": 4}})
+        self.env.write("b.jsonl", [odd])
+        self.env.run()
+        self.assertEqual((self.tokens()["input"], self.tokens()["output"]), (0, 4))
+
+
 class MemoryTests(Base):
     def test_stale_card_and_memory_size(self):
         (self.env.mem / "MEMORY.md").write_bytes(b"one\ntwo\nthree\n")

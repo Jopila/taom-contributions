@@ -40,6 +40,12 @@ FOR EVERY SCRIPT, READ-ONLY GATES INCLUDED:
 15. A consumer of another tool's report validates each record (an error record, a zero, a missing
    field), not only that the key exists: PowerShell reads a missing field as `$null` and `[float]`
    makes it 0.
+16. Untrusted input (a checklist item, not a gate; `tools/*.py` and hook scripts): no `os.system` or
+   `shell=True` on text built from input; no `pickle`, `marshal`, `shelve` or `yaml.load` on a file the
+   tool did not write (`yaml.safe_load` is fine); an `env` map passed to a subprocess never carries keys
+   from input (`BASH_ENV`, `PYTHONPATH`, `PYTHONSTARTUP`, `GIT_SSH_COMMAND` and similar); XML from outside
+   the repo (a download, a user file) is parsed without entity expansion. The repo's own ModuleData parsed
+   with `ElementTree` is fine.
 
 WHY: deep-review 2026-05-28 (scene tooling): BOM handling differed across a new script family and
 no core lens saw it (RCA `docs/reviews/rca-scene-tooling-2026-05-28.md`). Deep review 2026-09-18:

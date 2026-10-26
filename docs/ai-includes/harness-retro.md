@@ -31,6 +31,14 @@ Section 9 also compares each family's share of all output with the newest earlie
 the report folder (dated folders under one root by default) and lists every family that grew by
 2 points or more; the console line `output growth:` says how many.
 
+Section 10 (tokens and cache) reads `message.usage` of every request once (deduplicated by request
+id, so a request copied into a resumed session is not counted twice) and reports the totals, the
+cache-read share of input, the top five skills (main-session tokens after the skill was invoked)
+and subagent types by total tokens, and the count of cache breaks (one request writing more than
+100,000 tokens to the cache). It is for spotting where cost goes and where the prompt cache breaks.
+Output tokens are a floor (many subagent requests are written only mid-stream, and the report
+says how many). It is not a verdict by itself, and a skill's total grows with the work it was given.
+
 Also run `python tools/analyze_reviews.py --summary --no-plot` for the reviewer accuracy that
 `REVIEW-LOG.md` already tracks (`--no-plot` leaves the committed `progress.png` alone).
 

@@ -44,6 +44,8 @@ DEFAULT_SLUG = "e--repos-TAOM"
 RECURRING_SESSIONS = 3
 RUNAWAY_LEN = 3
 STALE_CARD_DAYS = 21
+CACHE_BREAK_TOKENS = 100_000   # one request that writes more than this to the cache re-sent the prompt
+UNATTRIBUTED = "subagents (unattributed)"
 
 HOOK_DENY_RE = re.compile(r"^(PreToolUse|PostToolUse):(\S+) hook error: \[([^\]]+)\](.*)", re.S)
 CLASSIFIER_PREFIX = "Permission for this action was denied by the Claude Code auto mode classifier"
@@ -249,6 +251,12 @@ class Stats:
         self.models = Counter()
         self.out_tools = defaultdict(lambda: [0, 0, 0])  # tool -> [results, chars, max]
         self.out_families = defaultdict(lambda: [0, 0, 0])
+        self.seen_requests = set()
+        self.tok = [0, 0, 0, 0, 0]   # input, output, cache read, cache creation, requests
+        self.output_partial = 0
+        self.tok_skills = Counter()
+        self.tok_agents = Counter()
+        self.cache_breaks = 0
 
 
 def add_output(table, key, size):
@@ -256,6 +264,57 @@ def add_output(table, key, size):
     row[0] += 1
     row[1] += size
     row[2] = max(row[2], size)
+
+
+def _num(v):
+    return v if isinstance(v, (int, float)) and not isinstance(v, bool) else 0
+
+
+def read_usage(r):
+    """(request key, (input, output, cache read, cache creation), final) of an assistant record, or None.
+    One API request is written as several records (one per content block) that share a requestId.
+    Input and cache fields are identical across them. Output_tokens grows as the request streams, so
+    the record with the most output is used, but some requests (many in subagent transcripts) are
+    written only as mid-stream snapshots. `final` is True when this record has a non-null
+    stop_reason; a request none of whose records is final has an output count that is a floor."""
+    msg = r.get("message")
+    usage = msg.get("usage") if isinstance(msg, dict) else None
+    if not isinstance(usage, dict):
+        return None
+    key = r.get("requestId") or msg.get("id") or "uuid:%s" % r.get("uuid")
+    counts = (_num(usage.get("input_tokens")), _num(usage.get("output_tokens")),
+              _num(usage.get("cache_read_input_tokens")), _num(usage.get("cache_creation_input_tokens")))
+    return str(key), counts, msg.get("stop_reason") is not None
+
+
+def commit_usage(stats, calls, agent):
+    """Add one file's deduplicated requests. `agent` is the subagent type, None for a main file."""
+    for key, (usage, skill, final) in calls.items():
+        if key in stats.seen_requests:
+            continue
+        stats.seen_requests.add(key)
+        for i in range(4):
+            stats.tok[i] += usage[i]
+        stats.tok[4] += 1
+        if not final:
+            stats.output_partial += 1
+        total = sum(usage)
+        if agent is not None:
+            stats.tok_agents[agent] += total
+        elif skill:
+            stats.tok_skills[skill] += total
+        if usage[3] > CACHE_BREAK_TOKENS:
+            stats.cache_breaks += 1
+
+
+def agent_type(path):
+    """The agentType of a subagent transcript's sibling .meta.json, else UNATTRIBUTED."""
+    try:
+        meta = json.loads(path.with_suffix(".meta.json").read_text(encoding="utf-8"))
+        kind = meta.get("agentType") if isinstance(meta, dict) else None
+        return kind if isinstance(kind, str) and kind else UNATTRIBUTED
+    except (OSError, ValueError):
+        return UNATTRIBUTED
 
 
 def classify_error(stats, text, tool, sid, ts=None):
@@ -371,8 +430,10 @@ def handle_assistant(stats, r, tools, count):
             stats.models[str(inp.get("model") or "(definition)")] += 1
 
 
-def scan_file(stats, path, since_str):
+def scan_file(stats, path, since_str, agent=None):
     tools = {}
+    calls = {}        # request key -> ((in, out, read, create), skill, final), the max-output record wins
+    skill = None      # the skill invoked most recently in this file, until a person types again
     last_ts = None
     # [key, sid, set of assistant message ids]. A run grows by MESSAGES, not by results: parallel
     # calls sent in one message that fail alike are one batch, not a retry loop.
@@ -413,12 +474,29 @@ def scan_file(stats, path, since_str):
                 stats.newest_date = ts[:10]
             sid = str(r.get("sessionId") or path.stem)
             if rtype == "assistant":
+                got = read_usage(r)
+                if got:
+                    prev = calls.get(got[0])
+                    final = got[2] or (prev is not None and prev[2])
+                    if prev is None or got[1][1] >= prev[0][1]:
+                        calls[got[0]] = (got[1], skill, final)
+                    else:
+                        calls[got[0]] = prev[:2] + (final,)
+                msg = r.get("message")
+                blocks = msg.get("content") if isinstance(msg, dict) else None
+                for b in blocks if isinstance(blocks, list) else []:
+                    if isinstance(b, dict) and b.get("type") == "tool_use" and b.get("name") == "Skill":
+                        inp = b.get("input") if isinstance(b.get("input"), dict) else {}
+                        skill = str(inp["skill"]) if inp.get("skill") else skill
                 continue
             if rtype == "system":
                 if r.get("subtype") == "compact_boundary":
                     stats.compactions += 1
             elif rtype == "attachment":
-                handle_attachment(stats, r.get("attachment"), sid, ts)
+                att = r.get("attachment")
+                handle_attachment(stats, att, sid, ts)
+                if isinstance(att, dict) and att.get("type") == "queued_command" and att.get("humanTurn") is True:
+                    skill = None  # typed while the model worked: no twin user record, still a human turn
             elif rtype == "user":
                 msg = r.get("message")
                 content = msg.get("content") if isinstance(msg, dict) else None
@@ -426,6 +504,7 @@ def scan_file(stats, path, since_str):
                     if isinstance(content, list) else []
                 if not results and handle_human(stats, r, sid, ts):
                     flush()  # a person answered between the failures: not a runaway
+                    skill = None
                 for b in results:
                     tool, msg_id, command = tools.get(b.get("tool_use_id"), ("?", b.get("tool_use_id"), None))
                     text = result_text(b.get("content"))
@@ -443,6 +522,7 @@ def scan_file(stats, path, since_str):
                         if key is not None:
                             run = [key, sid, {msg_id}]
     flush()
+    commit_usage(stats, calls, agent)
 
 
 def discover(transcripts, since_dt):
@@ -611,6 +691,20 @@ def output_size(stats, n):
             "families": output_rows(stats.out_families, "family", total, n, shell)}
 
 
+def token_rows(counter, n):
+    return [{"name": redact(k), "total": v} for k, v in counter.most_common(n)]
+
+
+def token_summary(stats, n):
+    inp, out, read, create, requests = stats.tok
+    seen = inp + read + create
+    return {"requests": requests, "input": inp, "output": out, "cache_read": read, "cache_creation": create,
+            "cache_read_share": round(read / seen, 4) if seen else 0,
+            "cache_breaks": stats.cache_breaks, "output_partial": stats.output_partial,
+            "skills": token_rows(stats.tok_skills, n),
+            "subagent_types": token_rows(stats.tok_agents, n)}
+
+
 def build_signals(stats, args, since, today, main, sub):
     n = args.top
     tool_rows = top_groups(stats.tool_errors, n, ("signature", "tool"))
@@ -646,6 +740,7 @@ def build_signals(stats, args, since, today, main, sub):
         "unused_skills": unused_skills(args.repo, used),
         "memory": memory_health(args.memory, today),
         "output_size": output_size(stats, n),
+        "tokens": token_summary(stats, 5),
     }
 
 
@@ -746,6 +841,23 @@ def render(sig):
         L += table(["Family", "Then", "Now", "Grew by"],
                    [[r["family"], "%.1f%%" % (100 * r["then"]), "%.1f%%" % (100 * r["now"]),
                      "%.1f points" % (100 * r["delta"])] for r in g["rows"]])
+    t = sig["tokens"]
+    L += ["## 10. Tokens and cache", ""]
+    if not t["requests"]:
+        L += ["no usage data in the window.", ""]
+    else:
+        L += ["%d API requests (deduplicated by request id). Input %d, output %d, cache "
+              "read %d, cache creation %d. Cache read is %.1f%% of input. %d cache breaks (one request "
+              "writing more than %d tokens to the cache)." % (
+                  t["requests"], t["input"], t["output"], t["cache_read"], t["cache_creation"],
+                  100 * t["cache_read_share"], t["cache_breaks"], CACHE_BREAK_TOKENS), ""]
+        if t["output_partial"]:
+            L += ["Output is a floor: %d requests (%.0f%%) were written mid-stream with no final count." % (
+                t["output_partial"], 100 * t["output_partial"] / t["requests"]), ""]
+        L += ["### Top skills by total tokens (main-session tokens after the skill was invoked)", ""]
+        L += table(["Skill", "Tokens"], [[r["name"], r["total"]] for r in t["skills"]])
+        L += ["### Top subagent types by total tokens", ""]
+        L += table(["Type", "Tokens"], [[r["name"], r["total"]] for r in t["subagent_types"]])
     return "\n".join(L) + "\n"
 
 
@@ -790,7 +902,7 @@ def main(argv=None):
     main_files, sub_files = discover(args.transcripts, datetime.combine(since, datetime.min.time()))
     for path in main_files + sub_files:
         try:
-            scan_file(stats, path, since.isoformat())
+            scan_file(stats, path, since.isoformat(), agent_type(path) if path in sub_files else None)
         except OSError as e:
             print("warning: cannot read %s: %s" % (path, e), file=sys.stderr)
     if stats.records == 0:
@@ -821,6 +933,9 @@ def main(argv=None):
     print("usage: %d skills used, %d subagent spawns, %d skills unused" % (
         sum(1 for _ in sig["usage"]["skills"]), sum(sig["usage"]["subagent_types"].values()),
         len(sig["unused_skills"])))
+    tk = sig["tokens"]
+    print("tokens: %s" % ("no usage data" if not tk["requests"] else "%d requests, %.1f%% cache read, %d cache breaks" % (
+        tk["requests"], 100 * tk["cache_read_share"], tk["cache_breaks"])))
     print("memory: %s bytes, %s lines, %d stale cards" % (
         sig["memory"]["memory_md_bytes"], sig["memory"]["memory_md_lines"], len(sig["memory"]["stale_cards"])))
     if g["baseline"]:

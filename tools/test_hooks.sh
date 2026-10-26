@@ -237,6 +237,16 @@ def frontmatter(txt):
             return "\n".join(lines[1:i])
     return None
 
+# Allowlists: harness-facts.md "Skill load semantics" and "Agent (subagent) load semantics".
+# Both pages were truncated when read (2026-10-26), so a documented key may be missing.
+SKILL_KEYS = {'name', 'description', 'when_to_use', 'argument-hint', 'arguments',
+              'disable-model-invocation', 'user-invocable', 'allowed-tools', 'disallowed-tools',
+              'model', 'effort', 'context', 'agent', 'background', 'hooks', 'paths', 'shell',
+              'metadata', 'license', 'compatibility'}   # https://code.claude.com/docs/en/skills
+AGENT_KEYS = {'name', 'description', 'tools', 'disallowedTools', 'model', 'permissionMode',
+              'maxTurns', 'autoCompactWindow', 'skills', 'mcpServers', 'hooks', 'memory',
+              'background', 'omitClaudeMd', 'effort', 'isolation', 'color', 'initialPrompt',
+              'experimental'}   # https://code.claude.com/docs/en/sub-agents
 bad = []
 n = 0
 for p in (list(pathlib.Path('.claude/skills').glob('*/SKILL.md'))
@@ -284,6 +294,23 @@ for p in (list(pathlib.Path('.claude/skills').glob('*/SKILL.md'))
                 continue  # quoted, the # is safe
             if ' #' in val:
                 bad.append(f"{p}: unquoted '#' in {field[:-1]} truncates it at that point (YAML comment); quote the value")
+
+    # Claude Code silently ignores an unrecognised frontmatter key, so a typo such as
+    # `disable-model-invocaton` or `allowed_tools` turns a setting off with no error.
+    # Rules are not checked: harness-facts.md says Claude Code reads only `paths` there,
+    # and 8 rules carry a `description` that is documentation for readers.
+    if p.name == 'SKILL.md':
+        allowed, stem = SKILL_KEYS, p.parent.name
+    elif p.parent.name == 'agents':
+        allowed, stem = AGENT_KEYS, p.stem
+    else:
+        continue
+    for k in d:
+        if k not in allowed:
+            bad.append(f"{p}: frontmatter key '{k}' is not on the allowlist. A misspelled key is ignored by Claude Code; if the key is documented, add it to the allowlist in tools/test_hooks.sh section 3b and to .claude/rules/harness-facts.md")
+    nm = d.get('name')
+    if nm is not None and str(nm) != stem:
+        bad.append(f"{p}: name '{nm}' must equal '{stem}' ({'its directory' if p.name == 'SKILL.md' else 'its file stem'})")
 print(f"COUNT {n}")
 for b in bad:
     print("BAD " + b)
