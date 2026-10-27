@@ -71,7 +71,7 @@
                             <Widget Id="UpgradeClipRect" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" ClipContents="true" >
                               <Children>
 
-                                <NavigatableListPanel Id="UpgradeTroops" DataSource="{Troops}" WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" HorizontalAlignment="Center" AlwaysRefreshAll="true" StackLayout.LayoutMethod="VerticalTopToBottom">
+                                <NavigatableListPanel Id="UpgradeTroops" DataSource="{Troops}" WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" HorizontalAlignment="Center" StackLayout.LayoutMethod="VerticalTopToBottom">
                                   <ItemTemplate>
                                     <PartyTroopUpgradeItem />
                                   </ItemTemplate>

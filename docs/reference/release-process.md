@@ -92,7 +92,7 @@ Use `/release`. It runs the sequence below and fails closed on the #371 pairing 
    2026-09-13, hook `check-commit-subject-version.sh`), so between releases
    `git log --grep 'vX.Y.Z - '` lists the commits a build reporting that `TaomVersion` can contain.
 8. Confirm `git rev-parse <release commit>^` prints the commit step 5 ended at (if not, stop and ask), then `git tag -a vX.Y.Z <release commit> -m "…"`, tagging the step 7 commit by SHA, then `git push origin <release branch> vX.Y.Z`.
-9. Build at the tag and gate the DLLs (the skill's Phase 8). Run `./build.ps1` in the main checkout only when `git status --porcelain` is empty and `HEAD` is the tag's commit; otherwise build a clean worktree of the tag (`git worktree add ../taom-release-vX.Y.Z vX.Y.Z`, `./build.ps1` there, then `git worktree remove ../taom-release-vX.Y.Z`). Then `python tools/package_release.py --source "<game>/Modules" --dest <out> --game-root "<game>" --require-build vX.Y.Z --dry-run` must print `build stamp OK`. Any later deploying build of a dirty tree (`./build.ps1`, or any build without `-p:DisableModuleCopy=true -p:ModuleId=`) replaces the gated DLLs and the module's ModuleData in the install: after the v2.0.34 gate passed, one made the installed `TAOM.dll` `+18a4e402...dirty`. So repeat the dry run right before Mike packages. Mike packages through the Modding Kit editor; Claude never writes a package with this command. Once his package exists in `E:\LOTRAOM_Releases\<channel>\Modules\`, offer the same dry run with `--source` pointing there and `--game-root "<game>"`. ShaderCacheKeeper ships beside the modules: build and test it at the tag (`python Native/ShaderCacheKeeper/build.py`, then `pwsh -File Native/ShaderCacheKeeper/test/run_tests.ps1`), copy `out/xinput9_1_0.dll` to `E:\LOTRAOM_Releases\<channel>\bin\Win64_Shipping_Client\` before the launcher manifest is generated, and record its SHA-256 in the release note; testing channel first ([shader-cache-keeper.md](../features/shader-cache-keeper.md)).
+9. Build at the tag and gate the DLLs (the skill's Phase 8). Run `./build.ps1` in the main checkout only when `git status --porcelain` is empty and `HEAD` is the tag's commit; otherwise build a clean worktree of the tag (`git worktree add ../taom-release-vX.Y.Z vX.Y.Z`, `./build.ps1` there, then `git worktree remove ../taom-release-vX.Y.Z`). Then `python tools/package_release.py --source "<game>/Modules" --dest <out> --game-root "<game>" --require-build vX.Y.Z --dry-run` must print `build stamp OK`. Any later deploying build of a dirty tree (`./build.ps1`, or any build without `-p:DisableModuleCopy=true -p:ModuleId=`) replaces the gated DLLs and the module's ModuleData in the install: after the v2.0.34 gate passed, one made the installed `TAOM.dll` `+18a4e402...dirty`. So repeat the dry run right before Mike packages. Mike packages through the Modding Kit editor; Claude never writes a package with this command. Once his package exists in `E:\LOTRAOM_Releases\<channel>\Modules\`, offer the same dry run with `--source` pointing there and `--game-root "<game>"`; it also refuses an untracked TAOM file there (never `AssetPackages/pack0.tpac`, which holds the TAOM UI in a channel folder). ShaderCacheKeeper ships beside the modules: build and test it at the tag (`python Native/ShaderCacheKeeper/build.py`, then `pwsh -File Native/ShaderCacheKeeper/test/run_tests.ps1`), copy `out/xinput9_1_0.dll` to `E:\LOTRAOM_Releases\<channel>\bin\Win64_Shipping_Client\` before the launcher manifest is generated, and record its SHA-256 in the release note; testing channel first ([shader-cache-keeper.md](../features/shader-cache-keeper.md)).
    The gate reads every `bin/<platform>/` copy of `TAOM.dll`, `TAOM.Client.dll` and
    `TAOM.Dependencies.dll`, refuses a `TAOM.Client.dll` in a `bin/Win64_Shipping_Server/` (ADR-013), and
    refuses a tag whose `Directory.Build.props` predates the `.dirty` flag. It requires
@@ -116,7 +116,8 @@ Use `/release`. It runs the sequence below and fails closed on the #371 pairing 
    the report lists each one and says so in one policy line. They are listed, not compared: #448's
    three lagging sacks were exactly these, so while the policy holds a lagging module sack cannot
    reach a build through the packager. `shader_mapping.bin` and `shader_compile_report.log` beside
-   them still ship (whether they should is open). The gate itself proves the DLLs only.
+   them still ship (whether they should is open). The gate proves the DLLs, and it also refuses
+   an untracked TAOM file (below).
    Deploys never delete, so the install also holds files from every earlier deploy. Before
    packaging, prune only what neither the tag nor its build owns:
    - **`<game>/Modules/TAOM/` outside `bin/`:** remove what `Main/_Module/` does not hold at the
@@ -124,12 +125,20 @@ Use `/release`. It runs the sequence below and fails closed on the #371 pairing 
      case-insensitively, as Windows resolves them: the tag spells `GUI/PreFabs/`, the install
      `GUI/Prefabs/`, and an exact comparison deletes every live prefab. Leave
      `RuntimeDataCache*` alone: the packager already excludes it unless `--keep-rdc` asks for it.
-     `AssetPackages/pack0.tpac` is what packaging TAOM in the editor writes and is not needed:
-     delete it. The other tpacs there are git-tracked (field camp and refuge prefabs) and stay.
+     `AssetPackages/pack0.tpac` is what packaging TAOM in the editor writes. In the dev install
+     (it has loose `Assets/`) it is a leftover: delete it. In an editor-published channel folder (no
+     loose `Assets/`) it is the packed TAOM UI: never delete it, and the check knows the difference.
+     The other tpacs there are git-tracked (field camp and refuge prefabs) and stay.
      `DsAssetPackages/` is git-tracked and ships; run `python tools/build_ds_skeleton_pack.py --check`
      before packaging.
      A leftover test-troop file (a `taom_test_` id under `ModuleData/`) is one of these; the packager
-     refuses it, dry runs included, so the dry run fails until it is pruned.
+     refuses it, dry runs included, so the dry run fails until it is pruned. So does any other TAOM
+     file the release commit does not track: under `--require-build`, `stale_module_files` compares
+     the copy list (outside `bin/`, `Shaders/D3D11/` and `RuntimeDataCache*`) with the commit's
+     `Main/_Module` tree, case-insensitively, and refuses with exit 2 on a stray file, a git
+     failure or an empty tree. The message names the folder it checked (the `--source` module, the
+     install or a channel folder): delete the file there, or commit it first if it is Kit output the
+     repo has not taken yet. `TAOM.Dependencies` is exempt.
    - **Shader sources:** the same dry run refuses a shader in a planned module's
      `Shaders/D3D11/shader_compile_report.log` that has no complete source in the package (a `taom_`
      shader needs all six `.rs` pass files under `TAOM/Shaders/Sources`, so deploy a build first), and

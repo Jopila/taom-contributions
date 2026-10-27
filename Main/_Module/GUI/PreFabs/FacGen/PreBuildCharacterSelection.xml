@@ -28,7 +28,7 @@
     <Constant Name="Party.Toggle.ExpandIndicator.Height" BrushLayer="Default" BrushName="Party.Toggle.ExpandIndicator" BrushValueType="Height" />
   </Constants>
   <VisualDefinitions>
-    <VisualDefinition Name="LeftPanel" EaseIn="true"   TransitionDuration="0.45">
+    <VisualDefinition Name="LeftPanel"   TransitionDuration="0.45">
       <VisualState PositionXOffset="-27" State="Default" />
     </VisualDefinition>
   </VisualDefinitions>

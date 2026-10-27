@@ -4523,3 +4523,13 @@ The first `check_mcm_default_flips.py` compared the settings against one release
 - **Why missed:** one base tag, constants compared as text, and silent OK paths (no tag, no settings found, a failed read, a partial class) that printed a pass.
 - **Prevent:** compare against every release the trap can reach; make every degenerate input fail loudly; prove the gate on the commit before the fix (it must fail there) before trusting a green run.
 - **Source:** [rca-settings-default-flips-2026-10-26.md](../rca-settings-default-flips-2026-10-26.md).
+### A release gate runs on more than one folder shape: test each one it will meet (#1024, 2026-10-26)
+The new packager check refused untracked files in the TAOM module. It was designed and tested on the dev install, but the
+release flow runs the same `--require-build` gate again on Mike's editor-published channel folder, which has no loose
+`Assets/` and one `AssetPackages/pack0.tpac` holding TAOM's packed UI. The check refused that file and told the reader
+to prune it, which would ship TAOM without its sprites.
+- **Why missed:** the never-delete-pack0 rule lived only in local memory, and the tests used one module shape.
+- **Prevent:** list every folder a release gate is run on (the dev install, each channel folder) and give each shape a
+  test; run the gate read-only on the real folders before merging. Keep any rule about what a folder must keep in the
+  release doc, not only in memory.
+- **Source:** [rca-prefab-attribute-gate-2026-10-26.md](../rca-prefab-attribute-gate-2026-10-26.md) finding 1.
