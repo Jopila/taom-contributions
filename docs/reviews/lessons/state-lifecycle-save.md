@@ -1099,13 +1099,13 @@ silent. Slow compile and wedge cannot be told apart from that log.
   wait out a shader compile that was not the cause.
 - **Source:** player bundle `taom_crash_20261018_184529_b18f3441`; fix in `tools/triage_battle_load.py`.
 
-### The end of the log is a second silence anchor when no watchdog line exists (2026-10-26)
+### The end of the log is a second silence anchor when no watchdog line follows the last sample (2026-10-26)
 A player log from 2026-10-25 again got the DRAINING verdict: three `WaitingForRender` samples (2771, 2737, 2704),
 then 117 s of `[MemSample]` lines and no watchdog line, because the game ended about 2 minutes into the wait
 (the player probably closed it; the log cannot tell). The 2026-10-18 fix measured the silence only up to the
 watchdog line, so with no watchdog it measured nothing and fell back to "draining". The first cut of this fix then
 chose its anchor by asking whether the log held any watchdog line at all. The watchdog fires once per loading
-window, so the only line can belong to an earlier load, or to a long scene load earlier in the same window, and
+window, so the newest watchdog line can belong to an earlier load, or to a long scene load earlier in the same window, and
 both shapes still read as draining (deep review, 2026-10-26).
 - **Why missed:** the fix assumed every frozen load lasts until the 300 s watchdog, and that a watchdog line in the
   log belongs to the wait being judged. Neither holds.

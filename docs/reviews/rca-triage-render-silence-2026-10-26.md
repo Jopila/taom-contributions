@@ -11,7 +11,8 @@ watchdog line only when it is not older than the last sample, and otherwise the 
 Review: risk tier 2 (a `tools/` script and its tests), one wave: the Data flow and Tooling correctness lenses. Codex
 did not run: no paid dispatch was authorized in this session. The UIExtenderEx change in the same commit had its own
 tier 1 review before the commit (`rca-uiextender-ongamestart-2026-10-26.md`) and was not reviewed again. One MEDIUM,
-four LOW and one NIT were confirmed against the code and fixed; two pre-existing LOW defects are follow-ups.
+four LOW and one NIT were confirmed against the code and fixed. Two pre-existing LOW defects and a same-second tie
+were then fixed on Mike's word.
 
 Sources: the two lens reports of 2026-10-26; player log `taom_debug_2026-10-25_17-36-25.log`; issue #1025.
 
@@ -26,13 +27,33 @@ Sources: the two lens reports of 2026-10-26; player log `taom_debug_2026-10-25_1
 | 5 | LOW | `test_no_watchdog_line_keeps_the_draining_message` named the contract the change reversed; it passed only because its log ends on the sample | Stale name | The existing test still passed, so nothing prompted a read of its name | Renamed `test_no_watchdog_and_no_later_line_keeps_the_draining_message` |
 | 6 | NIT | Two helpers derived one decision; `_render_silence_s` copied `_seconds_between`; a default argument nobody used; the parse loop matched each line's stamp up to three times | Duplication | First cut added beside existing code instead of reusing it | One helper returns `(seconds, anchor)`; `_seconds_between` reused; parameters required; the stamp is matched once per line |
 
-**FOLLOW-UP, no issue: awaiting Mike's word to file (issue creation is his).** Pre-existing, outside the changed lines:
-`format_report` prints the session's last watchdog line and the JSON's `watchdog_fired` reads the same session-level
-value, so a stale watchdog line from an earlier load appears under a later load's verdict, with its own advice.
+**Two pre-existing defects, fixed in the same change on Mike's word (2026-10-26):**
 
-**FOLLOW-UP, no issue: awaiting Mike's word to file.** Pre-existing: the verdict's silence arm needs the terminal
-sample's `shaders` above 0, while the timing line's silence branch needs only some sample with `shaders=`. A series
-ending at 0 gets "a real wedge" in the verdict and "cannot separate a slow compile from a wedge" in the timing line.
+| # | Sev | Bug | Fix | Proof |
+|---|---|---|---|---|
+| 7 | LOW | `format_report` printed the session's newest watchdog line and the JSON's `watchdog_fired` read the same value, so an earlier load's line, with its churn-capped advice, appeared under a later load's verdict | `_mission_watchdog` keeps the line only when it is stamped at or after the last load's mission-start marker (stamps, because a crash report echoes earlier lines after the watchdog line) | `WatchdogScopeTests`, including the `--json` CLI |
+| 8 | LOW | A series that ends in the render wait at `shaders=0` got "a real wedge" in the verdict and "DRAINING" or "cannot separate a slow compile from a wedge" in the timing line | `classify_phase_timings` sets `stuck_at_zero`, and the timing line says nothing is compiling; a completed load keeps its old line | `ZeroCountTimingTests` |
+
+## Convergence pass
+
+One `deep-reviewer` checked the applied fixes for parity and standards. Parity held: HEAD and the fixed tool gave
+identical results on 39 real logs and on 20,000 synthetic logs outside the intended class (a stamped watchdog line
+older than the last sample); inside it, every changed verdict matched the rule. It found one LOW text error, fixed:
+the note said a working wait writes a line every second, but the emitter writes at most once a second and once per
+frame when frames are slower (the player log's samples are 3.6 s and 1.7 s apart). Five NITs about wording and one
+test fixture were fixed.
+
+**Fixed on Mike's word (LOW, speculative):** a watchdog line stamped in the same second as the last sample counted as
+"at or after" it, even when it preceded the sample in the file, so a freeze in that second would read as a slow
+load. The parser now records how many phase events came before the watchdog line, and a same-second tie is decided
+by file order against the first copy of the last sample (a crash report's echo of it comes later). Tests:
+`test_same_second_watchdog_before_the_last_sample_is_not_the_anchor`, its reverse, and
+`test_same_second_tie_reads_the_original_sample_not_its_crash_report_echo`.
+
+A mutation run over the whole module (the report using the session watchdog, a tie ignoring the first copy, a tie
+always placing the watchdog first, the zero flag never set) fails each mutant. On 39 real logs the only changes are
+the new `stuck_at_zero` key (false on all of them), `silence_end` now null when not silent, the reworded note on the
+#1025 log, and the parser's new `n_events` field.
 
 ## Root-cause pattern
 
@@ -54,4 +75,4 @@ assumption about which lines a log holds, not an arithmetic error.
 
 A silence measured against an anchor needs the anchor to belong to the window being judged: compare stamps, and treat
 an older anchor as absent (`docs/reviews/lessons/state-lifecycle-save.md`, "The end of the log is a second silence
-anchor when no watchdog line exists"). No new memory: the lesson entry is the durable record.
+anchor when no watchdog line follows the last sample"). No new memory: the lesson entry is the durable record.

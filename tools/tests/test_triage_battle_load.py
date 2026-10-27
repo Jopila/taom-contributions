@@ -1800,10 +1800,12 @@ class RenderWaitSilenceTests(unittest.TestCase):
 
     def test_watchdog_from_earlier_in_the_same_load_is_not_the_anchor(self):
         # The watchdog fires once per loading window. A scene load past 300 s fires it before
-        # the render wait, and a later freeze in the same load writes no second line.
+        # the render wait, and a later freeze in the same load writes no second line. Only the
+        # stamps are read here, so the t= values stay those of the player log.
         self._assert_silent_to_log_end(_log(
             _init(), _init_done(),
-            self._wd("2026-10-25 17:39:20", shaders=0),
+            _line("ERROR", "[BattleLoad] WATCHDOG STILL LOADING after 303s — shaders=0 "
+                           "last phase=WaitingForSceneLoad seq=8", ts="2026-10-25 17:39:20"),
             _finish_begin(), _after_start_begin(), _after_start_done(), _finish_done(),
             self._rw(55, 21113, 0, 2771, "2026-10-25 17:39:35"),
             self._rw(56, 24748, 3636, 2737, "2026-10-25 17:39:39"),
@@ -1814,6 +1816,36 @@ class RenderWaitSilenceTests(unittest.TestCase):
         self._assert_silent_to_log_end(_log(
             _init(seq=1, ms=1000), self._wd("2026-10-25 17:20:00"), _playable(),
             self._ended_log("2026-10-25 17:41:37")))
+
+    def _tie_log(self, watchdog_first):
+        # The watchdog line and the last sample share one stamp; only file order tells them apart.
+        wd = self._wd("2026-10-25 17:39:40")
+        last = self._rw(57, 26417, 5305, 2704, "2026-10-25 17:39:40")
+        return _log(
+            _init(), _init_done(), _finish_begin(), _after_start_begin(),
+            _after_start_done(), _finish_done(),
+            self._rw(55, 21113, 0, 2771, "2026-10-25 17:39:35"),
+            self._rw(56, 24748, 3636, 2737, "2026-10-25 17:39:39"),
+            *((wd, last) if watchdog_first else (last, wd)),
+            _mem(ts="2026-10-25 17:41:37"))
+
+    def test_same_second_watchdog_before_the_last_sample_is_not_the_anchor(self):
+        self._assert_silent_to_log_end(self._tie_log(watchdog_first=True))
+
+    def test_same_second_watchdog_after_the_last_sample_is_the_anchor(self):
+        tl = tb.parse_battle_load_log(self._tie_log(watchdog_first=False))
+
+        self.assertEqual((None, "the watchdog fired"), tb._render_silence(tl))
+
+    def test_same_second_tie_reads_the_original_sample_not_its_crash_report_echo(self):
+        # The watchdog's bundle echoes the log tail after the watchdog line; the echoed sample
+        # is parsed as a new event, so file order must come from the first copy.
+        echo = _line("ERROR", "[CrashReport]   [2026-10-25 17:39:40] [INFO] [BattleLoad] "
+                              "seq=57 t=+26417ms phase=WaitingForRender waitedMs=5305 "
+                              "shaders=2704", ts="2026-10-25 17:41:37")
+        tl = tb.parse_battle_load_log(self._tie_log(watchdog_first=False) + echo + "\n")
+
+        self.assertEqual((None, "the watchdog fired"), tb._render_silence(tl))
 
     def test_log_ending_soon_after_the_last_sample_keeps_the_draining_message(self):
         tl = tb.parse_battle_load_log(self._ended_log("2026-10-25 17:39:50"))
@@ -1844,6 +1876,95 @@ class RenderWaitSilenceTests(unittest.TestCase):
 
         self.assertIn("DRAINING", report)
         self.assertNotIn("went silent", report)
+
+
+class WatchdogScopeTests(unittest.TestCase):
+    """The report and the JSON describe the LAST load. The parser keeps the newest watchdog line
+    of the whole log, and the watchdog fires once per loading window, so an earlier load's line
+    (with its churn-capped advice) must not appear under a later load's verdict (#1025)."""
+
+    @staticmethod
+    def _mission_start(seq, scene, ts):
+        return _line("INFO", f"[BattleLoad] seq={seq} t=+1000ms phase=MissionInitialize "
+                             f"scene='{scene}'", ts=ts)
+
+    def _two_loads(self, second_load_watchdog=False):
+        tail = ([_line("ERROR", "[BattleLoad] WATCHDOG STILL LOADING after 303s — shaders=0 "
+                                "last phase=WaitingForSceneLoad seq=6", ts="2026-10-25 17:44:00")]
+                if second_load_watchdog else [])
+        return _log(
+            self._mission_start(1, "battle_terrain_b", "2026-10-25 17:00:00"),
+            _line("ERROR", "[BattleLoad] WATCHDOG STILL LOADING after 900s — shaders=412 "
+                           "churn-capped last phase=WaitingForRender seq=5", ts="2026-10-25 17:15:00"),
+            _line("INFO", "[BattleLoad] seq=99 t=+8000ms phase=BattlePlayable "
+                          "scene='battle_terrain_b' agents=120", ts="2026-10-25 17:16:00"),
+            self._mission_start(4, "battle_terrain_031", "2026-10-25 17:39:00"),
+            *tail)
+
+    def test_earlier_loads_watchdog_is_not_reported_under_the_last_load(self):
+        tl = tb.parse_battle_load_log(self._two_loads())
+        report = tb.format_report(tb.classify(tl), tl, None)
+
+        self.assertIsNone(tb._mission_watchdog(tl))
+        self.assertNotIn("Stall watchdog fired", report)
+        self.assertNotIn("STILL MOVING", report)
+
+    def test_the_last_loads_own_watchdog_is_still_reported(self):
+        tl = tb.parse_battle_load_log(self._two_loads(second_load_watchdog=True))
+        report = tb.format_report(tb.classify(tl), tl, None)
+
+        self.assertIn("Stall watchdog fired after 303s", report)
+        self.assertNotIn("STILL MOVING", report)
+
+    def test_cli_json_watchdog_fired_reads_the_last_load(self):
+        with tempfile.TemporaryDirectory() as d:
+            p = Path(d) / "taom_debug.log"
+            p.write_text(self._two_loads(), encoding="utf-8")
+            out = Path(d) / "verdict.json"
+            r = subprocess.run([sys.executable, str(TOOL), str(p), "--json", str(out)],
+                               capture_output=True, text=True)
+            payload = json.loads(out.read_text(encoding="utf-8"))
+
+        self.assertFalse(payload["watchdog_fired"], r.stdout + r.stderr)
+
+
+class ZeroCountTimingTests(unittest.TestCase):
+    """A load that ends in the render wait with shaders=0 has nothing compiling: the verdict
+    calls it a real wedge, so the timing line must not call it draining or a slow compile."""
+
+    @staticmethod
+    def _rw(seq, shaders, ts):
+        return _line("INFO", f"[BattleLoad] seq={seq} t=+{seq * 1000}ms phase=WaitingForRender "
+                             f"waitedMs={seq} shaders={shaders}", ts=ts)
+
+    def _report(self, *tail):
+        text = _log(
+            _init(), _init_done(), _finish_begin(), _after_start_begin(),
+            _after_start_done(), _finish_done(),
+            self._rw(20, 40, "2026-10-25 17:39:35"),
+            self._rw(21, 20, "2026-10-25 17:39:36"),
+            self._rw(22, 0, "2026-10-25 17:39:37"),
+            *tail)
+        tl = tb.parse_battle_load_log(text)
+        return tb.format_report(tb.classify(tl), tl, None)
+
+    def test_count_ending_at_zero_is_not_called_draining(self):
+        report = self._report()
+
+        self.assertIn("NOTHING compiling", report)
+        self.assertIn("nothing is compiling", report)
+        self.assertNotIn("DRAINING", report)
+
+    def test_count_ending_at_zero_then_silence_is_not_called_a_slow_compile(self):
+        report = self._report(_mem(ts="2026-10-25 17:41:04"))
+
+        self.assertIn("nothing is compiling", report)
+        self.assertNotIn("cannot separate a slow cold compile", report)
+
+    def test_completed_load_keeps_its_timing_line(self):
+        report = self._report(_playable())
+
+        self.assertNotIn("nothing is compiling", report)
 
 
 class MultiMissionScopeTests(unittest.TestCase):
