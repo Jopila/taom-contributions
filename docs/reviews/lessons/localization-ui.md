@@ -1363,3 +1363,13 @@ whose loader reads only five attribute names, so four dead `EaseIn` attributes p
 - **Prevent:** map a known interface property to the type the widget's constructor assigns, fail any other unknown, and
   check every element kind against the loader that reads it.
 - **Source:** [rca-prefab-attribute-gate-2026-10-26.md](../rca-prefab-attribute-gate-2026-10-26.md) findings 2 and 3.
+
+### A prefab element is live only if its consumer is: trace who reads it before you edit it (#1027, 2026-10-26)
+A recommendation to ease the character selection screen's `LeftPanel` panel rested on its `VisualDefinition`, but no
+widget in that prefab names it, and Gauntlet resolves a definition only from a widget in the same prefab, so the edit
+changed nothing. The file is a clone of vanilla `ClanMembers.xml` whose panel widget dropped `VisualDefinition="LeftPanel"`.
+The same shape sat behind the dead prefabs of #1022 and #1024.
+- **Why missed:** the definition looked complete, and nothing checks that a definition is used.
+- **Prevent:** before changing a definition, constant, brush or prefab, find the element or code that consumes it (a
+  `VisualDefinition="X"` attribute, a `!Constant` reference, a tag, a movie load); if there is none, delete it instead.
+- **Source:** [rca-panel-ease-2026-10-26.md](../rca-panel-ease-2026-10-26.md) finding 1.
