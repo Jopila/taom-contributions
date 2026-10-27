@@ -61,7 +61,7 @@ public class MapFrameProfilerInstallerTests
         ClientComposition.Current = null;
     }
 
-    private Func<string, bool> Apply(bool core = true, bool views = true, int sites = 1) => category =>
+    private Func<string, bool> Apply(bool core = true, bool views = true, int sites = 1, bool menu = true) => category =>
     {
         _applied.Add(category);
         if (category == MapFrameProfilerInstaller.Category)
@@ -69,6 +69,8 @@ public class MapFrameProfilerInstallerTests
             MapFrameProfilerHooks.TickEventSites = sites;
             return core;
         }
+        if (category == MapFrameProfilerInstaller.MenuCategory)
+            return menu;
         Assert.AreEqual(MapFrameProfilerInstaller.ViewsCategory, category);
         return views;
     };
@@ -98,7 +100,8 @@ public class MapFrameProfilerInstallerTests
 
         Install(Apply());
 
-        CollectionAssert.AreEqual(new[] { MapFrameProfilerInstaller.Category, MapFrameProfilerInstaller.ViewsCategory }, _applied);
+        CollectionAssert.AreEqual(new[] { MapFrameProfilerInstaller.Category, MapFrameProfilerInstaller.ViewsCategory, MapFrameProfilerInstaller.MenuCategory }, _applied);
+        _logger.Received(1).LogInfo(MapProfileLines.BuildMenuProbesLine(3, 3));
         _logger.Received(1).LogInfo(MapProfileLines.BuildInstallLine(true, true, 6, 6, Array.Empty<string>(), v, v, 1, true,
             AllocationCounter.Available));
         Assert.IsNotNull(MapFrameProfilerHooks.Profiler);
@@ -253,6 +256,42 @@ public class MapFrameProfilerInstallerTests
     }
 
     [TestMethod]
+    public void OnGameInitialized_ToggleOff_NeverAppliesTheMenuCategory()
+    {
+        _settings.MapProfilerEnabled.Returns(false);
+
+        Install(Apply());
+        Install(Apply());
+
+        CollectionAssert.DoesNotContain(_applied, MapFrameProfilerInstaller.MenuCategory);
+        _logger.DidNotReceive().LogInfo(Arg.Is<string>(s => s.Contains("menu probes")));
+    }
+
+    [TestMethod]
+    public void OnGameInitialized_MenuCategoryFails_StillInstallsAndCountsWhatIsPatched()
+    {
+        _settings.MapProfilerEnabled.Returns(true);
+        var menuTargets = MapProfilerTargets.MenuTargets();
+
+        Install(Apply(menu: false), m => !menuTargets.Contains(m));
+
+        Assert.IsNotNull(MapFrameProfilerHooks.Profiler);
+        _logger.Received(1).LogInfo(MapProfileLines.BuildMenuProbesLine(0, 3));
+        _logger.DidNotReceive().LogError(Arg.Any<string>());
+    }
+
+    [TestMethod]
+    public void OnGameInitialized_MenuApplyThrows_StillInstalls()
+    {
+        _settings.MapProfilerEnabled.Returns(true);
+
+        Install(category => category == MapFrameProfilerInstaller.MenuCategory ? throw new InvalidOperationException("menu broke") : Apply()(category));
+
+        Assert.IsNotNull(MapFrameProfilerHooks.Profiler);
+        _logger.Received(1).LogWarning(Arg.Is<string>(s => s == MapProfileLines.BuildMenuFailedLine(new InvalidOperationException("menu broke"))));
+    }
+
+    [TestMethod]
     public void OnGameInitialized_TickEventSiteMissing_StillInstallsAndLogsTheVanillaLine()
     {
         _settings.MapProfilerEnabled.Returns(true);
@@ -272,10 +311,10 @@ public class MapFrameProfilerInstallerTests
         var profiler = MapFrameProfilerHooks.Profiler;
         Install(Apply());
 
-        Assert.AreEqual(2, _applied.Count, "Each category is applied once per process.");
+        Assert.AreEqual(3, _applied.Count, "Each category is applied once per process.");
         Assert.AreSame(profiler, MapFrameProfilerHooks.Profiler);
         _logger.DidNotReceive().LogWarning(Arg.Any<string>());
-        _logger.Received(1).LogInfo(Arg.Any<string>());
+        _logger.Received(2).LogInfo(Arg.Any<string>());
     }
 
     [TestMethod]
@@ -300,7 +339,7 @@ public class MapFrameProfilerInstallerTests
 
         Install(Apply(core: false));
 
-        Assert.AreEqual(2, _applied.Count);
+        Assert.AreEqual(3, _applied.Count);
         _logger.Received(1).LogWarning(MapProfileLines.NotInstalledLine);
     }
 

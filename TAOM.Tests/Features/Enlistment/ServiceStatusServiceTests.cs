@@ -296,6 +296,28 @@ public class ServiceStatusServiceTests
 
 
     [TestMethod]
+    public void RefreshIfChanged_SameModel_ButTheBoardIsInAnOldLanguage_WritesAgain()
+    {
+        // A language switch changes no field of the model, so the value comparison alone would leave the
+        // board in the old language until the next real change (#1019, the board is rendered once per push).
+        _sut.RefreshIfChanged();
+        _writer.ClearReceivedCalls();
+        _writer.IsStale.Returns(true);
+
+        Assert.IsTrue(_sut.RefreshIfChanged());
+        _writer.ReceivedWithAnyArgs(1).Write(default);
+    }
+
+    [TestMethod]
+    public void TheBoardWriter_RendersTheBoardOncePerPush_AndRecordsTheLanguageItRenderedIn()
+    {
+        var src = RepoPaths.ReadSource("Main/Features/Enlistment/Presentation/ServiceStatusTextWriter.cs", stripComments: true);
+        StringAssert.Contains(src, "SetTextVariable(WaitTextVariable, text.ToString())");
+        StringAssert.Contains(src, "ActiveTextLanguage");
+        Assert.IsFalse(src.Contains("SetTextVariable(WaitTextVariable, text)"), "The nested TextObject must not be handed to the global variable.");
+    }
+
+    [TestMethod]
     public void RefreshIfChanged_FirstCall_Writes()
     {
         Assert.IsTrue(_sut.RefreshIfChanged());

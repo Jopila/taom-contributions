@@ -15,14 +15,16 @@ public interface IServiceStatusTextWriter
 
     /// <summary>The wait text when nobody is serving (a discharge that ran before the map existed).</summary>
     void WriteNotServing();
+
+    /// <summary>True when the board was last rendered in a language other than the active one.</summary>
+    bool IsStale { get; }
 }
 
 public sealed class ServiceStatusTextWriter : IServiceStatusTextWriter
 {
     /// <summary>
-    /// The variable the wait menu's registered text (<c>"{TAOM_ENLISTMENT_WAIT_TEXT}"</c>) resolves
-    /// against. It is a GLOBAL, and that is fine here — the menu re-renders every frame and
-    /// re-resolves it each time (see <see cref="IServiceStatusService"/> for why).
+    /// The global the wait menu's registered text (<c>"{TAOM_ENLISTMENT_WAIT_TEXT}"</c>) resolves against, holding the
+    /// board as a flat string so each per-frame resolve is one flat pass instead of a nested render (#1019).
     /// </summary>
     private const string WaitTextVariable = "TAOM_ENLISTMENT_WAIT_TEXT";
 
@@ -67,8 +69,15 @@ public sealed class ServiceStatusTextWriter : IServiceStatusTextWriter
         text.SetTextVariable("ARREARS", WithRetinueLine(ArrearsLine(status.DeferredWages), status));
         text.SetTextVariable("DUTY", WithKitLine(DutyLine(status.ActiveDutyTitle), status));
 
-        MBTextManager.SetTextVariable(WaitTextVariable, text);
+        // The flat board resolves NEWLINE once, here; only engine UI builders set it, lazily, to this same value.
+        MBTextManager.SetTextVariable("NEWLINE", "\n");
+        MBTextManager.SetTextVariable(WaitTextVariable, text.ToString());
+        _renderedLanguage = MBTextManager.ActiveTextLanguage;
     }
+
+    private string _renderedLanguage;
+
+    public bool IsStale => _renderedLanguage != MBTextManager.ActiveTextLanguage;
 
     public void WriteNotServing() =>
         MBTextManager.SetTextVariable(

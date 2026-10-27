@@ -74,6 +74,9 @@ public enum EncounterFinishIntent
     /// The loot and aftermath screens do not have this shape: the main party stays in its map event
     /// through them. Duration is a conservative margin, not a loot-window guard.
     ///
+    /// Since #1021 the caller also takes this intent for an <c>EnlistedAttached</c> soldier outside a
+    /// settlement whose open encounter is a joined-battle orphan.
+    ///
     /// Like <see cref="StrandedOutsideSettlement"/>, its preconditions are ENFORCED BY THE POLICY
     /// rather than owed by the caller: R1 still outranks it, so a player genuinely in a map event is
     /// untouchable, and R1c additionally requires <c>!snapshot.PlayerInsideSettlement</c> so a town

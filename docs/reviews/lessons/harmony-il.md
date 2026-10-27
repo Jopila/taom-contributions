@@ -740,7 +740,8 @@ the three names and `PatchShield.IsExcludedTarget` checks it beside the namespac
   default) and `Mission.SpawnAgent`. What stays on the list: the per-unit and per-agent entries (Formation, Agent,
   `Mission.CanAgentRout`) until they are re-measured; `Mission.TickAgentsAndTeamsImp`, `Mission.WaitTickCompletion` and
   `ManagedScriptHolder.TickComponents`, where a swallow would break the frame or the entry stays as built; and the two
-  map targets only the Patch101 profiler patches (`Campaign.Tick`, `CampaignEvents.Tick`); and plan 040's seven
+  map and menu targets only the Patch101 profiler patches (`Campaign.Tick`, `CampaignEvents.Tick`,
+  `GameMenuVM.OnFrameTick`); and plan 040's seven
   load-time stamps, which are not hot but where a shield finalizer would change what an observe-only patch promises to
   leave alone. An entry kept for cost states its call rate beside it; the shield's per-call cost is stated once, in
   `PatchShieldPolicy`'s `ExcludedTargetNamespacePrefixes` comment. See the 2026-10-03 lesson "A shield exclusion kept
@@ -1309,3 +1310,8 @@ read, returns the safe result and skips the original only there, and swallows no
   and transpilers, and every callee the JIT can inline.
 - **Source:** [rca-lastseen-guard-2026-10-26.md](../rca-lastseen-guard-2026-10-26.md); Codex outputs
   `docs/reviews/raw/codex-prereview-lastseen-guard-2026-10-26.md` and `codex-fixreview-lastseen-guard-2026-10-26.md`.
+### When a shield exclusion is justified, trace where the unshielded exception lands (#1019, 2026-10-27)
+The map profiler's menu probe on `GameMenuVM.OnFrameTick` was excluded from PatchShield with the reason "a swallowed exception would skip the rest of the tick and the probe would vanish". The exclusion does the opposite: a missing-API error inside the method is no longer caught there, and it leaves through `GauntletMenuBaseView.OnFrameTick` and `MenuViewContext.OnFrameTick` (neither catches) into `MapScreen.OnFrameTick`, which is shielded. That catch skips the rest of the map screen frame and strips Patch36, Patch89 and Patch101, so profiling stops. The honest reason is parity: with the profiler off nothing TAOM patches the method, so the same escape happens. Another mod's patch on it loses the shield either way.
+- **Why missed:** the exclusion was copied from the earlier profiler-only targets, and its stated reason was never checked against the callers.
+- **Prevent:** when a shield exclusion is justified, trace where an unshielded exception lands, and write that path and the parity reason in the feature doc's per-target table (the 2026-10-02 per-target table rule). A method that stays shielded beside it gets its own row, naming which patches a strip removes.
+- **Source:** #1019; [rca-enlistment-board-render-and-probes-2026-10-26.md](../rca-enlistment-board-render-and-probes-2026-10-26.md).
