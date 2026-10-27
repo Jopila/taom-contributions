@@ -17,7 +17,7 @@ internal static class LadderQuests
 {
     /// <summary>
     /// The owner's running quest with this definition id. Per owner, like the ladder's state: another hero's quest on
-    /// the same rung (the player's hero before a Player Switcher change) must not block this one, and two quests may
+    /// the same rung (a former player hero's, after an heir took over) must not block this one, and two quests may
     /// share a definition id (the quest list is a plain list). The engine keys map markers and the journal record
     /// (<c>JournalLogEntry.IsRelatedTo</c>) by quest StringId, so two quests started here share one journal entry.
     /// </summary>

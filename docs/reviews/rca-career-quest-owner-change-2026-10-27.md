@@ -48,6 +48,21 @@ Pre-existing, outside the change:
   `OnPlayerCharacterChangedEvent`. Left as is: at most one in-game day, and the sweep must exist anyway
   for saves where the change already happened.
 
+## Fix re-review
+
+Codex at `high` and Agent 5 re-reviewed the fixes. Both found the three fixes sound on every traced path
+and no new production defect. Both found the same gap, and one inconsistency remained:
+
+| # | Sev | Finding | Resolution |
+|---|---|---|---|
+| 7 | MEDIUM (Codex P2; Agent 5 LOW) | The three call sites in `CareerQuestCampaignBehavior` (the quest id, the session-launch flag, the reason text) could revert with every test green: the service tests do not reach an entry point. Codex proved it with in-memory mutation runs. | Fix: `CareerQuestWiringTests` pins each call site from source text. A mutation run that reverted the id and the flag failed two of its three tests; the restored source passes all three. |
+| 8 | LOW (Agent 5) | `LadderQuests.cs`, `LordsLadderService.cs` and the ladder entry in `lessons/state-lifecycle-save.md` still said a Player Switcher change produces another hero's quest mid-campaign. | Fix: all three say "after an heir took over"; the lesson carries a correction note. |
+
+**Process note.** The first version of this change, including this RCA's first draft and both Codex
+prompts, was committed and pushed inside `6ae924638` by another session while the fix re-review was
+still running, together with about 70 unrelated files, under a subject without the version label. The
+review findings 7 and 8 land in a follow-up commit.
+
 ## Root-cause pattern
 
 Findings 1, 2 and 5 share one cause: I reused a nearby precedent or comment as evidence instead of

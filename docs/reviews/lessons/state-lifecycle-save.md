@@ -905,10 +905,13 @@ Switcher change or a throwing start stranded it for good.
 ### Scope a running-quest check the way the state it guards is scoped
 The ladder's rungs are per hero, but taking one up checked for anyone's running quest on it, while crediting and
 the hand-in looked only at the main hero's. A CareerQuest is a special quest, which `QuestManager.OnPlayerCharacterChanged`
-never cancels, so after a Player Switcher change the old hero's rung quest blocked the new hero for good.
+never cancels, so after an heir took over the old hero's rung quest blocked the new hero for good. (Correction,
+2026-10-27: this entry first said "after a Player Switcher change"; Player Switcher runs only in a new campaign's
+character creation, so mid-campaign only heir succession changes the player hero.)
 - **Why missed:** the check came from the one-quest Lord's Harness ("a second would share the first's quest id"),
-  and that premise was never re-derived: the quest list is a plain list. (Correction, 2026-10-27: the engine also
-  keys the journal record by quest StringId, `JournalLogEntry.IsRelatedTo`, so same-id quests share one journal entry.)
+  and that premise was never re-derived: the quest list is a plain list. (Correction, 2026-10-27: the engine keys
+  map markers and the journal record by quest StringId, `JournalLogEntry.IsRelatedTo`, so same-id quests share one
+  journal entry.)
 - **Prevent:** when state is per hero, every "is it running" check filters on the same owner; test the start, the
   credit and the hand-in with two owners. A repeat of the career-quest dedup fix (Codex P2, 2026-08-01).
 - **Source:** `docs/reviews/rca-lords-gear-ladder-2026-09-28.md` row 2 (Data flow A).
@@ -1245,3 +1248,8 @@ Move each stack on its own, run the commit in a `finally`, and treat a stack tha
 - **Why missed:** "all heroes" was read as `AllAliveHeroes`, and the service tests feed a fake roster, so nothing exercised the alive/dead split.
 - **Prevent:** any per-hero state TAOM persists or restores across a load enumerates `Hero.FindAll` (it reaches dead heroes the engine removed from `DeadOrDisabledHeroes`), unless the state is meaningless once the hero is dead. Name the choice where the roster is read.
 - **Source:** issue #1011.
+### A quest's StringId keys its journal record, so a quest started again needs a new id (career quests, 2026-10-27)
+`JournalLogsCampaignBehavior.OnQuestStarted` finds the last journal record whose `JournalLogEntry.IsRelatedTo` matches the quest's `StringId`, and reuses it. A career quest offered again after a cancel under the same `"taom_cq_" + def.Id` took over the cancelled quest's record: attributed to the former hero, marked unsuccessful, then flipped to success when the new quest completed. Each offer now gets `CareerQuestService.NewQuestStringId` (definition, owner, campaign milliseconds).
+- **Why missed:** a ladder comment and an earlier entry in this file said "the engine keys only map markers by id", and that claim was trusted instead of the journal code.
+- **Prevent:** before a quest can be started twice (a re-offer, a second owner, a retry), give each instance its own StringId; an engine claim copied into a comment or a lesson is checked against the decompile before it carries a design.
+- **Source:** [rca-career-quest-owner-change-2026-10-27.md](../rca-career-quest-owner-change-2026-10-27.md) finding 2.

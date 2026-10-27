@@ -58,7 +58,7 @@ public sealed class LordsLadderService
 
     /// <summary>
     /// A quest ended. Success on its owner's current rung readies the rung for that owner (the hero who took the
-    /// quest, even after a Player Switcher change) and returns it; any other quest changes nothing.
+    /// quest, even after an heir took over) and returns it; any other quest changes nothing.
     /// </summary>
     public LadderStep? OnQuestEnded(string? ownerHeroId, string? questId, bool success)
     {
