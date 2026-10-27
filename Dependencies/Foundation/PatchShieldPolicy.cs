@@ -135,8 +135,8 @@ public static class PatchShieldPolicy
     /// (three overloads, one entry covers all of them) and <c>GetUnitSpawnFrameWithIndex</c>. Same rationale
     /// as the namespace list's #331 (Gauntlet UI) and Patch38 (SettlementNameplateWidget) entries, applied
     /// at method granularity instead of namespace granularity. The three Mission tick entries are the exception:
-    /// they stay for what a swallow would break, or as built, not for cost (see their comment). So are the two
-    /// campaign-map entries, which only the default-off map profiler patches (see theirs), and the load-time
+    /// they stay for what a swallow would break, or as built, not for cost (see their comment). So are the three
+    /// campaign-map and menu entries, which only the default-off map profiler patches (see theirs), and the load-time
     /// stamps, which are not hot but where a shield finalizer would change behaviour an observe-only TAOM patch
     /// promises to leave alone.
     ///
@@ -201,6 +201,12 @@ public static class PatchShieldPolicy
         // SharedMapTargets_StayUnderPatchShield walk the real targets.
         "TaleWorlds.CampaignSystem.Campaign.Tick",
         "TaleWorlds.CampaignSystem.CampaignEvents.Tick",
+        // The menu probe's per-frame target (#1019): only the profiler patches GameMenuVM.OnFrameTick, so it is excluded like
+        // the two above, for parity with the profiler off, when nothing TAOM patches it. A missing-API error thrown inside it
+        // is then not caught here: it leaves through GauntletMenuBaseView.OnFrameTick and MenuViewContext.OnFrameTick, which
+        // have no catch, into the shielded MapScreen.OnFrameTick (docs/features/map-perf-profiler.md, "PatchShield").
+        // The ContextText setter beside it is Patch64's too and stays shielded.
+        "TaleWorlds.CampaignSystem.ViewModelCollection.GameMenu.GameMenuVM.OnFrameTick",
         // The load-time stamps (docs/features/load-time-stamps.md): observe-only TAOM patches that run
         // once per XML type, or once per lifecycle event, per load, so they are not hot. A shield
         // finalizer here would swallow a missing-API exception that propagates today (ending a

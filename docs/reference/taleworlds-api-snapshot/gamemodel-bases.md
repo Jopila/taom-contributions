@@ -269,6 +269,7 @@ Models: 68. Regenerate after any engine bump: `pwsh tools/snapshot_api_surface.p
 ## TaomMobilePartyAIModel : DefaultMobilePartyAIModel
 `Base: TaleWorlds.CampaignSystem.GameComponents.DefaultMobilePartyAIModel`
 
+- `Boolean ShouldConsiderAttacking(MobileParty party, MobileParty targetParty)`
 - `Boolean ShouldConsiderAvoiding(MobileParty party, MobileParty targetParty)`
 
 ## TaomNotableSpawnModel : DefaultNotableSpawnModel

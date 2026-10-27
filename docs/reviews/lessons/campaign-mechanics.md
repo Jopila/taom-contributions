@@ -1092,3 +1092,8 @@ server was protected only by the presence probe. The single-player predicate is 
 - **Prevent:** before a co-op gate on code that changes the world, read `docs/features/coop-interop.md` "Which predicate
   to use" and pick by what the code decides; a precedent's predicate answers that precedent's question.
 - **Source:** [rca-career-quest-owner-change-2026-10-27.md](../rca-career-quest-owner-change-2026-10-27.md) finding 1.
+### A join seeded from inside the raided village is interrupted by the engine, so read the trace before opening a fix (#1019, 2026-10-26)
+A review worried that a raid reaching the village an enlisted soldier stands in could leave him stranded. The v1.5.5 trace says it cannot: `EncounterManager.StartSettlementEncounter` (:222-243) finishes his encounter and starts the raid, TAOM's battle-start join seeds an encounter, and `StartBattleAction.ApplyInternal` (:34-36) interrupts it unless the event is a sally-out: `InterruptEncounter` (:1671-1679) leaves the battle and opens `encounter_interrupted`. For the raid itself, `StartSettlementEncounter` then, when he shares the village's faction, calls `PlayerEncounter.Start()` (which only creates the encounter) and `Current.Init(...)`, which joins the defender side (:655-661); otherwise it walks him out of the village with `LeaveSettlementAction.ApplyForParty` (:232-242).
+- **Why missed:** the review read the seeding call and not the engine call that runs after it.
+- **Prevent:** before a fix for an encounter or menu hazard, follow the engine call that runs after TAOM's seam; log the case (here one ungated INFO line in `EnsureEncounterAgainst`) and let a run decide.
+- **Source:** [enlistment.md](../../features/enlistment.md), "Inside the raided village (#1019)".

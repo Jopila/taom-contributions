@@ -415,7 +415,7 @@ gate is precisely the one that failed. Recorded in `docs/reviews/lessons/testing
 | Surface | Owner | Notes |
 |---|---|---|
 | Service wait menu + its six options | `Presentation/EnlistmentWaitMenuOptions.cs` | **Every service option is `isLeave: false`, and that is load-bearing; the discharged exit ("Go on your way", #828) is the one `isLeave` option and shows only while nobody serves.** `GameMenu.RunMenuOptionConsequence` calls `EndWait()` BEFORE the consequence for an `isLeave` option on a wait menu, which sets `IsWaitActive = false` and `TimeControlMode = Stop`, tearing down the tick that drives the position sync before the consequence runs. It also makes the option a candidate for the Escape slot. |
-| Live status board | `ServiceStatusService` + `Presentation/ServiceStatusTextWriter.cs` | Rebuilt on the pump's 2 s budget, pushed only when the model differs. **The value equality IS the throttle**, so a field omitted from `Equals` is a status line that never updates — one `DataRow` per field guards it. |
+| Live status board | `ServiceStatusService` + `Presentation/ServiceStatusTextWriter.cs` | Rebuilt on the pump's 2 s budget, pushed only when the model differs, or when the board was rendered in another language than the active one (#1019). **The value equality IS the throttle**, so a field omitted from `Equals` is a status line that never updates, one `DataRow` per field guards it. The board is rendered to a plain string once per push (`SetTextVariable(name, text.ToString())`), not handed to the menu as a nested `TextObject`. |
 | "Speak with your commander" | `EnlistmentPlayerActionService` + `IMapConversationAdapter` | The adapter carries the game-state guard itself: `ConversationManager.OpenMapConversation` opens with `(GameStateManager.Current?.ActiveState as MapState).OnMapConversationStarts(...)` — an `as` cast dereferenced with no null check, so it throws when the state manager is null, the state stack is empty, OR the active state is anything else. `CampaignMapConversation.OpenConversation` adds a fourth route via `Campaign.Current`. |
 | "Ask your sergeant for work" | `DutyOrchestrationService.RequestDutyNow` | Shares ONE offer path with the daily tick and the same rotation cadence, so asking cannot conjure work the rotation would not have given. Host-only. |
 | Release / desertion | `Presentation/EnlistmentWaitMenuPresenter` + `Hooks/EnlistmentReleaseDialogBehavior` | Keyed to `MinimumServiceDays` (21), deliberately NOT `ContractDays` (365) — see below. |
@@ -568,7 +568,13 @@ re-enlistment and across campaigns. **Fix:** state transition before gate; plus
   second and every 8 seconds. On a stopped wait menu (paused, or just after loading a save) the budget
   is real seconds: about every 250 ms and every 2 seconds. The board rebuild exceeds 4 Hz from a fast-forward multiplier above 32 (equal at 32), which is accepted;
   before this change the running menu ran both tiers twice as often, so the change halves the rate only at
-  the default x4. The wait-menu frame is also the one place a deferred raid join is performed (see "#954 Open
+  the default x4. Since #1019 each of those pushes renders the board once to a flat string
+  (`ServiceStatusTextWriter` passes `text.ToString()` to `MBTextManager.SetTextVariable`, whose string overload wraps
+  it in a plain `TextObject`), so the per-frame re-resolve of the menu text, which `GameMenuVM.IsMenuTextChanged`
+  forces for a menu text with no attributes, costs one flat pass instead of a nested render of the board lines.
+  The price is the language: the flat string no longer follows a language switch, so `IServiceStatusTextWriter.IsStale`
+  (the rendered language differs from `MBTextManager.ActiveTextLanguage`) makes `RefreshIfChanged` write again, within
+  one status tick of the switch. The wait-menu frame is also the one place a deferred raid join is performed (see "#954 Open
   risk 1"): `ServiceMaintenanceService.OnWaitMenuFrame` flushes it first, then pumps only when the campaign
   delta is exactly zero; the hook makes that one call and restarts its Stopwatch every frame.
 - **Deferred duty callbacks** granted rewards and mutated the record without re-checking authority
@@ -2312,6 +2318,30 @@ non-lord mobile party, and the commander on the defender side), `ServiceAttachme
 and `CommanderSettlementIdentityTests` (both snapshots fill the flag through `VillageRaidReader`, and
 the comment-stripped source pin: the reader tests `IsMobile`, `IsLordParty` and `TotalHealthyCount`
 with no LINQ and no `Find`).
+
+## Inside the raided village (#1019)
+
+A raid can reach the village the soldier stands in. Read from the v1.5.5 decompile, not seen in a game:
+`EncounterManager.StartSettlementEncounter` (:222-243) finishes the player's encounter and starts the raid; TAOM's
+battle-start join (`EnlistmentBattleBehavior.OnMapEventStarted` -> `ServiceBattleService.TryJoin`) then seeds an
+encounter through `IEncounterAdapter.EnsureEncounterAgainst`; `StartBattleAction.ApplyInternal` (:34-36) interrupts that
+encounter unless the event is a sally-out: `PlayerEncounter.InterruptEncounter` (:1671-1679) leaves the battle and
+opens vanilla's `encounter_interrupted` menu (Help / Leave). For the raid itself, `StartSettlementEncounter` then,
+when he shares the village's faction, calls `PlayerEncounter.Start()`, which only creates the encounter, and
+`Current.Init(...)`, which joins the defender side (`Init`, :655-661); otherwise it walks him out of the village with
+`LeaveSettlementAction.ApplyForParty` (:232-242). He is not stranded in either path, so no fix is made; the question
+that stays open is only which menu the game shows and what Help or Leave does.
+
+`EnsureEncounterAgainst` therefore writes one INFO line when it seeds a join while the main party's
+`CurrentSettlement` is the map event's settlement, and not behind the trace toggle (it is rare):
+`[EnlistDiag] seeding the join from inside '<settlement id>' (event=<type>, sameFactionAsSettlement=<True|False>); ...`.
+`sameFactionAsSettlement` is the engine's own test on the raid path: True means the engine re-joined him on the defender
+side, False means it walked him out of the village.
+Reproduce twice (same faction, then his own clan's village) with "Enable Enlistment Trace" on, and report that line,
+which menu appeared, and what happened after Help or Leave. `InsideSettlementJoinDiagnosticTests` pins the line's
+place (after the settlement read, before `RestartPlayerEncounter`, ungated). The timing questions of the same issue
+(the menu text redraw, the link colour rewrite, the board rate above x32) are measured by the map profiler's menu
+probes: [map-perf-profiler.md](map-perf-profiler.md), "Menu probes (#1019)".
 
 ## Personal spoils (#834)
 

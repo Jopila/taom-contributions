@@ -49,6 +49,7 @@ public class PatchCategoryNumberTests
         ["Patch89_MapLoadDiagnostics_SceneReady"] = "sub-category documented under ## Patch89_MapLoadDiagnostics",
         ["Patch98_HitchProbe_Camera"] = "sub-category documented under ## Patch98_HitchProbe",
         ["Patch101_MapFrameProfiler_Views"] = "sub-category documented under ## Patch101_MapFrameProfiler",
+        ["Patch101_MapFrameProfiler_Menu"] = "sub-category documented under ## Patch101_MapFrameProfiler",
     };
 
     /// <summary>A feature-map row that cites another feature's patch number, keyed "row Patch##". A stale entry fails.</summary>

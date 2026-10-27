@@ -1401,3 +1401,8 @@ Wave 1 tagged every Italian kingdom and clan name `{.FN}` because `{.FN}` and `{
 - **Prevent:** before a tag goes on a name class, read the language processor and the function file for every place that reads
   the tag, and tag by the gender of the implied noun ("il regno", "il clan"), not by the one effect you were fixing.
 - **Source:** `docs/features/name-grammar-tags.md` (Solution Approach), #1023 review wave 1.
+### Flattening a TextObject to a string freezes every global it reads at that moment (#1019, 2026-10-27)
+The enlistment board was turned into a plain string once per status change so the wait menu would not rebuild a nested text every frame. The board and its nested lines use `{NEWLINE}`, a global TAOM never sets: the engine sets it (`GameTexts.SetVariable("NEWLINE", "\n")`) lazily inside its UI builders, and ending a campaign clears all globals. Rendered every frame, the board picked `NEWLINE` up whenever the engine set it. Flattened once, a board written while it was unset kept its lines run together until the next status change.
+- **Why missed:** before the flatten the board re-rendered every frame and picked `NEWLINE` up later, so the unset state had no visible effect, and the render test never started from it.
+- **Prevent:** before `TextObject.ToString()` freezes a text, set every global the text reads (here `MBTextManager.SetTextVariable("NEWLINE", "\n")`), and test the frozen result with those globals removed first.
+- **Source:** #1019; [rca-enlistment-board-render-and-probes-2026-10-26.md](../rca-enlistment-board-render-and-probes-2026-10-26.md).
