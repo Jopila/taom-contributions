@@ -87,6 +87,10 @@
 	<string id="aom_clan_khuzait_19_name" text="{=aom_clan_khuzait_19_name}Bozorganith" />
 	<string id="aom_clan_lindon_1_name" text="{=aom_clan_lindon_1_name}Falathrim" />
 	<string id="aom_clan_lindon_2_name" text="{=aom_clan_lindon_2_name}Edhil Mithlond" />
+	<string id="aom_clan_lindon_3_name" text="{=aom_clan_lindon_3_name}Nos Galdor" />
+	<string id="aom_clan_lindon_4_name" text="{=aom_clan_lindon_4_name}Nos Brithombar" />
+	<string id="aom_clan_lindon_5_name" text="{=aom_clan_lindon_5_name}Wardens of Ered Luin" />
+	<string id="aom_clan_lindon_6_name" text="{=aom_clan_lindon_6_name}Nos Eglarest" />
 	<string id="aom_clan_lothlorien_1_name" text="{=aom_clan_lothlorien_1_name}Nos Finarfin" />
 	<string id="aom_clan_lothlorien_2_name" text="{=aom_clan_lothlorien_2_name}Wardens of the Naith" />
 	<string id="aom_clan_lothlorien_3_name" text="{=aom_clan_lothlorien_3_name}Nos Malgalad" />

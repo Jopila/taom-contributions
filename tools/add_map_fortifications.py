@@ -93,9 +93,19 @@ FORTS = [
     Fort("castle_RH1", "Egladil", "clan_rhudaur_1", "rhudaur", "castle", "taom_gondor_castle_003_forceatmo", 800, "town_RH1"),
     Fort("castle_RH2", "Ettendale Hold", "clan_rhudaur_2", "rhudaur", "castle", "taom_gondor_castle_001_forceatmo", 800, "castle_RH1"),
     Fort("castle_RH3", "Coldfells", "clan_rhudaur_3", "rhudaur", "castle", "taom_gondor_castle_002_forceatmo", 800, "castle_RH2"),
+    # Lindon (#1039; Mike placed the entities 2026-10-27 and named the two havens). One fief per clan:
+    # Edhil Mithlond takes Harlond, the four new houses (tools/oneoff/author_lindon_clans.py) the rest.
+    # Prosperity at the Lindon floor (tools/settlement_economy_floor.json). Battania scenes like the
+    # other elven fiefs; battania_town_e and battania_castle_c were unused.
+    Fort("town_LN2", "Harlond", "clan_lindon_2", "lindon", "town", "battania_town_e", 4800, "village_LN1_4"),
+    Fort("town_LN3", "Forlond", "clan_lindon_3", "lindon", "town", "battania_town_c", 4800, "town_LN2"),
+    Fort("castle_LN1", "Ost Falas", "clan_lindon_4", "lindon", "castle", "battania_castle_a", 950, "town_LN3"),
+    Fort("castle_LN2", "Barad Luin", "clan_lindon_5", "lindon", "castle", "battania_castle_b", 950, "castle_LN1"),
+    Fort("castle_LN3", "Tirith Aear", "clan_lindon_6", "lindon", "castle", "battania_castle_c", 950, "castle_LN2"),
 ]
 
-# FORTS ids a release has shipped. The save-order check protects saves made BEFORE a batch, so once
+# FORTS ids a release has shipped. The save-order check protects saves made BEFORE a batch only until the
+# distance cache is rebuilt with the batch's ids; after that such a save is expected not to load (#1041). Once
 # a release carries a batch, add its ids here and the next batch's rows become the required tail.
 # Limit: a village a later batch binds to an already released fortification is not counted as new
 # (batch_ids follows the bound fortification), so --check would name it; widen batch_ids first.
@@ -182,6 +192,28 @@ STYLE = {
 }
 # Cardolan and Rhudaur take Arthedain's style: the same Gondor-built scenes and weak building levels.
 STYLE["cardolan"] = STYLE["rhudaur"] = STYLE["arthedain"]
+# Lindon from its own town_LN1 (battania scenes and meshes, gate rotation, building levels) and the
+# elven castle_M1 (Lindon had no castle).
+STYLE["lindon"] = dict(town_menu="gui_bg_town_battania", castle_menu="gui_bg_castle_battania", wait="wait_battania_town",
+                       gate_rotation={"town": "0.378", "castle": "0.908"},
+                       arena="arena_battania_a", tavern="battania_town_house_a_interior_a_tavern",
+                       keep=("battania_castle_keep_a_l1_interior", "battania_castle_keep_a_l2_interior",
+                             "battania_castle_keep_a_l3_interior"),
+                       dungeon="battania_dungeon_stealth", house="battania_town_house_b_interior_b_house",
+                       town_buildings=[
+                           ("building_settlement_fortifications", 2), ("building_settlement_barracks", 2),
+                           ("building_settlement_training_fields", 1), ("building_settlement_guard_house", 1),
+                           ("building_settlement_siege_workshop", 1), ("building_settlement_tax_office", 2),
+                           ("building_settlement_marketplace", 3), ("building_settlement_warehouse", 3),
+                           ("building_settlement_mason", 2), ("building_settlement_waterworks", 3),
+                           ("building_settlement_courthouse", 1), ("building_settlement_roads_and_paths", 3)],
+                       castle_buildings=[
+                           ("building_castle_fortifications", 2), ("building_castle_barracks", 1),
+                           ("building_castle_training_fields", 1), ("building_castle_guard_house", 0),
+                           ("building_castle_siege_workshop", 1), ("building_castle_castallans_office", 1),
+                           ("building_castle_granary", 1), ("building_castle_craftmans_quarters", 0),
+                           ("building_castle_farmlands", 1), ("building_castle_mason", 1),
+                           ("building_castle_roads_and_paths", 2)])
 
 
 # ---------------------------------------------------------------- scene transforms

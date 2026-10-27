@@ -143,5 +143,9 @@
     <string id="aom_clan_rhudaur_1_name" text="House of Cameth Brin" />
     <string id="aom_clan_rhudaur_2_name" text="House of Ettendale" />
     <string id="aom_clan_rhudaur_3_name" text="Wardens of the Coldfells" />
+    <string id="aom_clan_lindon_3_name" text="{.NS}Nos Galdor" />
+    <string id="aom_clan_lindon_4_name" text="{.NS}Nos Brithombar" />
+    <string id="aom_clan_lindon_5_name" text="Wardens of Ered Luin" />
+    <string id="aom_clan_lindon_6_name" text="{.NS}Nos Eglarest" />
   </strings>
 </base>

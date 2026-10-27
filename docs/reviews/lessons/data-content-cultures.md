@@ -2208,3 +2208,9 @@ Cardolan's and Rhudaur's 14 ladies moved from copied face keys to the `fighter_g
 - **Why missed:** the template replaced the keys to pass the face-variety ceiling, and nobody listed what the keys had supplied; `HeroFaceVarietyDataTests` models faces, not hair.
 - **Prevent:** a human lady on a face template carries `<hair_tags>` in her `<face>` (`empire` matches 10 of 22 adult female hairs, none bald), as the Harad ladies carry `aserai`. `FemaleLordHairDataTests` gates it. When you replace one data mechanism with another, list what the old one supplied implicitly before you trust the new one.
 - **Source:** [rca-cardolan-rhudaur-2026-10-23.md](../rca-cardolan-rhudaur-2026-10-23.md) finding 1.
+
+### Read what a reused binding contains, not only that it exists (#1039, 2026-10-27)
+The four new Lindon clans reused `clan_lindon_2`'s `default_party_template`, as the Dale expansion reused its own culture's templates. That template's 14 stacks were all Rivendell troops, left from the era when Lindon borrowed the `rivendell` culture, so every new lord would have led "[Rivendell]" units while the castles' garrisons held Lindon ones. `Clan.DefaultPartyTemplate` returns the clan's binding before the culture's.
+- **Why missed:** the plan checked that the template id exists, which is what the Dale one-off asserts, and never read its stacks.
+- **Prevent:** before reusing a template, roster or binding for a culture, read one entry of it and confirm its culture. A borrowed-era leftover keeps its old troops after the culture is promoted.
+- **Source:** [rca-lindon-expansion-2026-10-27.md](../rca-lindon-expansion-2026-10-27.md) finding 2.

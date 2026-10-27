@@ -1,8 +1,8 @@
 ﻿# Scene Entity Reference
 
-Extracted from `E:\Steam\steamapps\common\Mount & Blade II Bannerlord\Modules\TAOM_Map\SceneObj\Main_map\scene.xscene` on 2026-10-23 by `tools/Generate-SceneEntitiesDoc.ps1`. Regenerate, do not hand-edit.
+Extracted from `E:\Steam\steamapps\common\Mount & Blade II Bannerlord\Modules\TAOM_Map\SceneObj\Main_map\scene.xscene` on 2026-10-27 by `tools/Generate-SceneEntitiesDoc.ps1`. Regenerate, do not hand-edit.
 
-## town_ (87 settlements)
+## town_ (89 settlements)
 
 | Region | Entities |
 |--------|----------|
@@ -26,11 +26,11 @@ Extracted from `E:\Steam\steamapps\common\Mount & Blade II Bannerlord\Modules\TA
 | CA (3) | town_CA1, town_CA2, town_CA3 |
 | GBC (2) | town_GBC1, town_GBC2 |
 | GT (1) | town_GT1 |
-| LN (1) | town_LN1 |
+| LN (3) | town_LN1, town_LN2, town_LN3 |
 | MM (3) | town_MM1, town_MM2, town_MM3 |
 | RH (1) | town_RH1 |
 
-## castle_ (156 castles)
+## castle_ (159 castles)
 
 | Region | Entities |
 |--------|----------|
@@ -54,10 +54,11 @@ Extracted from `E:\Steam\steamapps\common\Mount & Blade II Bannerlord\Modules\TA
 | AN (7) | castle_AN10, castle_AN11, castle_AN4, castle_AN5, castle_AN6, castle_AN8, castle_AN9 |
 | CA (2) | castle_CA1, castle_CA2 |
 | GBC (4) | castle_GBC1, castle_GBC2, castle_GBC3, castle_GBC4 |
+| LN (3) | castle_LN1, castle_LN2, castle_LN3 |
 | MM (7) | castle_MM1, castle_MM2, castle_MM3, castle_MM4, castle_MM5, castle_MM6, castle_MM7 |
 | RH (3) | castle_RH1, castle_RH2, castle_RH3 |
 
-## village_ (292 villages)
+## village_ (301 villages)
 
 | Region | Entities |
 |--------|----------|
@@ -81,11 +82,11 @@ Extracted from `E:\Steam\steamapps\common\Mount & Blade II Bannerlord\Modules\TA
 | CA (11) | village_CA1_1, village_CA1_2, village_CA1_3, village_CA1_4, village_CA2_1, village_CA2_2, village_CA2_4, village_CA3_1, village_CA3_2, village_CA3_3, village_CA3_4 |
 | GBC (6) | village_GBC1_1, village_GBC1_2, village_GBC1_3, village_GBC2_1, village_GBC2_2, village_GBC2_3 |
 | GT (7) | village_GT1_1, village_GT1_2, village_GT1_3, village_GT1_4, village_GT1_5, village_GT1_6, village_GT1_7 |
-| LN (4) | village_LN1_1, village_LN1_2, village_LN1_3, village_LN1_4 |
+| LN (13) | village_LN1_1, village_LN1_2, village_LN1_3, village_LN1_4, village_LN2_1, village_LN2_2, village_LN2_3, village_LN2_4, village_LN3_1, village_LN3_2, village_LN3_3, village_LN3_4, village_LN3_5 |
 | MM (8) | village_MM1_1, village_MM1_2, village_MM1_3, village_MM2_1, village_MM2_2, village_MM3_1, village_MM3_2, village_MM3_3 |
 | RH (3) | village_RH1_1, village_RH1_2, village_RH1_3 |
 
-## castle_village_ (395 castle villages)
+## castle_village_ (404 castle villages)
 
 | Region | Entities |
 |--------|----------|
@@ -109,6 +110,7 @@ Extracted from `E:\Steam\steamapps\common\Mount & Blade II Bannerlord\Modules\TA
 | AN (12) | castle_village_AN10_1, castle_village_AN11_1, castle_village_AN11_2, castle_village_AN4_1, castle_village_AN5_1, castle_village_AN5_2, castle_village_AN6_1, castle_village_AN6_2, castle_village_AN6_3, castle_village_AN8_1, castle_village_AN8_2, castle_village_AN9_1 |
 | CA (7) | castle_village_CA1_1, castle_village_CA1_2, castle_village_CA1_3, castle_village_CA2_1, castle_village_CA2_2, castle_village_CA2_3, castle_village_CA2_4 |
 | GBC (12) | castle_village_GBC1_1, castle_village_GBC1_2, castle_village_GBC2_1, castle_village_GBC2_2, castle_village_GBC3_1, castle_village_GBC3_2, castle_village_GBC3_3, castle_village_GBC3_4, castle_village_GBC4_1, castle_village_GBC4_2, castle_village_GBC4_3, castle_village_GBC4_4 |
+| LN (9) | castle_village_LN1_1, castle_village_LN1_2, castle_village_LN1_3, castle_village_LN2_1, castle_village_LN2_2, castle_village_LN2_3, castle_village_LN3_1, castle_village_LN3_2, castle_village_LN3_3 |
 | MM (16) | castle_village_MM1_1, castle_village_MM1_2, castle_village_MM1_3, castle_village_MM1_4, castle_village_MM2_1, castle_village_MM2_2, castle_village_MM2_3, castle_village_MM2_4, castle_village_MM3_1, castle_village_MM4_1, castle_village_MM5_1, castle_village_MM5_2, castle_village_MM6_1, castle_village_MM7_1, castle_village_MM7_2, castle_village_MM7_3 |
 | RH (8) | castle_village_RH1_1, castle_village_RH1_2, castle_village_RH2_1, castle_village_RH2_2, castle_village_RH2_3, castle_village_RH3_1, castle_village_RH3_2, castle_village_RH3_3 |
 

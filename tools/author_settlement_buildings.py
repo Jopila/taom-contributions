@@ -94,7 +94,7 @@ DECISIONS = {
     "town_EW3": dec("fortress_town", "East Osgiliath — eastern half of the war-torn crossing city."),
     "town_EW10": dec("major", "Serelond — Belfalas coastal town."),
     "town_EW11": dec("standard", "Methir — lesser Gondorian town."),
-    "castle_EW1": dec("major", "Harlond — the harbour-fort of Minas Tirith on Anduin."),
+    "castle_EW1": dec("major", "Harlond Quays — the harbour-fort of Minas Tirith on Anduin."),
     "castle_EW4": dec("great_fortress", "Cair Andros — the island fortress guarding the northern Anduin approach.", fort=3, sge=2),
     "castle_EW3": dec("major", "Edhellond — ancient elven haven-fort near Dol Amroth."),
     "castle_EW7": dec("major", "Bar-en-Siril — strong Gondorian keep."),

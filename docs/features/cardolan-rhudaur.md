@@ -177,6 +177,8 @@ new rows sit at the end of the file under `town_CA2`, so the first of them throw
 `Settlement.Deserialize` (its alleys), `MBObjectManager.LoadXML` swallows it, and the unfinished rows
 are dropped; every older settlement has already loaded. The mechanism is Arthedain's
 ([arthedain.md](arthedain.md) "Save Compatibility"), and the in-game check on an old save is owed.
+The cache was rebuilt for these rows on 2026-10-23, so a save made before them is now expected to stop
+loading (v1.5.6 decompile, not reproduced; #1041).
 
 Names behave differently from ids. A town's name is not saved: `Settlement.Deserialize` reads it
 from `settlements.xml` on every load, so a renamed town shows its new name in every save. A clan's

@@ -17,7 +17,8 @@ The musician's lyrics are vanilla's, untouched.
   (`ConversationManager.GetSentenceOptions`), and only a musician reaches the pick.
 - **TAOM requirement:** talking to the musician in any tavern works.
 - **Without this feature:** in a town whose culture owns no other town the conversation condition throws. Six towns
-  are in that state today: `town_DG1`, `town_isengard`, `town_L1`, `town_R1`, `town_GT1` and `town_LN1`. The count can
+  are in that state today: `town_DG1`, `town_GT1`, `town_isengard`, `town_L1`, `town_R1` and `town_RH1` (Rhudaur's
+  only town since #978; `town_LN1` left the list when Lindon gained Harlond and Forlond, #1039). The count can
   grow, because `CultureConversionAdapter` changes a settlement's culture at runtime (#824).
 
 ## Architecture
@@ -89,7 +90,7 @@ The tavern maid's local speciality line sets `DRINK` and `FOOD` only for vanilla
 
 ## In-game check
 
-- In any of the six towns (`town_DG1`, `town_isengard`, `town_L1`, `town_R1`, `town_GT1`, `town_LN1`), talking to the
+- In any of the six towns (`town_DG1`, `town_GT1`, `town_isengard`, `town_L1`, `town_R1`, `town_RH1`), talking to the
   musician never crashes, and about one lyric in four names another town.
 - In a Gondor town (11 Gondor towns), a lyric that names a town names a Gondor town, which proves the engine-first
   branch.

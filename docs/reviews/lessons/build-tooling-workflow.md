@@ -4551,3 +4551,9 @@ reverted `clans.xml` alone. This repeats "Change data a generator owns through t
   the gates of every file kind that holds it. The clan and TAOM_Map rows of the gate table in `moduledata-validation.md`
   now name `test_generator_regions_in_sync.py` and `add_map_fortifications.py --check`, which compares live names too.
 - **Source:** `docs/reviews/rca-tharbad-swap-2026-10-27.md`.
+
+### Record a baseline after the last write it covers (#1039, 2026-10-27)
+`check_external_loc_coverage.py --update-baseline` ran in the middle of the Lindon work; a later rename put one more English row in five languages, and the gate failed again. Both wave-1 data lenses caught it by re-running the gate.
+- **Why missed:** the baseline step was done once the planned writes ended, and a write requested later was not followed by it.
+- **Prevent:** refresh a ratchet baseline as the last data step before the review, and re-run every gate after any later write.
+- **Source:** `docs/reviews/rca-lindon-expansion-2026-10-27.md` finding 3.

@@ -4234,5 +4234,55 @@
 		faction="Faction.clan_rhudaur_3"
 		spouse="Hero.lord_RH3_2" />
   <!-- TAOM-NEWFACTIONS:rhudaur:END -->
+  <!-- TAOM-LINDON-EXPANSION:BEGIN -->
+	<Hero
+		id="lord_LN3_1"
+		faction="Faction.clan_lindon_3"
+		text="{=lord_LN3_1_description}Galdor of the Havens, who bore Círdan's counsel to the house of Elrond, keeps Forlond on the northern arm of the Gulf of Lhûn." />
+	<Hero
+		id="lord_LN3_2"
+		spouse="Hero.lord_LN3_1"
+		faction="Faction.clan_lindon_3" />
+	<Hero
+		id="lord_LN3_3"
+		father="Hero.lord_LN3_1"
+		mother="Hero.lord_LN3_2"
+		faction="Faction.clan_lindon_3" />
+	<Hero
+		id="lord_LN3_4"
+		father="Hero.lord_LN3_1"
+		mother="Hero.lord_LN3_2"
+		faction="Faction.clan_lindon_3" />
+	<Hero
+		id="lord_LN4_1"
+		faction="Faction.clan_lindon_4" />
+	<Hero
+		id="lord_LN4_2"
+		spouse="Hero.lord_LN4_1"
+		faction="Faction.clan_lindon_4" />
+	<Hero
+		id="lord_LN4_3"
+		faction="Faction.clan_lindon_4" />
+	<Hero
+		id="lord_LN5_1"
+		faction="Faction.clan_lindon_5" />
+	<Hero
+		id="lord_LN5_2"
+		spouse="Hero.lord_LN5_1"
+		faction="Faction.clan_lindon_5" />
+	<Hero
+		id="lord_LN5_3"
+		faction="Faction.clan_lindon_5" />
+	<Hero
+		id="lord_LN6_1"
+		faction="Faction.clan_lindon_6" />
+	<Hero
+		id="lord_LN6_2"
+		spouse="Hero.lord_LN6_1"
+		faction="Faction.clan_lindon_6" />
+	<Hero
+		id="lord_LN6_3"
+		faction="Faction.clan_lindon_6" />
+  <!-- TAOM-LINDON-EXPANSION:END -->
 </Heroes>
 

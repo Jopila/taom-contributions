@@ -15,7 +15,8 @@ while a PLACEHOLDER row has no scene entity, SettlementVisual.OnStartup NREs at 
 is missing, or whose master position drifted from the scene transform.
 
 Master rows are appended at the END of the file, never after an anchor (append_settlements): a
-save made before the batch still loads this file, and a new village or town ahead of an existing
+save made before the batch still loads this file (until the distance cache is rebuilt with the new ids,
+#1041), and a new village or town ahead of an existing
 row makes that save skip the existing row (2026-10-07, docs/modding/settlements.md "Add"). The
 row's `after` anchor (default INSERT_AFTER) now places only its loc rows, after that anchor's last
 row in each language, same display name in all 12 (Tolkien proper nouns do not translate). A row
@@ -73,6 +74,7 @@ MESHES = {
     "cardolan": ("gui_bg_village_empire", "wait_empire_village", "gui_bg_castle_empire"),
     "rhudaur": ("gui_bg_village_empire", "wait_empire_village", "gui_bg_castle_empire"),
     "bluecraig": ("gui_bg_village_sturgia", "wait_sturgia_village", "gui_bg_castle_sturgia"),
+    "lindon": ("gui_bg_village_battania", "wait_battania_village", "gui_bg_castle_battania"),
 }
 HEARTH = "500"  # the SETTLEMENT_ECONOMY_FLOOR for isengard (tools/settlement_economy_floor.json)
 
@@ -196,6 +198,26 @@ VILLAGES = [
     Village("castle_village_RH3_1", "Coldfell Shieling", "castle_RH3", "sheep_farm", "rhudaur", "taom_gondor_village_003_forceatmo", hearth="300", after="castle_RH3"),
     Village("castle_village_RH3_2", "Rimecliff", "castle_RH3", "trapper", "rhudaur", "taom_gondor_village_004_forceatmo", hearth="300", after="castle_RH3"),
     Village("castle_village_RH3_3", "Greyfell Wood", "castle_RH3", "lumberjack", "rhudaur", "taom_gondor_village_001_forceatmo", hearth="300", after="castle_RH3"),
+    # Lindon (#1039; Mike placed the entities 2026-10-27). Sindarin of the Falathrim, hearth at the
+    # Lindon floor (tools/settlement_economy_floor.json), the least used battania village scenes.
+    Village("village_LN2_1", "Talath Falas", "town_LN2", "wheat_farm", "lindon", "battania_village_h", after="town_LN2"),
+    Village("village_LN2_2", "Maewlond", "town_LN2", "fisherman", "lindon", "battania_village_i", after="town_LN2"),
+    Village("village_LN2_3", "Nen Harn", "town_LN2", "vineyard", "lindon", "battania_village_j", after="town_LN2"),
+    Village("village_LN2_4", "Linalph", "town_LN2", "cattle_farm", "lindon", "battania_village_k", after="town_LN2"),
+    Village("village_LN3_1", "Ethir Forn", "town_LN3", "fisherman", "lindon", "battania_village_l", after="town_LN3"),
+    Village("village_LN3_2", "Brithlas", "town_LN3", "salt_mine", "lindon", "battania_village", after="town_LN3"),
+    Village("village_LN3_3", "Hîthlin", "town_LN3", "sheep_farm", "lindon", "battania_village_l", after="town_LN3"),
+    Village("village_LN3_4", "Gwaewlas", "town_LN3", "flax_plant", "lindon", "battania_village_g", after="town_LN3"),
+    Village("village_LN3_5", "Mithlin", "town_LN3", "wheat_farm", "lindon", "battania_village_h", after="town_LN3"),
+    Village("castle_village_LN1_1", "Parth Harn", "castle_LN1", "sheep_farm", "lindon", "battania_village_i", after="castle_LN1"),
+    Village("castle_village_LN1_2", "Nimlas", "castle_LN1", "lumberjack", "lindon", "battania_village_j", after="castle_LN1"),
+    Village("castle_village_LN1_3", "Glanaear", "castle_LN1", "fisherman", "lindon", "battania_village_k", after="castle_LN1"),
+    Village("castle_village_LN2_1", "Emyn Luin", "castle_LN2", "sheep_farm", "lindon", "battania_village_l", after="castle_LN2"),
+    Village("castle_village_LN2_2", "Luinbar", "castle_LN2", "cattle_farm", "lindon", "battania_village", after="castle_LN2"),
+    Village("castle_village_LN2_3", "Ram Luin", "castle_LN2", "iron_mine", "lindon", "battania_village_j", after="castle_LN2"),
+    Village("castle_village_LN3_1", "Cirith Forn", "castle_LN3", "trapper", "lindon", "battania_village_g", after="castle_LN3"),
+    Village("castle_village_LN3_2", "Forlas", "castle_LN3", "lumberjack", "lindon", "battania_village_h", after="castle_LN3"),
+    Village("castle_village_LN3_3", "Falathlin", "castle_LN3", "fisherman", "lindon", "battania_village_i", after="castle_LN3"),
 ]
 INSERT_AFTER = "village_isengard_a"   # default anchor: last settlement of the Isengard block, and its last loc row
 

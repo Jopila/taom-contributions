@@ -1070,5 +1070,18 @@
     <string id="aom_lord_RH3_2_name" text="Harnoth" />
     <string id="aom_lord_RH3_3_name" text="Olwen" />
     <string id="aom_lord_RH3_4_name" text="Seren" />
+    <string id="aom_lord_LN3_1_name" text="Galdor" />
+    <string id="aom_lord_LN3_2_name" text="Faelwen" />
+    <string id="aom_lord_LN3_3_name" text="Thalanor" />
+    <string id="aom_lord_LN3_4_name" text="Glîrwen" />
+    <string id="aom_lord_LN4_1_name" text="Ostaron" />
+    <string id="aom_lord_LN4_2_name" text="Brethilwen" />
+    <string id="aom_lord_LN4_3_name" text="Hîrion" />
+    <string id="aom_lord_LN5_1_name" text="Luinor" />
+    <string id="aom_lord_LN5_2_name" text="Celebwen" />
+    <string id="aom_lord_LN5_3_name" text="Lothron" />
+    <string id="aom_lord_LN6_1_name" text="Aearion" />
+    <string id="aom_lord_LN6_2_name" text="Gwaeriel" />
+    <string id="aom_lord_LN6_3_name" text="Rínthal" />
   </strings>
 </base>

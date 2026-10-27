@@ -12,67 +12,67 @@
       "color2": "FF203054",
       "roster": [
         {
-          "troop": "rivendell_militia_spearman",
+          "troop": "lindon_militia_spearman",
           "min": 2,
           "max": 12
         },
         {
-          "troop": "rivendell_militia_veteran_spearman",
+          "troop": "lindon_militia_veteran_spearman",
           "min": 2,
           "max": 12
         },
         {
-          "troop": "imladris_swordguard",
+          "troop": "lindon_imladris_swordguard",
           "min": 1,
           "max": 11
         },
         {
-          "troop": "imladris_nobleman",
+          "troop": "lindon_imladris_nobleman",
           "min": 1,
           "max": 11
         },
         {
-          "troop": "battlemaster_of_the_first_age",
+          "troop": "lindon_battlemaster_of_the_first_age",
           "min": 0,
           "max": 12
         },
         {
-          "troop": "rivendell_militia_archer",
+          "troop": "lindon_militia_archer",
           "min": 2,
           "max": 12
         },
         {
-          "troop": "rivendell_militia_veteran_archer",
+          "troop": "lindon_militia_veteran_archer",
           "min": 2,
           "max": 12
         },
         {
-          "troop": "imladris_bowman",
+          "troop": "lindon_imladris_bowman",
           "min": 1,
           "max": 11
         },
         {
-          "troop": "imladris_marksman",
+          "troop": "lindon_imladris_marksman",
           "min": 0,
           "max": 11
         },
         {
-          "troop": "rivendell_noble",
+          "troop": "lindon_noble",
           "min": 2,
           "max": 12
         },
         {
-          "troop": "rivendell_royal_knight",
+          "troop": "lindon_royal_knight",
           "min": 0,
           "max": 11
         },
         {
-          "troop": "imladris_horse_archer",
+          "troop": "lindon_imladris_horse_archer",
           "min": 2,
           "max": 12
         },
         {
-          "troop": "rider_of_himring",
+          "troop": "lindon_rider_of_himring",
           "min": 0,
           "max": 11
         }
@@ -87,72 +87,72 @@
       "color2": "FF252E61",
       "roster": [
         {
-          "troop": "rivendell_militia_veteran_spearman",
+          "troop": "lindon_militia_veteran_spearman",
           "min": 2,
           "max": 11
         },
         {
-          "troop": "imladris_recruit",
+          "troop": "lindon_imladris_recruit",
           "min": 2,
           "max": 11
         },
         {
-          "troop": "imladris_infantry",
+          "troop": "lindon_imladris_infantry",
           "min": 2,
           "max": 11
         },
         {
-          "troop": "rivendell_militia_spearman",
+          "troop": "lindon_militia_spearman",
           "min": 2,
           "max": 11
         },
         {
-          "troop": "imladris_nobleman",
+          "troop": "lindon_imladris_nobleman",
           "min": 1,
           "max": 11
         },
         {
-          "troop": "imladris_guardsman",
+          "troop": "lindon_imladris_guardsman",
           "min": 1,
           "max": 11
         },
         {
-          "troop": "imladris_warden",
+          "troop": "lindon_imladris_warden",
           "min": 0,
           "max": 11
         },
         {
-          "troop": "rivendell_warden_gondolin",
-          "min": 0,
-          "max": 10
-        },
-        {
-          "troop": "rivendell_militia_veteran_archer",
-          "min": 2,
-          "max": 11
-        },
-        {
-          "troop": "imladris_marchwarden",
+          "troop": "lindon_warden_gondolin",
           "min": 0,
           "max": 10
         },
         {
-          "troop": "imladris_outrider",
+          "troop": "lindon_militia_veteran_archer",
           "min": 2,
           "max": 11
         },
         {
-          "troop": "rivendell_high_captain",
+          "troop": "lindon_imladris_marchwarden",
           "min": 0,
           "max": 10
         },
         {
-          "troop": "imladris_horse_archer",
+          "troop": "lindon_imladris_outrider",
           "min": 2,
           "max": 11
         },
         {
-          "troop": "rider_of_himring",
+          "troop": "lindon_high_captain",
+          "min": 0,
+          "max": 10
+        },
+        {
+          "troop": "lindon_imladris_horse_archer",
+          "min": 2,
+          "max": 11
+        },
+        {
+          "troop": "lindon_rider_of_himring",
           "min": 0,
           "max": 10
         }
@@ -383,6 +383,38 @@
         }
       ],
       "template_id": "kingdom_hero_party_rivendell_rivendell_3_template"
+    },
+    {
+      "id": "clan_lindon_3",
+      "source": "xml",
+      "theme": "lindon house 3 - Forlond",
+      "color": "FF6F8FA8",
+      "color2": "FF1E2F4F",
+      "roster": []
+    },
+    {
+      "id": "clan_lindon_4",
+      "source": "xml",
+      "theme": "lindon house 4 - Ost Falas",
+      "color": "FF8A9AB0",
+      "color2": "FF2B3A5C",
+      "roster": []
+    },
+    {
+      "id": "clan_lindon_5",
+      "source": "xml",
+      "theme": "lindon house 5 - Barad Luin",
+      "color": "FF5E7FA6",
+      "color2": "FF1B2A4A",
+      "roster": []
+    },
+    {
+      "id": "clan_lindon_6",
+      "source": "xml",
+      "theme": "lindon house 6 - Tirith Aear",
+      "color": "FF7C9CB4",
+      "color2": "FF23365A",
+      "roster": []
     }
   ]
 }

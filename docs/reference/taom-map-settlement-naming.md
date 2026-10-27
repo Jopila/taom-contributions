@@ -9,6 +9,7 @@ How to rename map settlements (towns, castles, villages) safely. Covers the dual
 - **NEVER rename a settlement ID** (`castle_village_DG1_1` etc.): IDs are referenced by save files, bound-village relationships, and party-template/recruitment XML. The one exception is a scene-first change: when the map author has already renamed or removed the entity in the editor, the data row is the orphan, and [`tools/rename_map_settlements.py`](../../tools/rename_map_settlements.py) makes the data follow the scene (master, 12 loc files, `recruitment_pools/gondor.json`, with a repo sweep that refuses on any other reference). New campaign only, which the entity rename already forces (#597).
 - Display names live in two layers: the `name="{=key}DEFAULT"` fallback in `settlements.xml`, and the per-language `<string id="..." text="..."/>` in each `loc_settlements.xml`. Both must be updated.
 - For bulk renames, use [`tools/Apply-MapVillageNames.py`](../../tools/Apply-MapVillageNames.py). It does 13 files in one pass, preserves UTF-8 + CRLF, idempotent.
+- **But it never evicts the translation cache.** It rewrites every one of its 438 `NAMES` in the master and all 12 loc files, with no dry run and no backup, and leaves `tools/translation_cache/<lang>.json` alone, so the next translator run writes the old wording back. That is why, on 2026-10-27, 421 to 438 rows per language (PL: 5) still showed text from before the renames, for example DE "Dorf E2_1" where the master says Linenhold. To rename one or two settlements, write only those ids (the master `name=`, the 12 loc rows, `name_tags.carry_tag` for BR and IT) and remove their rows from the cache (#1039).
 - For NEW villages, use [`tools/add_map_villages.py`](../../tools/add_map_villages.py): one `VILLAGES` row per village writes the `<Settlement>` block and the 12 loc rows, with the position read from the saved scene entity, and `--check` proves all three agree afterwards. The editor writes positions back only for ids already in the file, so a row added before its entity is saved stays a PLACEHOLDER until the next scene save, and one added after takes its position from the saved transform. Register the name in `Apply-MapVillageNames.py`'s `NAMES` too so the duplicate-name abort keeps covering it. Recipe: [docs/modding/settlements.md](../modding/settlements.md) "Recipes: Add".
 - **Entrance coordinates** (`posX`/`posY`, `gate_posX`/`gate_posY`) are a separate edit class from names. An entrance on a disconnected navmesh island wedges AI pathfinding with no crash and no log line. Never hand-pick a replacement — run `taom.audit_settlement_entrances` for an engine-computed one. See "Correcting Entrance Coordinates" below.
 
@@ -96,6 +97,7 @@ Authoritative table for naming new settlements anywhere on the map. Match the pr
 | `RU` | Rhûn (Easterling) | `Culture.khuzait` | Easterling/Wainrider | Mistrand, Lest, Vorgavuld | Mistrand-Krish, Vorgav-Argûn, Iôrig-Mukh |
 | `AN` | Arthedain (Arnor, 2026-10-07) | `Culture.arthedain` | Sindarin of the North + Bree-land Mannish | Fornost Erain, Annúminas, Bree, Amon Sûl, Staddle, Archet | Barad Forn, Lond Nenuial, Talath Forn, Rhaw Field, Hoarwell Watch (`castle_AN5`, renamed from Weather Hills 2026-10-16: the Weather Hills stay the broken country round Weathertop) |
 | `GBC` | Blue Craig (Ered Luin goblins) | `Culture.bluecraig` | Black Speech, hyphenated compounds | Blue Craig, Bolgkrag, Krimp-morn | Luinkrag, Gash-nakh, Mok-bûr, Zog-tang |
+| `LN` | Lindon (Grey Havens) | `Culture.lindon` | Sindarin of the Falathrim: sea, shore and haven words (`aear`, `falas`, `lond`, `luin`, `harn` south, `forn` north) | Mithlond, Harlond, Forlond, Harlindon, Lhûnbar | Ost Falas, Barad Luin, Tirith Aear, Maewlond, Ethir Forn (#1039) |
 
 ### Suffix vocabulary (for compound names)
 
@@ -118,15 +120,16 @@ Use `tools/Apply-SettlementNames.ps1` (PowerShell, existing) ONLY if you want to
 
 ### When to use `Apply-MapVillageNames.py` (the recommended path)
 
-Always, for any live-impact display-name change:
+For a bulk display-name change (for one or two ids a targeted write is simpler, see the TL;DR):
 
 1. **Identify the IDs to rename** — grep settlements.xml for `id="(castle_village|village)_<PREFIX>\d+_\d+"`, optionally filter by `bound="Settlement.<parent>"` to scope by parent castle/town.
 2. **Design the names** using the idiom table above. Web-research sparse regions on Tolkien Gateway / lord-of-the-rings.fandom.com / LOTRO wiki when invention is needed.
 3. **Edit the `NAMES` dict** in `tools/Apply-MapVillageNames.py`.
-4. **Dry-run is implicit** — the script aborts on duplicate names within the dict. Inspect the dict for collisions before running.
+4. **There is no dry run.** The script only aborts on duplicate names within the dict, so inspect the dict for collisions before running.
 5. **Run the script** — `python3 tools/Apply-MapVillageNames.py` writes 1 master + 12 loc files in one pass.
-6. **Verify** — grep for any remaining placeholder substrings (`Castle Village [A-Z]`, `Village [A-Z]+\d+_\d+`).
-7. **In-game spot-check** — launch Bannerlord, tour the campaign map, confirm names render. Switch language (DE/FR/JP) to confirm proper nouns render identically (the same Tolkien name in every language).
+6. **Evict the cache rows** of every id you renamed from `tools/translation_cache/<lang>.json`, or the next translator run writes the old wording back (TL;DR, #1039).
+7. **Verify:** grep for any remaining placeholder substrings (`Castle Village [A-Z]`, `Village [A-Z]+\d+_\d+`).
+8. **In-game spot-check:** launch Bannerlord, tour the campaign map, confirm names render. Switch language (DE/FR/JP) to confirm proper nouns render identically (the same Tolkien name in every language).
 
 ### Adding a brand-new settlement (not a rename)
 

@@ -370,6 +370,7 @@
 	<string id="lord_I3_5_text" text="{=lord_I3_5_text}Grisha engineers the siege weapons of the Stone Breakers. Her constructions have brought down many a fortress wall." />
 	<string id="lord_I4_5_text" text="{=lord_I4_5_text}Thraka serves the Black Maw as quartermaster and enforcer. Her iron discipline keeps the supply lines running even under siege." />
 	<string id="lord_LN1_1_description" text="{=lord_LN1_1_description}Círdan, the Shipwright, Lord of the Grey Havens and eldest of the Eldar in Middle-earth, who kept the Ring Narya until he gave it to Mithrandir." />
+	<string id="lord_LN3_1_description" text="{=lord_LN3_1_description}Galdor of the Havens, who bore Círdan's counsel to the house of Elrond, keeps Forlond on the northern arm of the Gulf of Lhûn." />
 	<string id="lord_MM1_1_description" text="{=lord_MM1_1_description}Bûrzum, Warlord of the Misty Mountains, who holds the deep places of Moria and the cold peaks above." />
 	<string id="lord_RH1_1_description" text="{=lord_RH1_1_description}Belegorn, King of Rhudaur, heir of Earendur's third son, lord of Cameth Brin and of the hill-men of the Angle." />
 	<string id="lord_U1_2_text" text="{=lord_U1_2_text}Zimraphel, a descendant of the Black Númenóreans, commands the Corsair fleet with cunning and grace. Her knowledge of the sea and its treacherous currents is unrivaled among the captains of Umbar." />

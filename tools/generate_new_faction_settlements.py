@@ -45,8 +45,8 @@ NAMES = {
     "town_LN1": "Mithlond",
 }
 # Sindarin-ish names for Lindon villages
-LN_VILLAGE_NAMES = {"village_LN1_1": "Forlond", "village_LN1_2": "Harlindon",
-                    "village_LN1_3": "Edhellond", "village_LN1_4": "Lhûnbar"}
+LN_VILLAGE_NAMES = {"village_LN1_1": "Eryn Lhûn", "village_LN1_2": "Harlindon",
+                    "village_LN1_3": "Ninglas", "village_LN1_4": "Lhûnbar"}
 
 # Mountain/orc village types cycle; elven village types for Lindon.
 ORC_VTYPES = ["iron_mine", "silver_mine", "lumberjack", "swine_farm", "cattle_farm", "clay_mine"]  # unused; per-fief rule drives types

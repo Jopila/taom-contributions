@@ -102,9 +102,9 @@ rows are what actually crashes a new campaign:
 - **Child, teen, lord and education equipment templates**, or the new game throws an NRE.
 - **An `as_<race>_facegen` action set**, only if the culture introduces a race, or its people T-pose.
 
-The measured floor is Lindon, the smallest realm TAOM ships: **2 clans, 10 heroes, 5 settlements.**
-<!-- measured: rg -c 'super_faction="Kingdom.lindon"' Main/_Module/ModuleData/characters/clans.xml ; rg -c 'faction="Faction.clan_lindon' Main/_Module/ModuleData/characters/heroes.xml ; rg -c 'culture="Culture.lindon"' "$BANNERLORD_GAME_DIR/Modules/TAOM_Map/ModuleData/settlements.xml" 2026-09-05 -->
-That is one town and four villages, two clans, one of them tier 6, and ten lords. It boots, it holds
+The measured floor: Rhudaur holds **3 clans, 12 heroes, 15 settlements** (a town, 3 castles, 11 villages). Lothlórien ties it on clans and fiefs with fewer heroes (11), and the Goblin kingdom has fewer settlements (7).
+<!-- measured: a python count of super_faction="Kingdom.<id>" in Main/_Module/ModuleData/characters/clans.xml, faction="Faction.<clan>" in characters/heroes.xml and culture="Culture.<id>" in the live TAOM_Map settlements.xml, per kingdom, 2026-10-27; Lindon held the floor until #1039 grew it to 6 clans, 23 heroes, 28 settlements -->
+That is one town, three castles and eleven villages, three clans and twelve lords. It boots, it holds
 fiefs and it passes every gate. Everything above that is ambition: Misty Mountain Orcs run 15 clans
 and 150 heroes off the same 13 files.
 

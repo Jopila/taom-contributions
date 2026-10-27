@@ -4,7 +4,8 @@
 
 Adds **four new kingdoms** and two new cultures to TAOM: the **Misty Mountain Orcs** and
 **Goblins** (two new orc cultures), **Goblins of Blue Craig** (a second goblin-culture kingdom),
-and **Lindon** (a new High-Elven kingdom that reuses the existing `rivendell` culture). All four
+and **Lindon** (a new High-Elven kingdom that first reused the `rivendell` culture and has had its own
+`lindon` culture since 2026-08-11, `cc1713eb3`). All four
 are full, **CC-playable** AI map-factions with settlements, clans, lords, troop trees, recruitment
 pools, **cultural feats**, faction-map cards, and **forever-alliance diplomacy** ties. The orc
 cultures' troops are infantry + archer lines wearing **orc armor** with mixed orc weapons.
@@ -26,10 +27,13 @@ central Misty Mountains and the Grey Havens are populated and playable in the ca
 | `mistymountainorcs` | `mistymountainorcs` (race `orc`) | `MM` / `MM` | `town_MM1` (Hrakdûr) | 3 towns, 7 castles, 23 villages | evil |
 | `goblin` | `goblin` (race `goblin`) | `GT` / `GB` | `town_GT1` (Goblin Town) | 1 town, 6 villages | evil |
 | `bluecraig` | `goblin` (race `goblin`) | `GBC` / `BC` | `town_GBC1` (Blue Craig)†, far west by Lindon | 2 towns (Luinkrag `town_GBC2` since 2026-10-07) + 7 villages (+ user-placed castles) | evil |
-| `lindon` | `rivendell` (race `elf`) | `LN` / `LN` | `town_LN1` (Mithlond) | 1 town, 4 villages* | free |
+| `lindon` | `lindon` (race `elf`; `rivendell` until 2026-08-11) | `LN` / `LN` | `town_LN1` (Mithlond) | 3 towns, 3 castles, 22 villages* | free |
 
-\* The 4 Lindon villages (`village_LN1_1..4`) have been **placed in the map editor** (positions in
-`settlements.xml` are the live editor placements, ≈232–319 X).
+\* Every Lindon settlement is a live editor placement. Mithlond's 4 villages (`village_LN1_1..4`) came
+first; on 2026-10-27 (#1039) Mike placed Harlond (`town_LN2`), Forlond (`town_LN3`), Ost Falas
+(`castle_LN1`), Barad Luin (`castle_LN2`), Tirith Aear (`castle_LN3`) and 18 villages, whose rows
+`tools/add_map_fortifications.py` and `tools/add_map_villages.py` wrote (their `FORTS` and `VILLAGES`
+tables hold every name). `village_LN1_1` became Eryn Lhûn then, because the town took the name Forlond, and `village_LN1_3` became Ninglas, because Gondor's `castle_EW3` is Edhellond.
 
 † `town_GBC1` (Blue Craig) has been **placed in the map editor** (≈250.97, 1270.66 — far NW by the
 Grey Havens). **Blue Craig is the SECOND, separate goblin kingdom** — a western realm distinct from
@@ -58,15 +62,20 @@ re-running it reproduces the live file exactly (positions + types) without clobb
   clan_5 = castle_GBC4 (Bolgkrag) + 4 villages. The 4 castles + 12 castle-villages were added by
   `tools/add_bluecraig_castles.py` (positions taken FROM the author's `scene.xscene` placements — every
   settlement MUST have a worldmap-scene entity or `SettlementVisual.OnStartup` NREs at map load).
-- **lindon** (2 clans): clan_1 = town_LN1 (ruler), clan_2 = landless vassal.
+- **lindon** (6 clans, one fief each since #1039): clan_1 Falathrim = town_LN1 Mithlond (ruler); clan_2
+  Edhil Mithlond = town_LN2 Harlond (home moved there); clan_3 Nos Galdor = town_LN3 Forlond; clan_4 Nos
+  Brithombar = castle_LN1 Ost Falas; clan_5 Wardens of Ered Luin = castle_LN2 Barad Luin; clan_6 Nos
+  Eglarest = castle_LN3 Tirith Aear. Clans 3 to 6 and their 13 lords are the `TAOM-LINDON-EXPANSION`
+  blocks written by `tools/oneoff/author_lindon_clans.py`, gated by `tools/tests/test_lindon_clan_expansion.py`.
 
 ### Lords / population
 
 Lord counts (region code → `lord_<CODE><clan>_<n>`): the three orc/goblin kingdoms — **goblin (GB,
 Goblin Town)**, **mistymountainorcs (MM)**, and **bluecraig (BC, Blue Craig)** — each get **~40 lords**
-(5 clans × 8; numerous, to fight off many enemies). **lindon (LN)** gets 10 (2 clans). Every clan is
+(5 clans × 8; numerous, to fight off many enemies). **lindon (LN)** gets 23 (6 clans: 10 in the first two, 13 added by #1039). Every clan is
 male-dominant with **≥2 females**, and each female is paired as a **spouse** to a clan male
-(within-clan, the Gundabad precedent) at childbearing age — so the clans reproduce and the factions
+(within-clan, the Gundabad precedent) at childbearing age (the #1039 Lindon houses are smaller: one
+lady each, married to the clan leader, and Nos Galdor also has an unmarried daughter), so the clans reproduce and the factions
 endure. ~130 new lords/heroes total; all spouse refs reciprocal + opposite-gender + resolved.
 
 ### Diplomacy — forever alliances (`diplomacy/diplomacy.json`)
@@ -131,23 +140,27 @@ Both orc cultures have authored feats (`Main/Features/CulturalFeats/TaomCultural
 | **mistymountainorcs** | −40% army influence cost (Orc Horde), +10% party size (Mountain Host; +30% until 2026-10-18, #818), +10% snow speed (Mountain-Bred), **+15% food consumption** (Hungry Host, penalty) |
 
 The 10% party-size bonuses (the cap since #818) only partly offset weaker troops; the
-food-consumption penalty is the cost of the horde. Snow-speed reflects their snow-navmesh mountain home. Lindon inherits Rivendell's 6
-feats automatically (shared culture). Feat string-ids in XML exactly match the C# `Register()`
+food-consumption penalty is the cost of the horde. Snow-speed reflects their snow-navmesh mountain home. Lindon's own culture lists the same 6
+feats as Rivendell (`taom_spcultures.xml`; a shared culture until 2026-08-11). Feat string-ids in XML exactly match the C# `Register()`
 ids (verified); all 8 are dispatched in `CulturalFeatsService`.
 
 ### Playable faction cards
 
 All 3 are `playable=true` in `factions.json` (`goblins_of_goblin_town`→goblin,
-`kingdom_of_moria`→mistymountainorcs, `high_kingdom_of_lindon`→rivendell) with bonuses/perks
+`kingdom_of_moria`→mistymountainorcs, `high_kingdom_of_lindon`→lindon since 2026-08-11) with bonuses/perks
 that match the authored feats (the party-size percentages are checked by
-`FactionMapDataTests.FactionCard_PartySizePercent_MatchesProductionFeat`). Lindon's card mirrors Imladris (same Rivendell culture/feats).
+`FactionMapDataTests.FactionCard_PartySizePercent_MatchesProductionFeat`). Lindon's card mirrors Imladris (the same feats on its own `lindon` culture).
 Strings registered via `tools/harvest_factionmap_strings.py`. Added to `cultures.json` (CC
 culture list) and `CareerCultureCoverageTests` documentedExceptions (careers are a follow-up).
 
-Lindon reuses the `rivendell` culture wholesale (troops, npcs, equipment, party templates,
-cultural feats) — only the kingdom, clans, lords, heroes, and settlements are new. Its lords
-use the rivendell equipment rosters (`rivendell_bat_template_medium_a..e`) and the generic elf
-skill templates (`taom_elf_king/warrior/lady_skills`).
+Lindon began by reusing the `rivendell` culture wholesale (troops, npcs, equipment, party templates,
+cultural feats); since 2026-08-11 it has its own `lindon` culture and troop tree. Its lords still
+use the rivendell equipment rosters (`rivendell_bat_template_medium_a..e`, which carry a horse and no
+bow, so every Lindon lord fields as Cavalry) and the generic elf skill templates
+(`taom_elf_king/warrior/lady_skills`). The two clan party templates keep their old ids
+(`kingdom_hero_party_rivendell_lindon_1/2_template`), but since #1039 every stack names its Lindon
+twin (`lindon_imladris_recruit` for `imladris_recruit` and so on), so Lindon lords lead Lindon
+troops; clans 2 to 6 share the second template.
 
 ### Generators (re-runnable, idempotent)
 
@@ -190,9 +203,37 @@ childhood clothing):
 | `taom_lord_template_equipment.xml` | `IsLordTemplate`, and `IsTeenagerEquipmentTemplate` on the teen rosters | 10 (lord/ruler battle/civ/teen × m/f) |
 | `taom_education_equipment_templates.xml` | none (id-suffix `_<culture>`, childhood-education events) | 98 |
 
-bluecraig (Culture.goblin) and Lindon (Culture.rivendell) inherit their culture's templates. Guarded by
+bluecraig (Culture.goblin) inherits its culture's templates; Lindon has its own `Culture.lindon` ones (for example `child_template_lindon_noble_male`). Guarded by
 `ConfigIdValidationTests.ChildGenerationCultures_HaveChildTeenAndLordEquipmentTemplates` +
 `NewOrcCultures_HaveChildEducationEquipmentRosters`. RCA: [docs/reviews/rca-new-factions-2026-06-02.md](../reviews/rca-new-factions-2026-06-02.md) Phase 4.
+
+## Lindon expansion (#1039, 2026-10-27)
+
+- **Data:** the live `TAOM_Map` rows came from `tools/add_map_fortifications.py` and `tools/add_map_villages.py`
+  (their `FORTS` and `VILLAGES` tables are the repo record of every name, owner and scene); the clans, lords and
+  heroes are the `TAOM-LINDON-EXPANSION` blocks in `characters/clans.xml`, `lords.xml` and `heroes.xml`, written
+  by the finished one-off `tools/oneoff/author_lindon_clans.py` (it refuses to run without `--rerun-retired`);
+  colours-only entries in `clan_heraldry/rivendell.json`.
+- **Renames (display names only):** Gondor's `castle_EW1` is Harlond Quays, `village_LN1_1` is Eryn Lhûn and
+  `village_LN1_3` is Ninglas, so no Lindon name repeats another on the map.
+- **Tests:** `tools/tests/test_lindon_clan_expansion.py` pins the owners, homes, lord-to-clan map, the renamed
+  names in the master and all 12 languages, the ladies' hair tags and the unique face keys.
+- **Saves:** new campaign only. An older save never loads the new clans or lords, and once the distance cache is
+  rebuilt for these rows it is expected not to load at all (#1041). The renames reach every save.
+
+### How to verify in game
+
+After `/engine-bump`, with TAOM, TAOM_Map and LOTRLOME_Armory loaded:
+
+1. Mod Options, TAOM, Map Tools, Rebuild Now, then reload (the distance cache predates the new rows).
+2. New campaign: Harlond is held by Edhil Mithlond, Forlond by Nos Galdor, Ost Falas by Nos Brithombar, Barad
+   Luin by the Wardens of Ered Luin and Tirith Aear by Nos Eglarest; Edhil Mithlond's home is Harlond.
+3. The map shows Harlond Quays in Gondor and Eryn Lhûn and Ninglas by Mithlond; no Lindon name repeats.
+4. The 13 new lords have distinct adult elf faces, the ladies are not bald, Galdor's biography shows, and their
+   parties hold "[Lindon]" troops.
+5. Enter Harlond, Forlond, the three castles, and Brithlas, Hîthlin, Luinbar and Ram Luin (whose scenes were
+   corrected); each loads.
+6. `taom.audit_settlement_entrances` reports no unreachable entrance among the new settlements.
 
 ## Key Files
 
@@ -211,7 +252,7 @@ bluecraig (Culture.goblin) and Lindon (Culture.rivendell) inherit their culture'
 | Settlements | `TAOM_Map/ModuleData/settlements.xml` (LIVE, external) | +45 `<Settlement>` (968 total) |
 | Registration | `SubModule.xml` | +6 `<XmlNode>` (troops/npcs/equipment ×2 orc cultures) |
 | Recruitment | `Features/TroopProgression/VolunteerRecruitmentService.cs` | +`InitializeGoblinCulture/MistyMountainOrcsCulture/RivendellCulture` (fixes the previously-missing `CultureMap["rivendell"]`, which also benefits the existing Rivendell kingdom) |
-| Faction map | `factionmap/factions.json` | `game_faction` set on `goblins_of_goblin_town`→goblin, `kingdom_of_moria`→mistymountainorcs (lindon already →rivendell) |
+| Faction map | `factionmap/factions.json` | `game_faction` set on `goblins_of_goblin_town`→goblin, `kingdom_of_moria`→mistymountainorcs (`high_kingdom_of_lindon`: `lindon` since 2026-08-11) |
 | Localization | `taom_module_strings.xml` | `str_faction_*` / `str_culture_*` per orc culture |
 | Tests | `VolunteerRecruitmentServiceTests.cs` (+6), `ConfigIdValidationTests.cs` (sets 16→18 cultures, 18→21 kingdoms) | modified |
 
@@ -227,7 +268,7 @@ bluecraig (Culture.goblin) and Lindon (Culture.rivendell) inherit their culture'
 
 1. **Cultural feats — DONE** (4 each; see above). Lindon inherits rivendell's feats.
 2. **CC-playable — DONE** (all 3 `playable=true` with full faction cards).
-3. **Lindon villages** — `village_LN1_1..4` need scene entities placed in the map editor.
+3. **Lindon villages: DONE** (placed in the editor; #1039 added the second wave).
 4. **Battle-scene grid** — new settlement positions in the central Misty Mountains / Grey Havens may
    need worldmap battle-scene-grid coverage so field battles near them load correct terrain
    (see `docs/reference/scene-reference-audit.md`). This is map-editor work.
@@ -265,6 +306,7 @@ starting a campaign if `golbin` was intended.
 
 ## Changelog
 
+- 2026-10-27: Lindon grows to 3 towns, 3 castles and 22 villages, with four new clans and 13 lords, one fief per clan (#1039).
 - 2026-06-23 — Misty Mountain Orcs grown from 5 to 15 clans (10-strong 6♂/4♀ warbands, +110 lords) via `generate_mistymountain_clans.py`; ownerless-clan audit clean.
 - 2026-06-02 — Codex + completeness-audit fixes: remapped Gundabad clone-leftover display text, reworked faction-map cards off the stripped cavalry, added the 4 kingdoms to `execution/alignment.json`.
 - 2026-06-02 — Deep-review fixes: `cattle_range`→`cattle_farm` VillageType, `TAOM_Map`→TAOM module dependency declared, Blue Craig given placeholder villages/economy.

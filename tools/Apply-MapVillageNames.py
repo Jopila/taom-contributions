@@ -21,6 +21,8 @@ Properties:
   - UTF-8 + CRLF preserved (UTF-8 round-trip via bytes)
   - Settlement IDs untouched (save compatibility preserved)
   - Validates uniqueness before applying (aborts on dup names within the dict)
+  - No dry run, no backup, and NO translation-cache eviction: after a rename, remove the renamed ids from
+    tools/translation_cache/<lang>.json, or the next translator run writes the old wording back (#1039)
 
 Usage:
   Edit the NAMES dict, then run:

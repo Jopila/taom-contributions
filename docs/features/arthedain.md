@@ -203,7 +203,9 @@ but never the new kingdom, clans or heroes (`SandBoxManager.InitializeSandboxXML
 settlement rows sit at the end of the file under a town, so in such a save the first of them throws
 inside `Settlement.Deserialize` (its alleys), `MBObjectManager.LoadXML` swallows it, and the
 unfinished rows are dropped as non-ready objects; every older settlement has already loaded. Not yet
-reproduced on a live save: the in-game check is owed. A new row placed before an existing one would
+reproduced on a live save: the in-game check is owed. That holds only until the settlement distance
+cache is rebuilt for the batch: the rebuilt cache names ids the old save dropped, and its load is then
+expected to fail at the first settlement distance (v1.5.6 decompile, not reproduced; #1041). A new row placed before an existing one would
 leave that existing settlement unready, so the old save would unregister it while its parties and
 heroes still pointed at it, which is why
 both map tools append and `add_map_fortifications.py --check` refuses any other order.
