@@ -74,7 +74,9 @@ FaceGen.GetBaseMonsterFromRace() [Postfix Patch5_FaceGen]
     |-> EyeHeightAdjustmentHook.OnGetBaseMonsterFromRace(ref result, race)
             |-> if raceName == "dwarf": adjusts StandingEyeHeight and CrouchEyeHeight via reflection
 
-RacePersistenceBehavior (CampaignBehaviorBase)
+RacePersistenceBehavior (CampaignBehaviorBase, built with `new` per campaign in SubModule.OnGameStart)
+    |-> constructor -> ResetForNewSession()   clears map + legend + new-campaign flag (#1035)
+    |-> OnNewGameCreated -> ResetForNewCampaign()   marks the campaign new (info, not the pre-TAOM warning)
     |-> OnBeforeSave -> RacePersistenceService.CaptureHeroRaces()
     |       captures hero races + the ordered race-name legend (IRaceManager.GetOrderedRaceNames)
     |       refuses when the table has < 2 races (keeps the existing map + legend)
@@ -260,6 +262,7 @@ written up in
 No guard is to be written until a dump names the faulting frame.
 
 ## Changelog
+- 2026-10-27: #1035, `RacePersistenceBehavior`'s constructor calls `ResetForNewSession()`, so a save with no record for the behavior (the engine then skips its `SyncData`) no longer inherits the previous campaign's race map in the same process. The same day a new game began to log an information line instead of the pre-TAOM save warning.
 - 2026-10-26: #1011, dead and disabled heroes are saved and restored. The engine resets their race from the template on load just as it does for living heroes, but the roster adapter only read `Hero.AllAliveHeroes`. `GetAllAliveHeroRaces` is now `GetAllHeroRaces`. Heroes who died before this fix keep the reverted race.
 - 2026-10-01: #700, the Load Game save preview no longer shows the rider lying flat in bind pose. The Patch55 prefix runs `ActionIndexCacheRepair` before vanilla reads `act_inventory_idle` on the cold main menu; pinned by `HeroRaceWiringTests`.
 - 2026-09-23: #644, the Nine are race nazghul, and `RestoreHeroRaces` leaves their XML race alone so existing saves adopt it (section above).
