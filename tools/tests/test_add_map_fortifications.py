@@ -155,6 +155,12 @@ class CheckTests(unittest.TestCase):
         self.assertTrue(any("posX=10" in f for f in found))
         self.assertTrue(any("gate in settlements.xml" in f for f in found))
 
+    def test_a_renamed_row_is_named(self):
+        # The live map is unversioned: this table is the only repo record of each fort's name.
+        renamed = self.master.replace('}Checkton"', '}Elsewhere"', 1)
+        found = amf.check([self.FORT], renamed, self.scene, self.loc)
+        self.assertTrue(any("names it 'Elsewhere'" in f for f in found))
+
 
 def row(sid, common=False):
     areas = "<CommonAreas><Area type=\"Backstreet\" name=\"x\" /></CommonAreas>" if common else ""

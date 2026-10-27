@@ -124,8 +124,8 @@ KINGDOMS = {
         lord_skill=("taom_gondor_knight_skills", "taom_gondor_knight_skills", "taom_gondor_young_lady_skills"),
         lords_per_clan=4,  # 4 clans x 4 = 16 lords (2 male + 2 female, married within the clan)
         clans=[("clan_cardolan_1", 4, "town_CA2", "House of Tyrn Gorthad"),
-               ("clan_cardolan_2", 3, "town_CA1", "House of Minas Eithel"),
-               ("clan_cardolan_3", 2, "town_CA3", "House of Tharbad"),
+               ("clan_cardolan_2", 3, "town_CA1", "House of Tharbad"),
+               ("clan_cardolan_3", 2, "town_CA3", "House of Minas Eithel"),
                ("clan_cardolan_4", 2, "castle_CA2", "Wardens of Sarn Ford")],
         leader_name="Aranthir",
         male_names=["Belethor", "Caladhor", "Anardil", "Baradhel", "Calenon", "Dorthar", "Hirluin",

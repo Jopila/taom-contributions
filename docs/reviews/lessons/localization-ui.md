@@ -1417,3 +1417,12 @@ the banner, so the corner showed a slice of the emblem. The same change drew the
   view model (`nineGrid: true` for every banner `MaskedTextureWidget`) and the widget's size, or read the sprite's
   `<Width>` and `<Height>` in `NativeSpriteData.xml` and keep its aspect. Prisoner Banners pins both in its wiring tests.
 - **Source:** [rca-prisoner-banners-2026-10-27.md](../rca-prisoner-banners-2026-10-27.md) findings 1 and 2.
+### A clan name is saved, and English never looks its key up (Tharbad swap, 2026-10-27)
+After a clan rename, a save started earlier keeps the old name in English and shows the new one in the 12 other languages.
+`Clan.Name` is a `[SaveableProperty]`, `clans.xml` loads only for a new campaign (`SandBoxManager.InitializeSandboxXMLs`),
+and `MBTextManager.GetLocalizedText` returns the saved inline text in English. A town name is not saved, so it changes in
+every save.
+- **Why missed:** the clan behaviour was inferred from the town behaviour.
+- **Prevent:** before telling Mike what an old save shows, check whether the field is saveable and whether its XML loads
+  for a saved game.
+- **Source:** `docs/reviews/rca-tharbad-swap-2026-10-27.md` row 3.
