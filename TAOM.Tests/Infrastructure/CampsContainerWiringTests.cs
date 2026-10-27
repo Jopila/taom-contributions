@@ -34,6 +34,8 @@ public class CampsContainerWiringTests
         container.RegisterInstance(Substitute.For<IModLogger>());
         container.RegisterInstance(Substitute.For<IEnlistmentStateQuery>());
         container.RegisterInstance(Substitute.For<IGameMenuAdapter>());
+        // Fire and Tribute's module registers this in production (IoC.cs, before the Refuge resolve); the Refuge raid takes it lazily (#1033).
+        container.RegisterInstance(Substitute.For<TAOM.Features.FireAndTribute.IRaidHostOwnSideQuery>());
 
         SupplyLinesIoC.RegisterSupplyLinesFeature(container);
         FieldCampIoC.RegisterFieldCampFeature(container);

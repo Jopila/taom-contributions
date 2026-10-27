@@ -95,6 +95,9 @@ clan screen + click-to-manage: Patch75 (registry entry has the co-op disposition
   `[SaveableProperty(11)]`) and a refuge is never unpinned, so the load pin is an idempotent belt for
   a party whose founding pin threw or an orphan adopted from an older save.
 - **Raids ship OFF** (experimental in the source, same default here).
+- **A raid never picks a Fire and Tribute host** (#1033). `FindNearestHostile` skips a party
+  `IRaidHostOwnSideQuery.IsHost` names, resolved lazily at the first scan: a forced refuge battle
+  would bypass the host's pin and its own-side rule ([fire-and-tribute.md](fire-and-tribute.md)).
 - **A refuge never disbands; warden death orphan-adopts.** Vanilla starts its disband flow itself
   when a party leader dies with no other hero in the roster (1.4.8 `KillCharacterAction.MakeDead`:
   `RemovePartyLeader` then `DisbandPartyAction.StartDisband`), which would march the garrison to a

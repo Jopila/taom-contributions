@@ -32,6 +32,8 @@ public sealed partial class FireAndTributeService : IRaidHostOwnSideQuery
         && _hostSides.TryGetValue(hostPartyId, out var side)
         && _alignment.ResolveSide(kingdomId, kingdomCultureId ?? string.Empty) == side;
 
+    public bool IsHost(string? partyId) => partyId != null && _hostSides.ContainsKey(partyId);
+
     /// <summary>Drops the record and publishes the snapshot without it.</summary>
     private void RemoveHost(RaidHostRecord record)
     {

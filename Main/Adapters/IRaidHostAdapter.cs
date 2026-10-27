@@ -17,6 +17,12 @@ public interface IRaidHostAdapter
     RaidSpawnFailure Probe(string clanId, string anchorId);
 
     /// <summary>
+    /// The anchor's current owner: its map faction's id and culture id, and whether that faction is a kingdom (#1032).
+    /// False, with both ids empty, when the anchor or its owner cannot be read.
+    /// </summary>
+    bool TryGetAnchorOwner(string anchorId, out string factionId, out string cultureId, out bool isKingdom);
+
+    /// <summary>
     /// Creates an empty host: a bandit party of the clan whose home is the nearest hideout of the clan's culture to the
     /// anchor, named <paramref name="keyedName"/> (a <c>{=key}English</c> string). It appears at a point the engine finds
     /// near the anchor's gate (the gate itself when the engine finds none), which is then retried up to 15 times around

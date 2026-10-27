@@ -1,10 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using TAOM.Core.Logging;
 using TAOM.Features.Enlistment;
 using TAOM.Features.FieldCamp;
 using TAOM.Features.FieldCamp.Domain;
+using TAOM.Features.FireAndTribute;
 using TAOM.Features.Refuge;
 using TAOM.Features.Refuge.Domain;
 using TaleWorlds.CampaignSystem;
@@ -71,8 +73,9 @@ public class RefugeServiceTests
             ICampService camps,
             IEnlistmentStateQuery enlistment,
             IRefugeVisualService visuals,
+            Lazy<IRaidHostOwnSideQuery> hosts,
             IModLogger logger)
-            : base(settings, wardens, camps, enlistment, visuals, logger)
+            : base(settings, wardens, camps, enlistment, visuals, hosts, logger)
         {
         }
 
@@ -289,6 +292,7 @@ public class RefugeServiceTests
     private IEnlistmentStateQuery _enlistment;
     private IRefugeVisualService _visuals;
     private IModLogger _logger;
+    private IRaidHostOwnSideQuery _hosts;
     private TestableRefugeService _sut;
     private Dictionary<string, RefugeData> _book;
 
@@ -323,8 +327,9 @@ public class RefugeServiceTests
             .Returns(true);
 
         _logger = Substitute.For<IModLogger>();
+        _hosts = Substitute.For<IRaidHostOwnSideQuery>();
 
-        _sut = new TestableRefugeService(_settings, _wardens, _camps, _enlistment, _visuals, _logger);
+        _sut = new TestableRefugeService(_settings, _wardens, _camps, _enlistment, _visuals, Hosts(), _logger);
         _book = new Dictionary<string, RefugeData>();
 
         // Order-sensitive collaborators log into the same event stream as the subclass seams.
@@ -1314,6 +1319,27 @@ public class RefugeServiceTests
 
     // --- FindNearestHostile (the raid-target pick; the scan seams only read the map) ---
 
+    private Lazy<IRaidHostOwnSideQuery> Hosts() => new Lazy<IRaidHostOwnSideQuery>(() => _hosts);
+
+    // #1033: a Fire and Tribute host keeps to its raid; a forced refuge battle would bypass its pin and the own-side rule.
+    [TestMethod]
+    public void FindNearestHostile_ARaidingHost_IsSkipped_AndTheNextHostilePicked()
+    {
+        _hosts.IsHost("host_1").Returns(true);
+        _sut.RaidCandidates = new List<RaidCandidate> { Hostile("host_1", 1f), Hostile("enemy", 3f) };
+
+        Assert.AreEqual("enemy", _sut.FindNearestHostile("r1", 6f)?.PartyId);
+    }
+
+    [TestMethod]
+    public void FindNearestHostile_OnlyAHostNearby_ReturnsNull()
+    {
+        _hosts.IsHost("host_1").Returns(true);
+        _sut.RaidCandidates = new List<RaidCandidate> { Hostile("host_1", 1f) };
+
+        Assert.IsNull(_sut.FindNearestHostile("r1", 6f));
+    }
+
     private static RaidCandidate Hostile(string id, float distance) => new RaidCandidate
     {
         PartyId = id,
@@ -2130,8 +2156,9 @@ public class RefugeServiceTests
             ICampService camps,
             IEnlistmentStateQuery enlistment,
             IRefugeVisualService visuals,
+            Lazy<IRaidHostOwnSideQuery> hosts,
             IModLogger logger)
-            : base(settings, wardens, camps, enlistment, visuals, logger)
+            : base(settings, wardens, camps, enlistment, visuals, hosts, logger)
         {
         }
 
@@ -2162,7 +2189,7 @@ public class RefugeServiceTests
     public void Dismantle_MovesEveryHeroAndHeroPrisonerByActionBeforeTheBulkCopy()
     {
         var probe = new HeroMergeProbeService(
-            _settings, _wardens, _camps, _enlistment, _visuals, _logger);
+            _settings, _wardens, _camps, _enlistment, _visuals, Hosts(), _logger);
         probe.Heroes = new List<string> { "warden_promoted", "companion_deposited" };
         probe.HeroPrisoners = new List<string> { "captive_lord" };
         var book = new Dictionary<string, RefugeData>
@@ -2191,7 +2218,7 @@ public class RefugeServiceTests
     public void Dismantle_NoHeroesInRefuge_StillBulkMerges()
     {
         var probe = new HeroMergeProbeService(
-            _settings, _wardens, _camps, _enlistment, _visuals, _logger);
+            _settings, _wardens, _camps, _enlistment, _visuals, Hosts(), _logger);
         var book = new Dictionary<string, RefugeData>
         {
             ["r1"] = new RefugeData { PartyId = "r1", Established = true },

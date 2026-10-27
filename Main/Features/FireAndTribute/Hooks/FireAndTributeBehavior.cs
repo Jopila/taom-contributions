@@ -61,8 +61,28 @@ public sealed class FireAndTributeBehavior : CampaignBehaviorBase
 
     private void OnMobilePartyDestroyed(MobileParty party, PartyBase destroyerParty)
     {
-        try { _service.OnPartyDestroyed(party?.StringId); }
+        try
+        {
+            var (factionId, cultureId, isKingdom, isMainParty) = ReadDestroyer(destroyerParty);
+            _service.OnPartyDestroyed(party?.StringId, factionId, cultureId, isKingdom, isMainParty);
+        }
         catch (Exception ex) { _logger.LogError($"[FireAndTribute] party destroyed failed: {ex}"); }
+    }
+
+    // Its own guard: a destroyer whose faction cannot be read is logged as unknown, and the host's broken event still lands.
+    private (string? FactionId, string? CultureId, bool IsKingdom, bool IsMainParty) ReadDestroyer(PartyBase destroyerParty)
+    {
+        try
+        {
+            var faction = destroyerParty?.MapFaction;
+            return (faction?.StringId, faction?.Culture?.StringId, faction?.IsKingdomFaction == true,
+                destroyerParty?.MobileParty?.IsMainParty == true);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning($"[FireAndTribute] destroyer not read: {ex.Message}");
+            return (null, null, false, false);
+        }
     }
 
     private void Guard(string what, Action action)

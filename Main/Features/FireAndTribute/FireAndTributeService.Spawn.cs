@@ -228,6 +228,8 @@ public sealed partial class FireAndTributeService
         {
             string candidate = def.Anchors[(start + i) % def.Anchors.Count];
             failure = _adapter.Probe(def.ClanId, candidate);
+            if (failure == RaidSpawnFailure.None && HeldByOtherSide(def, candidate))
+                failure = RaidSpawnFailure.AnchorHeldByOtherSide;
             if (failure == RaidSpawnFailure.None)
             {
                 anchor = candidate;
@@ -239,6 +241,15 @@ public sealed partial class FireAndTributeService
         }
         return false;
     }
+
+    /// <summary>
+    /// True when the anchor's current owner is not a kingdom of the host's own side (#1032): a kingdom of another side, or
+    /// a faction with no kingdom (a rebel clan), whose parties the own-side rule does not hold back. An owner that cannot
+    /// be read leaves the anchor usable, as before the check.
+    /// </summary>
+    private bool HeldByOtherSide(RaidHostDef def, string anchorId) =>
+        _adapter.TryGetAnchorOwner(anchorId, out string factionId, out string cultureId, out bool isKingdom)
+        && (!isKingdom || _alignment.ResolveSide(factionId, cultureId) != def.Side);
 
     private static string DryRunText(RaidHostDef def, string target, float targetStrength,
         IReadOnlyList<(string TroopId, int Count)> plan, FireAndTributeTuning t, string anchor)

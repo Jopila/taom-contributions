@@ -207,6 +207,8 @@ public class FireAndTributeWiringTests
         Assert.AreSame(container.Resolve<IFireAndTributeService>(), container.Resolve<IFireAndTributeService>());
         // The party AI model reads the snapshot the behavior's service writes: a second instance would never be written.
         Assert.AreSame<object>(container.Resolve<IFireAndTributeService>(), container.Resolve<IRaidHostOwnSideQuery>());
+        // The Refuge raid takes it lazily (#1033): the Lazy must resolve to the same instance.
+        Assert.AreSame<object>(container.Resolve<IFireAndTributeService>(), container.Resolve<Lazy<IRaidHostOwnSideQuery>>().Value);
         Assert.IsInstanceOfType(container.Resolve<IRaidHostAdapter>(), typeof(RaidHostAdapter));
         Assert.IsInstanceOfType(container.Resolve<IFireAndTributeNoticeAdapter>(), typeof(FireAndTributeNoticeAdapter));
         Assert.IsInstanceOfType(container.Resolve<ITributeEnvoyAdapter>(), typeof(TributeEnvoyAdapter));
