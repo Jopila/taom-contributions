@@ -205,6 +205,8 @@ public class FireAndTributeWiringTests
         Assert.AreNotSame(decl.Create(container), decl.Create(container), "a fresh behavior per campaign start");
         Assert.IsInstanceOfType(container.Resolve<IFireAndTributeService>(), typeof(FireAndTributeService));
         Assert.AreSame(container.Resolve<IFireAndTributeService>(), container.Resolve<IFireAndTributeService>());
+        // The party AI model reads the snapshot the behavior's service writes: a second instance would never be written.
+        Assert.AreSame<object>(container.Resolve<IFireAndTributeService>(), container.Resolve<IRaidHostOwnSideQuery>());
         Assert.IsInstanceOfType(container.Resolve<IRaidHostAdapter>(), typeof(RaidHostAdapter));
         Assert.IsInstanceOfType(container.Resolve<IFireAndTributeNoticeAdapter>(), typeof(FireAndTributeNoticeAdapter));
         Assert.IsInstanceOfType(container.Resolve<ITributeEnvoyAdapter>(), typeof(TributeEnvoyAdapter));

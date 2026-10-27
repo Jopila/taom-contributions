@@ -38,8 +38,6 @@ public sealed partial class FireAndTributeService
         NoteWarSeen(day);
         if (_settings.Enabled)
             RollSpawns(day);
-        // Once a day, so a kingdom that changes side is followed; a spawn and a removal publish at once.
-        PublishOwnSide();
         LogDaily(day);
     }
 
@@ -197,13 +195,13 @@ public sealed partial class FireAndTributeService
             StartDay = day, Raids = 0, Quota = quota, Returning = false,
         };
         _state.Hosts.Add(record);
+        PublishOwnSide();
         _spawnedToday++;
         // The side's grudge is spent by the host that rides, whether or not it could use it.
         _state.Grudges.Remove(def.Side);
         ScheduleEnvoy(record, t);
         _notices.ShowSpawned(def.Name, spawn.NearestTownId);
         _logger.LogInfo($"{Tag} {def.Id} rides ({partyId}) from {spawn.HomeId} against {target}: {plan.Sum(p => p.Count)} men, quota {quota}");
-        PublishOwnSide();
         Steer(record, config, day);
         return new SpawnOutcome(true, $"{def.Id} rides against {target} with {plan.Sum(p => p.Count)} men, quota {quota} (party {partyId}).");
     }

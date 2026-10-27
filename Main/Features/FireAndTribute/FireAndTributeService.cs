@@ -22,10 +22,12 @@ namespace TAOM.Features.FireAndTribute;
 /// session, a co-op mod TAOM cannot probe or a dedicated server releases every host's pin and stops the feature.
 /// </summary>
 /// <remarks>
-/// Singleton state is the saved record, the planned-despawn set and the diagnostic counters, all
+/// Singleton state is the saved record, the planned-despawn set, the diagnostic counters and the own-side snapshot, all
 /// per campaign: the behavior's constructor calls <see cref="ResetForNewSession"/>. Parts: this file (lifecycle, gates,
-/// status), the Spawn part (daily roll and creation), the Steering part (hourly steps and events) and the Envoy part (the
-/// tribute envoy: schedule, popup, the player's answer, the console's "bring it now"). Main thread only.
+/// status), the Spawn part (daily roll and creation), the Steering part (hourly steps and events), the Envoy part (the
+/// tribute envoy: schedule, popup, the player's answer, the console's "bring it now") and the OwnSide part (the snapshot
+/// the party AI model reads). Main thread only, except the two <see cref="IRaidHostOwnSideQuery"/> members, which the AI
+/// worker calls.
 /// </remarks>
 public sealed partial class FireAndTributeService : IFireAndTributeService
 {
@@ -122,7 +124,7 @@ public sealed partial class FireAndTributeService : IFireAndTributeService
     public void ResetForNewSession()
     {
         _state = new FireAndTributeState();
-        _ownSide = NoHosts;
+        _hostSides = NoHosts;
         _planned.Clear();
         _spawnedToday = 0;
         _raidsToday = 0;
@@ -138,6 +140,7 @@ public sealed partial class FireAndTributeService : IFireAndTributeService
         foreach (var warning in parsed.Warnings)
             _logger.LogWarning($"{Tag} save record: {warning}");
         _state = parsed;
+        PublishOwnSide();
     }
 
     /// <summary>
@@ -162,7 +165,6 @@ public sealed partial class FireAndTributeService : IFireAndTributeService
             else if (!_adapter.Read(record.PartyId).Exists)
                 Lost(record);
         }
-        PublishOwnSide();
     }
 
     /// <summary>
@@ -178,7 +180,7 @@ public sealed partial class FireAndTributeService : IFireAndTributeService
             _logger.LogInfo($"{Tag} {record.HostId} ({record.PartyId}) released: {why}");
         }
         _state.Hosts.Clear();
-        _ownSide = NoHosts;
+        _hostSides = NoHosts;
     }
 
     /// <summary>

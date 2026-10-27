@@ -1560,3 +1560,13 @@ and three live TAOM centre scenes have one, so the round was priced on a room th
   location it is added to, and test the location the conversation actually runs in (`CampaignMission.Current.Location`),
   not the partner's occupation.
 - **Source:** `docs/reviews/rca-inn-rounds-2026-10-26.md` finding 1.
+
+### `SetDoNotMakeNewDecisions(true)` does not stop a party's own initiative everywhere (#870, 2026-10-27)
+A pinned Fire and Tribute host still takes initiative when its best target fights at, or besieges, the host's target
+settlement: `MobilePartyAi.GetBehaviors` (v1.5.5 `MobilePartyAi.cs:485-486`) applies the initiative result in that case
+despite the flag. An own-side rule written for the other party's decision only would let the host attack a friend.
+- **Why missed:** the design took "the host makes no new decisions" from the adapter's pin call without reading the
+  branch that consumes the flag.
+- **Prevent:** before relying on `DoNotMakeNewDecisions` to silence a party, read `MobilePartyAi.GetBehaviors`; a rule
+  about a pair of parties in `MobilePartyAIModel` checks both directions.
+- **Source:** [rca-fire-and-tribute-own-side-2026-10-27.md](../rca-fire-and-tribute-own-side-2026-10-27.md) finding 4.

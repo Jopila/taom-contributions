@@ -130,6 +130,17 @@ public class RacePersistenceServiceTests
         _logger.Received(1).LogWarning(Arg.Is<string>(m => m.Contains("No saved race data")));
     }
 
+    // A save with no RacePersistenceBehavior record: the engine calls SyncData only for a behavior the save holds a
+    // record for (CampaignBehaviorDataStore.LoadBehaviorData), so a pre-TAOM save reaches the restore with neither call.
+    [TestMethod]
+    public void RestoreHeroRaces_WithoutResetOrSync_Warns()
+    {
+        _sut.RestoreHeroRaces();
+
+        _logger.Received(1).LogWarning(Arg.Is<string>(m => m.Contains("No saved race data")));
+        _logger.DidNotReceive().LogInfo(Arg.Is<string>(m => m.Contains("new campaign")));
+    }
+
     [TestMethod]
     public void RestoreHeroRaces_LoadAfterNewCampaignInSameProcess_Warns()
     {

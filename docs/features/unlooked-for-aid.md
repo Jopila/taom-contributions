@@ -59,6 +59,7 @@ MCM "World/Help Unlooked-For" ─> UnlookedForAidSettingsProvider (captured once
 MobilePartyAIModel slot ─> TaomMobilePartyAIModel ──> UnlookedForAidService.Decide
    (AI + main thread)        base.ShouldConsiderAvoiding        ^
                              SiegeAvoidanceFactsReader ─────────┘ (facts: primitives)
+                             IRaidHostOwnSideQuery (Fire and Tribute, checked first)
 ```
 
 ### Co-op
@@ -101,12 +102,13 @@ A bare postfix with no strength check (a weak lord would walk into a siege that 
 
 - `IPathService`, `IModLogger` (kernel) for the config load.
 - `TaomSettings` (MCM) for the switch.
+- `IRaidHostOwnSideQuery`, registered by Fire and Tribute's module: this feature's model also carries that feature's own-side rule ([fire-and-tribute.md](fire-and-tribute.md), "Own side").
 
 ## Tests
 
 - `TAOM.Tests/Features/UnlookedForAid/UnlookedForAidServiceTests.cs`: the decision matrix (switch off, non-lord, player-led siege in the besieger and the inside-settlement case, ratio above, at and below, zero and negative camp, NaN and infinite strengths, besieged-settlement target, unrelated target, ratio read once).
 - `TAOM.Tests/Features/UnlookedForAid/UnlookedForAidConfigProviderTests.cs`: one test per validation rule and the shipped JSON.
-- `TAOM.Tests/Features/UnlookedForAid/UnlookedForAidWiringTests.cs`: module listed once, the model on the `MobilePartyAIModel` slot, IL checks that the override calls base and the service, reader and service read no `TaomSettings.Instance`, IoC or logger, the model declares only `ShouldConsiderAvoiding`, a source scan that no other TAOM class fills the `MobilePartyAIModel` slot, the model factory builds the model, a reader test for a target outside any siege (unread strengths are NaN), and that `IoC.cs` and `SubModule.cs` name nothing of the feature. A reader test with an army, an attachment or a besieger camp needs a running campaign (their setters call game code, and the player-led check reads `Campaign.Current`), so those paths are covered by the in-game check.
+- `TAOM.Tests/Features/UnlookedForAid/UnlookedForAidWiringTests.cs`: module listed once, the model on the `MobilePartyAIModel` slot, IL checks that the override calls base and the service, reader and service read no `TaomSettings.Instance`, IoC or logger, the model declares only `ShouldConsiderAttacking` and `ShouldConsiderAvoiding`, both run the own-side check, its helpers and the alignment read path read no settings, IoC or logger, a source scan that no other TAOM class fills the `MobilePartyAIModel` slot, the model factory builds the model, a reader test for a target outside any siege (unread strengths are NaN), and that `IoC.cs` and `SubModule.cs` name nothing of the feature. A reader test with an army, an attachment or a besieger camp needs a running campaign (their setters call game code, and the player-led check reads `Campaign.Current`), so those paths are covered by the in-game check.
 - `TAOM.Tests/Features/UnlookedForAid/UnlookedForAidSettingsProviderTests.cs` and the rows in `CampaignHotPathSettingsProvidersTests.cs`.
 
 ## How to Retune
