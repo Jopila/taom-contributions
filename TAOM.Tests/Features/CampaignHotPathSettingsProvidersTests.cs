@@ -138,6 +138,8 @@ public class CampaignHotPathSettingsProvidersTests
     [DataRow(typeof(TAOM.Features.SettlementServices.SettlementServicesSettingsProvider))]
     // Notable Services: read by each of three dialog conditions when a conversation is built; the accessor takes the settings once.
     [DataRow(typeof(TAOM.Features.NotableServices.NotableServicesSettingsProvider))]
+    // Inn Rounds: read by each of three dialog conditions when a tavern keeper's conversation is built; the accessor takes the settings once.
+    [DataRow(typeof(TAOM.Features.InnRounds.InnRoundsSettingsProvider))]
     // #873: not a hot path (read a few times per party row when the Army Management screen opens); it still takes the settings once.
     [DataRow(typeof(RedArrowSettingsProvider))]
     // #867: not a hot path; read once when a clan signs on as a mercenary. The accessor still takes the settings once.
@@ -204,6 +206,7 @@ public class CampaignHotPathSettingsProvidersTests
     [DataRow(typeof(ISeasonedHostsSettingsProvider), typeof(SeasonedHostsSettingsProvider))]
     [DataRow(typeof(IKingsMusterSettingsProvider), typeof(KingsMusterSettingsProvider))]
     [DataRow(typeof(TAOM.Features.NotableServices.INotableServicesSettingsProvider), typeof(TAOM.Features.NotableServices.NotableServicesSettingsProvider))]
+    [DataRow(typeof(TAOM.Features.InnRounds.IInnRoundsSettingsProvider), typeof(TAOM.Features.InnRounds.InnRoundsSettingsProvider))]
     [DataRow(typeof(ISmithsMeasureSettingsProvider), typeof(SmithsMeasureSettingsProvider))]
     public void Provider_ResolvesFromARealContainer(Type service, Type implementation)
     {

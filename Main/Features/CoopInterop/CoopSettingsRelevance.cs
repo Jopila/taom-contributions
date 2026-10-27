@@ -133,6 +133,10 @@ public static class CoopSettingsRelevance
         // hearth or prosperity, met flags, tracker marks, relation, Roguery experience and the given rosters) is behind the
         // single-player predicate in NotableServicesService.
         "EnableNotableServices",
+        // Inn Rounds (#901): the switch and the two scales only shape a player's click at the tavern keeper. Every write (the player's
+        // gold, the town's coffers, the party's morale, the clan's renown, Charm experience, tracker marks) is behind the
+        // single-player predicate in InnRoundsService, so a peer holding a different value never changes a running simulation.
+        "EnableInnRounds", "InnRoundsMoraleScale", "InnRoundsRenownScale",
         "EnableQuickActions", "EnableInventorySearch", "QuickActionsShowConfirmation",
         "QuickActionsPlaySounds", "DamagedQualityDropdown", "DamagedThreshold",
         "UseCustomThreshold", "ExcludeDamagedHorses",

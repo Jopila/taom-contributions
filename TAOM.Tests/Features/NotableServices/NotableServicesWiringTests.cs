@@ -103,6 +103,7 @@ public class NotableServicesWiringTests
         container.RegisterInstance(Substitute.For<IRelationGrantService>());
         container.RegisterInstance(Substitute.For<IMessengerConversationState>());
         container.RegisterInstance(Substitute.For<IMapRevealAdapter>());
+        container.RegisterInstance(Substitute.For<IHeroSkillXpAdapter>());
         var module = new NotableServicesModule();
 
         module.RegisterServices(container);
@@ -218,7 +219,8 @@ public class NotableServicesWiringTests
     {
         var service = Source(Folder + "/NotableServicesService.cs");
 
-        StringAssert.Contains(service, "!_coop.IsSessionActive && !_coop.ShouldDeferToHost && !_server.IsDedicatedServer && _coop.IsAuthority");
+        StringAssert.Contains(service, "CoopSessionPolicy.IsSinglePlayerAuthority(_coop, _server)");
+        Assert.IsFalse(service.Contains("IsSessionActive"), "the four-term form lives in CoopSessionPolicy only");
         StringAssert.Contains(service, "_messenger.IsOpen");
     }
 
@@ -392,7 +394,6 @@ public class NotableServicesWiringTests
         StringAssert.Contains(adapter, "settlement.Militia += amount;");
         StringAssert.Contains(adapter, "village.Hearth += amount;");
         StringAssert.Contains(adapter, "town.Prosperity += amount;");
-        StringAssert.Contains(adapter, "Player?.AddSkillXp(DefaultSkills.Roguery, xp)");
     }
 
     [TestMethod]
@@ -421,6 +422,7 @@ public class NotableServicesWiringTests
         container.RegisterInstance(Substitute.For<IRelationGrantService>());
         container.RegisterInstance(Substitute.For<IMessengerConversationState>());
         container.RegisterInstance(Substitute.For<IMapRevealAdapter>());
+        container.RegisterInstance(Substitute.For<IHeroSkillXpAdapter>());
         var module = new NotableServicesModule();
         module.RegisterServices(container);
 

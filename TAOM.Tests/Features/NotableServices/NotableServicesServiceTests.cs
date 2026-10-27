@@ -125,7 +125,7 @@ public class NotableServicesServiceTests
         f.Adapter.DidNotReceiveWithAnyArgs().AddMilitia(default!, default);
         f.Adapter.DidNotReceiveWithAnyArgs().ShowGiftNotice(default!, default);
         f.Grants.DidNotReceiveWithAnyArgs().Grant(default!, default, default!);
-        f.Adapter.DidNotReceiveWithAnyArgs().AddRogueryXp(default);
+        f.Skills.DidNotReceiveWithAnyArgs().AddSkillXpLanded(default!, default!, default);
     }
 
     [TestMethod]
@@ -236,7 +236,7 @@ public class NotableServicesServiceTests
 
         f.OpenScreen()!(new GiftTally(7, 5));
 
-        f.Adapter.Received(1).AddRogueryXp(60f);
+        f.Skills.Received(1).AddSkillXpLanded(NotableServicesFixture.PlayerId, "Roguery", 60f);
         f.Adapter.Received(1).ShowRogueryNotice(60);
     }
 
@@ -248,8 +248,36 @@ public class NotableServicesServiceTests
 
         f.OpenScreen()!(new GiftTally(0, 1));
 
-        f.Adapter.Received(1).AddRogueryXp(2.5f);
+        f.Skills.Received(1).AddSkillXpLanded(NotableServicesFixture.PlayerId, "Roguery", 2.5f);
         f.Adapter.Received(1).ShowRogueryNotice(3);
+    }
+
+    [TestMethod]
+    public void Done_TheRogueryNotice_ShowsTheExperienceThatLanded_NotTheAsk()
+    {
+        var f = new NotableServicesFixture();
+        f.Config.RogueryXpPerPrisoner = 12f;
+        f.Skills.AddSkillXpLanded(NotableServicesFixture.PlayerId, "Roguery", Arg.Any<float>()).Returns(87.4f);
+
+        f.OpenScreen()!(new GiftTally(7, 5));
+
+        f.Skills.Received(1).AddSkillXpLanded(NotableServicesFixture.PlayerId, "Roguery", 60f);
+        f.Adapter.Received(1).ShowRogueryNotice(87);
+        f.Adapter.DidNotReceive().ShowRogueryNotice(60);
+    }
+
+    [DataTestMethod]
+    [DataRow(0f)]
+    [DataRow(0.4f)]
+    public void Done_TheRogueryNotice_IsSkipped_WhenNothingLanded(float landed)
+    {
+        var f = new NotableServicesFixture();
+        f.Skills.AddSkillXpLanded(NotableServicesFixture.PlayerId, "Roguery", Arg.Any<float>()).Returns(landed);
+
+        f.OpenScreen()!(new GiftTally(0, 3));
+
+        f.Skills.Received(1).AddSkillXpLanded(NotableServicesFixture.PlayerId, "Roguery", 30f);
+        f.Adapter.DidNotReceiveWithAnyArgs().ShowRogueryNotice(default);
     }
 
     [TestMethod]
@@ -259,7 +287,7 @@ public class NotableServicesServiceTests
 
         f.OpenScreen()!(new GiftTally(7, 0));
 
-        f.Adapter.DidNotReceiveWithAnyArgs().AddRogueryXp(default);
+        f.Skills.DidNotReceiveWithAnyArgs().AddSkillXpLanded(default!, default!, default);
         f.Adapter.DidNotReceiveWithAnyArgs().ShowRogueryNotice(default);
     }
 
@@ -819,7 +847,7 @@ public class NotableServicesServiceTests
         f.Service.Reveal();
 
         f.Adapter.Received(1).PayNotable(NotableServicesFixture.SpeakerId, 100);
-        f.Adapter.Received(1).ShowHoldsMarkedNotice(2);
+        f.Reveal.Received(1).ShowHoldsMarkedNotice(2);
     }
 
     [TestMethod]

@@ -26,4 +26,10 @@ public interface IMapRevealAdapter
     /// tracked, unknown or a village is left alone.
     /// </summary>
     int Track(IReadOnlyList<string> settlementIds);
+
+    /// <summary>The campaign map's diagonal, the unit the reveal bound is a share of.</summary>
+    float MapDiagonal { get; }
+
+    /// <summary>The line after holds were marked on the map.</summary>
+    void ShowHoldsMarkedNotice(int count);
 }

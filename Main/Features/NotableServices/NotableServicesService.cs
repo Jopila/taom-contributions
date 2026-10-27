@@ -15,19 +15,21 @@ namespace TAOM.Features.NotableServices;
 /// Every rule of Notable Services (docs/features/notable-services.md): the three lines a notable of the player's settlement
 /// offers. Give men to the settlement (troops raise its militia, prisoners its hearth or prosperity, and the notable thinks
 /// better of the player), pay to be introduced to the other notables, and pay to have the nearest holds marked on the map.
-/// It works on snapshots and ids and reaches the engine only through <see cref="INotableServicesAdapter"/> and
-/// <see cref="IMapRevealAdapter"/>. The conditions (<see cref="OffersGift"/>, <see cref="QuoteIntroduce"/>,
+/// It works on snapshots and ids and reaches the engine only through <see cref="INotableServicesAdapter"/>; the rules of the
+/// holds line are <see cref="HoldsRevealService"/>'s, which the tavern keeper's line shares. The conditions (<see cref="OffersGift"/>, <see cref="QuoteIntroduce"/>,
 /// <see cref="OffersReveal"/>, <see cref="CanAffordReveal"/>) never write; <see cref="QueueGift"/>, <see cref="Introduce"/> and
 /// <see cref="Reveal"/> are the only members that do. The service keeps no campaign state.
 /// </summary>
 public sealed class NotableServicesService
 {
     private const string Tag = "[NotableServices]";
+    private const string RoguerySkillId = "Roguery";
 
     private readonly INotableServicesAdapter _adapter;
-    private readonly IMapRevealAdapter _reveal;
+    private readonly HoldsRevealService _holds;
     private readonly IAlignmentService _alignment;
     private readonly IRelationGrantService _grants;
+    private readonly IHeroSkillXpAdapter _skills;
     private readonly INotableServicesSettingsProvider _settings;
     private readonly INotableServicesConfigProvider _config;
     private readonly IMessengerConversationState _messenger;
@@ -35,14 +37,15 @@ public sealed class NotableServicesService
     private readonly IDedicatedServerProvider _server;
     private readonly IModLogger _logger;
 
-    public NotableServicesService(INotableServicesAdapter adapter, IMapRevealAdapter reveal, IAlignmentService alignment,
-        IRelationGrantService grants, INotableServicesSettingsProvider settings, INotableServicesConfigProvider config,
+    public NotableServicesService(INotableServicesAdapter adapter, HoldsRevealService holds, IAlignmentService alignment,
+        IRelationGrantService grants, IHeroSkillXpAdapter skills, INotableServicesSettingsProvider settings, INotableServicesConfigProvider config,
         IMessengerConversationState messenger, ICoopSessionProvider coop, IDedicatedServerProvider server, IModLogger logger)
     {
         _adapter = adapter;
-        _reveal = reveal;
+        _holds = holds;
         _alignment = alignment;
         _grants = grants;
+        _skills = skills;
         _settings = settings;
         _config = config;
         _messenger = messenger;
@@ -70,8 +73,7 @@ public sealed class NotableServicesService
     /// mod TAOM cannot probe, no dedicated server, and a peer that may write the world. Read live on every use
     /// (ICoopSessionProvider's contract). The same predicate as Settlement Services.
     /// </summary>
-    private bool MayWriteWorld =>
-        !_coop.IsSessionActive && !_coop.ShouldDeferToHost && !_server.IsDedicatedServer && _coop.IsAuthority;
+    private bool MayWriteWorld => CoopSessionPolicy.IsSinglePlayerAuthority(_coop, _server);
 
     /// <summary>The gift line is shown: a notable of the player's settlement, not at war, with men to give and no party screen open.</summary>
     public bool OffersGift() => Giftable(Speaker(_adapter.ConversationPartnerId)) != null;
@@ -105,7 +107,7 @@ public sealed class NotableServicesService
 
     public bool OffersReveal() => Speaker(_adapter.ConversationPartnerId) != null;
 
-    public int RevealPrice => Whole(_config.GetConfig().RevealPrice);
+    public int RevealPrice => _holds.Price;
 
     public bool CanAffordReveal() => _adapter.PlayerGold >= RevealPrice;
 
@@ -151,50 +153,9 @@ public sealed class NotableServicesService
         var speaker = Speaker(_adapter.ConversationPartnerId);
         if (speaker == null)
             return RevealOutcome.Unavailable;
-        if (speaker.AtWarWithPlayer)
-            return RevealOutcome.AtWar;
 
-        try
-        {
-            var config = _config.GetConfig();
-            if (speaker.Relation < config.RevealMinRelation)
-                return RevealOutcome.Cold;
-
-            var chosen = NearestUntracked(_reveal.FortificationsAround(speaker.SettlementId), config);
-            if (chosen.Count == 0)
-                return RevealOutcome.NothingNew;
-
-            var price = Whole(config.RevealPrice);
-            if (_adapter.PlayerGold < price || (price > 0 && !_adapter.PayNotable(speaker.HeroId, price)))
-                return RevealOutcome.Unavailable;
-
-            var marked = _reveal.Track(chosen);
-            if (marked > 0)
-                _adapter.ShowHoldsMarkedNotice(marked);
-            return RevealOutcome.Revealed;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError($"{Tag} Pointing out the holds near '{speaker.SettlementId}' failed: {ex.Message}");
-            return RevealOutcome.Unavailable;
-        }
-    }
-
-    /// <summary>
-    /// The ids of the nearest <c>revealCount</c> towns and castles that carry no mark and lie within
-    /// <c>revealMaxDiagonalFraction</c> of the map's diagonal, nearest first. A distance that is not a number is left out.
-    /// </summary>
-    private IReadOnlyList<string> NearestUntracked(IReadOnlyList<RevealCandidate> around, NotableServicesConfig config)
-    {
-        var bound = config.RevealMaxDiagonalFraction * _adapter.MapDiagonal;
-        var count = Whole(config.RevealCount);
-        return around
-            .Where(c => !c.IsTracked && c.Distance <= bound)
-            .OrderBy(c => c.Distance)
-            .ThenBy(c => c.SettlementId, StringComparer.Ordinal)
-            .Take(count)
-            .Select(c => c.SettlementId)
-            .ToList();
+        var ask = new RevealAsk(speaker.SettlementId, speaker.AtWarWithPlayer, speaker.Relation);
+        return _holds.Reveal(ask, price => _adapter.PlayerGold >= price && _adapter.PayNotable(speaker.HeroId, price));
     }
 
     private void OpenGift(string heroId)
@@ -265,10 +226,13 @@ public sealed class NotableServicesService
                 _adapter.ShowRelationNotice(heroId, landed);
 
             var xp = delta.Prisoners * config.RogueryXpPerPrisoner;
-            if (xp >= 1f)
+            var playerId = _adapter.PlayerHeroId;
+            if (xp >= 1f && !string.IsNullOrEmpty(playerId))
             {
-                _adapter.AddRogueryXp(xp);
-                _adapter.ShowRogueryNotice(Whole(xp));
+                // The engine scales the ask (the XP multiplier and the learning rate), so the notice shows what landed.
+                var earned = Whole(_skills.AddSkillXpLanded(playerId!, RoguerySkillId, xp));
+                if (earned > 0)
+                    _adapter.ShowRogueryNotice(earned);
             }
         }
         catch (Exception ex)

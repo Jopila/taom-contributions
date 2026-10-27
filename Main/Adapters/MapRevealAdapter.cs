@@ -1,6 +1,10 @@
+using System;
 using System.Collections.Generic;
 using TaleWorlds.CampaignSystem;
 using TaleWorlds.CampaignSystem.Settlements;
+using TaleWorlds.Library;
+using TaleWorlds.Localization;
+using TAOM.Core.Logging;
 
 namespace TAOM.Adapters;
 
@@ -17,6 +21,17 @@ namespace TAOM.Adapters;
 /// </summary>
 public sealed class MapRevealAdapter : IMapRevealAdapter
 {
+    private const string Tag = "[MapReveal]";
+
+    private readonly IModLogger _logger;
+
+    public MapRevealAdapter(IModLogger logger)
+    {
+        _logger = logger;
+    }
+
+    public float MapDiagonal => Campaign.MapDiagonal;
+
     public void RevealClan(string clanId)
     {
         var clan = Campaign.Current?.CampaignObjectManager?.Find<Clan>(clanId);
@@ -64,6 +79,21 @@ public sealed class MapRevealAdapter : IMapRevealAdapter
                 settlements.Add(settlement);
         }
         return Track(settlements);
+    }
+
+    public void ShowHoldsMarkedNotice(int count)
+    {
+        try
+        {
+            var text = new TextObject("{=taom_ns_holds_notice}{COUNT} {?IS_PLURAL}holds{?}hold{\\?} marked on your map.")
+                .SetTextVariable("IS_PLURAL", count > 1 ? 1 : 0)
+                .SetTextVariable("COUNT", count);
+            InformationManager.DisplayMessage(new InformationMessage(text.ToString(), Colors.Green));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"{Tag} Showing the holds notice failed: {ex.Message}");
+        }
     }
 
     private static int Track(IEnumerable<Settlement> settlements)

@@ -44,9 +44,6 @@ public interface INotableServicesAdapter
     /// <summary>Marks each hero as met by the player.</summary>
     void MarkMet(IReadOnlyList<string> heroIds);
 
-    /// <summary>The campaign map's diagonal, the unit the reveal bound is a share of.</summary>
-    float MapDiagonal { get; }
-
     /// <summary>Runs the action once, when the current conversation has ended (the engine's end-of-conversation one-shot).</summary>
     void RunAfterConversation(Action action);
 
@@ -70,8 +67,8 @@ public interface INotableServicesAdapter
     /// <summary>Adds to a town's prosperity.</summary>
     void AddProsperity(string settlementId, float amount);
 
-    /// <summary>Adds Roguery experience to the player.</summary>
-    void AddRogueryXp(float xp);
+    /// <summary>The player hero's id; null before a campaign. The skill experience goes through <c>IHeroSkillXpAdapter</c>.</summary>
+    string? PlayerHeroId { get; }
 
     /// <summary>The line after a gift: how many men the settlement took. The adapter names the settlement from its id.</summary>
     void ShowGiftNotice(string settlementId, int men);
@@ -87,7 +84,4 @@ public interface INotableServicesAdapter
 
     /// <summary>The line after an introduction.</summary>
     void ShowIntroducedNotice(int count);
-
-    /// <summary>The line after holds were marked on the map.</summary>
-    void ShowHoldsMarkedNotice(int count);
 }

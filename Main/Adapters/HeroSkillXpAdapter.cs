@@ -8,6 +8,8 @@ namespace TAOM.Adapters;
 
 public sealed class HeroSkillXpAdapter : IHeroSkillXpAdapter
 {
+    private const string Tag = "[HeroSkillXp]";
+
     private readonly IModLogger _logger;
 
     public HeroSkillXpAdapter(IModLogger logger)
@@ -15,8 +17,17 @@ public sealed class HeroSkillXpAdapter : IHeroSkillXpAdapter
         _logger = logger;
     }
 
-    public bool AddSkillXp(string heroId, string skillId, float xp)
+    public bool AddSkillXp(string heroId, string skillId, float xp) => Add(heroId, skillId, xp, out _);
+
+    public float AddSkillXpLanded(string heroId, string skillId, float xp)
     {
+        Add(heroId, skillId, xp, out var landed);
+        return landed;
+    }
+
+    private bool Add(string heroId, string skillId, float xp, out float landed)
+    {
+        landed = 0f;
         if (float.IsNaN(xp) || float.IsInfinity(xp) || xp <= 0f)
             return false;
         try
@@ -25,15 +36,18 @@ public sealed class HeroSkillXpAdapter : IHeroSkillXpAdapter
             var skill = FindSkill(skillId);
             if (hero?.HeroDeveloper == null || skill == null)
             {
-                _logger?.LogWarning($"[Enlistment] AddSkillXp: unresolvable hero '{heroId}' or skill '{skillId}'");
+                _logger?.LogWarning($"{Tag} AddSkillXp: unresolvable hero '{heroId}' or skill '{skillId}'");
                 return false;
             }
+            var before = hero.HeroDeveloper.GetSkillXp(skill);
             hero.HeroDeveloper.AddSkillXp(skill, xp);
+            var after = hero.HeroDeveloper.GetSkillXp(skill);
+            landed = after - before;
             return true;
         }
         catch (Exception ex)
         {
-            _logger?.LogError($"[Enlistment] AddSkillXp('{heroId}', '{skillId}', {xp}) failed: {ex.Message}");
+            _logger?.LogError($"{Tag} AddSkillXp('{heroId}', '{skillId}', {xp}) failed: {ex.Message}");
             return false;
         }
     }
@@ -50,7 +64,7 @@ public sealed class HeroSkillXpAdapter : IHeroSkillXpAdapter
         }
         catch (Exception ex)
         {
-            _logger?.LogError($"[Enlistment] GetSkillValue('{heroId}', '{skillId}') failed: {ex.Message}");
+            _logger?.LogError($"{Tag} GetSkillValue('{heroId}', '{skillId}') failed: {ex.Message}");
             return 0;
         }
     }

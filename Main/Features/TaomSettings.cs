@@ -1299,6 +1299,26 @@ public class TaomSettings : AttributeGlobalSettings<TaomSettings>
         HintText = "When enabled, if you attack on land a bandit party you have not dealt with before and it belongs to one of the eight talking clans (Dunlending, Rhun, Haradrim, Gundabad, Umbar, Gondor deserters, Blacklocks, Mirkwood Stalkers), there is a one in four chance that it greets you in its own words, and your ultimatum is vanilla's reply to that kind of greeting. Spiders, wild trolls and looters are unchanged. Applies to the next bandit conversation. Text only: nothing else about the encounter changes. When off, every greeting is vanilla's. The lines bandits use when they rob you are separate data and always apply. Default: on.")]
     public bool EnableBanditGreetings { get; set; } = true;
 
+    // --- World / Inn Rounds (#901) ---
+
+    // Read live at each tavern keeper conversation, through InnRoundsSettingsProvider's one cached settings reference, so none
+    // needs a restart. GroupOrder 79 is used by no other group (78 is Bandit Voices, 77 Notable Services; checked 2026-10-26); it
+    // sits on the group's first property, because MCM ignores a GroupOrder on any later one.
+    [SettingPropertyGroup("World/Inn Rounds", GroupOrder = 79)]
+    [SettingPropertyBool("Enable Inn Rounds", Order = 0, RequireRestart = false,
+        HintText = "When enabled, the tavern keeper of a town offers three more lines: stand a round for your whole party (morale and a little Charm experience), stand a round for everyone in the tavern (renown and a little Charm experience), and pay to have the nearest towns and castles marked on your map. A round costs the town's price for the local drink for each head, capped, and the gold goes to the town. At most a few rounds a day, set in inn_rounds.json. Single player only; the lines are hidden during a messenger conversation. The map question is refused while the town's realm is at war with yours or its owner does not know you well enough. When off, none of the lines appear. Default: on.")]
+    public bool EnableInnRounds { get; set; } = TAOM.Features.InnRounds.InnRoundsSettingsProvider.DefaultEnabled;
+
+    [SettingPropertyGroup("World/Inn Rounds")]
+    [SettingPropertyFloatingInteger("Inn Round Morale Scale", 0f, 3f, "0.00", Order = 1, RequireRestart = false,
+        HintText = "Multiplies the morale a party round gives (20 to 40 before the scale, set in inn_rounds.json). 0 gives none; the party's morale never goes past 100. Between 0 and 3. Default: 1.")]
+    public float InnRoundsMoraleScale { get; set; } = TAOM.Features.InnRounds.InnRoundsSettingsProvider.DefaultScale;
+
+    [SettingPropertyGroup("World/Inn Rounds")]
+    [SettingPropertyFloatingInteger("Inn Round Renown Scale", 0f, 3f, "0.00", Order = 2, RequireRestart = false,
+        HintText = "Multiplies the renown a house round gives (1 to 3 before the scale, set in inn_rounds.json), rounded to a whole number. 0 gives none. Between 0 and 3. Default: 1.")]
+    public float InnRoundsRenownScale { get; set; } = TAOM.Features.InnRounds.InnRoundsSettingsProvider.DefaultScale;
+
     // --- Prisoner Recruitment ---
 
     [SettingPropertyGroup("World/Prisoner Recruitment", GroupOrder = 39)]

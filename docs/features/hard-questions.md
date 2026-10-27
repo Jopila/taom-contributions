@@ -119,7 +119,7 @@ Every number above is a field. Chances are in [0, 1], penalties are at most 0 (a
 | [HardQuestionsCampaignBehavior.cs](../../Main/Features/HardQuestions/Hooks/HardQuestionsCampaignBehavior.cs) | SyncData, release, death |
 | [CaptiveLordAdapter.cs](../../Main/Adapters/CaptiveLordAdapter.cs) | Captive snapshot (cheap), circle (per deed), conversation context, `IsRansomScreenOpen` |
 | [LordEquipmentAdapter.cs](../../Main/Adapters/LordEquipmentAdapter.cs) | Equipment sets with the shared-set guard, slot-wise re-kit |
-| [MapRevealAdapter.cs](../../Main/Adapters/MapRevealAdapter.cs) | Tracking marks on settlements, known heroes. Shared with Lord Courtesies and, through the by-id pair `FortificationsAround` and `Track`, with [Notable Services](notable-services.md) |
+| [MapRevealAdapter.cs](../../Main/Adapters/MapRevealAdapter.cs) | Tracking marks on settlements, known heroes. Shared with Lord Courtesies and, through the by-id pair `FortificationsAround` and `Track`, with [Notable Services](notable-services.md) and [Inn Rounds](inn-rounds.md) (both through `HoldsRevealService`, which also reads `MapDiagonal` and `ShowHoldsMarkedNotice`) |
 | [HardQuestionsActionAdapter.cs](../../Main/Adapters/HardQuestionsActionAdapter.cs) | Relation, relation summary line, gold, wound, death, renown, reproach, party-screen commit |
 | [PlayerTraitAdapter.cs](../../Main/Adapters/PlayerTraitAdapter.cs) | Trait experience through `TraitLevelingHelper.OnIncidentResolved` |
 | [hard_questions.json](../../Main/_Module/ModuleData/hard_questions/hard_questions.json) | Numbers |

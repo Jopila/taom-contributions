@@ -4053,4 +4053,47 @@
 	<string id="taom_mh_mcm_hide_locked" text="{=taom_mh_mcm_hide_locked}Hide Locked Items from Smelting" />
 	<string id="taom_mh_mcm_hide_locked_hint" text="{=taom_mh_mcm_hide_locked_hint}Weapons you locked in the inventory no longer appear in the smithy's smelting list, so they cannot be smelted by accident. Unlock one in the inventory to smelt it. A weapon you lock inside the smithy leaves the list at your next smelt or tab switch. No restart. Default: on." />
 
+	<!-- Inn Rounds (#901): the drink a culture's taverns pour, one row per culture id (the id after the dot is the culture id, the variation GameTexts.TryGetText takes). A culture with no row is called "ale" (taom_round_drink_default, in InnRoundsAdapter). The beer or wine choice that sets the price is cultureDrinks in inn_rounds.json. Names are gender-neutral and name no people. -->
+	<string id="str_taom_round_drink.erebor" text="{=taom_round_drink_erebor}deep-cellar ale" />
+	<string id="str_taom_round_drink.rivendell" text="{=taom_round_drink_rivendell}valley wine" />
+	<string id="str_taom_round_drink.mirkwood" text="{=taom_round_drink_mirkwood}Dorwinion wine" />
+	<string id="str_taom_round_drink.lothlorien" text="{=taom_round_drink_lothlorien}golden cordial" />
+	<string id="str_taom_round_drink.lindon" text="{=taom_round_drink_lindon}harbour wine" />
+	<string id="str_taom_round_drink.isengard" text="{=taom_round_drink_isengard}sour black ale" />
+	<string id="str_taom_round_drink.gundabad" text="{=taom_round_drink_gundabad}smoky grog" />
+	<string id="str_taom_round_drink.umbar" text="{=taom_round_drink_umbar}spiced coast wine" />
+	<string id="str_taom_round_drink.dolguldur" text="{=taom_round_drink_dolguldur}bitter dregs" />
+	<string id="str_taom_round_drink.gondor" text="{=taom_round_drink_gondor}Belfalas wine" />
+	<string id="str_taom_round_drink.mordor" text="{=taom_round_drink_mordor}black ale" />
+	<string id="str_taom_round_drink.shaghana" text="{=taom_round_drink_shaghana}date wine" />
+	<string id="str_taom_round_drink.abanissa" text="{=taom_round_drink_abanissa}palm wine" />
+	<string id="str_taom_round_drink.goblin" text="{=taom_round_drink_goblin}cave brew" />
+	<string id="str_taom_round_drink.mistymountainorcs" text="{=taom_round_drink_mistymountainorcs}stonewater brew" />
+	<string id="str_taom_round_drink.bluecraig" text="{=taom_round_drink_bluecraig}craig brew" />
+	<string id="str_taom_round_drink.arthedain" text="{=taom_round_drink_arthedain}hearth ale" />
+	<string id="str_taom_round_drink.cardolan" text="{=taom_round_drink_cardolan}barrowdown ale" />
+	<string id="str_taom_round_drink.rhudaur" text="{=taom_round_drink_rhudaur}hill ale" />
+	<string id="str_taom_round_drink.empire" text="{=taom_round_drink_empire}heather ale" />
+	<string id="str_taom_round_drink.vlandia" text="{=taom_round_drink_vlandia}honey mead" />
+	<string id="str_taom_round_drink.battania" text="{=taom_round_drink_battania}spiced wine" />
+	<string id="str_taom_round_drink.khuzait" text="{=taom_round_drink_khuzait}steppe brew" />
+	<string id="str_taom_round_drink.aserai" text="{=taom_round_drink_aserai}oasis wine" />
+	<string id="str_taom_round_drink.sturgia" text="{=taom_round_drink_sturgia}dale ale" />
+	<!-- harvested by tools/harvest_literal_loc_keys.py -->
+	<!-- InnRoundsAdapter -->
+	<string id="taom_round_party_notice" text="{=taom_round_party_notice}You stand a round of {DRINK} for your company. Good cheer goes round (recent events morale +{MORALE})." />
+	<string id="taom_round_house_notice" text="{=taom_round_house_notice}You stand a round of {DRINK} for the whole house. Word of it will spread." />
+	<string id="taom_round_drink_default" text="{=taom_round_drink_default}ale" />
+	<!-- InnRounds -->
+	<string id="taom_round_reveal_done" text="{=taom_round_reveal_done}Listen, then. Travellers have talked of little else but these holds all season, and I will tell you where each one lies." />
+	<string id="taom_round_reveal_war" text="{=taom_round_reveal_war}Your realm is at war with the one who holds this town. I will say nothing of the roads while the swords are out." />
+	<string id="taom_round_reveal_cold" text="{=taom_round_reveal_cold}The ones who hold this town do not know you well enough yet. I keep my talk of the roads for friends." />
+	<string id="taom_round_reveal_nothing" text="{=taom_round_reveal_nothing}I have no more news of the holds near here. You know all that I know." />
+	<string id="taom_round_party" text="{=taom_round_party}Stand a round for my whole company ({PRICE}{GOLD_ICON})." />
+	<string id="taom_round_house" text="{=taom_round_house}A round for everyone in the house, on me ({PRICE}{GOLD_ICON})." />
+	<string id="taom_round_cap" text="{=taom_round_cap}Enough rounds have been poured for one day." />
+	<!-- harvested by tools/harvest_literal_loc_keys.py -->
+	<!-- InnRoundsAdapter -->
+	<string id="taom_round_xp_notice" text="{=taom_round_xp_notice}Standing a round teaches you a little about winning a room (+{XP} {SKILL_NAME} experience)." />
+
 </strings>

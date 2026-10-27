@@ -94,7 +94,7 @@ Group `World/Lord Courtesies` (`GroupOrder = 63`), both default on, neither need
 | `Main/Features/LordCourtesies/Hooks/LordCourtesiesDialogBehavior.cs` | Thin campaign behavior |
 | `Main/Features/LordCourtesies/Hooks/LordCourtesiesDialogLines.cs` | The conversation lines |
 | `Main/Adapters/ILordCourtesyAdapter.cs`, `LordCourtesyAdapter.cs` | Engine boundary: snapshot, roster, gift screen, engine worth |
-| `Main/Adapters/MapRevealAdapter.cs` | Shared with Hard Questions and, through the by-id pair `FortificationsAround` and `Track`, [Notable Services](notable-services.md): tracking marks and known heroes |
+| `Main/Adapters/MapRevealAdapter.cs` | Shared with Hard Questions and, through the by-id pair `FortificationsAround` and `Track`, [Notable Services](notable-services.md) and [Inn Rounds](inn-rounds.md) (both through `HoldsRevealService`, which also reads `MapDiagonal` and `ShowHoldsMarkedNotice`): tracking marks and known heroes |
 | `Main/_Module/ModuleData/lord_courtesies/lord_courtesies.json` | Config |
 
 ## Dependencies
@@ -102,7 +102,7 @@ Group `World/Lord Courtesies` (`GroupOrder = 63`), both default on, neither need
 - `TroopHandoverService` (Bonds of Battle): the gain, the daily cap, the grant and the notice. Unchanged; this feature only calls `OnHandover`.
 - `IAlignmentService` (Execution): sides of the player and the lord.
 - `IArmouryPlayerAdapter` (Adapters): the player's kingdom id (the same-realm gate), the player's `Side` pair, and `ChangeRelationWith` for the holdings costs.
-- `IMapRevealAdapter` (Adapters): `RevealClan`. Notable Services is a third consumer, through `FortificationsAround` and `Track`. Registered by `HardQuestionsIoC`; this feature resolves it and does not register it again.
+- `IMapRevealAdapter` (Adapters): `RevealClan`. Notable Services and Inn Rounds are further consumers, through `HoldsRevealService`, which reads `FortificationsAround`, `Track`, `MapDiagonal` and `ShowHoldsMarkedNotice`. Registered by `HardQuestionsIoC`; this feature resolves it and does not register it again.
 - `ICoopSessionProvider` and `IDedicatedServerProvider` (CoopInterop): hide both lines when TAOM defers to a host and on a dedicated server.
 - `PartyScreenHelper.DonateModeTroopTransferableDelegate` (engine, public): troops move from the player's side only and heroes never move.
 
