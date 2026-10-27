@@ -15,25 +15,33 @@ namespace TAOM.Tests.Features.CharacterCreation;
 [TestCategory("RequiresGame")]
 public class NarrativeMountSpawnGuardTests
 {
+    // Every value vanilla dereferences without a check (v1.5.5 :204-215, and MBGlobals.GetActionSet's
+    // dictionary lookup on the monster's action-set code, Codex 2026-10-27 HIGH).
+    private static readonly object MountKey = new object();
+
     [TestMethod]
     public void CanSpawnMount_EverythingPresent_IsTrue() =>
-        Assert.IsTrue(NarrativeHorseGuardPatchHelper.CanSpawnMount(true, true, true, true));
+        Assert.IsTrue(NarrativeHorseGuardPatchHelper.CanSpawnMount(true, "horse", "harness", "as_horse", MountKey));
 
     [TestMethod]
     public void CanSpawnMount_NoSpawnPoint_IsFalse() =>
-        Assert.IsFalse(NarrativeHorseGuardPatchHelper.CanSpawnMount(false, true, true, true));
+        Assert.IsFalse(NarrativeHorseGuardPatchHelper.CanSpawnMount(false, "horse", "harness", "as_horse", MountKey));
 
     [TestMethod]
-    public void CanSpawnMount_ItemIdMissing_IsFalse() =>
-        Assert.IsFalse(NarrativeHorseGuardPatchHelper.CanSpawnMount(true, false, true, true));
+    public void CanSpawnMount_NoHorseId_IsFalse() =>
+        Assert.IsFalse(NarrativeHorseGuardPatchHelper.CanSpawnMount(true, null, "harness", "as_horse", MountKey));
 
     [TestMethod]
-    public void CanSpawnMount_NoHorseMonster_IsFalse() =>
-        Assert.IsFalse(NarrativeHorseGuardPatchHelper.CanSpawnMount(true, true, false, true));
+    public void CanSpawnMount_NoHarnessId_IsFalse() =>
+        Assert.IsFalse(NarrativeHorseGuardPatchHelper.CanSpawnMount(true, "horse", null, "as_horse", MountKey));
+
+    [TestMethod]
+    public void CanSpawnMount_NoActionSetCode_IsFalse() =>
+        Assert.IsFalse(NarrativeHorseGuardPatchHelper.CanSpawnMount(true, "horse", "harness", null, MountKey));
 
     [TestMethod]
     public void CanSpawnMount_NoMountCreationKey_IsFalse() =>
-        Assert.IsFalse(NarrativeHorseGuardPatchHelper.CanSpawnMount(true, true, true, false));
+        Assert.IsFalse(NarrativeHorseGuardPatchHelper.CanSpawnMount(true, "horse", "harness", "as_horse", null));
 
     [TestMethod]
     [TestCategory("BindingVerification")]

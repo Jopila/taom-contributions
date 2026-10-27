@@ -72,6 +72,10 @@ public static class GauntletSceneNotification_OpenScene_Guard_Patch
         // Cold target (once per cinematic), so binding __originalMethod for the rethrow marker is cheap.
         if (!(__exception is NullReferenceException)) return RethrowStackPreserver.PreserveForRethrow(__exception, __originalMethod);
 
+        // The state change comes before any I/O: a failed log line must not leave the cinematic's input
+        // soft-locked. Dequeued by the OnTick Postfix, after OnTick re-touches focus/input.
+        CloseRequested = true;
+
         try
         {
             _logger ??= IoC.Resolve<IModLogger>();
@@ -81,7 +85,6 @@ public static class GauntletSceneNotification_OpenScene_Guard_Patch
                 "SceneNotificationVisualGuard: suppressed an NRE building a scene-notification character " +
                 "visual (e.g. become-king cinematic); aborting the cinematic cleanly (deferred close). " +
                 __exception);
-            CloseRequested = true; // dequeued by the OnTick Postfix, after OnTick re-touches focus/input
         }
         catch
         {

@@ -532,14 +532,16 @@ public class SubModule : MBSubModuleBase
         // ShaderPrecompilationIoC.InitializeHooks(logger, _shaderRunner);
 
         TryPatchCategory("Patch22_ArmyTargeting");
-        // Patch49: Finalizer guarding vanilla Army.FindBestGatheringSettlementAndMoveTheLeader,
-        // which NREs (Army.cs:726 settlement.GatePosition / 659 Kingdom.Settlements, v1.4.6) when a
-        // besieger army can't resolve a gathering fortification — a map-tick CTD on siege start.
+        // Patch49: Finalizer (with a state-setting prefix) guarding vanilla
+        // Army.FindBestGatheringSettlementAndMoveTheLeader, which NREs (v1.5.5 Army.cs:728
+        // settlement.GatePosition / :661 Kingdom.Settlements) when a besieger army can't resolve a
+        // gathering fortification: a map-tick CTD on siege start.
         // No TAOM patch is on the stack; aggressive Patch22 targeting just makes it more reachable.
         // Crash report 2026-06-17. See the patch's doc-comment.
         TryPatchCategory("Patch49_ArmyGatheringNreGuard");
-        // Patch123: Finalizer containing the v1.5.x vanilla HeroHelper.GetLastSeenText NRE (a lord
-        // held by a leaderless party, e.g. bandits, crashed his encyclopedia page). Crash 9b2a103e.
+        // Patch123: Prefix answering vanilla HeroHelper.GetLastSeenText where its v1.5.x rewrite would
+        // NRE (a known lord held by a leaderless party, e.g. bandits, crashed his encyclopedia page).
+        // Crash 9b2a103e.
         Features.Encyclopedia.Hooks.HeroHelper_GetLastSeenText_Patch.Initialize(logger);
         TryPatchCategory("Patch123_LastSeenTextGuard");
         // Patch59: CaravanTrade — four postfixes on CaravansCampaignBehavior private methods
