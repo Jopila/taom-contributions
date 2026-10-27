@@ -34,7 +34,7 @@ public class SidePairScanTests
     {
         ["TAOM.Features.Execution.AlignmentServiceExtensions"] = "the extension that resolves a SideIds pair",
         ["TAOM.Features.CaravanTrade.CaravanTradeService"] = "each side is a faction's id with that faction's own culture (the CanTradeWith patch passes IFaction.StringId and IFaction.Culture)",
-        ["TAOM.Features.FireAndTribute.FireAndTributeService"] = "a kingdom snapshot's id with the culture of that same kingdom (IKingdomWarSnapshotAdapter reads both from one Kingdom)",
+        ["TAOM.Features.FireAndTribute.FireAndTributeService"] = "a kingdom snapshot's id with the culture of that same kingdom (IKingdomWarSnapshotAdapter reads both from one Kingdom), and in IsOwnSide one MobileParty.MapFaction's StringId with that same faction's Culture (zipped in TaomMobilePartyAIModel.IsSpared; FactionSides.Of would allocate per call on the AI worker)",
         ["TAOM.Features.EyeOfSauron.EyeOfSauronService"] = "the player's kingdom with that kingdom's culture (PlayerKingdomCultureId)",
         ["TAOM.Features.Namegiving.NamegivingService"] = "the map faction id with the culture the snapshot took from the same faction",
         ["TAOM.Features.RealmBorders.RealmBorderService"] = "a realm id with CultureOfRealm, the culture of that same realm",

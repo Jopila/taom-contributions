@@ -11,7 +11,9 @@ namespace TAOM.Features.UnlookedForAid;
 /// campaign <c>MobilePartyAIModel</c> slot, its service, config and MCM switch. No Harmony patch, nothing saved. Overlap
 /// check, 2026-10-23: no other TAOM code fills the <c>MobilePartyAIModel</c> slot. The model is built in the factory below
 /// on the main thread in <c>OnGameStart</c>, which resolves the service and with it captures the MCM settings reference
-/// and loads the config, so the AI worker thread that later calls the model touches neither.
+/// and loads the config, so the AI worker thread that later calls the model touches neither. The factory also resolves
+/// Fire and Tribute's <c>IRaidHostOwnSideQuery</c> (registered by that module, parked or not), whose own-side rule the
+/// model carries.
 /// </summary>
 internal sealed class UnlookedForAidModule : TaomFeatureModule
 {

@@ -2288,3 +2288,13 @@ compile error from the rename.
 - **Prevent:** before calling a fix tested, revert the fix's own lines and run the new tests; if they stay green, add a
   test on the layer that changed (for an adapter, a source pin on the engine member it must read).
 - **Source:** [rca-b09-followups-2026-10-26.md](../rca-b09-followups-2026-10-26.md) finding 2.
+
+### A singleton mapped to a second interface is pinned with AreSame (#870, 2026-10-27)
+Fire and Tribute's party AI rule reads `IRaidHostOwnSideQuery`, mapped onto the `IFireAndTributeService` singleton with
+`RegisterMapping`. Deleting the mapping, or registering the query as its own singleton, passed every test; the second form
+gives the model an instance whose snapshot nothing writes, and the bug it fixed returns with no message.
+- **Why missed:** the service tests drove the service directly, and the consumer's wiring test registered a substitute
+  for the query, so nothing resolved it from the real module.
+- **Prevent:** when a module maps one singleton to a second interface, its wiring test resolves both from the real
+  registration and asserts `AreSame` (`FireAndTributeWiringTests`, `PlayerSwitcherWiringTests`).
+- **Source:** [rca-fire-and-tribute-own-side-2026-10-27.md](../rca-fire-and-tribute-own-side-2026-10-27.md) finding 1.

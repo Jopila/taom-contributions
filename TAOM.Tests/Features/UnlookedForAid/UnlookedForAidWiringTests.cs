@@ -94,6 +94,7 @@ public class UnlookedForAidWiringTests
         Assert.IsTrue(calls.Any(m => m.DeclaringType == typeof(DefaultMobilePartyAIModel) && m.Name == nameof(MobilePartyAIModel.ShouldConsiderAvoiding)),
             "vanilla's rule runs first");
         Assert.IsTrue(calls.Any(m => m.DeclaringType == typeof(UnlookedForAidService) && m.Name == nameof(UnlookedForAidService.Decide)));
+        Assert.IsTrue(calls.Any(m => m.Name == "OwnSideMeetsHost"), "the Fire and Tribute own-side check runs on the avoid path");
         AssertNoThreadUnsafeReads(calls);
     }
 
@@ -113,7 +114,7 @@ public class UnlookedForAidWiringTests
     [TestCategory("RequiresGame")]
     public void TheOwnSideHelpers_ReadNoSettingsAndNoIoC()
     {
-        foreach (var name in new[] { "OwnSideMeetsHost", "KingdomIdOf" })
+        foreach (var name in new[] { "OwnSideMeetsHost", "IsSpared" })
         {
             var method = typeof(TaomMobilePartyAIModel).GetMethod(name, All)!;
             AssertNoThreadUnsafeReads(IlCallScanner.ExtractCalledMethods(method, method.GetMethodBody()!.GetILAsByteArray()).ToArray());
@@ -126,6 +127,51 @@ public class UnlookedForAidWiringTests
         var type = typeof(FireAndTributeService);
         foreach (var method in new MethodBase[] { type.GetProperty(nameof(IRaidHostOwnSideQuery.AnyHost))!.GetMethod!, type.GetMethod(nameof(IRaidHostOwnSideQuery.IsOwnSide))! })
             AssertNoThreadUnsafeReads(IlCallScanner.ExtractCalledMethods(method, method.GetMethodBody()!.GetILAsByteArray()).ToArray());
+    }
+
+    // IsOwnSide resolves the kingdom's side on the AI worker. AlignmentService's map is written only in its constructor, so
+    // its read path may call nothing but the map's TryGetValue, IsNullOrEmpty and itself: a lazy cache write here would be a
+    // concurrent Dictionary write.
+    [TestMethod]
+    public void TheAlignmentReadPath_OnlyReadsItsMap()
+    {
+        var type = typeof(TAOM.Features.Execution.AlignmentService);
+        foreach (var name in new[] { "ResolveSide", "GetKingdomSide", "GetCultureSide", "GetSide" })
+        {
+            var method = type.GetMethod(name, All)!;
+            var calls = IlCallScanner.ExtractCalledMethods(method, method.GetMethodBody()!.GetILAsByteArray()).ToArray();
+            var other = calls.Where(m => !(m.DeclaringType == type
+                    || (m.Name == "TryGetValue" && m.DeclaringType?.Name == "Dictionary`2")
+                    || (m.Name == nameof(string.IsNullOrEmpty) && m.DeclaringType == typeof(string))))
+                .Select(m => m.DeclaringType?.Name + "." + m.Name).ToList();
+            Assert.AreEqual(0, other.Count, name + " calls " + string.Join(", ", other));
+        }
+    }
+
+    // Both directions: IsSpared(targetParty, party) spares the host from the deciding party, IsSpared(party, targetParty)
+    // spares the deciding party from a host whose own initiative runs (MobilePartyAi.cs:485-486). In IL: this, then the
+    // two arguments in each order, then the call.
+    [TestMethod]
+    [TestCategory("RequiresGame")]
+    public void TheOwnSideCheck_SparesBothDirections()
+    {
+        var method = typeof(TaomMobilePartyAIModel).GetMethod("OwnSideMeetsHost", All)!;
+        var il = method.GetMethodBody()!.GetILAsByteArray();
+        var calls = IlCallScanner.ExtractCalledMethods(method, il).Where(m => m.Name == "IsSpared").ToList();
+
+        Assert.AreEqual(2, calls.Count, "one IsSpared call per direction");
+        Assert.IsTrue(ContainsSequence(il, 0x02, 0x04, 0x03, 0x28), "IsSpared(targetParty, party) is missing");
+        Assert.IsTrue(ContainsSequence(il, 0x02, 0x03, 0x04, 0x28), "IsSpared(party, targetParty) is missing");
+    }
+
+    private static bool ContainsSequence(byte[] il, params byte[] sequence)
+    {
+        for (int i = 0; i + sequence.Length <= il.Length; i++)
+        {
+            if (sequence.Where((b, j) => il[i + j] == b).Count() == sequence.Length)
+                return true;
+        }
+        return false;
     }
 
     [TestMethod]

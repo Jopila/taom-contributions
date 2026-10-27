@@ -340,7 +340,9 @@ internal sealed class FakeFatAlignment : IAlignmentService
 
     public FactionSide GetCultureSide(string cultureId) => FactionSide.Neutral;
 
-    public FactionSide ResolveSide(string kingdomId, string cultureId) => GetKingdomSide(kingdomId);
+    // As AlignmentService: the kingdom's own side, else its culture's (ByKingdom also holds culture ids).
+    public FactionSide ResolveSide(string kingdomId, string cultureId) =>
+        GetKingdomSide(kingdomId) is var side && side != FactionSide.Neutral ? side : GetKingdomSide(cultureId ?? string.Empty);
 
     public bool AreEnemyAlignments(string kingdomIdA, string kingdomIdB) => AreEnemyAlignments(GetKingdomSide(kingdomIdA), GetKingdomSide(kingdomIdB));
 
