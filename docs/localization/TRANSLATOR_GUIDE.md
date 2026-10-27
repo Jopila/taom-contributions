@@ -644,6 +644,15 @@ cache makes recovery free (re-run the translator; everything returns from cache)
 the wrong order costs a full re-run — as it did on 2026-08-08, when 84 late-registered duty keys
 blanked all 12 freshly-translated enlistment files.
 
+**A registered row that nothing reads** is still translated 12 times.
+`python tools/check_orphan_loc_rows.py` fails on one. Declare a key built at run time in
+`tools/loc_composed_families.json`, or a row kept on purpose in `tools/loc_orphan_allowlist.json`.
+The gate scans this repo only, so before retiring a row grep the live `TAOM_Map` and
+`LOTRLOME_Armory` installs for its id. Retire a dead row from the English file, the 12 language
+files, `tools/translation_cache/` and `tools/translation_overrides/` together, whole lines only.
+A SHADOWED row is retired from the English file only; its language rows, cache entry and override
+belong to the vanilla key the winning row still uses.
+
 **A non-zero exit is not necessarily failure.** The translator exits 1 if ANY entry failed
 validation. Four vanilla-derived strings with nested gender conditionals
 (`{?TARGET_HERO.GENDER}lady{?}lord{\?}`), `uc4M4bhG`, `qa4FlTWS`, `uiY3ds0Z` and `V097rA1v`, used to fail

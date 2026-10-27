@@ -527,12 +527,6 @@
 
     <string id="0cdXddA9" text="{KINGDOM1_LINK} a formé une alliance avec {KINGDOM2_LINK}." />
 
-    <string id="q3wD0rbq" text="{SETTLEMENT_LINK} est gouverné par {LORD.LINK}, {FACTION_OFFICIAL} de {FACTION_TERM}. {KEEP_INFO}" />
-
-    <string id="RVDojUOM" text="Les terres autour de {SETTLEMENT_LINK} appartiennent principalement à {LORD.LINK}, {FACTION_OFFICIAL} de {FACTION_TERM}. {PROSPERITY_INFO}" />
-
-    <string id="UWzQsHA2" text="{SETTLEMENT_LINK} est gouverné par {LORD.LINK}, {FACTION_OFFICIAL} de {FACTION_TERM}. {PROSPERITY_INFO} {MORALE_INFO}" />
-
     <string id="taom_str_faction_official.erebor" text="un noble nain" />
 
     <string id="taom_str_faction_official.erebor_f" text="une dame naine" />
@@ -3747,40 +3741,6 @@
 
     <string id="taom_str_player_mother_name.goblin" text="Borlia" />
 
-    <string id="taom_bandit_goblin_name" text="Pillards Gobelins" />
-
-    <string id="taom_bandit_goblin_m1" text="Bolg" />
-
-    <string id="taom_bandit_goblin_m2" text="Yazneg" />
-
-    <string id="taom_bandit_goblin_m3" text="Fimbul" />
-
-    <string id="taom_bandit_goblin_m4" text="Narzug" />
-
-    <string id="taom_bandit_goblin_m5" text="Gorbag" />
-
-    <string id="taom_bandit_goblin_m6" text="Mauhûr" />
-
-    <string id="taom_bandit_goblin_m7" text="Snaga" />
-
-    <string id="taom_bandit_goblin_m8" text="Ufthak" />
-
-    <string id="taom_bandit_goblin_m9" text="Radbug" />
-
-    <string id="taom_bandit_goblin_m10" text="Lugdush" />
-
-    <string id="taom_bandit_goblin_f1" text="Skarra" />
-
-    <string id="taom_bandit_goblin_f2" text="Vorga" />
-
-    <string id="taom_bandit_goblin_f3" text="Mazra" />
-
-    <string id="taom_bandit_goblin_f4" text="Grishta" />
-
-    <string id="taom_bandit_goblin_f5" text="Narzga" />
-
-    <string id="taom_hideout_desc_goblin" text="Sous les escarpements du Haut Col, vous découvrez un terrier puant de gobelins creusé profondément dans la roche nue." />
-
     <string id="taom_str_faction_official.mistymountainorcs" text="un chef des Monts Brumeux" />
 
     <string id="taom_str_faction_official.mistymountainorcs_f" text="une cheffe des Monts Brumeux" />
@@ -3810,40 +3770,6 @@
     <string id="taom_str_player_father_name.mistymountainorcs" text="Narzuk" />
 
     <string id="taom_str_player_mother_name.mistymountainorcs" text="Borlia" />
-
-    <string id="taom_bandit_mistymountainorcs_name" text="Pillards Orques" />
-
-    <string id="taom_bandit_mistymountainorcs_m1" text="Bolg" />
-
-    <string id="taom_bandit_mistymountainorcs_m2" text="Yazneg" />
-
-    <string id="taom_bandit_mistymountainorcs_m3" text="Fimbul" />
-
-    <string id="taom_bandit_mistymountainorcs_m4" text="Narzug" />
-
-    <string id="taom_bandit_mistymountainorcs_m5" text="Gorbag" />
-
-    <string id="taom_bandit_mistymountainorcs_m6" text="Mauhûr" />
-
-    <string id="taom_bandit_mistymountainorcs_m7" text="Snaga" />
-
-    <string id="taom_bandit_mistymountainorcs_m8" text="Ufthak" />
-
-    <string id="taom_bandit_mistymountainorcs_m9" text="Radbug" />
-
-    <string id="taom_bandit_mistymountainorcs_m10" text="Lugdush" />
-
-    <string id="taom_bandit_mistymountainorcs_f1" text="Skarra" />
-
-    <string id="taom_bandit_mistymountainorcs_f2" text="Vorga" />
-
-    <string id="taom_bandit_mistymountainorcs_f3" text="Mazra" />
-
-    <string id="taom_bandit_mistymountainorcs_f4" text="Grishta" />
-
-    <string id="taom_bandit_mistymountainorcs_f5" text="Narzga" />
-
-    <string id="taom_hideout_desc_mistymountainorcs" text="Sous les escarpements des Monts Brumeux, vous découvrez un terrier infect d'orques creusé dans la roche nue." />
 
     <string id="taom_bld_stall_title" text="TAOM : le chargement de la dernière bataille pourrait ne pas être terminé" />
 
@@ -6411,7 +6337,6 @@
 
     <string id="taom_camp_done_morale" text="The long work wears on the men (morale -{N})." />
 
-
     <string id="taom_camp_done_none" text="The men return empty-handed." />
 
     <string id="taom_camp_done_timber" text="The woodcutters return with {N} hardwood." />
@@ -6434,7 +6359,6 @@
 
     <string id="taom_camp_start_settlement" text="the party stands inside a settlement." />
 
-
     <string id="taom_camp_start_moving" text="the party is on the move." />
 
     <string id="taom_camp_start_external" text="something nearby forbids a camp here." />
@@ -6442,7 +6366,6 @@
     <string id="taom_camp_start_other" text="a camp cannot be pitched here." />
 
     <string id="taom_camp_start_blocked" text="Your campaign begins without a camp: {REASON}" />
-
 
     <string id="taom_camp_block_off" text="Camp work is off while field camps are disabled in the mod options." />
 
@@ -6484,7 +6407,6 @@
     <string id="taom_ns_screen_header" text="Give Men" />
 
     <string id="taom_ns_gift_notice" text="{SETTLEMENT} takes in the {COUNT} {?IS_PLURAL}people{?}person{\?} you gave." />
-
 
     <string id="taom_ns_roguery_notice" text="Dealing in prisoners teaches you something of the trade (+{XP} {SKILL_NAME} experience)." />
 

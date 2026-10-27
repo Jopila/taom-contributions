@@ -55,7 +55,7 @@ from pathlib import Path
 
 import name_tags
 from _gamedir import DEFAULT_GAME_ROOT, ensure_exists, game_modules
-from _loc_sources import TAOM_SOURCES
+from _loc_sources import OVERRIDE_SOURCE, TAOM_SOURCES, VANILLA_ID_SHAPE  # noqa: F401
 
 
 # ── Configuration ──────────────────────────────────────────────────────────────
@@ -315,10 +315,6 @@ def key_owners(sources: list[Path]) -> dict[str, Path]:
             owners.setdefault(sid, src)
     return owners
 
-
-# Where LocalizationOverrideLoader reads its English-only overrides, and the shape of a vanilla key.
-OVERRIDE_SOURCE = "taom_module_strings.xml"
-VANILLA_ID_SHAPE = re.compile(r"[0-9A-Za-z]{8}")
 
 
 def english_only_override_ids(source: Path) -> set:

@@ -525,30 +525,6 @@
 
     <string id="taom_encounter_peace" text="Ihr seid auf {PARTY} getroffen. Sie zu bekämpfen wird einen Krieg mit {KINGDOM} auslösen." />
 
-    <string id="2BVDp7Tg" text="{KINGDOM} wird {POLICY_DESCRIPTION} beenden ({POLICY}). {POLICY_SUPPORT}" />
-
-    <string id="Lbs2bNlg" text="{KINGDOM} wird {POLICY_DESCRIPTION} beginnen ({POLICY}). {POLICY_SUPPORT}" />
-
-    <string id="jnYwiCAz" text="{KINGDOM} wird {POLICY_DESCRIPTION} fortsetzen ({POLICY}). {POLICY_SUPPORT}" />
-
-    <string id="faUooB7V" text="{KINGDOM} wird nicht {POLICY_DESCRIPTION} sein ({POLICY}). {POLICY_SUPPORT}" />
-
-    <string id="6d4ZTvGv" text="{LORD.NAME} ist {TITLE} von {FACTION_NAME} und Oberhaupt von {CLAN_NAME}, {CLAN_DESCRIPTION} des Reiches. {?LORD.GENDER}Sie hat{?}Er hat{\?} den Ruf, {REPUTATION} zu sein." />
-
-    <string id="o5AUljbW" text="{LORD.NAME} ist ein Mitglied von {CLAN_NAME}, {CLAN_DESCRIPTION} von {FACTION_NAME}. {?LORD.GENDER}Sie hat{?}Er hat{\?} den Ruf, {REPUTATION} zu sein." />
-
-    <string id="0bPb5btR" text="{LORD.NAME} ist ein Mitglied von {CLAN_NAME}, {CLAN_DESCRIPTION} von {FACTION_NAME}, das {RULER} im Bürgerkrieg unterstützt. {?LORD.GENDER}Sie hat{?}Er hat{\?} den Ruf, {REPUTATION} zu sein." />
-
-    <string id="JuPUG5wX" text="{LORD.NAME} ist {TITLE} von {FACTION_NAME} und Oberhaupt von {CLAN_NAME}, {CLAN_DESCRIPTION}, das {RULER} im Bürgerkrieg unterstützt. {?LORD.GENDER}Sie hat{?}Er hat{\?} den Ruf, {REPUTATION} zu sein." />
-
-    <string id="4pmvrnmN" text="Die Burg von {SETTLEMENT_LINK} gehört {LORD.LINK}, {FACTION_OFFICIAL} von {FACTION_TERM}. {KEEP_INFO}" />
-
-    <string id="q3wD0rbq" text="{SETTLEMENT_LINK} wird von {LORD.LINK}, {FACTION_OFFICIAL} von {FACTION_TERM}, regiert. {KEEP_INFO}" />
-
-    <string id="RVDojUOM" text="Die Ländereien um {SETTLEMENT_LINK} gehören größtenteils {LORD.LINK}, {FACTION_OFFICIAL} von {FACTION_TERM}. {PROSPERITY_INFO}" />
-
-    <string id="UWzQsHA2" text="{SETTLEMENT_LINK} wird von {LORD.LINK}, {FACTION_OFFICIAL} von {FACTION_TERM}, regiert. {PROSPERITY_INFO} {MORALE_INFO}" />
-
     <string id="taom_str_faction_official.erebor" text="ein edler Zwerg" />
 
     <string id="taom_str_faction_official.erebor_f" text="eine edle Zwergin" />
@@ -3811,40 +3787,6 @@
 
     <string id="taom_str_player_mother_name.goblin" text="Borlia" />
 
-    <string id="taom_bandit_goblin_name" text="Goblin-Räuber" />
-
-    <string id="taom_bandit_goblin_m1" text="Bolg" />
-
-    <string id="taom_bandit_goblin_m2" text="Yazneg" />
-
-    <string id="taom_bandit_goblin_m3" text="Fimbul" />
-
-    <string id="taom_bandit_goblin_m4" text="Narzug" />
-
-    <string id="taom_bandit_goblin_m5" text="Gorbag" />
-
-    <string id="taom_bandit_goblin_m6" text="Mauhûr" />
-
-    <string id="taom_bandit_goblin_m7" text="Snaga" />
-
-    <string id="taom_bandit_goblin_m8" text="Ufthak" />
-
-    <string id="taom_bandit_goblin_m9" text="Radbug" />
-
-    <string id="taom_bandit_goblin_m10" text="Lugdush" />
-
-    <string id="taom_bandit_goblin_f1" text="Skarra" />
-
-    <string id="taom_bandit_goblin_f2" text="Vorga" />
-
-    <string id="taom_bandit_goblin_f3" text="Mazra" />
-
-    <string id="taom_bandit_goblin_f4" text="Grishta" />
-
-    <string id="taom_bandit_goblin_f5" text="Narzga" />
-
-    <string id="taom_hideout_desc_goblin" text="Unter den Klippen des Hohen Passes findet Ihr einen stinkenden Bau von Kobolden, tief in den nackten Fels gegraben." />
-
     <string id="taom_str_faction_official.mistymountainorcs" text="ein Häuptling des Nebelgebirges" />
 
     <string id="taom_str_faction_official.mistymountainorcs_f" text="eine Häuptlingin des Nebelgebirges" />
@@ -3874,40 +3816,6 @@
     <string id="taom_str_player_father_name.mistymountainorcs" text="Narzuk" />
 
     <string id="taom_str_player_mother_name.mistymountainorcs" text="Borlia" />
-
-    <string id="taom_bandit_mistymountainorcs_name" text="Ork-Räuber" />
-
-    <string id="taom_bandit_mistymountainorcs_m1" text="Bolg" />
-
-    <string id="taom_bandit_mistymountainorcs_m2" text="Yazneg" />
-
-    <string id="taom_bandit_mistymountainorcs_m3" text="Fimbul" />
-
-    <string id="taom_bandit_mistymountainorcs_m4" text="Narzug" />
-
-    <string id="taom_bandit_mistymountainorcs_m5" text="Gorbag" />
-
-    <string id="taom_bandit_mistymountainorcs_m6" text="Mauhûr" />
-
-    <string id="taom_bandit_mistymountainorcs_m7" text="Snaga" />
-
-    <string id="taom_bandit_mistymountainorcs_m8" text="Ufthak" />
-
-    <string id="taom_bandit_mistymountainorcs_m9" text="Radbug" />
-
-    <string id="taom_bandit_mistymountainorcs_m10" text="Lugdush" />
-
-    <string id="taom_bandit_mistymountainorcs_f1" text="Skarra" />
-
-    <string id="taom_bandit_mistymountainorcs_f2" text="Vorga" />
-
-    <string id="taom_bandit_mistymountainorcs_f3" text="Mazra" />
-
-    <string id="taom_bandit_mistymountainorcs_f4" text="Grishta" />
-
-    <string id="taom_bandit_mistymountainorcs_f5" text="Narzga" />
-
-    <string id="taom_hideout_desc_mistymountainorcs" text="Unter den Klippen des Nebelgebirges findet Ihr einen üblen Bau von Orks, in den nackten Fels gegraben." />
 
     <string id="taom_bld_stall_title" text="TAOM: Letztes Schlachtladen möglicherweise nicht abgeschlossen" />
 
@@ -6475,7 +6383,6 @@
 
     <string id="taom_camp_done_morale" text="The long work wears on the men (morale -{N})." />
 
-
     <string id="taom_camp_done_none" text="The men return empty-handed." />
 
     <string id="taom_camp_done_timber" text="The woodcutters return with {N} hardwood." />
@@ -6498,7 +6405,6 @@
 
     <string id="taom_camp_start_settlement" text="the party stands inside a settlement." />
 
-
     <string id="taom_camp_start_moving" text="the party is on the move." />
 
     <string id="taom_camp_start_external" text="something nearby forbids a camp here." />
@@ -6506,7 +6412,6 @@
     <string id="taom_camp_start_other" text="a camp cannot be pitched here." />
 
     <string id="taom_camp_start_blocked" text="Your campaign begins without a camp: {REASON}" />
-
 
     <string id="taom_camp_block_off" text="Camp work is off while field camps are disabled in the mod options." />
 
@@ -6548,7 +6453,6 @@
     <string id="taom_ns_screen_header" text="Give Men" />
 
     <string id="taom_ns_gift_notice" text="{SETTLEMENT} takes in the {COUNT} {?IS_PLURAL}people{?}person{\?} you gave." />
-
 
     <string id="taom_ns_roguery_notice" text="Dealing in prisoners teaches you something of the trade (+{XP} {SKILL_NAME} experience)." />
 
