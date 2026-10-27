@@ -4533,3 +4533,11 @@ to prune it, which would ship TAOM without its sprites.
   test; run the gate read-only on the real folders before merging. Keep any rule about what a folder must keep in the
   release doc, not only in memory.
 - **Source:** [rca-prefab-attribute-gate-2026-10-26.md](../rca-prefab-attribute-gate-2026-10-26.md) finding 1.
+
+### Prove a gate on a tree it cannot read, not only on the fault it was built for (#1026, 2026-10-26)
+
+The text-processor gate skipped a file it could not parse, passed when it found no Native files, passed a release channel when the path was wrong, and its tests stayed green when the UTF-16 path or the exit code was deleted. This is the third gate on 2026-10-26 to pass on input it never read (after #1020 and #1017).
+
+- **Why missed:** the gate was proven on the live install that showed the fault, and its pass test for the release step was the absence of a FAIL line, which a run that never starts also meets.
+- **Prevent:** read inputs the way the consumer (the engine) reads them; exit 2 on an unreadable file, an empty reference set or zero files checked; give a release check a PASS line and an exit code with one meaning; kill a mutant of each guard (skip the parse, drop the exit code) before trusting the tests.
+- **Source:** [rca-text-processors-2026-10-26.md](../rca-text-processors-2026-10-26.md) findings 3 to 5.
