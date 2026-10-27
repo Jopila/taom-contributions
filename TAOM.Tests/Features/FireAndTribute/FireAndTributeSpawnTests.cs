@@ -524,6 +524,74 @@ public class FireAndTributeSpawnTests
         Assert.AreEqual(1, _r.Warnings("AnchorMissing"));
     }
 
+    // #1032: an anchor the other side has captured is skipped, as a missing one is.
+    [TestMethod]
+    public void Spawn_AnAnchorHeldByTheOtherSide_TriesTheNextOne()
+    {
+        _r.Adapter.AnchorOwners["town_G1"] = ("empire_w", "empire_w", true);
+        _r.Adapter.AnchorOwners["castle_G4"] = ("empire_s", "empire_s", true);
+        Tick(44);
+        OnlyEvilRolls();
+
+        Tick(100);
+
+        Assert.AreEqual(1, _r.LiveRecords().Count);
+        Assert.IsTrue(_r.Adapter.Called("spawn:gundabad_raiders:castle_G4:0.25"));
+        Assert.IsFalse(_r.Adapter.Called("spawn:gundabad_raiders:town_G1:0.25"));
+    }
+
+    [TestMethod]
+    public void Spawn_EveryAnchorHeldByTheOtherSide_SkipsTheHost()
+    {
+        _r.Adapter.AnchorOwners["town_G1"] = ("empire_w", "empire_w", true);
+        _r.Adapter.AnchorOwners["castle_G4"] = ("vlandia", "vlandia", true);
+        Tick(44);
+        OnlyEvilRolls();
+
+        Tick(100);
+
+        Assert.AreEqual(0, _r.Adapter.Parties.Count);
+        Assert.AreEqual(1, _r.Warnings("AnchorHeldByOtherSide"));
+    }
+
+    [TestMethod]
+    public void Spawn_AnchorsHeldByTheOwnSide_SpawnAsBefore()
+    {
+        _r.Adapter.AnchorOwners["town_G1"] = ("empire_s", "empire_s", true);
+        _r.Adapter.AnchorOwners["castle_G4"] = ("isengard", "isengard", true);
+        Tick(44);
+        OnlyEvilRolls();
+
+        Tick(100);
+
+        Assert.AreEqual(1, _r.LiveRecords().Count);
+    }
+
+    // A rebel clan holds the town with the town's own culture and no kingdom: its parties are not held back by the
+    // own-side rule, so the anchor counts as lost even though the culture resolves to the host's side.
+    [TestMethod]
+    public void Spawn_AnAnchorHeldByARebelClanOfTheHostsCulture_TriesTheNextOne()
+    {
+        _r.Adapter.AnchorOwners["town_G1"] = ("town_G1_rebel_clan", "empire_s", false);
+        Tick(44);
+        OnlyEvilRolls();
+
+        Tick(100);
+
+        Assert.IsTrue(_r.Adapter.Called("spawn:gundabad_raiders:castle_G4:0.25"));
+        Assert.IsFalse(_r.Adapter.Called("spawn:gundabad_raiders:town_G1:0.25"));
+    }
+
+    [TestMethod]
+    public void Spawn_ANeutralHostAtANeutralAnchor_Spawns()
+    {
+        _r.Adapter.AnchorOwners["town_U1"] = ("umbar", "umbar", true);
+
+        var result = _r.Service.TrySpawn(FactionSide.Neutral, dryRun: false);
+
+        Assert.AreEqual(1, _r.LiveRecords().Count(h => h.Side == FactionSide.Neutral), result);
+    }
+
     [TestMethod]
     public void Spawn_NoPointOutOfSight_SkipsTheHostAndWarns()
     {

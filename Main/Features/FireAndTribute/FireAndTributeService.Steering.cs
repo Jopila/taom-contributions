@@ -179,7 +179,8 @@ public sealed partial class FireAndTributeService
         _raidsToday++;
     }
 
-    public void OnPartyDestroyed(string? partyId)
+    public void OnPartyDestroyed(string? partyId, string? destroyerFactionId = null, string? destroyerCultureId = null,
+        bool destroyerIsKingdom = false, bool destroyerIsMainParty = false)
     {
         if (partyId == null || _planned.Contains(partyId))
             return;
@@ -190,6 +191,21 @@ public sealed partial class FireAndTributeService
         RemoveHost(record);
         StartCooldown(record.Side);
         _notices.ShowBroken(NameOf(record));
-        _logger.LogInfo($"{Tag} {record.HostId} ({partyId}) was broken after {record.Raids}/{record.Quota} raids");
+        _logger.LogInfo($"{Tag} {record.HostId} ({partyId}) was broken after {record.Raids}/{record.Quota} raids by "
+            + DestroyerText(record, destroyerFactionId, destroyerCultureId, destroyerIsKingdom, destroyerIsMainParty));
+    }
+
+    // "its own side" only for an AI party of a kingdom on the host's side: the parties the own-side rule holds back. The
+    // engine names the leader party of the side the host fought (usually the winner), not every party in the battle.
+    private string DestroyerText(RaidHostRecord record, string? factionId, string? cultureId, bool isKingdom, bool isMainParty)
+    {
+        if (isMainParty)
+            return "the player's party";
+        if (string.IsNullOrEmpty(factionId))
+            return "an unknown party";
+        if (!isKingdom)
+            return $"{factionId}, no kingdom";
+        var side = _alignment.ResolveSide(factionId!, cultureId ?? string.Empty);
+        return side == record.Side ? $"{factionId}, its own side" : $"{factionId}, side {side}";
     }
 }

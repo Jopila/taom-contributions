@@ -42,6 +42,15 @@ public sealed class RaidHostAdapter : IRaidHostAdapter
         return NearestHideout(clan, anchor) == null ? RaidSpawnFailure.NoHideout : RaidSpawnFailure.None;
     }
 
+    public bool TryGetAnchorOwner(string anchorId, out string factionId, out string cultureId, out bool isKingdom)
+    {
+        var owner = Settlement.Find(anchorId)?.MapFaction;
+        factionId = owner?.StringId ?? string.Empty;
+        cultureId = owner?.Culture?.StringId ?? string.Empty;
+        isKingdom = owner?.IsKingdomFaction == true;
+        return owner != null;
+    }
+
     /// <summary>The hideout of the clan's culture nearest to the anchor. A bandit party must have one: a null home breaks vanilla's per-hideout count.</summary>
     private static Hideout? NearestHideout(Clan clan, Settlement anchor)
     {

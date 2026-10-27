@@ -51,6 +51,9 @@ internal sealed class FakeRaidHostAdapter : IRaidHostAdapter
 
     public Dictionary<string, RaidSpawnFailure> ProbeByAnchor { get; } = new Dictionary<string, RaidSpawnFailure>();
 
+    /// <summary>Anchor owners by anchor id (faction id, culture id, a kingdom?); an anchor not listed has an unreadable owner.</summary>
+    public Dictionary<string, (string FactionId, string CultureId, bool IsKingdom)> AnchorOwners { get; } = new Dictionary<string, (string FactionId, string CultureId, bool IsKingdom)>();
+
     public RaidSpawnFailure SpawnFailure { get; set; } = RaidSpawnFailure.None;
 
     public string? NearestTown { get; set; } = "town_X";
@@ -75,6 +78,15 @@ internal sealed class FakeRaidHostAdapter : IRaidHostAdapter
         if (ProbeByClan.TryGetValue(clanId, out var byClan))
             return byClan;
         return ProbeByAnchor.TryGetValue(anchorId, out var byAnchor) ? byAnchor : RaidSpawnFailure.None;
+    }
+
+    public bool TryGetAnchorOwner(string anchorId, out string factionId, out string cultureId, out bool isKingdom)
+    {
+        var known = AnchorOwners.TryGetValue(anchorId, out var owner);
+        factionId = known ? owner.FactionId : string.Empty;
+        cultureId = known ? owner.CultureId : string.Empty;
+        isKingdom = known && owner.IsKingdom;
+        return known;
     }
 
     public RaidHostSpawn SpawnHost(string clanId, string anchorId, string keyedName, float spawnRadiusDays)
@@ -448,7 +460,7 @@ internal sealed class FireAndTributeRig
         Service = new FireAndTributeService(Adapter, Notices, ConfigProvider, Settings, Snapshots, Alignment,
             WarOfTheRing, Coop, Dedicated, Random, Player, Presenter, Enlistment, Logger);
         // The engine raises the destroy event inside the removal.
-        Adapter.OnDespawned = Service.OnPartyDestroyed;
+        Adapter.OnDespawned = id => Service.OnPartyDestroyed(id);
     }
 
     public static KingdomWarSnapshot Kingdom(string id, float strength) =>

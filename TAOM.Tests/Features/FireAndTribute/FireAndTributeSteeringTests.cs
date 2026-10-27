@@ -563,6 +563,58 @@ public class FireAndTributeSteeringTests
         StringAssert.Contains(_r.Service.CaptureState(), "\"cool\":{\"Evil\":220}");
     }
 
+    // #1034: the broken line names the destroyer's faction and whether it is on the host's own side, so a run's log
+    // shows who still breaks hosts.
+    [TestMethod]
+    public void PartyDestroyed_ByItsOwnSide_TheLineSaysSo()
+    {
+        _r.Service.OnPartyDestroyed(_host.PartyId, "empire_s", "empire_s", destroyerIsKingdom: true);
+
+        _r.Logger.Received(1).LogInfo(Arg.Is<string>(m => m.Contains("was broken after") && m.EndsWith("by empire_s, its own side")));
+    }
+
+    [TestMethod]
+    public void PartyDestroyed_ByAnotherSide_TheLineNamesTheSide()
+    {
+        _r.Service.OnPartyDestroyed(_host.PartyId, "empire_w", "empire_w", destroyerIsKingdom: true);
+
+        _r.Logger.Received(1).LogInfo(Arg.Is<string>(m => m.Contains("was broken after") && m.EndsWith("by empire_w, side Free")));
+    }
+
+    // The kingdom's own side wins over its culture's: a Free kingdom of an Evil culture is still another side, which
+    // pins the order of the two ids.
+    [TestMethod]
+    public void PartyDestroyed_ByAKingdomOfAnotherSideButTheHostsCulture_NamesTheKingdomsSide()
+    {
+        _r.Service.OnPartyDestroyed(_host.PartyId, "empire_w", "empire_s", destroyerIsKingdom: true);
+
+        _r.Logger.Received(1).LogInfo(Arg.Is<string>(m => m.Contains("was broken after") && m.EndsWith("by empire_w, side Free")));
+    }
+
+    [TestMethod]
+    public void PartyDestroyed_ByThePlayersParty_SaysSoWhateverItsKingdom()
+    {
+        _r.Service.OnPartyDestroyed(_host.PartyId, "empire_s", "empire_s", destroyerIsKingdom: true, destroyerIsMainParty: true);
+
+        _r.Logger.Received(1).LogInfo(Arg.Is<string>(m => m.Contains("was broken after") && m.EndsWith("by the player's party")));
+    }
+
+    [TestMethod]
+    public void PartyDestroyed_ByAFactionWithNoKingdom_IsNeverItsOwnSide()
+    {
+        _r.Service.OnPartyDestroyed(_host.PartyId, "town_G1_rebel_clan", "empire_s");
+
+        _r.Logger.Received(1).LogInfo(Arg.Is<string>(m => m.Contains("was broken after") && m.EndsWith("by town_G1_rebel_clan, no kingdom")));
+    }
+
+    [TestMethod]
+    public void PartyDestroyed_WithNoDestroyer_TheLineSaysUnknown()
+    {
+        _r.Service.OnPartyDestroyed(_host.PartyId);
+
+        _r.Logger.Received(1).LogInfo(Arg.Is<string>(m => m.Contains("was broken after") && m.EndsWith("by an unknown party")));
+    }
+
     [TestMethod]
     public void PartyDestroyed_ForAnotherParty_OrNull_ChangesNothing()
     {

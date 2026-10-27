@@ -26,8 +26,8 @@ namespace TAOM.Features.FireAndTribute;
 /// per campaign: the behavior's constructor calls <see cref="ResetForNewSession"/>. Parts: this file (lifecycle, gates,
 /// status), the Spawn part (daily roll and creation), the Steering part (hourly steps and events), the Envoy part (the
 /// tribute envoy: schedule, popup, the player's answer, the console's "bring it now") and the OwnSide part (the snapshot
-/// the party AI model reads). Main thread only, except the two <see cref="IRaidHostOwnSideQuery"/> members, which the AI
-/// worker calls.
+/// the party AI model and the Refuge raid read). Main thread only, except <see cref="IRaidHostOwnSideQuery"/>'s
+/// <c>AnyHost</c> and <c>IsOwnSide</c>, which the AI worker calls.
 /// </remarks>
 public sealed partial class FireAndTributeService : IFireAndTributeService
 {

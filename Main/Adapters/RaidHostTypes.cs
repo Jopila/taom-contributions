@@ -15,6 +15,13 @@ public enum RaidSpawnFailure
     NoHideout,
 
     /// <summary>
+    /// The anchor's current owner is not a kingdom of the host's own side (#1032): a kingdom of another side captured it,
+    /// or a faction with no kingdom holds it (a rebel clan), and a host mustering there would meet parties the own-side
+    /// rule does not hold back.
+    /// </summary>
+    AnchorHeldByOtherSide,
+
+    /// <summary>
     /// The engine found no valid map point for the host. It looks for one within the spawn radius of the anchor's gate and
     /// falls back to the gate itself, so this means even that is not a valid position.
     /// </summary>

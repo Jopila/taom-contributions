@@ -124,7 +124,7 @@ public class FireAndTributeBehaviorSessionResetTests
         service.When(s => s.OnHourlyTick()).Do(_ => throw new InvalidOperationException("boom"));
         service.When(s => s.OnSessionLaunched()).Do(_ => throw new InvalidOperationException("boom"));
         service.When(s => s.OnVillageStateChanged(Arg.Any<bool>(), Arg.Any<string?>())).Do(_ => throw new InvalidOperationException("boom"));
-        service.When(s => s.OnPartyDestroyed(Arg.Any<string?>())).Do(_ => throw new InvalidOperationException("boom"));
+        service.When(s => s.OnPartyDestroyed(Arg.Any<string?>(), Arg.Any<string?>(), Arg.Any<string?>(), Arg.Any<bool>(), Arg.Any<bool>())).Do(_ => throw new InvalidOperationException("boom"));
         var logger = Substitute.For<IModLogger>();
         var sut = new FireAndTributeBehavior(service, logger);
 

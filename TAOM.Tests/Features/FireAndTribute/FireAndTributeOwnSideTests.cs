@@ -83,6 +83,21 @@ public class FireAndTributeOwnSideTests
     }
 
     [TestMethod]
+    public void IsHost_IsTrueOnlyForALiveHost()
+    {
+        var host = _r.SpawnEvil();
+        var query = (IRaidHostOwnSideQuery)_r.Service;
+
+        Assert.IsTrue(query.IsHost(host.PartyId));
+        Assert.IsFalse(query.IsHost("some_ordinary_bandit_party"));
+        Assert.IsFalse(query.IsHost(null));
+
+        _r.Service.OnPartyDestroyed(host.PartyId);
+
+        Assert.IsFalse(query.IsHost(host.PartyId));
+    }
+
+    [TestMethod]
     public void IsOwnSide_AnotherPartyOfTheHostClan_IsFalse()
     {
         _r.SpawnEvil();

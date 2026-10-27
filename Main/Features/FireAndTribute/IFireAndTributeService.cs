@@ -32,7 +32,13 @@ public interface IFireAndTributeService
     /// <summary>A village changed state; <paramref name="looted"/> is true for the Looted state. Records only.</summary>
     void OnVillageStateChanged(bool looted, string? raiderPartyId);
 
-    void OnPartyDestroyed(string? partyId);
+    /// <summary>
+    /// A party was destroyed. For a host, the broken line names the destroyer (#1034): the player's party, a faction with
+    /// no kingdom, or a kingdom and whether it is on the host's own side. The ids are null when the engine names no
+    /// destroyer or the destroyer has no map faction.
+    /// </summary>
+    void OnPartyDestroyed(string? partyId, string? destroyerFactionId = null, string? destroyerCultureId = null,
+        bool destroyerIsKingdom = false, bool destroyerIsMainParty = false);
 
     /// <summary>The console's status lines.</summary>
     IReadOnlyList<string> Describe();

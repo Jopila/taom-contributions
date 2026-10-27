@@ -50,10 +50,10 @@ in under a minute, and it was not run on the new tests before review.
 
 ## Follow-ups
 
-- FOLLOW-UP: a host's anchors are not re-checked at spawn, so a host can muster beside an anchor the other side has captured. no issue: offered to Mike, who decides on new public issues.
-- FOLLOW-UP: TAOM's Refuge raid (`RefugeService.FindNearestHostile`) can pick a host and force a battle. no issue: a guard for a rare case is Mike's call under `simplicity-criterion.md`; offered to him.
-- FOLLOW-UP: the broken-host log line does not name the destroyer's faction, so a run cannot show who broke a host. no issue: offered to Mike with the in-game check.
-- FOLLOW-UP: a pre-TAOM save loaded after another campaign in the same process restores the previous campaign's race map (older than this change). no issue: offered to Mike.
+- FOLLOW-UP: a host's anchors are not re-checked at spawn, so a host can muster beside an anchor the other side has captured. #1032, fixed 2026-10-27.
+- FOLLOW-UP: TAOM's Refuge raid (`RefugeService.FindNearestHostile`) can pick a host and force a battle. #1033, fixed 2026-10-27 (Mike, in this session: "Fix all of the follow up issues").
+- FOLLOW-UP: the broken-host log line does not name the destroyer's faction, so a run cannot show who broke a host. #1034, fixed 2026-10-27.
+- FOLLOW-UP: a pre-TAOM save loaded after another campaign in the same process restores the previous campaign's race map (older than this change). #1035, fixed 2026-10-27.
 
 ## Feedback to codify
 

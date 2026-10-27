@@ -5,6 +5,7 @@ using TAOM.Core.Validation;
 using TAOM.Features.Enlistment;
 using TAOM.Features.FieldCamp;
 using TAOM.Features.FieldCamp.Domain;
+using TAOM.Features.FireAndTribute;
 using TAOM.Features.Refuge.Components;
 using TAOM.Features.Refuge.Domain;
 using TaleWorlds.CampaignSystem;
@@ -127,6 +128,9 @@ public class RefugeService : IRefugeService, IRefugeBook
     private readonly ICampService _camps;
     private readonly IEnlistmentStateQuery _enlistment;
     private readonly IRefugeVisualService _visuals;
+
+    // Fire and Tribute's live hosts, resolved at the first raid scan rather than at mod load (#1033).
+    private readonly Lazy<IRaidHostOwnSideQuery> _hosts;
     private readonly IModLogger _logger;
 
     private Dictionary<string, RefugeData> _refuges = new Dictionary<string, RefugeData>();
@@ -149,6 +153,7 @@ public class RefugeService : IRefugeService, IRefugeBook
         ICampService camps,
         IEnlistmentStateQuery enlistment,
         IRefugeVisualService visuals,
+        Lazy<IRaidHostOwnSideQuery> hosts,
         IModLogger logger)
     {
         _settings = settings;
@@ -156,6 +161,7 @@ public class RefugeService : IRefugeService, IRefugeBook
         _camps = camps;
         _enlistment = enlistment;
         _visuals = visuals;
+        _hosts = hosts;
         _logger = logger;
     }
 
@@ -860,6 +866,10 @@ public class RefugeService : IRefugeService, IRefugeBook
             if (candidate == null || candidate.IsMainParty || !candidate.IsActive || candidate.InMapEvent)
                 continue;
             if (candidate.IsRefuge)
+                continue;
+            // A Fire and Tribute host keeps to its raid: a forced refuge battle would bypass its pin and its own-side
+            // rule (#1033).
+            if (_hosts.Value.IsHost(candidate.PartyId))
                 continue;
             if (!IsAtWarWithRefuge(scan, candidate))
                 continue;

@@ -1,10 +1,11 @@
 namespace TAOM.Features.FireAndTribute;
 
 /// <summary>
-/// The narrow view the party AI model takes of the live hosts: whether a party of a kingdom meets a host of its own side.
-/// Vanilla calls the model on its AI worker thread, so both members read one immutable snapshot that the main thread
+/// The narrow view other features take of the live hosts: the party AI model asks whether a party of a kingdom meets a
+/// host of its own side, and the Refuge raid whether a party is a host at all.
+/// Vanilla calls the model on its AI worker thread, so every member reads one immutable snapshot that the main thread
 /// replaces whole, and <see cref="IsOwnSide"/> also reads the alignment map, which is written only at construction;
-/// neither touches the engine, IoC, MCM or the logger.
+/// none touches the engine, IoC, MCM or the logger.
 /// </summary>
 public interface IRaidHostOwnSideQuery
 {
@@ -16,4 +17,7 @@ public interface IRaidHostOwnSideQuery
     /// host's side.
     /// </summary>
     bool IsOwnSide(string? kingdomId, string? kingdomCultureId, string? hostPartyId);
+
+    /// <summary>True when <paramref name="partyId"/> is a live host. The Refuge raid asks it on the main thread (#1033).</summary>
+    bool IsHost(string? partyId);
 }
