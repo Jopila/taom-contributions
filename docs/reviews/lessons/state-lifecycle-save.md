@@ -1245,3 +1245,9 @@ Move each stack on its own, run the commit in a `finally`, and treat a stack tha
 - **Why missed:** "all heroes" was read as `AllAliveHeroes`, and the service tests feed a fake roster, so nothing exercised the alive/dead split.
 - **Prevent:** any per-hero state TAOM persists or restores across a load enumerates `Hero.FindAll` (it reaches dead heroes the engine removed from `DeadOrDisabledHeroes`), unless the state is meaningless once the hero is dead. Name the choice where the roster is read.
 - **Source:** issue #1011.
+
+### Before reusing an engine object across a state change, list the saved fields it still carries and the steps that run before your guard (#1021, 2026-10-27)
+Enlistment kept a defender's encounter inside the commander's town after a repulsed assault. The encounter still held that battle's result (`EnemyRetreated`), so on the next assault the siege continue check read it as a battle to continue and the soldier landed on `menu_siege_strategies` with no battle. A second gap had the same shape: the discharge guard sat after the step (`RestorePresence`, which clears `AttachedTo`) that already pulled a merged soldier out of his battle.
+- **Why missed:** the plan checked that the object could be reused, not what it still held, and the guard was placed by reading the step list, not by asking which earlier step removes its condition.
+- **Prevent:** before reusing an engine object, list its saved fields and clear or verify each one; before placing a guard, list the steps that run ahead of it and check whether any of them removes the state the guard tests. Test with a merged soldier, not only an unmerged one.
+- **Source:** #1021, `docs/reviews/rca-enlistment-encounter-exits-2026-10-26.md`.

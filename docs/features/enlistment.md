@@ -123,8 +123,9 @@ an exit is the safer side. The Patch66 `EnterMenuMode` postfix is untouched.
 - Battle: `EnlistmentBattleBehavior` (MapEventStarted/Ended boundary) →
   `ServiceBattleService`. Ordering contract: state flips to `EnlistedBattle`
   (redirect-exempt) BEFORE any encounter/menu push, then presence → position →
-  encounter → join → menu. Failed joins roll back to parked-attached, finishing any
-  encounter they created first. Post-battle, the state stays `EnlistedBattle` while the loot
+  encounter → join → menu. A join that never landed rolls back to parked-attached, finishing any
+  encounter it created first. A landed join whose `encounter` menu failed to open stays in the battle
+  (state `EnlistedBattle`, service menu popped) and the game opens `encounter` itself (#1021). Post-battle, the state stays `EnlistedBattle` while the loot
   encounter is open (so the guard can't eat aftermath menus); wait-menu init + reconciler
   close the loop.
 - **Two join paths, both live.** The `MapEventStarted` edge, plus an hourly recovery:
@@ -326,7 +327,7 @@ The first shipped version never joined a single battle. Five separate defects, a
 | **Restore presence BEFORE any encounter work** | The engine skips inactive parties in encounter detection (`EncounterManager` line 38). Checking joinability while parked is a chicken-and-egg. |
 | **Seed the encounter from `MapEvent.AttackerSide/DefenderSide.LeaderParty`** | Those are `PartyBase`, so a besieged settlement is representable. Resolving through the `MapEventStarted` arguments drops sieges silently — a settlement defender has no `MobileParty`, so its id is null. |
 | **Verify the join actually landed** | `PlayerEncounter.JoinBattleInternal` silently calls `Finish()` when `EncounteredBattle` is null. A non-throwing call proves nothing; check `MainParty.MapEvent != null`. A false success left state at `EnlistedBattle`, which then blocked every later battle. |
-| **Never leave an orphaned `PlayerEncounter`** | `EncounterManager` gates the main party on `PlayerEncounter.Current == null`. A leaked encounter stops the player entering any future one. Worse: a `MapEventSide` acquired without a live encounter + open `encounter` menu freezes that map event forever (`MapEventManager.Tick` skips the player's event; only `PlayerEncounter.Update` advances it), which leaves the commander permanently unable to start battles. |
+| **Never leave an orphaned `PlayerEncounter`** | `EncounterManager` gates the main party on `PlayerEncounter.Current == null`. A leaked encounter stops the player entering any future one. Worse: a `MapEventSide` acquired without a live encounter + open `encounter` menu freezes that map event forever (`MapEventManager.Tick` skips the player's event; only `PlayerEncounter.Update` advances it), which leaves the commander permanently unable to start battles. The rollback cannot pull an unmerged soldier out of his event, so when a landed join's menu fails the menu is left to the game (`ServiceBattleService.TryJoin`, #1021). |
 
 ## Patch66_Enlistment (see harmony-patch-registry.md)
 
@@ -512,8 +513,9 @@ it was always supposed to rest on was finally written on 2026-09-12 (#577):
 `EnlistmentLoadNormalizer` restores `EnlistedBattle` at load when the record reads
 `EnlistedAttached` but the party is still in a map event, and leaves an encounter with no map event
 behind it alone. A settlement encounter is the reconciler's; a leftover whose encountered party is a
-mobile opposing leader outside a settlement stays until a discharge or the stale-latch recovery closes it
-(R4 returns `SkipNotOurs`, #1021 item 1).
+mobile opposing leader outside a settlement is skipped by the sweep (R4 returns `SkipNotOurs`), and since
+#1021 the stale-latch recovery closes it: it treats an attached soldier with a joined-battle encounter
+(`IEncounterAdapter.IsJoinedBattleEncounter`) outside a settlement as a timed episode too.
 Without it every gate keyed on `EnlistedBattle` read the wrong state for the battle the player
 saved in: the deployment-screen model and the role strip deferred to vanilla, and the presence
 hold did not fire.
@@ -1399,9 +1401,11 @@ Two defects, both fixed 2026-09-12:
   (`EnlistmentLoadNormalizerTests`, three rows).
 
 Two paths still detach with an open encounter, both pre-existing, both recorded on #577 rather
-than fixed here: the MCM master switch turned off mid-battle runs the discharge (RestorePresence,
-LeaveArmy, ClearArmyAttachment) before the ownership policy closes the encounter, by the documented
-"discharge outranks ownership" rule; and a failed join's rollback can leave the encounter open
+than fixed here: a discharge that runs mid-battle (the heir-mismatch discharge at load, tracked in
+#1030) runs RestorePresence, LeaveArmy and ClearArmyAttachment before the ownership policy closes the
+encounter, by the documented "discharge outranks ownership" rule (the MCM master switch no longer takes
+this path: with the feature off, the release waits until the player's battle ends and discharges on the
+next hourly tick, #1021); and a failed join's rollback can leave the encounter open
 when the encounter's party is the opposing leader (R4 skips it) while `ReassertServiceMenu` re-inits the wait
 menu, whose init parks unconditionally on `EnlistedAttached`.
 
@@ -1984,6 +1988,28 @@ intent that R1c lets through. It runs before the assessment so the recovery land
 and it hands R1c the decision rather than calling `Finish` itself, so R1 still refuses outright if the
 player turns out to be in a map event after all. Like R2c, R1c enforces its own
 `!PlayerInsideSettlement` precondition rather than trusting the caller.
+
+**Widened for #1021.** The same timer now covers two more orphans. (1) `EnlistedAttached`, parked
+outside a settlement, encounter open against the opposing leader, `IsJoinedBattle` true, no map event:
+a save taken while latched in `EnlistedBattle` loads as attached, and the policy skips it because the
+encountered party is the opposing leader. The recovery finishes it through R1c and
+re-parks him; no state transition is made, because attached to attached is not a legal edge.
+`FinalizeBattle` leaves the battle with no winner and the finalized event no-ops, so the finish is safe
+here. (2) `EnlistedBattle` INSIDE the commander's town after a defender's repulsed assault
+(`OnPlayerEncounterContinueBattle` keeps the encounter). R1c refuses inside a settlement and `Finish`
+would escape-teleport an unmerged soldier and walk him out (`FinishEncounterInternal` only teleports,
+and the walk-out is `PlayerEncounter.Finish`'s own `LeaveSettlement()`; both need `AttachedTo` null), and for a merged one neither runs but he is left inside with no encounter, the
+#510 crash shape. So the recovery only moves the state to `EnlistedAttached` after the window, logs a
+warning, and leaves the encounter. The next assault reuses it when the party it was joined against is
+in that assault; otherwise the join is refused and rolls back. Reuse clears the last battle's result
+(`IEncounterAdapter.ForgetEndedBattleResult`, only when the encounter has no battle and a result is
+still set). The repulsed assault leaves the result at `EnemyRetreated`; the siege component's continue
+check (`CheckIfBattleShouldContinueAfterBattleMission`) returns false on it only when the other side is not
+the attacker, and for a defender it is, so the continue handler would finish the new assault
+(`FinishBattleAndKeepSiegeEvent`) and switch to `menu_siege_strategies`. Every component's continue check
+returns false on a null result, hence the reset (the saved continue flag resets at the first `DoWait`).
+Before the fix every later assault on that town ended the moment he joined. A conversation keeps the
+latch.
 
 **The anchor is not persisted, and that is not the same as safe.** The reconciler is
 `Reuse.Singleton`, so it outlives the campaign, and the anchor is an ABSOLUTE campaign day. A campaign
@@ -2643,10 +2669,17 @@ What actually remains, each a state no test can reach:
 - **Encounter after a battle (#796).** (1) Enlisted, join and win a field battle with loot and
   prisoners and read every screen to the end: back on the service menu, and no "closing" line from
   `[EnlistDiag]` until the screens close. (2) The same during a siege assault the commander wins.
-  (3) If an assault is repulsed with your commander ATTACKING: within one in-game hour the service menu
-  is back, and the log shows "breaking a stale EnlistedBattle latch" or "a PlayerEncounter is open with
-  no battle in progress". A defending commander's repulse is #1021 item 2 (no automatic exit), not a
-  pass or fail condition here.
+  (3) If an assault is repulsed with your commander ATTACKING: within three in-game hours (the
+  first hourly tick only sets the anchor, and the elapsed check against 1/24 day falls short by float
+  rounding on about half of the hours, so recovery fires on the second or third tick) the service menu is back, and the log shows "breaking a
+  stale battle latch (state EnlistedBattle)" or "a PlayerEncounter is open with
+  no battle in progress". A defending commander's repulse inside his town (#1021): enlist under a lord
+  holding a town, follow him inside, defend an assault until the attackers retreat; within three
+  in-game hours (the second or third hourly tick) `taom.service_status` shows `EnlistedAttached`, still inside, the log shows "releasing a stale
+  EnlistedBattle latch inside a settlement", the next assault logs "cleared the last battle's result from the
+  reused encounter (#1021)" and then "joined commander battle on side Defender", and that assault reaches
+  its mission or simulation instead of ending at once; when the lord marches out the soldier follows. The saved-while-latched field orphan is
+  unit-tested only.
   (4) Right after a battle, discharge from the service menu, then click a settlement and a lord:
   encounters start.
 - **Quartermaster answers (#829).** Draw a kit (expect the issued line), ask again at the same rank
@@ -2662,7 +2695,11 @@ What actually remains, each a state no test can reach:
   'town' for '<settlement id>'`. (c) The town route ("Go on your way" into the town menu) is reached
   only through the identity guard from a save with no live settlement encounter; there is no
   in-game recipe, unit tests cover it. (d) Repeat (a) once in a non-English language (the English
-  seed text shows until the paid translation).
+  seed text shows until the paid translation). (e) #1021: save at the assault's encounter menu as a
+  defender, switch enlistment off in MCM, load: the log shows "feature disabled: waiting for the
+  battle to end before releasing", the battle plays out normally, and the release then follows (a) or
+  (b) above. The discharge's own "left the player in his own battle" path (step 10 skipped) is the floor
+  for an unmerged soldier and has no in-game recipe; unit tests cover it.
 - **Discharge, any reason.** Zero occurrences in the live log. The save-breaker fix is written and
   never exercised; the line that would indict it is
   `DISCHARGE(…) LEFT THE PLAYER UNABLE TO START ENCOUNTERS`. Leaving service and immediately

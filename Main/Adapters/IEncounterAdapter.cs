@@ -17,6 +17,13 @@ public interface IEncounterAdapter
 
     bool IsInsideSettlement { get; }
 
+    /// <summary>
+    /// True when the current encounter was created or extended by a battle join (<c>PlayerEncounter.IsJoinedBattle</c>).
+    /// Such an encounter's encountered party is the opposing leader, which is how an orphaned one is told apart from a
+    /// lord the player is talking to (#1021). False when there is no encounter or the read fails.
+    /// </summary>
+    bool IsJoinedBattleEncounter { get; }
+
     /// <summary>StringId of the encountered mobile party, or null.</summary>
     string EncounteredPartyId { get; }
 
@@ -143,4 +150,16 @@ public interface IEncounterAdapter
     /// while a party is inside a settlement. Each site must now state its intent.
     /// </summary>
     bool Finish(bool forcePlayerOutFromSettlement);
+
+    /// <summary>
+    /// Clears the last battle's result from a REUSED encounter (#1021). A defender's repulsed assault keeps its
+    /// encounter with that battle's result still set (<c>EnemyRetreated</c>). On the next assault the siege
+    /// component's continue check (<c>CheckIfBattleShouldContinueAfterBattleMission</c>) returns false on that
+    /// result only when the other side is NOT the attacker; for a defender it IS, so the old result reads as a
+    /// battle to continue, the continue handler finishes the new assault and the menu switches to
+    /// <c>menu_siege_strategies</c>. Every component's continue check returns false on a NULL result, so
+    /// forgetting it fixes this. Acts only when an encounter exists, no battle is attached to it and a result
+    /// is still set. Never throws.
+    /// </summary>
+    void ForgetEndedBattleResult();
 }
