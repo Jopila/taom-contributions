@@ -340,26 +340,6 @@
 	<!-- These reuse the same localization tokens as vanilla C# code to override at load time -->
 	<string id="taom_alliance_formed" text="{=0cdXddA9}{KINGDOM1_LINK} has formed an alliance with {KINGDOM2_LINK}." />
 	<string id="taom_no_longer_enemies" text="{=1rbg3Hz2}{FACTION_1} and {FACTION_2} are no longer enemies." />
-	<string id="taom_policy_stop" text="{=2BVDp7Tg}{KINGDOM} will stop {POLICY_DESCRIPTION} ({POLICY}). {POLICY_SUPPORT}" />
-	<string id="taom_policy_start" text="{=Lbs2bNlg}{KINGDOM} will start {POLICY_DESCRIPTION} ({POLICY}). {POLICY_SUPPORT}" />
-	<string id="taom_policy_continue" text="{=jnYwiCAz}{KINGDOM} will continue {POLICY_DESCRIPTION} ({POLICY}). {POLICY_SUPPORT}" />
-	<string id="taom_policy_reject" text="{=faUooB7V}{KINGDOM} will not be {POLICY_DESCRIPTION} ({POLICY}). {POLICY_SUPPORT}" />
-
-	<!-- DLL localization token overrides (hero titles and lord descriptions) -->
-	<string id="taom_hero_of_faction" text="{=TauRjAud}{NAME} of {FACTION}" />
-	<string id="taom_servant_of_faction" text="{=2mVZORaE}a servant of {FACTION_NAME}" />
-	<string id="taom_lord_ruler_desc" text="{=6d4ZTvGv}{LORD.NAME} is {TITLE} of {FACTION_NAME} and head of the {CLAN_NAME}, {CLAN_DESCRIPTION} of the realm. {?LORD.GENDER}She{?}He{\?} has the reputation of being {REPUTATION}." />
-	<string id="taom_lord_member_desc" text="{=o5AUljbW}{LORD.NAME} is a member of the {CLAN_NAME}, {CLAN_DESCRIPTION} of {FACTION_NAME}. {?LORD.GENDER}She{?}He{\?} has the reputation of being {REPUTATION}." />
-	<string id="taom_lord_member_desc2" text="{=9Obe3S6L}{LORD.FIRSTNAME} is a member of the {CLAN_NAME}, {CLAN_DESCRIPTION} from the lands of {FACTION_NAME}. {?LORD.GENDER}She{?}He{\?} has the reputation of being {REPUTATION}." />
-	<string id="taom_lord_head_desc" text="{=hRfXSdlP}{LORD.FIRSTNAME} is a head of the {CLAN_NAME}, {CLAN_DESCRIPTION} from the lands of {FACTION_NAME}. {?LORD.GENDER}She{?}He{\?} has the reputation of being {REPUTATION}." />
-	<string id="taom_lord_civilwar_member" text="{=0bPb5btR}{LORD.NAME} is a member of the {CLAN_NAME}, {CLAN_DESCRIPTION} of {FACTION_NAME} that is backing {RULER} in the civil war. {?LORD.GENDER}She{?}He{\?} has the reputation of being {REPUTATION}." />
-	<string id="taom_lord_civilwar_ruler" text="{=JuPUG5wX}{LORD.NAME} is {TITLE} of {FACTION_NAME} and head of the {CLAN_NAME}, {CLAN_DESCRIPTION} that is backing {RULER} in the civil war. {?LORD.GENDER}She{?}He{\?} has the reputation of being {REPUTATION}." />
-	<string id="taom_castle_desc" text="{=4pmvrnmN}The castle of {SETTLEMENT_LINK} is owned by {LORD.LINK}, {FACTION_OFFICIAL} of {FACTION_TERM}. {KEEP_INFO}" />
-	<string id="taom_settlement_gov" text="{=q3wD0rbq}{SETTLEMENT_LINK} is governed by {LORD.LINK}, {FACTION_OFFICIAL} of {FACTION_TERM}. {KEEP_INFO}" />
-	<string id="taom_settlement_land" text="{=RVDojUOM}The lands around {SETTLEMENT_LINK} are owned mostly by {LORD.LINK}, {FACTION_OFFICIAL} of {FACTION_TERM}. {PROSPERITY_INFO}" />
-	<string id="taom_settlement_gov2" text="{=UWzQsHA2}{SETTLEMENT_LINK} is governed by {LORD.LINK}, {FACTION_OFFICIAL} of {FACTION_TERM}. {PROSPERITY_INFO} {MORALE_INFO}" />
-	<string id="taom_prisoner_dialogue" text="{=yAOQnMVw}You're of {FACTION}, right? That means you're my prisoner." />
-	<string id="taom_protection_dialogue" text="{=YT4OvaAG}Very well. You may consider yourself under the protection of {FACTION_NAME}. You have until this time tomorrow to complete your journey, or we may ask for another payment from you." />
 
 	<!-- Erebor -->
 	<string id="str_faction_official.erebor" text="{=taom_str_faction_official.erebor}a noble dwarf" />
@@ -575,6 +555,7 @@
 	<string id="taom_the_fix_VWoHoUin" text="{=VWoHoUin}There will be no peace between us and {ENEMY_INFORMAL_NAME}, any more than the wolf makes peace with the sheep." />
 	<string id="taom_the_fix_wijL0mTy" text="{=wijL0mTy}{FACTION_LEADER} will decide if an alliance will be formed with {KINGDOM_NAME}. You can pick your stance regarding this decision." />
 	<string id="taom_the_fix_wsDNxArW" text="{=wsDNxArW}{PEACEMAKER_RULER.NAME} of {KINGDOM_CONSIDERING_PEACE} has chosen not to make peace with {KINGDOM}." />
+	<string id="taom_the_fix_WYHqMwwo" text="{=WYHqMwwo}{CLAN} has been eliminated." />
 	<string id="taom_the_fix_xAuejv91" text="{=xAuejv91}{RULER.NAME} of {KINGDOM} has decided against making peace with {OTHER_KINGDOM}, with his {?RULER.GENDER}her{?}his{\?} council evenly divided on the matter." />
 	<string id="taom_the_fix_XaZyU3Cn" text="{=XaZyU3Cn}{AGGRESSOR_RULER.NAME} of {AGGRESSOR_KINGDOM} chose not to go to war with {KINGDOM} despite the wishes of {?AGGRESSOR_RULER.GENDER}her{?}his{\?} council." />
 	<string id="taom_the_fix_XbYCVCbR" text="{=XbYCVCbR}We oppose calling our ally {CALLED_KINGDOM} to war." />
@@ -2285,23 +2266,6 @@
 	<string id="str_adjective_for_culture.goblin" text="{=taom_str_adjective_for_culture.goblin}Goblin" />
 	<string id="str_player_father_name.goblin" text="{=taom_str_player_father_name.goblin}Narzuk" />
 	<string id="str_player_mother_name.goblin" text="{=taom_str_player_mother_name.goblin}Borlia" />
-	<string id="taom_bandit_goblin_name" text="{=taom_bandit_goblin_name}Goblin Raiders" />
-	<string id="taom_bandit_goblin_m1" text="{=taom_bandit_goblin_m1}Bolg" />
-	<string id="taom_bandit_goblin_m2" text="{=taom_bandit_goblin_m2}Yazneg" />
-	<string id="taom_bandit_goblin_m3" text="{=taom_bandit_goblin_m3}Fimbul" />
-	<string id="taom_bandit_goblin_m4" text="{=taom_bandit_goblin_m4}Narzug" />
-	<string id="taom_bandit_goblin_m5" text="{=taom_bandit_goblin_m5}Gorbag" />
-	<string id="taom_bandit_goblin_m6" text="{=taom_bandit_goblin_m6}Mauhûr" />
-	<string id="taom_bandit_goblin_m7" text="{=taom_bandit_goblin_m7}Snaga" />
-	<string id="taom_bandit_goblin_m8" text="{=taom_bandit_goblin_m8}Ufthak" />
-	<string id="taom_bandit_goblin_m9" text="{=taom_bandit_goblin_m9}Radbug" />
-	<string id="taom_bandit_goblin_m10" text="{=taom_bandit_goblin_m10}Lugdush" />
-	<string id="taom_bandit_goblin_f1" text="{=taom_bandit_goblin_f1}Skarra" />
-	<string id="taom_bandit_goblin_f2" text="{=taom_bandit_goblin_f2}Vorga" />
-	<string id="taom_bandit_goblin_f3" text="{=taom_bandit_goblin_f3}Mazra" />
-	<string id="taom_bandit_goblin_f4" text="{=taom_bandit_goblin_f4}Grishta" />
-	<string id="taom_bandit_goblin_f5" text="{=taom_bandit_goblin_f5}Narzga" />
-	<string id="taom_hideout_desc_goblin" text="{=taom_hideout_desc_goblin}Beneath the crags of the High Pass you find a reeking warren of goblins burrowed deep into the bare rock." />
 
 	<!-- TAOM-NEWFACTIONS:goblin:END -->
 	<!-- TAOM-NEWFACTIONS:mistymountainorcs:BEGIN -->
@@ -2320,23 +2284,6 @@
 	<string id="str_adjective_for_culture.mistymountainorcs" text="{=taom_str_adjective_for_culture.mistymountainorcs}Orc" />
 	<string id="str_player_father_name.mistymountainorcs" text="{=taom_str_player_father_name.mistymountainorcs}Narzuk" />
 	<string id="str_player_mother_name.mistymountainorcs" text="{=taom_str_player_mother_name.mistymountainorcs}Borlia" />
-	<string id="taom_bandit_mistymountainorcs_name" text="{=taom_bandit_mistymountainorcs_name}Orc Raiders" />
-	<string id="taom_bandit_mistymountainorcs_m1" text="{=taom_bandit_mistymountainorcs_m1}Bolg" />
-	<string id="taom_bandit_mistymountainorcs_m2" text="{=taom_bandit_mistymountainorcs_m2}Yazneg" />
-	<string id="taom_bandit_mistymountainorcs_m3" text="{=taom_bandit_mistymountainorcs_m3}Fimbul" />
-	<string id="taom_bandit_mistymountainorcs_m4" text="{=taom_bandit_mistymountainorcs_m4}Narzug" />
-	<string id="taom_bandit_mistymountainorcs_m5" text="{=taom_bandit_mistymountainorcs_m5}Gorbag" />
-	<string id="taom_bandit_mistymountainorcs_m6" text="{=taom_bandit_mistymountainorcs_m6}Mauhûr" />
-	<string id="taom_bandit_mistymountainorcs_m7" text="{=taom_bandit_mistymountainorcs_m7}Snaga" />
-	<string id="taom_bandit_mistymountainorcs_m8" text="{=taom_bandit_mistymountainorcs_m8}Ufthak" />
-	<string id="taom_bandit_mistymountainorcs_m9" text="{=taom_bandit_mistymountainorcs_m9}Radbug" />
-	<string id="taom_bandit_mistymountainorcs_m10" text="{=taom_bandit_mistymountainorcs_m10}Lugdush" />
-	<string id="taom_bandit_mistymountainorcs_f1" text="{=taom_bandit_mistymountainorcs_f1}Skarra" />
-	<string id="taom_bandit_mistymountainorcs_f2" text="{=taom_bandit_mistymountainorcs_f2}Vorga" />
-	<string id="taom_bandit_mistymountainorcs_f3" text="{=taom_bandit_mistymountainorcs_f3}Mazra" />
-	<string id="taom_bandit_mistymountainorcs_f4" text="{=taom_bandit_mistymountainorcs_f4}Grishta" />
-	<string id="taom_bandit_mistymountainorcs_f5" text="{=taom_bandit_mistymountainorcs_f5}Narzga" />
-	<string id="taom_hideout_desc_mistymountainorcs" text="{=taom_hideout_desc_mistymountainorcs}Beneath the crags of the Misty Mountains you find a foul warren of orcs burrowed into the bare rock." />
 
 	<!-- TAOM-NEWFACTIONS:mistymountainorcs:END -->
 
@@ -4052,5 +3999,48 @@
 	<string id="taom_mh_mcm_bulk_hint" text="{=taom_mh_mcm_bulk_hint}In the smithy, hold Shift while you smelt or refine to do five at once, or Ctrl to do the whole stack (Ctrl wins when both are held). It stops when your stamina or the charcoal or materials run out, and each unit costs what a single one would. Applies at once, no restart. Default: on." />
 	<string id="taom_mh_mcm_hide_locked" text="{=taom_mh_mcm_hide_locked}Hide Locked Items from Smelting" />
 	<string id="taom_mh_mcm_hide_locked_hint" text="{=taom_mh_mcm_hide_locked_hint}Weapons you locked in the inventory no longer appear in the smithy's smelting list, so they cannot be smelted by accident. Unlock one in the inventory to smelt it. A weapon you lock inside the smithy leaves the list at your next smelt or tab switch. No restart. Default: on." />
+
+	<!-- Inn Rounds (#901): the drink a culture's taverns pour, one row per culture id (the id after the dot is the culture id, the variation GameTexts.TryGetText takes). A culture with no row is called "ale" (taom_round_drink_default, in InnRoundsAdapter). The beer or wine choice that sets the price is cultureDrinks in inn_rounds.json. Names are gender-neutral and name no people. -->
+	<string id="str_taom_round_drink.erebor" text="{=taom_round_drink_erebor}deep-cellar ale" />
+	<string id="str_taom_round_drink.rivendell" text="{=taom_round_drink_rivendell}valley wine" />
+	<string id="str_taom_round_drink.mirkwood" text="{=taom_round_drink_mirkwood}Dorwinion wine" />
+	<string id="str_taom_round_drink.lothlorien" text="{=taom_round_drink_lothlorien}golden cordial" />
+	<string id="str_taom_round_drink.lindon" text="{=taom_round_drink_lindon}harbour wine" />
+	<string id="str_taom_round_drink.isengard" text="{=taom_round_drink_isengard}sour black ale" />
+	<string id="str_taom_round_drink.gundabad" text="{=taom_round_drink_gundabad}smoky grog" />
+	<string id="str_taom_round_drink.umbar" text="{=taom_round_drink_umbar}spiced coast wine" />
+	<string id="str_taom_round_drink.dolguldur" text="{=taom_round_drink_dolguldur}bitter dregs" />
+	<string id="str_taom_round_drink.gondor" text="{=taom_round_drink_gondor}Belfalas wine" />
+	<string id="str_taom_round_drink.mordor" text="{=taom_round_drink_mordor}black ale" />
+	<string id="str_taom_round_drink.shaghana" text="{=taom_round_drink_shaghana}date wine" />
+	<string id="str_taom_round_drink.abanissa" text="{=taom_round_drink_abanissa}palm wine" />
+	<string id="str_taom_round_drink.goblin" text="{=taom_round_drink_goblin}cave brew" />
+	<string id="str_taom_round_drink.mistymountainorcs" text="{=taom_round_drink_mistymountainorcs}stonewater brew" />
+	<string id="str_taom_round_drink.bluecraig" text="{=taom_round_drink_bluecraig}craig brew" />
+	<string id="str_taom_round_drink.arthedain" text="{=taom_round_drink_arthedain}hearth ale" />
+	<string id="str_taom_round_drink.cardolan" text="{=taom_round_drink_cardolan}barrowdown ale" />
+	<string id="str_taom_round_drink.rhudaur" text="{=taom_round_drink_rhudaur}hill ale" />
+	<string id="str_taom_round_drink.empire" text="{=taom_round_drink_empire}heather ale" />
+	<string id="str_taom_round_drink.vlandia" text="{=taom_round_drink_vlandia}honey mead" />
+	<string id="str_taom_round_drink.battania" text="{=taom_round_drink_battania}spiced wine" />
+	<string id="str_taom_round_drink.khuzait" text="{=taom_round_drink_khuzait}steppe brew" />
+	<string id="str_taom_round_drink.aserai" text="{=taom_round_drink_aserai}oasis wine" />
+	<string id="str_taom_round_drink.sturgia" text="{=taom_round_drink_sturgia}dale ale" />
+	<!-- harvested by tools/harvest_literal_loc_keys.py -->
+	<!-- InnRoundsAdapter -->
+	<string id="taom_round_party_notice" text="{=taom_round_party_notice}You stand a round of {DRINK} for your company. Good cheer goes round (recent events morale +{MORALE})." />
+	<string id="taom_round_house_notice" text="{=taom_round_house_notice}You stand a round of {DRINK} for the whole house. Word of it will spread." />
+	<string id="taom_round_drink_default" text="{=taom_round_drink_default}ale" />
+	<!-- InnRounds -->
+	<string id="taom_round_reveal_done" text="{=taom_round_reveal_done}Listen, then. Travellers have talked of little else but these holds all season, and I will tell you where each one lies." />
+	<string id="taom_round_reveal_war" text="{=taom_round_reveal_war}Your realm is at war with the one who holds this town. I will say nothing of the roads while the swords are out." />
+	<string id="taom_round_reveal_cold" text="{=taom_round_reveal_cold}The ones who hold this town do not know you well enough yet. I keep my talk of the roads for friends." />
+	<string id="taom_round_reveal_nothing" text="{=taom_round_reveal_nothing}I have no more news of the holds near here. You know all that I know." />
+	<string id="taom_round_party" text="{=taom_round_party}Stand a round for my whole company ({PRICE}{GOLD_ICON})." />
+	<string id="taom_round_house" text="{=taom_round_house}A round for everyone in the house, on me ({PRICE}{GOLD_ICON})." />
+	<string id="taom_round_cap" text="{=taom_round_cap}Enough rounds have been poured for one day." />
+	<!-- harvested by tools/harvest_literal_loc_keys.py -->
+	<!-- InnRoundsAdapter -->
+	<string id="taom_round_xp_notice" text="{=taom_round_xp_notice}Standing a round teaches you a little about winning a room (+{XP} {SKILL_NAME} experience)." />
 
 </strings>

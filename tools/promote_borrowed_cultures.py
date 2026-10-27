@@ -659,10 +659,12 @@ def source_blocks(kind, text, src, cfg=None):
     if kind == "strings":
         # The liege titles (str_liege_title*.<culture>, commit 30003668b) are multi-line elements with a
         # culture tag and belong to the Liege Titles feature, which writes one row pair per realm by
-        # hand: a line-based clone would copy only their opening tag and break the file.
+        # hand: a line-based clone would copy only their opening tag and break the file. Inn Rounds' drink
+        # rows (str_taom_round_drink.<culture>, #901) are also written by hand for every culture, so a clone
+        # would define the promoted culture's id a second time.
         lines = [ln for ln in text.splitlines()
                  if f".{src}" in ln and "<string" in ln and "taom_faction_" not in ln
-                 and "str_liege_title" not in ln]
+                 and "str_liege_title" not in ln and "str_taom_round_drink" not in ln]
         if not lines:
             raise SystemExit(f"no <string> lines found for {src}")
         return "\n".join("  " + ln.strip() for ln in lines) + "\n"

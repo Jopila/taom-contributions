@@ -142,8 +142,6 @@ public sealed class NotableServicesAdapter : INotableServicesAdapter
         }
     }
 
-    public float MapDiagonal => Campaign.MapDiagonal;
-
     public void RunAfterConversation(Action action)
     {
         var manager = Campaign.Current?.ConversationManager;
@@ -225,7 +223,7 @@ public sealed class NotableServicesAdapter : INotableServicesAdapter
             town.Prosperity += amount;
     }
 
-    public void AddRogueryXp(float xp) => Player?.AddSkillXp(DefaultSkills.Roguery, xp);
+    public string? PlayerHeroId => Player?.StringId;
 
     public void ShowGiftNotice(string settlementId, int men) =>
         Show(Plural(new TextObject("{=taom_ns_gift_notice}{SETTLEMENT} takes in the {COUNT} {?IS_PLURAL}people{?}person{\\?} you gave."), men)
@@ -262,10 +260,6 @@ public sealed class NotableServicesAdapter : INotableServicesAdapter
 
     public void ShowIntroducedNotice(int count) =>
         Show(Plural(new TextObject("{=taom_ns_introduced_notice}You are introduced to {COUNT} more {?IS_PLURAL}notables{?}notable{\\?} here."), count)
-            .SetTextVariable("COUNT", count));
-
-    public void ShowHoldsMarkedNotice(int count) =>
-        Show(Plural(new TextObject("{=taom_ns_holds_notice}{COUNT} {?IS_PLURAL}holds{?}hold{\\?} marked on your map."), count)
             .SetTextVariable("COUNT", count));
 
     private static TextObject Plural(TextObject text, int count) => text.SetTextVariable("IS_PLURAL", count > 1 ? 1 : 0);

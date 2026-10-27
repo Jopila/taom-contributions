@@ -38,6 +38,7 @@ characters to players. Full contract: [`docs/reference/release-process.md`](../.
 6. Every release channel's `TAOM_Map` package carries each settlement TAOM data names; Arthedain's
    `town_AN1` to `town_AN3` are the open case. The check per channel is in
    [`release-process.md`](../../../docs/reference/release-process.md) ("TAOM_Map ships in the same release").
+6a. For the channel this release ships to, `BANNERLORD_GAME_MODULES="E:/LOTRAOM_Releases/<channel>/Modules" python tools/check_external_loc_coverage.py --processors-only` (PowerShell: set `$env:BANNERLORD_GAME_MODULES` first). Any exit other than 0 blocks the release: the TAOM_Map and Armory packages must carry Native's text processor ([`release-process.md`](../../../docs/reference/release-process.md), #1026).
 6b. `python tools/check_mcm_default_flips.py` exits 0 before the tag: a changed MCM default under an
    unchanged name reaches no player who saved settings (rename it, or allowlist it with a reason).
 7. **Owed in-game checks (never blocks):** `python tools/ingame_ledger.py` lists the issues closed since

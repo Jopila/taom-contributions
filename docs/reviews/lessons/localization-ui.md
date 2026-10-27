@@ -1363,3 +1363,41 @@ whose loader reads only five attribute names, so four dead `EaseIn` attributes p
 - **Prevent:** map a known interface property to the type the widget's constructor assigns, fail any other unknown, and
   check every element kind against the loader that reads it.
 - **Source:** [rca-prefab-attribute-gate-2026-10-26.md](../rca-prefab-attribute-gate-2026-10-26.md) findings 2 and 3.
+
+### A prefab element is live only if its consumer is: trace who reads it before you edit it (#1027, 2026-10-26)
+A recommendation to ease the character selection screen's `LeftPanel` panel rested on its `VisualDefinition`, but no
+widget in that prefab names it, and Gauntlet resolves a definition only from a widget in the same prefab, so the edit
+changed nothing. The file is a clone of vanilla `ClanMembers.xml` whose panel widget dropped `VisualDefinition="LeftPanel"`.
+The same shape sat behind the dead prefabs of #1022 and #1024.
+- **Why missed:** the definition looked complete, and nothing checks that a definition is used.
+- **Prevent:** before changing a definition, constant, brush or prefab, find the element or code that consumes it (a
+  `VisualDefinition="X"` attribute, a `!Constant` reference, a tag, a movie load); if there is none, delete it instead.
+- **Source:** [rca-panel-ease-2026-10-26.md](../rca-panel-ease-2026-10-26.md) finding 1.
+### A language_data.xml with a name and no text_processor resets the language's grammar processor (#1026, 2026-10-26)
+`LanguageData.Deserialize` assigns `TextProcessor` whenever `name` is non-empty, and takes it from the `text_processor`
+attribute, which is null when absent. The live `TAOM_Map` and `LOTRLOME_Armory` files carried `name` and no processor, so
+wherever one of them loads after Native it resets the language to the default processor, whose `ProcessToken` prints
+nothing. Eight languages were affected: English (lords' parties read "Aragorn Party" for "Aragorn's Party", from the live
+Armory root file), and Italian `{.di}` and `{.a}`, French `{.cl}`, Turkish `'{.e}`, German, Polish, Russian and Spanish.
+TAOM's own files had only `id`, so nothing restored it. TAOM's `SubModule.xml` pins no load order against these modules, but TAOM_Map's `SubModule.xml:19` pins TAOM before TAOM_Map
+(`id="TAOM" order="LoadBeforeThis"`), so the
+rule is not "TAOM loads last": every module's file with a `name` must carry the processor. `TAOM.Dependencies` is the one exemption: its install-only files carry a `name` and no processor, and are safe only because its `SubModule.xml` lists Native in `ModulesToLoadAfterThis`, so it always sorts before Native.
+- **Why missed:** `strings-and-localization.md` said an absent `text_processor` keeps whatever another module set, and no
+  test read the attribute. The missing words only show in a running game.
+- **Prevent:** give every `language_data.xml` that has a `name`, the root English file included, the `text_processor`
+  Native declares for that id, and none where Native declares none. `LanguageProcessorTests` checks TAOM's 13 files, and
+  `tools/check_external_loc_coverage.py` fails on a live `TAOM_Map` or `LOTRLOME_Armory` file (root or per language)
+  that has a `name` and a processor different from Native's, and `LiveTaomMapAndArmoryLanguageData_InstalledNative_CarryTheSameProcessor`
+  guards the same files. Players get the fix only from a release with new TAOM_Map and Armory packages. Read the engine's `Deserialize` before writing a rule about an absent
+  attribute.
+- **Source:** issue #1026. Known effects, not fixed here: an untagged TAOM name can take the gender of a word tagged
+  earlier in the same text in IT, SP, DE, PL and RU (Spanish "en el Minas Tirith"), which is #1023's work; French
+  `{.dl}`/`{.cl}` put a bare "de" or "à" before an untagged name ("de Le Poing de Fer"), also #1023; Turkish `{._}`
+  lowercases with Turkish rules ("ısengard"), as the engine's processor does for vanilla names.
+### Before tagging a translated name, check what the engine's grammar does with the tag in that language (#1023, 2026-10-26)
+Wave 1 tagged every Italian kingdom and clan name `{.FN}` because `{.FN}` and `{.MN}` both print the plain preposition. Italian
+`GENDER` maps MN to 4 and FN to 5, and 29 of the 30 vanilla selections differ between the two: `{.FN}` gave "Erebor è stata distrutta".
+- **Why missed:** the check covered the tag's effect on the preposition and stopped; the agreement code reads the same tag.
+- **Prevent:** before a tag goes on a name class, read the language processor and the function file for every place that reads
+  the tag, and tag by the gender of the implied noun ("il regno", "il clan"), not by the one effect you were fixing.
+- **Source:** `docs/features/name-grammar-tags.md` (Solution Approach), #1023 review wave 1.

@@ -1551,3 +1551,12 @@ census), which makes the state common. Patch123 contains it.
   (`EncyclopediaLinkWithName`, `.Name` on a `LeaderHero`) for new reads through a nullable getter, and ask which states
   TAOM makes common (leaderless captors, a lord without a party) that vanilla rarely reaches.
 - **Source:** player crash bundle 9b2a103e (v2.0.34); [registry](../../reference/harmony-patch-registry.md#patch123_lastseentextguard).
+### Before keying a feature on a conversation partner, list every place vanilla spawns that partner (Inn Rounds, #901, 2026-10-26)
+The house round assumed that talking to a tavern keeper means the player is in the tavern. Vanilla also places a keeper
+in the town centre by day wherever the scene has a `spawnpoint_tavernkeeper` (`TavernEmployeesCampaignBehavior.cs:118-123`),
+and three live TAOM centre scenes have one, so the round was priced on a room the player was not in.
+- **Why missed:** the plan read the dialog token the feature hooks, not the spawn code that decides where that partner stands.
+- **Prevent:** when a line's rule depends on where the conversation takes place, grep the partner's spawn code for every
+  location it is added to, and test the location the conversation actually runs in (`CampaignMission.Current.Location`),
+  not the partner's occupation.
+- **Source:** `docs/reviews/rca-inn-rounds-2026-10-26.md` finding 1.

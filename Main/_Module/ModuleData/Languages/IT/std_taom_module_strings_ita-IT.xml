@@ -525,34 +525,6 @@
 
     <string id="taom_encounter_peace" text="Hai incontrato {PARTY}. Combatterli causerà una guerra con {KINGDOM}." />
 
-    <string id="TauRjAud" text="{NAME} di {FACTION}" />
-
-    <string id="2mVZORaE" text="un servitore di {FACTION_NAME}" />
-
-    <string id="6d4ZTvGv" text="{LORD.NAME} è {TITLE} di {FACTION_NAME} e capo di {CLAN_NAME}, {CLAN_DESCRIPTION} del reame. {?LORD.GENDER}Ella{?}Egli{\?} ha la reputazione di essere {REPUTATION}." />
-
-    <string id="o5AUljbW" text="{LORD.NAME} è un membro di {CLAN_NAME}, {CLAN_DESCRIPTION} di {FACTION_NAME}. {?LORD.GENDER}Ella{?}Egli{\?} ha la reputazione di essere {REPUTATION}." />
-
-    <string id="9Obe3S6L" text="{LORD.FIRSTNAME} è un membro di {CLAN_NAME}, {CLAN_DESCRIPTION} dalle terre di {FACTION_NAME}. {?LORD.GENDER}Ella{?}Egli{\?} ha la reputazione di essere {REPUTATION}." />
-
-    <string id="hRfXSdlP" text="{LORD.FIRSTNAME} è un capo di {CLAN_NAME}, {CLAN_DESCRIPTION} dalle terre di {FACTION_NAME}. {?LORD.GENDER}Ella{?}Egli{\?} ha la reputazione di essere {REPUTATION}." />
-
-    <string id="0bPb5btR" text="{LORD.NAME} è un membro di {CLAN_NAME}, {CLAN_DESCRIPTION} di {FACTION_NAME} che sostiene {RULER} nella guerra civile. {?LORD.GENDER}Ella{?}Egli{\?} ha la reputazione di essere {REPUTATION}." />
-
-    <string id="JuPUG5wX" text="{LORD.NAME} è {TITLE} di {FACTION_NAME} e capo di {CLAN_NAME}, {CLAN_DESCRIPTION} che sostiene {RULER} nella guerra civile. {?LORD.GENDER}Ella{?}Egli{\?} ha la reputazione di essere {REPUTATION}." />
-
-    <string id="4pmvrnmN" text="Il castello di {SETTLEMENT_LINK} è posseduto da {LORD.LINK}, {FACTION_OFFICIAL} di {FACTION_TERM}. {KEEP_INFO}" />
-
-    <string id="q3wD0rbq" text="{SETTLEMENT_LINK} è governata da {LORD.LINK}, {FACTION_OFFICIAL} di {FACTION_TERM}. {KEEP_INFO}" />
-
-    <string id="RVDojUOM" text="Le terre attorno a {SETTLEMENT_LINK} sono possedute principalmente da {LORD.LINK}, {FACTION_OFFICIAL} di {FACTION_TERM}. {PROSPERITY_INFO}" />
-
-    <string id="UWzQsHA2" text="{SETTLEMENT_LINK} è governata da {LORD.LINK}, {FACTION_OFFICIAL} di {FACTION_TERM}. {PROSPERITY_INFO} {MORALE_INFO}" />
-
-    <string id="yAOQnMVw" text="Sei di {FACTION}, giusto? Ciò significa che sei mio prigioniero." />
-
-    <string id="YT4OvaAG" text="Molto bene. Puoi considerarti sotto la protezione di {FACTION_NAME}. Hai tempo fino a domani a quest'ora per completare il tuo viaggio, o potremmo chiederti un altro pagamento." />
-
     <string id="taom_str_faction_official.erebor" text="un nobile nano" />
 
     <string id="taom_str_faction_official.erebor_f" text="una dama nana" />
@@ -849,9 +821,9 @@
 
     <string id="ZZ1oLfEq" text="{RULER.NAME} ha risposto alla chiamata di {CALLING_KINGDOM} e ha dichiarato guerra a {KINGDOM_TO_CALL_TO_WAR_AGAINST} con il sostegno del {?RULER.GENDER}suo{?}suo{\?} consiglio." />
 
-    <string id="taom_shaghana_name" text="Shaghâna" />
+    <string id="taom_shaghana_name" text="{.MN}Shaghâna" />
 
-    <string id="taom_shaghana_short_name" text="Shaghâna" />
+    <string id="taom_shaghana_short_name" text="{.MN}Shaghâna" />
 
     <string id="taom_shaghana_title" text="Taskralan di Shaghâna" />
 
@@ -859,7 +831,7 @@
 
     <string id="taom_shaghana_desc" text="Shaghâna è la regione orientale di Harad, una terra di steppe bruciate dal sole e antiche fortezze. I suoi nove clan tribali sono guerrieri feroci, uniti da giuramento e sangue, che incutono terrore in coloro che osano opporsi a loro." />
 
-    <string id="aom_shaghana_name" text="Shaghâna" />
+    <string id="aom_shaghana_name" text="{.FN}Shaghâna" />
 
     <string id="aom_shaghana_desc" text="Gli Shaghâna sono un fiero popolo tribale delle steppe orientali di Harad, rinomati come razziatori implacabili e abili cavalieri. Legati da giuramento e clan, rispondono al loro Taskral e servono i disegni oscuri di Sauron dalle loro fortezze bruciate dal sole." />
 
@@ -881,23 +853,23 @@
 
     <string id="aom_lord_SH9_1_name" text="Saluz" />
 
-    <string id="aom_clan_shaghana_1_name" text="Ezarkia" />
+    <string id="aom_clan_shaghana_1_name" text="{.MN}Ezarkia" />
 
-    <string id="aom_clan_shaghana_2_name" text="Kûmaraknis" />
+    <string id="aom_clan_shaghana_2_name" text="{.MN}Kûmaraknis" />
 
-    <string id="aom_clan_shaghana_3_name" text="Taiymâkä" />
+    <string id="aom_clan_shaghana_3_name" text="{.MN}Taiymâkä" />
 
-    <string id="aom_clan_shaghana_4_name" text="Zayaknûri" />
+    <string id="aom_clan_shaghana_4_name" text="{.MN}Zayaknûri" />
 
-    <string id="aom_clan_shaghana_5_name" text="Selarkes" />
+    <string id="aom_clan_shaghana_5_name" text="{.MN}Selarkes" />
 
-    <string id="aom_clan_shaghana_6_name" text="Uzharês" />
+    <string id="aom_clan_shaghana_6_name" text="{.MN}Uzharês" />
 
-    <string id="aom_clan_shaghana_7_name" text="Alâranin" />
+    <string id="aom_clan_shaghana_7_name" text="{.MN}Alâranin" />
 
-    <string id="aom_clan_shaghana_8_name" text="Banûgand" />
+    <string id="aom_clan_shaghana_8_name" text="{.MN}Banûgand" />
 
-    <string id="aom_clan_shaghana_9_name" text="Acammes" />
+    <string id="aom_clan_shaghana_9_name" text="{.MN}Acammes" />
 
     <string id="aom_sh_notable_0" text="Astuto mercante Shaghâna" />
 
@@ -951,9 +923,9 @@
 
     <string id="aom_sh_headman_3" text="Anziano del villaggio Shaghâna" />
 
-    <string id="taom_abanissa_name" text="Âbanissa" />
+    <string id="taom_abanissa_name" text="{.MN}Âbanissa" />
 
-    <string id="taom_abanissa_short_name" text="Âbanissa" />
+    <string id="taom_abanissa_short_name" text="{.MN}Âbanissa" />
 
     <string id="taom_abanissa_title" text="Châjaphân di Âbanissa" />
 
@@ -961,7 +933,7 @@
 
     <string id="taom_abanissa_desc" text="Âbanissa si trova nel profondo sud di Harad, un regno di giungle umide e antiche dinastie di pietra. Le grandi Casate di Âbanissa comandano temibili bestie da guerra ed eserciti di guerrieri disciplinati, il loro potere non risponde ad altri se non a Sauron stesso." />
 
-    <string id="aom_abanissa_name" text="Âbanissa" />
+    <string id="aom_abanissa_name" text="{.FN}Âbanissa" />
 
     <string id="aom_abanissa_desc" text="Le grandi Casate di Âbanissa governano il profondo sud di Harad, una terra di giungle umide, antichi palazzi di pietra e imponenti bestie da guerra. I loro eserciti marciano sotto i vessilli delle dinastie, ispirando rispetto e terrore attraverso le terre meridionali." />
 
@@ -981,21 +953,21 @@
 
     <string id="aom_lord_AB8_1_name" text="Tirdah" />
 
-    <string id="aom_clan_abanissa_1_name" text="Casata di Phaxsharân" />
+    <string id="aom_clan_abanissa_1_name" text="{.FS}Casata di Phaxsharân" />
 
-    <string id="aom_clan_abanissa_2_name" text="Casata di Hoshêdharma" />
+    <string id="aom_clan_abanissa_2_name" text="{.FS}Casata di Hoshêdharma" />
 
-    <string id="aom_clan_abanissa_3_name" text="Casata di Vasnârad" />
+    <string id="aom_clan_abanissa_3_name" text="{.FS}Casata di Vasnârad" />
 
-    <string id="aom_clan_abanissa_4_name" text="Casata di Gorazehan" />
+    <string id="aom_clan_abanissa_4_name" text="{.FS}Casata di Gorazehan" />
 
-    <string id="aom_clan_abanissa_5_name" text="Casata di Azadafrozan" />
+    <string id="aom_clan_abanissa_5_name" text="{.FS}Casata di Azadafrozan" />
 
-    <string id="aom_clan_abanissa_6_name" text="Casata di Artaxshâasan" />
+    <string id="aom_clan_abanissa_6_name" text="{.FS}Casata di Artaxshâasan" />
 
-    <string id="aom_clan_abanissa_7_name" text="Casata di Ardâcheran" />
+    <string id="aom_clan_abanissa_7_name" text="{.FS}Casata di Ardâcheran" />
 
-    <string id="aom_clan_abanissa_8_name" text="Casata di Tîrdahanâ" />
+    <string id="aom_clan_abanissa_8_name" text="{.FS}Casata di Tîrdahanâ" />
 
     <string id="aom_ab_notable_0" text="Mediatore di dinastia dell'Harad Remoto" />
 
@@ -1049,87 +1021,87 @@
 
     <string id="aom_ab_headman_3" text="Anziano del villaggio di Âbanissa" />
 
-    <string id="TAOM_ghilman_name" text="Guardia del Serpente" />
+    <string id="TAOM_ghilman_name" text="{.FS}Guardia del Serpente" />
 
-    <string id="TAOM_ghilman_short" text="Guardia del Serpente" />
+    <string id="TAOM_ghilman_short" text="{.FS}Guardia del Serpente" />
 
     <string id="TAOM_ghilman_text" text="La Guardia del Serpente è composta da soldati a cavallo al servizio del Signore del Serpente di Harad Vicino. Cresciuti in sella nelle pianure ondulate a sud dell'Ephel Dúath, sono insuperabili come arcieri a cavallo in tutte le terre meridionali della Terra di Mezzo. In tempi di pace tra Harad e Mordor, la Guardia offre i propri servigi ai signori Haradrim e a qualsiasi altra potenza abbastanza ricca da permettersi il loro compenso aureo." />
 
-    <string id="TAOM_legion_name" text="La Compagnia Grigia" />
+    <string id="TAOM_legion_name" text="{.FS}Compagnia Grigia" />
 
-    <string id="TAOM_legion_short" text="Compagnia Grigia" />
+    <string id="TAOM_legion_short" text="{.FS}Compagnia Grigia" />
 
     <string id="TAOM_legion_text" text="La Compagnia Grigia è l'ultima confraternita organizzata dei Raminghi Dúnedain, discendenti dei re di Arnor che persero il loro regno ere fa. Cavalcano attraverso il Nord senza una dimora propria, mantenendo la pace in terre che hanno dimenticato i loro nomi. Sebbene la loro prima lealtà sia verso la stirpe di Elendil, accettano contratti da signori in tutta la Terra di Mezzo quando il loro vagare li conduce attraverso terre civilizzate." />
 
-    <string id="TAOM_skolderbrotva_name" text="Asciaioli di Erebor" />
+    <string id="TAOM_skolderbrotva_name" text="{.MP}Asciaioli di Erebor" />
 
-    <string id="TAOM_skolderbrotva_short" text="Asciaioli" />
+    <string id="TAOM_skolderbrotva_short" text="{.MP}Asciaioli" />
 
     <string id="TAOM_skolderbrotva_text" text="Gli Asciaioli di Erebor sono veterani delle battaglie del Re Thorin che hanno trovato il tempo di pace poco adatto al loro temperamento. Addestrati nel combattimento ravvicinato delle sale naniche — muro di scudi, ascia corta, piccone — sono formidabili su qualsiasi terreno ma eccellono nei passi montani che collegano Erebor ai regni degli uomini. Accettano contratti da chiunque possa permettersi il loro compenso, ma non alzeranno mai un'ascia contro Erebor o Gran Burrone." />
 
-    <string id="TAOM_company_name" text="Lame Corsare" />
+    <string id="TAOM_company_name" text="{.FP}Lame Corsare" />
 
-    <string id="TAOM_company_short" text="Corsari" />
+    <string id="TAOM_company_short" text="{.MP}Corsari" />
 
     <string id="TAOM_company_text" text="Le Lame Corsare sono veterani combattenti di mare dai porti di Umbar che hanno deciso di vendere le proprie abilità sulla terraferma. Combattono come balestrieri — l'arma preferita della guerra navale — e si trovano a loro agio in un assedio quanto su un ponte oscillante. Il loro capitano, un Númenóreano esiliato e sfregiato, li mantiene fedeli ai contratti con ferrea disciplina, sapendo che la loro reputazione è il loro carico più prezioso." />
 
-    <string id="TAOM_beni_zilal_name" text="L'Occhio Cieco" />
+    <string id="TAOM_beni_zilal_name" text="{.MS}Occhio Cieco" />
 
-    <string id="TAOM_beni_zilal_short" text="Occhio Cieco" />
+    <string id="TAOM_beni_zilal_short" text="{.MS}Occhio Cieco" />
 
     <string id="TAOM_beni_zilal_text" text="L'Occhio Cieco è una confraternita di contrabbandieri, ricettatori e sicari a pagamento che opera lungo le coste di Harad e nel deserto profondo. Si dice discendano da un culto di assassini che serviva un re Haradrim dimenticato, e i loro metodi — veleno, ombra e leva dei segreti — rimangono immutati. I signori che desiderano rimuovere discretamente un rivale, o i mercanti che necessitano di merci trasportate senza ispezione doganale, sanno dove lasciare una moneta d'oro e una lettera sigillata." />
 
-    <string id="TAOM_wolfskins_name" text="Devastatori Variag" />
+    <string id="TAOM_wolfskins_name" text="{.MP}Devastatori Variag" />
 
-    <string id="TAOM_wolfskins_short" text="Devastatori" />
+    <string id="TAOM_wolfskins_short" text="{.MP}Devastatori" />
 
     <string id="TAOM_wolfskins_text" text="I Devastatori Variag sono bande guerriere di giovani guerrieri Variag delle steppe di Khand che trascorrono la loro prima età virile in uno stato di guerra rituale: non possono possedere cibo cotto, dormire sotto alcun tetto permanente e non mostrare pietà. Sebbene la maggior parte alla fine torni alla vita stanziale dei loro clan, alcuni non lo fanno mai, e questi formano i Devastatori — fuorilegge che predano le strade di Khand e compiono razzie oltre i suoi confini in Harad e Gondor." />
 
-    <string id="TAOM_brotherhood_name" text="Predoni Dunlandiani" />
+    <string id="TAOM_brotherhood_name" text="{.MP}Predoni Dunlandiani" />
 
-    <string id="TAOM_brotherhood_short" text="Predoni" />
+    <string id="TAOM_brotherhood_short" text="{.MP}Predoni" />
 
     <string id="TAOM_brotherhood_text" text="I Predoni Dunlandiani sono il residuo spezzato di un clan di collina che un tempo dimorava nelle valli ora governate dai Rohirrim. I loro nonni furono cacciati da terre fertili verso le alture rocciose, e hanno alimentato quell'amarezza trasformandola in una filosofia da predone: tutto ciò che viene preso da un meridionale o da un uomo del re è semplicemente il ripristino di quanto fu rubato. In pratica sono briganti, ma pericolosi, che conoscono ogni sentiero di capre attraverso le colline." />
 
-    <string id="TAOM_hidden_hand_name" text="I Servitori della Bocca" />
+    <string id="TAOM_hidden_hand_name" text="{.MP}Servitori della Bocca" />
 
-    <string id="TAOM_hidden_hand_short" text="Servitori" />
+    <string id="TAOM_hidden_hand_short" text="{.MP}Servitori" />
 
     <string id="TAOM_hidden_hand_text" text="I Servitori della Bocca sono gli Occhi di Barad-dûr che operano oltre il Cancello Nero — informatori, esecutori e spie infiltrati tra i popoli che confinano con Mordor. Dove gli eserciti di Sauron non possono ancora giungere, questi agenti raccolgono tributi e mettono a tacere il dissenso. Operano attraverso corruzione, ricatto e omicidi silenziosi, assicurandosi che nessuna cospirazione contro il Signore Oscuro metta radici prima di essere sradicata e distrutta." />
 
-    <string id="TAOM_lakepike_name" text="Predoni del Lago Lungo" />
+    <string id="TAOM_lakepike_name" text="{.MP}Predoni del Lago Lungo" />
 
-    <string id="TAOM_lakepike_short" text="Predoni" />
+    <string id="TAOM_lakepike_short" text="{.MP}Predoni" />
 
     <string id="TAOM_lakepike_text" text="I Predoni del Lago Lungo vivono tra i canneti e i vecchi moli marcescenti delle rive in ombra del Lago Lungo, lontano dalle luci rispettabili di Esgaroth. Si guadagnano da vivere attirando chiatte su bassifondi nascosti con false lanterne, poi spogliando il carico e vendendolo attraverso ricettatori nella città stessa. Nonostante gli sforzi del Maestro di Pontelagopoli e dei mercanti di Dale, i Predoni hanno troppi amici nelle taverne del porto per essere facilmente cacciati via." />
 
-    <string id="TAOM_embers_name" text="Culto dell'Occhio Senza Palpebre" />
+    <string id="TAOM_embers_name" text="{.MS}Culto dell'Occhio Senza Palpebre" />
 
-    <string id="TAOM_embers_short" text="Culto dell'Occhio" />
+    <string id="TAOM_embers_short" text="{.MS}Culto dell'Occhio" />
 
     <string id="TAOM_embers_text" text="Il Culto dell'Occhio Senza Palpebre è una società segreta radicata nella tradizione dei Númenóreani Neri, che venera Sauron come un dio-re che riporterà i suoi fedeli alla gloria quando risorgerà. Reclutano tra i diseredati di Dunland e gli angoli dimenticati del reame, promettendo favore divino e potere terreno. In verità, i loro capi rispondono ad agenti di Barad-dûr, e la loro struttura a cellule li rende quasi impossibili da sradicare per la giustizia di qualsiasi signore." />
 
-    <string id="TAOM_jawwal_name" text="I Cavalieri delle Sabbie" />
+    <string id="TAOM_jawwal_name" text="{.MP}Cavalieri delle Sabbie" />
 
-    <string id="TAOM_jawwal_short" text="Cavalieri delle Sabbie" />
+    <string id="TAOM_jawwal_short" text="{.MP}Cavalieri delle Sabbie" />
 
     <string id="TAOM_jawwal_text" text="I Cavalieri delle Sabbie sono i clan nomadi del deserto dell'interno profondo di Harad, maestri delle distese senz'acqua tra gli Ephel Dúath e il lontano mare meridionale. Percorrono rotte note solo a loro, esigendo tributo da qualsiasi carovana abbastanza audace da attraversare il loro territorio. I signori sedentari del Vicino Harad li trattano come un fastidio; i Cavalieri delle Sabbie considerano i signori sedentari ladri che hanno rubato ciò che il deserto aveva già dato liberamente." />
 
-    <string id="TAOM_karakhuzaits_name" text="Gli Esterlings Selvaggi" />
+    <string id="TAOM_karakhuzaits_name" text="{.MP}Esterlings Selvaggi" />
 
-    <string id="TAOM_karakhuzaits_short" text="Selvaggi" />
+    <string id="TAOM_karakhuzaits_short" text="{.MP}Selvaggi" />
 
     <string id="TAOM_karakhuzaits_text" text="Gli Esterlings Selvaggi sono i clan indomiti delle steppe del Mare di Rhûn, che hanno resistito all'autorità di ogni signore che ha cercato di sottometterli — capoclan di Rhûn, luogotenente di Mordor e Re di Dale allo stesso modo. Vagano attraverso le praterie a est del Celduin, radunando cavalli, razziando greggi e riscuotendo pedaggi da qualsiasi carovana abbastanza folle da attraversare la loro steppa senza scorta armata." />
 
-    <string id="TAOM_forest_people_name" text="I Drúedain" />
+    <string id="TAOM_forest_people_name" text="{.MP}Drúedain" />
 
-    <string id="TAOM_forest_people_short" text="Wose" />
+    <string id="TAOM_forest_people_short" text="{.MP}Wose" />
 
     <string id="TAOM_forest_people_text" text="I Drúedain, conosciuti dagli Uomini come Wose o gli Uomini Selvaggi dei Boschi, sono un popolo antico che dimora nella foresta profonda di Drúadan e nelle valli nascoste delle Montagne Bianche. Dissodano il terreno con il fuoco, coltivano ciò di cui hanno bisogno sul suolo ricco di cenere e si spostano quando la terra è esaurita — un modo di vivere che i popoli sedentari della Terra di Mezzo non hanno mai compreso e mai si sono preoccupati di farlo. I Drúedain non vogliono signori, non pagano tasse e chiedono solo di essere lasciati al silenzio della foresta." />
 
-    <string id="TAOM_eleftheroi_name" text="I Beorniani" />
+    <string id="TAOM_eleftheroi_name" text="{.MP}Beorniani" />
 
-    <string id="TAOM_eleftheroi_short" text="Beorniani" />
+    <string id="TAOM_eleftheroi_short" text="{.MP}Beorniani" />
 
     <string id="TAOM_eleftheroi_text" text="I Beorniani sono i grandi uomini dei boschi che dimorano nella valle dell'Anduin tra le Montagne Nebbiose e Bosco Atro, guidati dai mutapelle della stirpe di Beorn. Non permettono a nessun Orco di attraversare il loro territorio, riscuotono un pedaggio al Guado di Carrock per finanziare la loro guardia e non rispondono a nessun re della Terra di Mezzo. Sebbene commercino e parlino con Elfi e Nani, qualsiasi esercito che marci attraverso la loro foresta senza permesso scoprirà che i Beorniani hanno denti molto grandi." />
 
@@ -2103,7 +2075,7 @@
 
     <string id="taom_career_grp_wolfskin_hunter_t3_b" text="Maestro del Grande Branco" />
 
-    <string id="taom_bandit_dunland_name" text="Predoni di Dunland" />
+    <string id="taom_bandit_dunland_name" text="{.MP}Predoni di Dunland" />
 
     <string id="taom_bandit_dunland_m1" text="Caradoc" />
 
@@ -2135,7 +2107,7 @@
 
     <string id="taom_bandit_dunland_f5" text="Olwen" />
 
-    <string id="taom_bandit_rhun_name" text="Predoni di Rhûn" />
+    <string id="taom_bandit_rhun_name" text="{.MP}Predoni di Rhûn" />
 
     <string id="taom_bandit_rhun_m1" text="Khamûl" />
 
@@ -2167,7 +2139,7 @@
 
     <string id="taom_bandit_rhun_f5" text="Sangela" />
 
-    <string id="taom_bandit_harad_name" text="Predoni Haradrim" />
+    <string id="taom_bandit_harad_name" text="{.MP}Predoni Haradrim" />
 
     <string id="taom_bandit_harad_m1" text="Suladân" />
 
@@ -2199,7 +2171,7 @@
 
     <string id="taom_bandit_harad_f5" text="Mûzana" />
 
-    <string id="taom_bandit_gundabad_name" text="Predoni Orcheschi di Gundabad" />
+    <string id="taom_bandit_gundabad_name" text="{.MP}Predoni Orcheschi di Gundabad" />
 
     <string id="taom_bandit_gundabad_m1" text="Bolg" />
 
@@ -2231,7 +2203,7 @@
 
     <string id="taom_bandit_gundabad_f5" text="Narzga" />
 
-    <string id="taom_bandit_umbar_name" text="Corsari di Umbar" />
+    <string id="taom_bandit_umbar_name" text="{.MP}Corsari di Umbar" />
 
     <string id="taom_bandit_umbar_m1" text="Castamir" />
 
@@ -2263,7 +2235,7 @@
 
     <string id="taom_bandit_umbar_f5" text="Inzilbêth" />
 
-    <string id="taom_bandit_gondor_name" text="Soldati di Gondor" />
+    <string id="taom_bandit_gondor_name" text="{.MP}Soldati di Gondor" />
 
     <string id="taom_bandit_gondor_m1" text="Bergil" />
 
@@ -2295,7 +2267,7 @@
 
     <string id="taom_bandit_gondor_f5" text="Anwen" />
 
-    <string id="taom_bandit_erebor_name" text="Blacklocks" />
+    <string id="taom_bandit_erebor_name" text="{.MP}Blacklocks" />
 
     <string id="taom_bandit_erebor_m1" text="Nargûm" />
 
@@ -2327,7 +2299,7 @@
 
     <string id="taom_bandit_erebor_f5" text="Frida" />
 
-    <string id="taom_bandit_mirkwood_name" text="Inseguitori di Bosco Atro" />
+    <string id="taom_bandit_mirkwood_name" text="{.MP}Inseguitori di Bosco Atro" />
 
     <string id="taom_bandit_mirkwood_m1" text="Faeglir" />
 
@@ -3935,40 +3907,6 @@
 
     <string id="taom_str_player_mother_name.goblin" text="Borlia" />
 
-    <string id="taom_bandit_goblin_name" text="Razziatori Goblin" />
-
-    <string id="taom_bandit_goblin_m1" text="Bolg" />
-
-    <string id="taom_bandit_goblin_m2" text="Yazneg" />
-
-    <string id="taom_bandit_goblin_m3" text="Fimbul" />
-
-    <string id="taom_bandit_goblin_m4" text="Narzug" />
-
-    <string id="taom_bandit_goblin_m5" text="Gorbag" />
-
-    <string id="taom_bandit_goblin_m6" text="Mauhûr" />
-
-    <string id="taom_bandit_goblin_m7" text="Snaga" />
-
-    <string id="taom_bandit_goblin_m8" text="Ufthak" />
-
-    <string id="taom_bandit_goblin_m9" text="Radbug" />
-
-    <string id="taom_bandit_goblin_m10" text="Lugdush" />
-
-    <string id="taom_bandit_goblin_f1" text="Skarra" />
-
-    <string id="taom_bandit_goblin_f2" text="Vorga" />
-
-    <string id="taom_bandit_goblin_f3" text="Mazra" />
-
-    <string id="taom_bandit_goblin_f4" text="Grishta" />
-
-    <string id="taom_bandit_goblin_f5" text="Narzga" />
-
-    <string id="taom_hideout_desc_goblin" text="Sotto le rocce dell'Alto Passo trovi una tana fetida di goblin scavata in profondità nella roccia nuda." />
-
     <string id="taom_str_faction_official.mistymountainorcs" text="un capotribù delle Montagne Nebbiose" />
 
     <string id="taom_str_faction_official.mistymountainorcs_f" text="una capotribù delle Montagne Nebbiose" />
@@ -3998,40 +3936,6 @@
     <string id="taom_str_player_father_name.mistymountainorcs" text="Narzuk" />
 
     <string id="taom_str_player_mother_name.mistymountainorcs" text="Borlia" />
-
-    <string id="taom_bandit_mistymountainorcs_name" text="Predoni Orcheschi" />
-
-    <string id="taom_bandit_mistymountainorcs_m1" text="Bolg" />
-
-    <string id="taom_bandit_mistymountainorcs_m2" text="Yazneg" />
-
-    <string id="taom_bandit_mistymountainorcs_m3" text="Fimbul" />
-
-    <string id="taom_bandit_mistymountainorcs_m4" text="Narzug" />
-
-    <string id="taom_bandit_mistymountainorcs_m5" text="Gorbag" />
-
-    <string id="taom_bandit_mistymountainorcs_m6" text="Mauhûr" />
-
-    <string id="taom_bandit_mistymountainorcs_m7" text="Snaga" />
-
-    <string id="taom_bandit_mistymountainorcs_m8" text="Ufthak" />
-
-    <string id="taom_bandit_mistymountainorcs_m9" text="Radbug" />
-
-    <string id="taom_bandit_mistymountainorcs_m10" text="Lugdush" />
-
-    <string id="taom_bandit_mistymountainorcs_f1" text="Skarra" />
-
-    <string id="taom_bandit_mistymountainorcs_f2" text="Vorga" />
-
-    <string id="taom_bandit_mistymountainorcs_f3" text="Mazra" />
-
-    <string id="taom_bandit_mistymountainorcs_f4" text="Grishta" />
-
-    <string id="taom_bandit_mistymountainorcs_f5" text="Narzga" />
-
-    <string id="taom_hideout_desc_mistymountainorcs" text="Sotto le rocce delle Montagne Nebbiose trovi una tana fetida di orchi scavata nella roccia nuda." />
 
     <string id="taom_bld_stall_title" text="TAOM: il caricamento dell'ultima battaglia potrebbe non essere terminato" />
 
@@ -5227,7 +5131,7 @@
 
     <string id="taom_oob_autoassign_none" text="Nessun eroe è adatto a un posto di capitano libero." />
 
-    <string id="taom_bandit_mirkwood_spiders_name" text="Ragni di Bosco Atro" />
+    <string id="taom_bandit_mirkwood_spiders_name" text="{.MP}Ragni di Bosco Atro" />
 
     <string id="taom_spider_brood_forest_name" text="Ragno Gigante" />
 
@@ -5235,7 +5139,7 @@
 
     <string id="taom_spider_brood_pale_name" text="Madre della Covata Pallida" />
 
-    <string id="taom_bandit_wild_trolls_name" text="Troll Selvatici" />
+    <string id="taom_bandit_wild_trolls_name" text="{.MP}Troll Selvatici" />
 
     <string id="taom_troll_bandit_cave_name" text="Troll delle Caverne" />
 
@@ -6148,9 +6052,9 @@
 
     <string id="taom_fwatch_wait_site" text="{SCOUT} is riding to look over {SETTLEMENT}." />
 
-    <string id="taom_namegiving_lore_minas_ithil" text="Minas Ithil" />
+    <string id="taom_namegiving_lore_minas_ithil" text="{.FN}Minas Ithil" />
 
-    <string id="taom_namegiving_lore_amon_lanc" text="Amon Lanc" />
+    <string id="taom_namegiving_lore_amon_lanc" text="{.FN}Amon Lanc" />
 
     <string id="taom_namegiving_lore_deadmens_dike" text="Deadmen's Dike" />
 
@@ -6599,7 +6503,6 @@
 
     <string id="taom_camp_done_morale" text="The long work wears on the men (morale -{N})." />
 
-
     <string id="taom_camp_done_none" text="The men return empty-handed." />
 
     <string id="taom_camp_done_timber" text="The woodcutters return with {N} hardwood." />
@@ -6622,7 +6525,6 @@
 
     <string id="taom_camp_start_settlement" text="the party stands inside a settlement." />
 
-
     <string id="taom_camp_start_moving" text="the party is on the move." />
 
     <string id="taom_camp_start_external" text="something nearby forbids a camp here." />
@@ -6630,7 +6532,6 @@
     <string id="taom_camp_start_other" text="a camp cannot be pitched here." />
 
     <string id="taom_camp_start_blocked" text="Your campaign begins without a camp: {REASON}" />
-
 
     <string id="taom_camp_block_off" text="Camp work is off while field camps are disabled in the mod options." />
 
@@ -6672,7 +6573,6 @@
     <string id="taom_ns_screen_header" text="Give Men" />
 
     <string id="taom_ns_gift_notice" text="{SETTLEMENT} takes in the {COUNT} {?IS_PLURAL}people{?}person{\?} you gave." />
-
 
     <string id="taom_ns_roguery_notice" text="Dealing in prisoners teaches you something of the trade (+{XP} {SKILL_NAME} experience)." />
 
@@ -6737,6 +6637,78 @@
     <string id="taom_mh_mcm_hide_locked" text="Hide Locked Items from Smelting" />
 
     <string id="taom_mh_mcm_hide_locked_hint" text="Weapons you locked in the inventory no longer appear in the smithy's smelting list, so they cannot be smelted by accident. Unlock one in the inventory to smelt it. A weapon you lock inside the smithy leaves the list at your next smelt or tab switch. No restart. Default: on." />
+
+    <string id="taom_round_drink_erebor" text="deep-cellar ale" />
+
+    <string id="taom_round_drink_rivendell" text="valley wine" />
+
+    <string id="taom_round_drink_mirkwood" text="Dorwinion wine" />
+
+    <string id="taom_round_drink_lothlorien" text="golden cordial" />
+
+    <string id="taom_round_drink_lindon" text="harbour wine" />
+
+    <string id="taom_round_drink_isengard" text="sour black ale" />
+
+    <string id="taom_round_drink_gundabad" text="smoky grog" />
+
+    <string id="taom_round_drink_umbar" text="spiced coast wine" />
+
+    <string id="taom_round_drink_dolguldur" text="bitter dregs" />
+
+    <string id="taom_round_drink_gondor" text="Belfalas wine" />
+
+    <string id="taom_round_drink_mordor" text="black ale" />
+
+    <string id="taom_round_drink_shaghana" text="date wine" />
+
+    <string id="taom_round_drink_abanissa" text="palm wine" />
+
+    <string id="taom_round_drink_goblin" text="cave brew" />
+
+    <string id="taom_round_drink_mistymountainorcs" text="stonewater brew" />
+
+    <string id="taom_round_drink_bluecraig" text="craig brew" />
+
+    <string id="taom_round_drink_arthedain" text="hearth ale" />
+
+    <string id="taom_round_drink_cardolan" text="barrowdown ale" />
+
+    <string id="taom_round_drink_rhudaur" text="hill ale" />
+
+    <string id="taom_round_drink_empire" text="heather ale" />
+
+    <string id="taom_round_drink_vlandia" text="honey mead" />
+
+    <string id="taom_round_drink_battania" text="spiced wine" />
+
+    <string id="taom_round_drink_khuzait" text="steppe brew" />
+
+    <string id="taom_round_drink_aserai" text="oasis wine" />
+
+    <string id="taom_round_drink_sturgia" text="dale ale" />
+
+    <string id="taom_round_party_notice" text="You stand a round of {DRINK} for your company. Good cheer goes round (recent events morale +{MORALE})." />
+
+    <string id="taom_round_house_notice" text="You stand a round of {DRINK} for the whole house. Word of it will spread." />
+
+    <string id="taom_round_drink_default" text="ale" />
+
+    <string id="taom_round_reveal_done" text="Listen, then. Travellers have talked of little else but these holds all season, and I will tell you where each one lies." />
+
+    <string id="taom_round_reveal_war" text="Your realm is at war with the one who holds this town. I will say nothing of the roads while the swords are out." />
+
+    <string id="taom_round_reveal_cold" text="The ones who hold this town do not know you well enough yet. I keep my talk of the roads for friends." />
+
+    <string id="taom_round_reveal_nothing" text="I have no more news of the holds near here. You know all that I know." />
+
+    <string id="taom_round_party" text="Stand a round for my whole company ({PRICE}{GOLD_ICON})." />
+
+    <string id="taom_round_house" text="A round for everyone in the house, on me ({PRICE}{GOLD_ICON})." />
+
+    <string id="taom_round_cap" text="Enough rounds have been poured for one day." />
+
+    <string id="taom_round_xp_notice" text="Standing a round teaches you a little about winning a room (+{XP} {SKILL_NAME} experience)." />
 
   </strings>
 

@@ -3695,40 +3695,6 @@
 
     <string id="taom_str_player_mother_name.goblin" text="ボルリア" />
 
-    <string id="taom_bandit_goblin_name" text="ゴブリン略奪者" />
-
-    <string id="taom_bandit_goblin_m1" text="ボルグ" />
-
-    <string id="taom_bandit_goblin_m2" text="ヤズネグ" />
-
-    <string id="taom_bandit_goblin_m3" text="フィンブル" />
-
-    <string id="taom_bandit_goblin_m4" text="ナルズグ" />
-
-    <string id="taom_bandit_goblin_m5" text="ゴルバグ" />
-
-    <string id="taom_bandit_goblin_m6" text="マウフール" />
-
-    <string id="taom_bandit_goblin_m7" text="スナガ" />
-
-    <string id="taom_bandit_goblin_m8" text="ウフサク" />
-
-    <string id="taom_bandit_goblin_m9" text="ラドブグ" />
-
-    <string id="taom_bandit_goblin_m10" text="ルグドゥシュ" />
-
-    <string id="taom_bandit_goblin_f1" text="スカーラ" />
-
-    <string id="taom_bandit_goblin_f2" text="ヴォルガ" />
-
-    <string id="taom_bandit_goblin_f3" text="マズラ" />
-
-    <string id="taom_bandit_goblin_f4" text="グリシュタ" />
-
-    <string id="taom_bandit_goblin_f5" text="ナルズガ" />
-
-    <string id="taom_hideout_desc_goblin" text="高い峠の岩山の下に、むき出しの岩に深く掘られたゴブリンの悪臭漂う巣窟を発見した。" />
-
     <string id="taom_str_faction_official.mistymountainorcs" text="霧ふり山脈の族長" />
 
     <string id="taom_str_faction_official.mistymountainorcs_f" text="霧ふり山脈の女族長" />
@@ -3758,40 +3724,6 @@
     <string id="taom_str_player_father_name.mistymountainorcs" text="ナルズク" />
 
     <string id="taom_str_player_mother_name.mistymountainorcs" text="ボルリア" />
-
-    <string id="taom_bandit_mistymountainorcs_name" text="オークの略奪者" />
-
-    <string id="taom_bandit_mistymountainorcs_m1" text="ボルグ" />
-
-    <string id="taom_bandit_mistymountainorcs_m2" text="ヤズネグ" />
-
-    <string id="taom_bandit_mistymountainorcs_m3" text="フィンブル" />
-
-    <string id="taom_bandit_mistymountainorcs_m4" text="ナルズグ" />
-
-    <string id="taom_bandit_mistymountainorcs_m5" text="ゴルバグ" />
-
-    <string id="taom_bandit_mistymountainorcs_m6" text="マウフール" />
-
-    <string id="taom_bandit_mistymountainorcs_m7" text="スナガ" />
-
-    <string id="taom_bandit_mistymountainorcs_m8" text="ウフサク" />
-
-    <string id="taom_bandit_mistymountainorcs_m9" text="ラドバグ" />
-
-    <string id="taom_bandit_mistymountainorcs_m10" text="ラグドゥシュ" />
-
-    <string id="taom_bandit_mistymountainorcs_f1" text="スカラ" />
-
-    <string id="taom_bandit_mistymountainorcs_f2" text="ヴォルガ" />
-
-    <string id="taom_bandit_mistymountainorcs_f3" text="マズラ" />
-
-    <string id="taom_bandit_mistymountainorcs_f4" text="グリシュタ" />
-
-    <string id="taom_bandit_mistymountainorcs_f5" text="ナルズガ" />
-
-    <string id="taom_hideout_desc_mistymountainorcs" text="霧ふり山脈の岩山の下に、むき出しの岩に掘られたオークの穢れた巣窟を発見した。" />
 
     <string id="taom_bld_stall_title" text="TAOM: 前回の戦闘読み込みが完了していない可能性があります" />
 
@@ -6359,7 +6291,6 @@
 
     <string id="taom_camp_done_morale" text="The long work wears on the men (morale -{N})." />
 
-
     <string id="taom_camp_done_none" text="The men return empty-handed." />
 
     <string id="taom_camp_done_timber" text="The woodcutters return with {N} hardwood." />
@@ -6382,7 +6313,6 @@
 
     <string id="taom_camp_start_settlement" text="the party stands inside a settlement." />
 
-
     <string id="taom_camp_start_moving" text="the party is on the move." />
 
     <string id="taom_camp_start_external" text="something nearby forbids a camp here." />
@@ -6390,7 +6320,6 @@
     <string id="taom_camp_start_other" text="a camp cannot be pitched here." />
 
     <string id="taom_camp_start_blocked" text="Your campaign begins without a camp: {REASON}" />
-
 
     <string id="taom_camp_block_off" text="Camp work is off while field camps are disabled in the mod options." />
 
@@ -6432,7 +6361,6 @@
     <string id="taom_ns_screen_header" text="Give Men" />
 
     <string id="taom_ns_gift_notice" text="{SETTLEMENT} takes in the {COUNT} {?IS_PLURAL}people{?}person{\?} you gave." />
-
 
     <string id="taom_ns_roguery_notice" text="Dealing in prisoners teaches you something of the trade (+{XP} {SKILL_NAME} experience)." />
 
@@ -6497,6 +6425,78 @@
     <string id="taom_mh_mcm_hide_locked" text="Hide Locked Items from Smelting" />
 
     <string id="taom_mh_mcm_hide_locked_hint" text="Weapons you locked in the inventory no longer appear in the smithy's smelting list, so they cannot be smelted by accident. Unlock one in the inventory to smelt it. A weapon you lock inside the smithy leaves the list at your next smelt or tab switch. No restart. Default: on." />
+
+    <string id="taom_round_drink_erebor" text="deep-cellar ale" />
+
+    <string id="taom_round_drink_rivendell" text="valley wine" />
+
+    <string id="taom_round_drink_mirkwood" text="Dorwinion wine" />
+
+    <string id="taom_round_drink_lothlorien" text="golden cordial" />
+
+    <string id="taom_round_drink_lindon" text="harbour wine" />
+
+    <string id="taom_round_drink_isengard" text="sour black ale" />
+
+    <string id="taom_round_drink_gundabad" text="smoky grog" />
+
+    <string id="taom_round_drink_umbar" text="spiced coast wine" />
+
+    <string id="taom_round_drink_dolguldur" text="bitter dregs" />
+
+    <string id="taom_round_drink_gondor" text="Belfalas wine" />
+
+    <string id="taom_round_drink_mordor" text="black ale" />
+
+    <string id="taom_round_drink_shaghana" text="date wine" />
+
+    <string id="taom_round_drink_abanissa" text="palm wine" />
+
+    <string id="taom_round_drink_goblin" text="cave brew" />
+
+    <string id="taom_round_drink_mistymountainorcs" text="stonewater brew" />
+
+    <string id="taom_round_drink_bluecraig" text="craig brew" />
+
+    <string id="taom_round_drink_arthedain" text="hearth ale" />
+
+    <string id="taom_round_drink_cardolan" text="barrowdown ale" />
+
+    <string id="taom_round_drink_rhudaur" text="hill ale" />
+
+    <string id="taom_round_drink_empire" text="heather ale" />
+
+    <string id="taom_round_drink_vlandia" text="honey mead" />
+
+    <string id="taom_round_drink_battania" text="spiced wine" />
+
+    <string id="taom_round_drink_khuzait" text="steppe brew" />
+
+    <string id="taom_round_drink_aserai" text="oasis wine" />
+
+    <string id="taom_round_drink_sturgia" text="dale ale" />
+
+    <string id="taom_round_party_notice" text="You stand a round of {DRINK} for your company. Good cheer goes round (recent events morale +{MORALE})." />
+
+    <string id="taom_round_house_notice" text="You stand a round of {DRINK} for the whole house. Word of it will spread." />
+
+    <string id="taom_round_drink_default" text="ale" />
+
+    <string id="taom_round_reveal_done" text="Listen, then. Travellers have talked of little else but these holds all season, and I will tell you where each one lies." />
+
+    <string id="taom_round_reveal_war" text="Your realm is at war with the one who holds this town. I will say nothing of the roads while the swords are out." />
+
+    <string id="taom_round_reveal_cold" text="The ones who hold this town do not know you well enough yet. I keep my talk of the roads for friends." />
+
+    <string id="taom_round_reveal_nothing" text="I have no more news of the holds near here. You know all that I know." />
+
+    <string id="taom_round_party" text="Stand a round for my whole company ({PRICE}{GOLD_ICON})." />
+
+    <string id="taom_round_house" text="A round for everyone in the house, on me ({PRICE}{GOLD_ICON})." />
+
+    <string id="taom_round_cap" text="Enough rounds have been poured for one day." />
+
+    <string id="taom_round_xp_notice" text="Standing a round teaches you a little about winning a room (+{XP} {SKILL_NAME} experience)." />
 
   </strings>
 

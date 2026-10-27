@@ -20,12 +20,14 @@ public sealed class NotableServicesFixture
 {
     public const string SpeakerId = "notable1";
     public const string SettlementId = "village_1";
+    public const string PlayerId = "player1";
 
     public NotableServicesConfig Config { get; } = new();
     public INotableServicesConfigProvider ConfigProvider { get; } = Substitute.For<INotableServicesConfigProvider>();
     public INotableServicesSettingsProvider Settings { get; } = Substitute.For<INotableServicesSettingsProvider>();
     public INotableServicesAdapter Adapter { get; } = Substitute.For<INotableServicesAdapter>();
     public IMapRevealAdapter Reveal { get; } = Substitute.For<IMapRevealAdapter>();
+    public IHeroSkillXpAdapter Skills { get; } = Substitute.For<IHeroSkillXpAdapter>();
     public IAlignmentService Alignment { get; } = Substitute.For<IAlignmentService>();
     public IRelationGrantService Grants { get; } = Substitute.For<IRelationGrantService>();
     public IMessengerConversationState Messenger { get; } = Substitute.For<IMessengerConversationState>();
@@ -70,7 +72,9 @@ public sealed class NotableServicesFixture
         Adapter.PayNotable(Arg.Any<string>(), Arg.Any<int>()).Returns(true);
         Adapter.UnmetNotables(SettlementId).Returns(new List<string> { "notable2", "notable3" });
         Adapter.PlayerHasMenToGive().Returns(true);
-        Adapter.MapDiagonal.Returns(1000f);
+        Reveal.MapDiagonal.Returns(1000f);
+        Adapter.PlayerHeroId.Returns(PlayerId);
+        Skills.AddSkillXpLanded(PlayerId, Arg.Any<string>(), Arg.Any<float>()).Returns(call => call.Arg<float>());
         Adapter.When(a => a.RunAfterConversation(Arg.Any<Action>())).Do(c => Queued = c.Arg<Action>());
         Adapter.When(a => a.OpenGiftScreen(Arg.Any<string>(), Arg.Any<int>(), Arg.Any<Func<GiftTransfer, bool>>(), Arg.Any<Func<GiftTally, bool>>(), Arg.Any<Action<GiftTally>>()))
             .Do(c =>
@@ -89,7 +93,7 @@ public sealed class NotableServicesFixture
         Alignment.ResolveSide("", "c_neutral").Returns(FactionSide.Neutral);
         Grants.Grant(Arg.Any<string>(), Arg.Any<int>(), Arg.Any<string>()).Returns(call => call.ArgAt<int>(1));
 
-        Service = new NotableServicesService(Adapter, Reveal, Alignment, Grants, Settings, ConfigProvider, Messenger, Coop, Server, Logger);
+        Service = new NotableServicesService(Adapter, new HoldsRevealService(Reveal, ConfigProvider, Logger), Alignment, Grants, Skills, Settings, ConfigProvider, Messenger, Coop, Server, Logger);
     }
 
     /// <summary>The player's side of a troop or prisoner: a faction-less pair with the culture.</summary>

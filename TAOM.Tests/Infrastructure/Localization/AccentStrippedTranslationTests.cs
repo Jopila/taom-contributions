@@ -31,6 +31,19 @@ namespace TAOM.Tests.Infrastructure.Localization;
 [TestClass]
 public class AccentStrippedTranslationTests
 {
+    private static readonly Regex LeadingTags = new Regex(@"^(?:\{\.[A-Za-z]+\})+", RegexOptions.Compiled);
+
+    /// <summary>
+    /// True when the row is the English with its diacritics stripped but not the English itself. A leading grammar
+    /// tag (#1023) is not part of the translation, so it is stripped before both comparisons.
+    /// </summary>
+    internal static bool IsStrippedEnglish(string rowValue, string english)
+    {
+        var value = LeadingTags.Replace(rowValue, "");
+        if (value == english) return false;                         // untranslated, and staged as such
+        return string.Equals(Fold(value), Fold(english), StringComparison.Ordinal);
+    }
+
     /// <summary>
     /// Rows that already shipped in this state before the check existed. Each is a real, fixable
     /// defect; the list exists so the check can be added without a repair pass, and it must only
@@ -102,8 +115,7 @@ public class AccentStrippedTranslationTests
             foreach (var kv in Rows(file))
             {
                 if (!english.TryGetValue(kv.Key, out var eng)) continue;
-                if (kv.Value == eng) continue;                      // untranslated, and staged as such
-                if (!string.Equals(Fold(kv.Value), Fold(eng), StringComparison.Ordinal)) continue;
+                if (!IsStrippedEnglish(kv.Value, eng)) continue;
 
                 if (Baseline.Contains(kv.Key)) { stillBaselined.Add(kv.Key); continue; }
                 offenders.Add($"  {lang} {kv.Key}: \"{kv.Value}\" against English \"{eng}\"");
@@ -111,7 +123,8 @@ public class AccentStrippedTranslationTests
         }
 
         Assert.AreEqual(0, offenders.Count,
-            "These language rows are the English text with its diacritics stripped. The translator's\n" +
+            "These language rows are the English text with its diacritics stripped (a leading grammar tag is\n" +
+            "ignored: it is not part of the translation). The translator's\n" +
             "discovery gate is cur_text == eng_text, so it will never see them again and they ship as\n" +
             "mangled English forever. Copy the registry's bytes into the row, do not retype it.\n" +
             string.Join("\n", offenders));
@@ -120,5 +133,27 @@ public class AccentStrippedTranslationTests
         Assert.AreEqual(0, repaired.Count,
             "These keys are excused in Baseline but no longer need excusing. Remove them; the list\n" +
             "may only ever shrink.\n  " + string.Join("\n  ", repaired));
+    }
+}
+
+[TestClass]
+public class AccentStrippedComparisonTests
+{
+    [TestMethod]
+    public void IsStrippedEnglish_TaggedRowWithTheAccentRemoved_IsCaught()
+    {
+        Assert.IsTrue(AccentStrippedTranslationTests.IsStrippedEnglish("{.NS}Rhun", "Rhûn"));
+    }
+
+    [TestMethod]
+    public void IsStrippedEnglish_TaggedRowEqualToEnglish_IsUntranslatedNotStripped()
+    {
+        Assert.IsFalse(AccentStrippedTranslationTests.IsStrippedEnglish("{.NS}Rhûn", "Rhûn"));
+    }
+
+    [TestMethod]
+    public void IsStrippedEnglish_RealTranslation_IsNotCaught()
+    {
+        Assert.IsFalse(AccentStrippedTranslationTests.IsStrippedEnglish("{.FS}Casa de Bard", "House of Bard"));
     }
 }

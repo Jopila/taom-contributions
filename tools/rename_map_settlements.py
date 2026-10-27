@@ -46,6 +46,7 @@ from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import add_map_villages as amv  # noqa: E402
+import name_tags  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
@@ -152,6 +153,12 @@ def loc_remove(text, sid):
     nl = amv.detect_newline(text)
     pat = _loc_key_re(sid)
     return nl.join(line for line in text.split(nl) if not pat.search(line))
+
+
+def rename_table_ids(table, renames):
+    """Move the grammar-tag table's entries of renamed settlements (tags and pins, BR and IT) to the new ids; returns the count."""
+    prefix = "Settlements.Settlement.name."
+    return name_tags.rename_ids(table, {prefix + r.old: prefix + r.new for r in renames})
 
 
 def rename_json_ids(text, old, new):
@@ -317,6 +324,9 @@ def main():
         print(f"  loc {lang:3}: {len(rn)} key rename(s), {len(rm)} row removal(s)" + ("" if rn or rm else " (nothing to do)"))
     for rel, (_, due) in repo_plan.items():
         print(f"  repo {rel}: {', '.join(r.old + ' -> ' + r.new for r in due)}")
+    table = name_tags.load_table()
+    table_moves = rename_table_ids(json.loads(json.dumps(table)), RENAMES)
+    print(f"  tag table {name_tags.TABLE_PATH.name}: {table_moves} entr(ies) to move to the new ids")
     if not args.apply:
         print("\nDRY RUN: re-run with --apply to write the live files.")
         return 0
@@ -344,6 +354,9 @@ def main():
         for r in due:
             text, _ = rename_json_ids(text, r.old, r.new)
         _write_json(REPO_ROOT / rel, text)
+    if table_moves:
+        rename_table_ids(table, RENAMES)
+        name_tags.TABLE_PATH.write_text(name_tags.dump_table(table), encoding="utf-8")
     print(f"\nApplied: {len(renames)} rename(s) and {len(removals)} removal(s) in settlements.xml; loc files "
           f"written for {len(written)} of {len(locs)} languages ({', '.join(written) or 'none'}); "
           f"{len(repo_plan)} repo file(s); backups *.bak_{tag}; every written file re-parsed. Run --check.")

@@ -29,6 +29,7 @@ Get new player-facing text into all 12 supported languages (BR, CNs, CNt, DE, FR
 2. `python tools/generate_name_localization_strings.py --apply` (one pass; `--check` and `tools/tests` fail while a source is ahead of its generated file).
 3. A hero, NPC or culture key that two sites share with different English needs its own key first (`EveryNameKey_InTheNameGeneratorsSources_HasOneEnglishDefault`). Heroes' `text=` is saved with the hero, so give **both** sites new keys and retire the old one, or old saves show the other hero's text.
 4. `python tools/translate_with_claude.py --lang <L> --module TAOM --sync-ids --apply`, once per language.
+5. A new kingdom, clan, culture or town name also needs its BR and IT grammar tag: `python tools/generate_name_tags.py --write`, then `python tools/name_tags.py --lang all --apply` ([name-grammar-tags.md](../../../docs/features/name-grammar-tags.md)).
 
 ## Tools
 - `tools/translate_with_claude.py` — 4-tier fallback (override → cache → LLM → English); cache in `tools/translation_cache/<lang>.json` is git-tracked, so re-runs are free. `--provider anthropic` (default, `claude-opus-5`) | `deepseek` | `openrouter`; the last two need no SDK and read `DEEPSEEK_API_KEY` / `OPENROUTER_API_KEY`. `--module TAOM` works with no game installed; `--module all` reads TAOM_Map and Armory from the install, so it needs `$BANNERLORD_GAME_DIR` and exits 2 without it.

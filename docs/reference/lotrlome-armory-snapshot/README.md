@@ -737,6 +737,30 @@ syllable + "орной"; the row and the RU cache now read "Чернокорно
 English), so after a reinstall reset it to its English first, then replay; `LanguageTextIntegrityTests` keeps the
 damage out of the cache, so a replay cannot bring it back.
 
+### ⚠️ APPLIED EDIT: live language_data.xml, Native's text processor (2026-10-26, #1026)
+
+**Live edits to 15 language files in `TAOM_Map` and `LOTRLOME_Armory` that a reinstall WILL revert.** Originals:
+`E:\LOTRAOMAssets\_loc_backup_20261026\` (`TAOM_Map\<L>\`, `LOTRLOME_Armory\<L>\` and `LOTRLOME_Armory\root\`; the tree
+omits the `ModuleData\Languages` levels). Each file had a `name` and no `text_processor`, which resets the language's
+grammar processor to a default that prints no tokens. One attribute was added to each, `text_processor="TaleWorlds.Localization.TextProcessor.LanguageProcessors.<Lang>TextProcessor"`
+(the value Native declares), before `under_development`; no other byte changed.
+
+| Live file | Class added |
+|---|---|
+| `TAOM_Map/ModuleData/Languages/{DE,FR,IT,PL,RU,SP,TR}/language_data.xml` (7) | German, French, Italian, Polish, Russian, Spanish, Turkish |
+| `LOTRLOME_Armory/ModuleData/Languages/{DE,FR,IT,PL,RU,SP,TR}/language_data.xml` (7) | the same seven |
+| `LOTRLOME_Armory/ModuleData/Languages/language_data.xml` (1, English) | English |
+
+The count is 15: the 14 per-language files plus the Armory root file. Native declares no processor for BR, CNs, CNt, JP
+or KO, so those files were left as they were.
+
+**Replay:** add the same attribute to each file, or reinstall a package that carries it (the next release must ship
+TAOM_Map and Armory packages with it, see `release-process.md`). **Gates:** before the fix, the pre-fix replay of these
+files printed `FAIL: live language_data.xml files reset the language's text processor (#1026).` with 15 lines of the
+form `<module>/<L>: name='...' text_processor=None, Native declares ...TextProcessor`. Now
+`python tools/check_external_loc_coverage.py` passes (exit 0), `LanguageProcessorTests` passes, and its LiveInstall test
+`LiveTaomMapAndArmoryLanguageData_InstalledNative_CarryTheSameProcessor` guards these files.
+
 ## Snapshot date
 
 2026-10-18: `action_sets.xml` refreshed by a byte copy of the live file after `tools/bind_orc_goblin_locomotion.py

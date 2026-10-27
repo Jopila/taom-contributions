@@ -240,6 +240,16 @@ public class PrefabAttributeNameBindingTests
 
         Assert.AreEqual(0, VisualProblems(
             "<VisualDefinition Name=\"A\" TransitionDuration=\"0.4\" EaseType=\"EaseIn\" EaseFunction=\"Quad\" DelayOnBegin=\"0.1\" />").Count);
+        Assert.AreEqual(0, VisualProblems(
+            "<VisualDefinition Name=\"A\" EaseType=\"EaseOut\" EaseFunction=\"Quint\" />").Count);
+
+        // The loader parses these with Enum.TryParse and no ignoreCase, and keeps Linear/Sine on a miss.
+        var badType = VisualProblems("<VisualDefinition Name=\"A\" EaseType=\"Easeout\" />");
+        Assert.AreEqual(1, badType.Count, string.Join("; ", badType));
+        StringAssert.Contains(badType[0], "Easeout");
+        var badFunction = VisualProblems("<VisualDefinition Name=\"A\" EaseFunction=\"Quintic\" />");
+        Assert.AreEqual(1, badFunction.Count, string.Join("; ", badFunction));
+        StringAssert.Contains(badFunction[0], "Quintic");
     }
 
     [TestMethod]
@@ -398,7 +408,18 @@ public class PrefabAttributeNameBindingTests
                 : name == "State"
                   || PrefabAttributeResolver.ResolveAttribute(typeof(TaleWorlds.GauntletUI.VisualState), name) == AttributeResolution.Settable;
             if (!ok)
+            {
                 result.Problems.Add($"{rel}:{line} <{tag}> {name} is not an attribute the engine reads on a {tag}");
+                continue;
+            }
+
+            // WidgetPrefab.cs:42-51 uses Enum.TryParse without ignoreCase and silently keeps Linear/Sine on a miss.
+            var easeEnum = tag != "VisualDefinition" ? null
+                : name == "EaseType" ? typeof(TaleWorlds.GauntletUI.AnimationInterpolation.Type)
+                : name == "EaseFunction" ? typeof(TaleWorlds.GauntletUI.AnimationInterpolation.Function)
+                : null;
+            if (easeEnum != null && !Enum.IsDefined(easeEnum, attribute.Value))
+                result.Problems.Add($"{rel}:{line} <{tag}> {name}=\"{attribute.Value}\" is not a {easeEnum.Name} name; the loader is case-sensitive and keeps the default");
         }
     }
 

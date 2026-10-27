@@ -21,8 +21,8 @@ No Harmony patch, no GameModel and no save data: one dialog behavior over a serv
 5. **Troops** have no alignment filter.
 6. **Gain** is `min(maxGainPerGift, men x gainPerMan / max(1, 1 + relation / 10))`, granted only when it rounds to at least 1, through `IRelationGrantService`.
 7. **No wait** after a gift.
-8. **Co-op gate:** the Settlement Services single-player predicate, `!IsSessionActive && !ShouldDeferToHost && !IsDedicatedServer && IsAuthority`.
-9. **Shared reveal:** the reveal lives in `IMapRevealAdapter` so a later feature (#901) can reuse it. That feature is not built here.
+8. **Co-op gate:** the Settlement Services single-player predicate, `CoopSessionPolicy.IsSinglePlayerAuthority` (no live session, no deferral to a host, no dedicated server, and an authority).
+9. **Shared reveal:** the reveal's rules live in `HoldsRevealService` and its engine calls in `IMapRevealAdapter`, so the tavern keeper's line ([inn-rounds.md](inn-rounds.md), #901) uses the same ones. The caller decides who may ask and how the price is paid; the service decides the outcome.
 
 ## Architecture
 
@@ -38,7 +38,7 @@ No Harmony patch, no GameModel and no save data: one dialog behavior over a serv
 
 ### Solution Approach
 
-`NotableServicesService` owns every rule over snapshots and ids. `INotableServicesAdapter` is the engine boundary for the speaker, the unmet notables, the purse, the gift screen, the settlement writes, the Roguery experience and the notices. `IMapRevealAdapter` gains `FortificationsAround(settlementId)` (every other town and castle with its distance and tracked flag) and `Track(ids)`; the clan and kingdom reveals share its one marking site. `NotableServicesDialogBehavior` is thin (ADR-002) and built with `new` for every campaign because it keeps the last answers its reply lines read.
+`NotableServicesService` owns every rule over snapshots and ids. `INotableServicesAdapter` is the engine boundary for the speaker, the unmet notables, the purse, the gift screen, the settlement writes, the player hero id and the notices. The Roguery experience goes through the shared `IHeroSkillXpAdapter.AddSkillXpLanded`, which returns the experience that landed. `IMapRevealAdapter` gains `FortificationsAround(settlementId)` (every other town and castle with its distance and tracked flag), `Track(ids)`, `MapDiagonal` and `ShowHoldsMarkedNotice(count)`; the clan and kingdom reveals share its one marking site. `HoldsRevealService` owns the reveal's order: war gives `AtWar`, a relation under `revealMinRelation` gives `Cold`, no candidate gives `NothingNew`, then the caller's payment, the marks and the notice. `NotableServicesService.Reveal` finds the speaker, builds a `RevealAsk` (settlement, war flag, relation) and pays the notable through `PayNotable`. `NotableServicesDialogBehavior` is thin (ADR-002) and built with `new` for every campaign because it keeps the last answers its reply lines read.
 
 ### Component Diagram
 
@@ -48,7 +48,7 @@ notable_services.json -> NotableServicesConfigProvider (validated, cached)
 NotableServicesDialogBehavior -> NotableServicesService (Gain, rules, gate)
 (lines at priority 111)               |
                                       +--> INotableServicesAdapter (snapshot, purse, screen, writes, notices)
-                                      +--> IMapRevealAdapter (FortificationsAround, Track)
+                                      +--> HoldsRevealService --> IMapRevealAdapter (FortificationsAround, Track, MapDiagonal, notice)
                                       +--> IRelationGrantService, IAlignmentService
                                       +--> IMessengerConversationState, ICoopSessionProvider, IDedicatedServerProvider
 ```
@@ -57,7 +57,7 @@ NotableServicesDialogBehavior -> NotableServicesService (Gain, rules, gate)
 
 The three options sit on `hero_main_options` at priority 111 (vanilla is 100). They show for a notable (`Hero.IsNotable`: artisan, gang leader, merchant, rural notable or headman) who is not a preacher and stands in the settlement the main hero is in. War hides only the Give men line: Introduce still works at war, and the pointing-out answers with its war refusal. All three are hidden during a messenger conversation, outside single-player, and with the MCM toggle off.
 
-- **Give men** ("I have men to spare for your people"): hidden at war with the settlement's realm, while any party screen is open, and when the player holds no regular troop or prisoner. The notable answers, the conversation ends, and the "Give Men" party screen opens with both prisoner panels shown. Troops and prisoners move from the player to the settlement. Heroes never move, upgrades are off, nothing is donated to a party, and talking from the screen is refused. At a castle prisoners cannot move. A prisoner the settlement refuses (decision 4) cannot move. Cancel changes nothing. On Done: each troop adds `militiaPerTroop` to the settlement's militia; each prisoner adds `hearthPerPrisoner` to a village's hearth or `prosperityPerPrisoner` to a town's prosperity; the relation gain is granted with the notable; Roguery experience of `rogueryXpPerPrisoner` per prisoner is added; notices show the men taken, the relation earned and the experience earned.
+- **Give men** ("I have men to spare for your people"): hidden at war with the settlement's realm, while any party screen is open, and when the player holds no regular troop or prisoner. The notable answers, the conversation ends, and the "Give Men" party screen opens with both prisoner panels shown. Troops and prisoners move from the player to the settlement. Heroes never move, upgrades are off, nothing is donated to a party, and talking from the screen is refused. At a castle prisoners cannot move. A prisoner the settlement refuses (decision 4) cannot move. Cancel changes nothing. On Done: each troop adds `militiaPerTroop` to the settlement's militia; each prisoner adds `hearthPerPrisoner` to a village's hearth or `prosperityPerPrisoner` to a town's prosperity; the relation gain is granted with the notable; Roguery experience of `rogueryXpPerPrisoner` per prisoner is asked for, and the notice shows the experience that landed after the engine's multipliers (none when none did); other notices show the men taken and the relation earned.
 - **Introduce** ("Introduce me to the other notables here (N denars)"): shown only when at least one other notable of the settlement is unmet. The price is the number of unmet notables times `introducePrice`. The line is greyed with "You don't have enough gold." when the player is short. The consequence pays the speaker (a positive `GiveGoldAction` amount from the player to him), then marks each unmet notable as met. If the payment cannot be made nobody is marked.
 - **Point out the holds** ("Point me to the holds near here (N denars)"): always shown while the lines are, greyed when the player is short. The work runs in the consequence, never in a condition, and the reply reads the stored outcome. At war: refused, with no charge. Relation below `revealMinRelation`: refused, no charge. No new candidates (all within range already marked, or none within range): "nothing more to tell", no charge. Otherwise `revealPrice` is paid to the speaker once and the nearest `revealCount` untracked towns and castles within the bound get the engine's visual tracker mark. The settlement the player stands in is never a candidate.
 
@@ -93,11 +93,12 @@ The gain rounds half away from zero, and a gain under 1 is not sent. At relation
 | File | Purpose |
 |------|---------|
 | `Main/Features/NotableServices/NotableServicesService.cs` | Every rule: gate, gain, transfer filter, introduce, reveal |
+| `Main/Features/NotableServices/HoldsRevealService.cs` | The reveal's rules, shared with the tavern keeper's line |
 | `Main/Features/NotableServices/NotableServicesModule.cs` | Feature module, behavior built with `new` per campaign |
 | `Main/Features/NotableServices/NotableServicesIoC.cs` | DryIoc registration (never the map reveal adapter) |
 | `Main/Features/NotableServices/NotableServicesConfigProvider.cs` | Validated JSON config |
 | `Main/Features/NotableServices/NotableServicesSettingsProvider.cs` | MCM switch over a default of on |
-| `Main/Features/NotableServices/Domain/` | `NotableSnapshot`, `GiftTally`, `GiftTransfer`, `IntroduceQuote`, `RevealOutcome`, `SettlementKind` |
+| `Main/Features/NotableServices/Domain/` | `NotableSnapshot`, `GiftTally`, `GiftTransfer`, `IntroduceQuote`, `RevealAsk`, `RevealOutcome`, `SettlementKind` |
 | `Main/Features/NotableServices/Hooks/` | Dialog behavior, dialog lines, number-carrying texts |
 | `Main/Adapters/INotableServicesAdapter.cs`, `NotableServicesAdapter.cs` | Engine boundary |
 | `Main/Adapters/IMapRevealAdapter.cs`, `MapRevealAdapter.cs`, `RevealCandidate.cs` | Shared reveal, extended |
@@ -105,7 +106,8 @@ The gain rounds half away from zero, and a gain under 1 is not sent. At relation
 
 ## Dependencies
 
-- `IMapRevealAdapter` (Adapters): registered by Hard Questions and only resolved here; a test pins one registration in the whole mod.
+- `IMapRevealAdapter` (Adapters): registered by Hard Questions and only resolved here (by `HoldsRevealService`); a test pins one registration in the whole mod.
+- `IHeroSkillXpAdapter` (Enlistment registers it): the Roguery experience and the amount that landed.
 - `IRelationGrantService` (Relations): the relation grant; the notice shows the change that landed. The relation owner of a clanless notable is the notable himself, so the grant names the speaker.
 - `IAlignmentService` (Execution): resolves the two sides for the prisoner filter.
 - `IMessengerConversationState` (Messengers), `ICoopSessionProvider`, `IDedicatedServerProvider` (Co-op Interop): the gates.
@@ -116,6 +118,7 @@ The gain rounds half away from zero, and a gain under 1 is not sent. At relation
 - `TAOM.Tests/Features/NotableServices/NotableServicesServiceTests.cs`: the gain formula, where the men go, the transfer filter, who offers and when, introduce, reveal and Roguery experience.
 - `NotableServicesConfigProviderTests.cs`: every field against NaN, both infinities, below and above range, the bounds, a missing and an unparseable file, and the shipped JSON.
 - `NotableServicesWiringTests.cs`: the module line, nothing in `IoC.cs` or `SubModule.cs`, one map reveal registration, the container resolving the service, the entry-point size, source pins that no condition writes, the screen's construction and the settings group.
+- `HoldsRevealServiceTests.cs`: the shared reveal's outcomes (war, cold, nothing new, an unpaid price, a free reveal, a fault), its order and its config reads.
 - `NotableServicesBehaviorTests.cs` (`RequiresGame`): the behavior over the real service.
 - A campaign behavior declared by a feature module has its co-op row in [coop-interop.md](coop-interop.md).
 
@@ -125,7 +128,7 @@ The gain rounds half away from zero, and a gain under 1 is not sent. At relation
 2. Prisoners to a village (hearth rises), a town (prosperity rises) and a castle (they cannot be moved).
 3. A Free village refuses orc prisoners. A Mordor village takes Free prisoners.
 4. Cancel the screen: nothing changes.
-5. The relation and XP notices show, and Done refuses a gift above the cap.
+5. The relation notice and the Roguery notice (the experience that landed, which can differ from the ask) show, and Done refuses a gift above the cap.
 6. Introduce: the gold goes to the speaker, and the encyclopedia "Met Before" lists them.
 7. Reveal at peace marks holds. At war or at negative relation it is refused with no charge. Each repeat marks the next nearest holds, and "nothing more to tell" (with no charge) comes only once every hold within reach is marked.
 8. A messenger conversation shows none of the lines.
@@ -137,7 +140,7 @@ The gain rounds half away from zero, and a gain under 1 is not sent. At relation
 
 ## Performance
 
-Each repeat of the pointing-out marks the next 3 holds. From one place the player can reach a median of about 76 towns and castles within the 0.2 bound (counted by a script over the live `settlements.xml`; not re-run for this doc). Every tracked nameplate is drawn on each map frame, outside the vanilla distance cull and the Nameplate Cull patch, and that cost has not been measured. The player removes a mark with the Track toggle on the settlement's encyclopedia page.
+Each repeat of the pointing-out marks the next 3 holds. From one place the player can reach a median of about 76 towns and castles within the 0.2 bound (counted by a script over the live `settlements.xml`; not re-run for this doc). Every tracked nameplate is drawn on each map frame, outside the vanilla distance cull and the Nameplate Cull patch, and that cost has not been measured. The tavern keeper's line ([inn-rounds.md](inn-rounds.md)) sells the same marks through the same service, so a player who uses both reaches that cost sooner, and the unmeasured nameplate cost counts for both. The player removes a mark with the Track toggle on the settlement's encyclopedia page.
 
 ## Known limits
 
@@ -150,6 +153,8 @@ The 12 language files hold English seed rows only. The paid translation is owed 
 
 ## Changelog
 
+- 2026-10-26: the Roguery notice shows the experience that landed, not the ask: `IHeroSkillXpAdapter.AddSkillXpLanded` returns the change in the hero developer's Roguery total (the engine scales the ask by the XP multiplier and the learning rate), the service injects that shared adapter, and the notice is skipped when none landed. `INotableServicesAdapter` lost its own Roguery call and gained `PlayerHeroId`. The single-player gate is now `CoopSessionPolicy.IsSinglePlayerAuthority`.
+- 2026-10-26: the reveal's rules move into `HoldsRevealService` for Inn Rounds (#901); `MapDiagonal` and `ShowHoldsMarkedNotice` move from `INotableServicesAdapter` to `IMapRevealAdapter`. Behaviour and the NotableServices tests are unchanged (the fixture and one assertion read the moved members from the reveal adapter).
 - 2026-10-26: wave 2 review fixes: the relation notice uses the game's own translated relation line, the experience notice rounds like every other amount, the pointing-out walks only towns and castles, and the docs name the per-panel cap and the reveal's nameplate cost.
 - 2026-10-26: wave 1 review fixes: prisoner panels shown (mode Shared), gift hidden under any open party screen and when there is nothing to give, the relation notice shows what landed, the switch is player-local in the co-op fingerprint.
 - 2026-10-24: first version (#899).

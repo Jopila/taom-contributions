@@ -28,6 +28,8 @@ from pathlib import Path
 
 ENV_VAR = "BANNERLORD_GAME_DIR"
 MODULES_ENV_VAR = "BANNERLORD_GAME_MODULES"
+# The install root the tools fall back to when neither variable is set (one machine's path; see game_dir).
+DEFAULT_GAME_ROOT = r"E:\Steam\steamapps\common\Mount & Blade II Bannerlord"
 # The lotraom-assets mirror of LOTRLOME_Armory for the 1.5 line (the v1.4 tree is gone), which
 # the Armory writers keep in step with the live install.
 ASSET_REPO = Path(r"E:\repos\lotraom-assets") / "v1.5" / "LOTRLOME_Armory"

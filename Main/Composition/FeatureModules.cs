@@ -89,5 +89,6 @@ internal static class FeatureModules
         new Features.SmithsMeasure.SmithsMeasureModule(),
         new Features.ManyHammers.ManyHammersModule(),
         new Features.BanditVoices.BanditVoicesModule(),
+        new Features.InnRounds.InnRoundsModule(),
     };
 }

@@ -63,6 +63,23 @@ A lone French `{.dl}` before an untagged TAOM name is not a keep reason. It is a
 
 The test fails on a listed pair that is no longer a TAOM row of a vanilla key: the row is gone, or vanilla no longer declares the id. Restore the row from git (its cache entry is kept), or delete the line if the removal was on purpose.
 
+### Name grammar tags (#1023)
+
+The `gender-tag` pairs of Portuguese and Italian exist because TAOM's translated names carried no grammar tag. Since #1023 phase 1
+they do: a kingdom, minor faction, clan, culture or settlement name in `BR` and `IT` starts with `{.NS}`, `{.FN}`, `{.MS}` or
+another tag the language's text code reads, from `tools/translation_name_tags.json` ([name-grammar-tags.md](name-grammar-tags.md)).
+The tag is added to the language files when they are written; the translation cache and the overrides stay tag-free, and the
+English rows never carry one.
+
+The Italian tags only work once the Italian text processor runs, which is #1026 (TAOM's `language_data.xml` files did not declare the processors); the report of `taom.print_kept_pairs IT` says in its header whether it does.
+
+A kept pair is not deleted by this change. `taom.print_kept_pairs <lang>` renders each pair's vanilla row and TAOM row in game
+with the real names bound and writes both lines to a report; a pair goes only when its vanilla line reads right there. Until
+then every `gender-tag` line of the kept-rows file stays, and so does its row.
+
+A translated name that gains a tag is still compared with its English source without the tag, so a row that is still English is
+still found untranslated, and `translate_with_claude.py` counts grammar tags in its placeholder check, so a translation that drops or adds one is rejected.
+
 `translate_with_claude.py --sync-ids` skips the 8-character vanilla-style ids of `taom_module_strings.xml`, and so do `rebuild_translation_files.py` and `generate_translation_template.py` (one shared rule, `override_ids_to_skip`), unless the language file already holds a row for the id.
 
 ### Component Diagram
@@ -157,6 +174,7 @@ The loader will still run (lines 276-289 do not depend on the category), but its
 
 _Most history is in the repository-root `CHANGELOG.md`; this section is the go-forward home for localization-override changes._
 
+- **2026-10-26 (#1023):** BR and IT names carry the grammar tag (phase 1); the 301 `gender-tag` pairs are kept until the in-game render shows vanilla's rows reading right. See "Name grammar tags" above.
 - **2026-10-26:** a vanilla key TAOM rewords keeps one English row and no language rows, so vanilla's curated translation applies in every other language; 369 pairs where vanilla's row is wrong for TAOM keep theirs (`kept-vanilla-key-rows.txt`). `VanillaKeyOverrideTests` enforces both, and `--sync-ids`, `rebuild_translation_files.py` and `generate_translation_template.py` skip the English-only ids.
 - **2026-10-03 (#706):** the overrides apply only while the text language is English. Before, the 313 registered ids showed English in every language and hid their translated rows. `OverrideLanguageGate` added; one INFO line per switch to a non-English language and one when English returns, none for a session that starts in English.
 
