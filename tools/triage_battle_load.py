@@ -28,10 +28,10 @@ VERDICT classes (the phase the log ENDS on discriminates the hang)
                       that is FALLING means a cold shader cache (a slow load, not a
                       hang); a frozen count is the wedge. If the 1 Hz stream went
                       silent for 30 s or more before the watchdog line (or, when
-                      no watchdog line was written after the last sample, before
-                      the log's last line), the count is frozen whatever the
-                      earlier samples did, and the log cannot separate a slow
-                      compile from a main-thread wedge.
+                      no watchdog line is stamped at or after the last sample,
+                      before the log's last stamped line), the count is frozen
+                      whatever the earlier samples did, and the log cannot
+                      separate a slow compile from a main-thread wedge.
   SCENE               ends at MissionInitialize / BattleSceneSelected /
                       MissionInitializeDone / FinishMissionLoadingBegin /
                       WaitingForSceneLoad — froze during mission construction before any
@@ -341,6 +341,8 @@ class Watchdog:
     # predates them. Absent is absent: never rendered as a fabricated shaders=0.
     tokens: str = ""
     ts: str | None = None
+    # Phase events parsed before this line: breaks a same-second tie with a sample by file order.
+    n_events: int | None = None
 
 
 @dataclass
@@ -498,7 +500,7 @@ def parse_battle_load_log(text: str) -> Timeline:
                 elapsed_seconds=int(m.group(1)),
                 last_phase=sm.group(1) if sm else "",
                 last_detail=(sm.group(3).strip() if sm else status.strip()),
-                tokens=tokens, ts=_raw_ts(raw))
+                tokens=tokens, ts=_raw_ts(raw), n_events=len(tl.events))
             continue
 
         m = _SLOT_RE.search(line)
@@ -541,19 +543,47 @@ def _raw_ts(raw: str) -> str | None:
     return stamps[-1] if stamps else None
 
 
+def _first_copy_index(events: list, event: PhaseEvent) -> int:
+    """Index of the first event with this event's seq, phase and stamp. A crash report echoes
+    the log tail after the watchdog line, and the parser reads each echo as a new event that
+    keeps its original stamp, so the terminal event can be a later copy of the original."""
+    key = (event.seq, event.phase, event.ts)
+    return next(i for i, e in enumerate(events) if (e.seq, e.phase, e.ts) == key)
+
+
+def _mission_watchdog(tl: Timeline) -> Watchdog | None:
+    """The watchdog line when it belongs to the last load: stamped at or after that load's
+    mission-start marker. The parser keeps the newest watchdog line of the whole log and
+    the watchdog fires once per loading window, so the line can be an earlier load's. Stamps,
+    not file positions, because a crash report echoes earlier lines after the watchdog line.
+    Without a mission-start marker or a stamp, the line is kept, as before."""
+    wd = tl.watchdog
+    start = _last_mission_start_index(tl.events)
+    if wd is None or start is None:
+        return wd
+    gap = _seconds_between(tl.events[start].ts, wd.ts)
+    return None if gap is not None and gap < 0 else wd
+
+
 def _render_silence(tl: Timeline) -> tuple[int | None, str]:
     """(seconds, anchor) for the render-wait silence. The seconds run from the last
     WaitingForRender line to the anchor, when the log's last phase is that sample and the gap
-    reaches RENDER_WAIT_SILENCE_THRESHOLD_S; else None (unmeasured, never zero).
+    reaches RENDER_WAIT_SILENCE_THRESHOLD_S; else None (not silent, or a stamp is missing;
+    never zero).
 
-    The anchor is the watchdog line only when it was written at or after that sample. The
-    watchdog fires once per loading window, so the session's only watchdog line can belong to
-    an earlier load, or to a long scene load earlier in this one; then, as with no watchdog
-    line at all, the anchor is the newest stamped line of any kind."""
+    The anchor is the watchdog line only when it comes after that sample: a later stamp, or the
+    same second and later in the file. The watchdog fires once per loading window, so the
+    newest watchdog line in the log can belong to an earlier load, or to a long scene load
+    earlier in this one; then, as with no watchdog line at all, the anchor is the newest
+    stamped line of any kind."""
     last = tl.events[-1] if tl.events else None
     wd = tl.watchdog
     wd_gap = _seconds_between(last.ts if last else None, wd.ts) if wd else None
-    if wd is not None and not (wd_gap is not None and wd_gap < 0):
+    if wd_gap == 0 and wd.n_events is not None:
+        wd_after = wd.n_events > _first_copy_index(tl.events, last)
+    else:
+        wd_after = wd_gap is None or wd_gap >= 0
+    if wd is not None and wd_after:
         end_ts, anchor = wd.ts, "the watchdog fired"
     else:
         end_ts, anchor = tl.last_ts, "the log ended"
@@ -628,10 +658,10 @@ def _classify_render_wait(terminal: PhaseEvent, silent_s: int | None,
             "still landing means a cold cache; none means the main thread wedged, and the "
             "next step is a hang dump (/native-crash-triage Phase 2b).")
         v.notes.append(
-            "Why the falling samples mislead: the WaitingForRender line is written once per "
-            "second on every render-wait frame, so a working wait leaves a line per second. "
-            "Silence after the last sample means no render-wait frame ran, whatever the "
-            "earlier counts did.")
+            "Why the falling samples mislead: the WaitingForRender line is written on "
+            "render-wait frames, at most once a second (one per frame when frames run "
+            "slower). Silence after the last sample means no render-wait frame began, "
+            "whatever the earlier counts did.")
         return v
 
     if shaders > 0:
@@ -1104,6 +1134,10 @@ def classify_phase_timings(tl: Timeline) -> dict | None:
         # the log, see _render_silence) and that anchor; both None when it was not silent.
         "silent_s": silent_s,
         "silence_end": silence_end if silent_s is not None else None,
+        # The log ends in the render wait with nothing compiling: the verdict's real-wedge case,
+        # so the timing line must not call the fall to 0 a drain or a slow compile.
+        "stuck_at_zero": (tl.events[-1].phase == "WaitingForRender"
+                          and bool(shader_counts) and shader_counts[-1] == 0),
     } if render else None
 
     return {
@@ -1191,8 +1225,9 @@ _NEXT_STEPS = {
     "RENDER_WAIT": [
         "Read the shaders= series in the WaitingForRender lines FIRST: falling while the "
         "lines keep coming (one per second) means the load was working and the player "
-        "simply waited less than it needed; a stream that stopped 30 s or more before the "
-        "log went on (a watchdog line or any later line) is the frozen case (see the notes).",
+        "simply waited less than it needed; a stream that stopped 30 s or more before a "
+        "later line (the watchdog line, or the log's last stamped line when no watchdog "
+        "line follows the samples) is the frozen case (see the notes).",
         "Confirm against the player's rgl_log for the same window: count compile_shader "
         "lines and 'Missing shader from sack' misses.",
         "When the count falls with the stream intact, a cold shader cache is the cause, "
@@ -1285,6 +1320,11 @@ def _format_timings(t: dict) -> list:
         if r["shaders_peak"] is None:
             out.append("  shaders= was omitted by the game (the native count could not be "
                        "read) — it is unmeasured, not zero.")
+        elif r.get("stuck_at_zero"):
+            out.append(f"  shaders {r['shaders_first']} -> {r['shaders_last']} (peak "
+                       f"{r['shaders_peak']}) — nothing is compiling at the last sample, so "
+                       "the render gate is held by something other than shader compilation "
+                       "(see the verdict).")
         elif r.get("silent_s") is not None:
             out.append(f"  shaders {r['shaders_first']} -> {r['shaders_last']} (peak "
                        f"{r['shaders_peak']}) — the count is frozen at the last sample and "
@@ -1351,13 +1391,14 @@ def format_report(verdict: Verdict, tl: Timeline, rgl, mem: dict | None = None,
     if timings is not None:
         out.extend(_format_timings(timings))
 
-    if tl.watchdog:
+    wd = _mission_watchdog(tl)
+    if wd:
         out.append("")
-        out.append(f"Stall watchdog fired after {tl.watchdog.elapsed_seconds}s — "
-                   f"last phase={tl.watchdog.last_phase} {tl.watchdog.last_detail}".rstrip())
-        if tl.watchdog.tokens:
-            out.append(f"  reading at fire: {tl.watchdog.tokens}")
-            if "churn-capped" in tl.watchdog.tokens:
+        out.append(f"Stall watchdog fired after {wd.elapsed_seconds}s — "
+                   f"last phase={wd.last_phase} {wd.last_detail}".rstrip())
+        if wd.tokens:
+            out.append(f"  reading at fire: {wd.tokens}")
+            if "churn-capped" in wd.tokens:
                 out.append("  churn-capped: the compile queue was STILL MOVING when the "
                            "watchdog fired, and was capped for never draining. Treat as a "
                            "cold shader cache on slow hardware, not a frozen compiler.")
@@ -1591,7 +1632,7 @@ def main() -> int:
             "confirmed_assets": verdict.confirmed_assets,
             "notes": verdict.notes,
             "terminal_phase": tl.events[-1].phase if tl.events else None,
-            "watchdog_fired": tl.watchdog is not None,
+            "watchdog_fired": _mission_watchdog(tl) is not None,
             "memory": mem,
             "stations": stations,
             "timings": timings,
