@@ -132,13 +132,15 @@ public static class CharacterCreationCampaignBehavior_GetAgeSelectionMenuArgs_Pa
 /// <summary>
 /// Backstop for SpawnNonHumanNarrativeMenuCharacter; the primary defense is RemoveHorseCharacters in
 /// the prefix guards above. Vanilla reads the spawn-point entity, both item ids, the horse's
-/// <c>HorseComponent.Monster</c> and <c>MountCreationKey</c> with no null check (v1.5.5 :204-215),
+/// <c>HorseComponent.Monster</c>, that monster's <c>ActionSetCode</c> (a dictionary key in
+/// <c>MBGlobals.GetActionSet</c>) and <c>MountCreationKey</c> with no null check (v1.5.5 :204-215),
 /// and creates the mount entity (:208) before the spawn-point read throws. This prefix skips the
 /// spawn when any of those is missing, so the menu loop moves on to the next character. It replaced
 /// a finalizer that swallowed every NRE in the method, a foreign one included, and left the
 /// half-built entity in the scene (NRE guard audit 2026-10-27). Skipping also skips vanilla's
 /// <c>ClearMountEntities()</c> (:203), which matters only with two non-human characters in one menu.
-/// Applied at Patch20 time; may silently fail if SandBox.GauntletUI isn't loaded yet.
+/// Applied at Patch20 time. A null TargetMethod (SandBox.GauntletUI not loaded) fails loudly: Harmony 2.4.2
+/// throws, and PatchCategoryIndex leaves the rest of Patch20 unpatched; TryApply logs it.
 /// </summary>
 [HarmonyPatch]
 [HarmonyPatchCategory("Patch20_NarrativeHorseGuard")]
@@ -160,16 +162,17 @@ public static class CharacterCreationNarrativeStageView_SpawnNonHuman_Patch
             var item = character?.Item1Id == null ? null : Game.Current?.ObjectManager?.GetObject<ItemObject>(character.Item1Id);
             var canSpawn = NarrativeHorseGuardPatchHelper.CanSpawnMount(
                 spawnPointFound: character != null && ____characterScene?.FindEntityWithTag(character.SpawnPointEntityId) != null,
-                idsPresent: character?.Item1Id != null && character.Item2Id != null,
-                horseMonsterFound: item?.HorseComponent?.Monster != null,
-                mountKeyPresent: character?.MountCreationKey != null);
+                item1Id: character?.Item1Id,
+                item2Id: character?.Item2Id,
+                actionSetCode: item?.HorseComponent?.Monster?.ActionSetCode,
+                mountKey: character?.MountCreationKey);
             if (!canSpawn)
             {
                 try
                 {
                     IoC.Resolve<TAOM.Core.Logging.IModLogger>()?.LogWarning(
                         $"[CharacterCreation] skipped spawning narrative mount '{character?.StringId}': its spawn point, " +
-                        $"item ids, horse monster or mount key is missing (item1='{character?.Item1Id}').");
+                        $"item ids, horse action set or mount key is missing (item1='{character?.Item1Id}').");
                 }
                 catch { /* logger unavailable: the skip stands */ }
             }
@@ -262,9 +265,13 @@ internal static class NarrativeHorseGuardPatchHelper
         return "guard";
     }
 
-    /// <summary>The reads vanilla SpawnNonHumanNarrativeMenuCharacter makes without a null check.</summary>
-    internal static bool CanSpawnMount(bool spawnPointFound, bool idsPresent, bool horseMonsterFound, bool mountKeyPresent) =>
-        spawnPointFound && idsPresent && horseMonsterFound && mountKeyPresent;
+    /// <summary>
+    /// The values vanilla SpawnNonHumanNarrativeMenuCharacter uses without a null check. A null id or
+    /// action-set code throws <c>ArgumentNullException("key")</c> from a dictionary lookup; the action-set
+    /// code is null when the horse item, its HorseComponent or its Monster is missing too.
+    /// </summary>
+    internal static bool CanSpawnMount(bool spawnPointFound, string item1Id, string item2Id, string actionSetCode, object mountKey) =>
+        spawnPointFound && item1Id != null && item2Id != null && actionSetCode != null && mountKey != null;
 
     internal static void RemoveHorseCharacters(CharacterCreationManager manager)
     {

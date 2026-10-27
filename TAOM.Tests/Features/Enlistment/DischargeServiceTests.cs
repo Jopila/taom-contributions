@@ -542,7 +542,8 @@ public class DischargeServiceTests
     public void Execute_PlayerStillInHisBattle_LeavesTheEncounterToTheBattle()
     {
         // The loot and aftermath screens, for an UNMERGED soldier: the main party is still in its map
-        // event, so R1 defers. A merged soldier leaves his event at step 6 (LeaveArmy), the #577 path.
+        // event, so R1 defers. A merged soldier is pulled out of his event at step 5 (RestorePresence clears
+        // AttachedTo), which is why the reconciler holds a feature-off discharge until the battle ends (#1021).
         MakeEnlisted();
         _encounter.GetOwnership(Arg.Any<string>()).Returns(new EncounterOwnershipSnapshot(
             hasEncounter: true, hasEncounteredMobileParty: true,
@@ -552,6 +553,40 @@ public class DischargeServiceTests
         Assert.IsTrue(_service.Execute(DischargeReason.PlayerRequest));
 
         _encounter.DidNotReceive().Finish(Arg.Any<bool>());
+    }
+
+    [TestMethod]
+    public void Execute_PlayerInHisBattleInsideTheCommandersTown_DoesNotTouchTheBattleEncounter()
+    {
+        // #1021 item 3. A soldier in a map event inside the commander's town who is not army-merged
+        // is deferred by R1 at step 7. Step 10 must not graft a town visit onto that battle encounter,
+        // open the town menu over a frozen battle, or finish it mid-battle.
+        MakeEnlisted();
+        _commanderAdapter.GetSnapshot(Arg.Any<string>()).Returns(new CommanderSnapshot(
+            exists: true, isAlive: true, partyIsInSettlement: true,
+            settlementId: "town_A1", settlementMenuId: "town"));
+        _attachment.GetPresenceFlags().Returns(new PlayerPresenceFlags(
+            mainPartyExists: true, isActive: true, isVisible: true, settlementId: "town_A1"));
+        _attachment.GetPresence(Arg.Any<string>()).Returns(new PlayerPresenceSnapshot(
+            mainPartyExists: true, isActive: true, isVisible: true, isInMapEvent: true,
+            hasPlayerEncounter: true, settlementId: "town_A1"));
+        _gameMenu.CurrentMenuId.Returns(EnlistmentMenuService.ServiceWaitMenuId);
+        _encounter.IsMainPartyInMapEvent.Returns(true);
+        _encounter.GetOwnership(Arg.Any<string>()).Returns(new EncounterOwnershipSnapshot(
+            hasEncounter: true, hasEncounteredMobileParty: true,
+            encounteredPartyId: "besieger_party", encounteredPartyIsCommanderRelated: false,
+            playerInMapEvent: true, playerInsideSettlement: true));
+
+        Assert.IsTrue(_service.Execute(DischargeReason.PlayerRequest));
+
+        _gameMenu.Received(1).ExitToLast();
+        _logger.Received().LogWarning(Arg.Is<string>(m => m.Contains("ended with the player in his own battle")));
+
+        _encounter.DidNotReceive().EnsureSettlementEncounter(Arg.Any<string>());
+        _gameMenu.DidNotReceive().EnsureMenuOpen("town");
+        _encounter.DidNotReceive().Finish(Arg.Any<bool>());
+        _attachment.DidNotReceive().LeaveSettlement();
+        _logger.DidNotReceive().LogError(Arg.Is<string>(m => m.Contains("UNABLE TO START ENCOUNTERS")));
     }
 
     [TestMethod]

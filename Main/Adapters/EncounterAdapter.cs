@@ -16,6 +16,8 @@ public sealed class EncounterAdapter : IEncounterAdapter
 {
     private readonly IModLogger _logger;
 
+    private bool _joinedBattleReadFailed;
+
     public EncounterAdapter(IModLogger logger)
     {
         _logger = logger;
@@ -24,6 +26,26 @@ public sealed class EncounterAdapter : IEncounterAdapter
     public bool HasCurrent => PlayerEncounter.Current != null;
 
     public bool IsInsideSettlement => PlayerEncounter.InsideSettlement;
+
+    public bool IsJoinedBattleEncounter
+    {
+        get
+        {
+            try
+            {
+                return PlayerEncounter.Current?.IsJoinedBattle == true;
+            }
+            catch (Exception ex)
+            {
+                if (!_joinedBattleReadFailed)
+                {
+                    _joinedBattleReadFailed = true;
+                    _logger?.LogError($"[Enlistment] IsJoinedBattleEncounter failed: {ex.Message}");
+                }
+                return false;
+            }
+        }
+    }
 
     public string EncounteredPartyId => PlayerEncounter.EncounteredMobileParty?.StringId;
 
@@ -334,6 +356,15 @@ public sealed class EncounterAdapter : IEncounterAdapter
                 return false;
             }
 
+            // #1019 item 1: a join seeded from inside the settlement the party stands in (a raid reaching the soldier's
+            // village). StartBattleAction.ApplyInternal (v1.5.5 :34-36) then interrupts the encounter this seeds, unless it
+            // is a sally-out: InterruptEncounter leaves the battle and opens vanilla's 'encounter_interrupted' menu. Rare, so
+            // it is not behind the trace toggle.
+            var main = MobileParty.MainParty;
+            var place = mapEvent.MapEventSettlement;
+            if (place != null && main?.CurrentSettlement == place)
+                _logger?.LogInfo($"[EnlistDiag] seeding the join from inside '{place.StringId}' (event={mapEvent.EventType}, sameFactionAsSettlement={main.MapFaction == place.MapFaction}); a battle start interrupts this encounter (not a sally-out) and opens 'encounter_interrupted'");
+
             PlayerEncounter.RestartPlayerEncounter(defenderLeader, attackerLeader, forcePlayerOutFromSettlement: false);
 
             var seeded = PlayerEncounter.Current != null && PlayerEncounter.EncounteredBattle == mapEvent;
@@ -530,6 +561,24 @@ public sealed class EncounterAdapter : IEncounterAdapter
         if (settlement.IsCastle) return new CastleEncounter(settlement);
         if (settlement.IsHideout) return new HideoutEncounter(settlement);
         return null;
+    }
+
+    // Forgets the ended battle's result on a reused encounter (#1021); see IEncounterAdapter.
+    public void ForgetEndedBattleResult()
+    {
+        try
+        {
+            if (PlayerEncounter.Current == null || PlayerEncounter.Battle != null
+                || PlayerEncounter.CampaignBattleResult == null)
+                return;
+
+            PlayerEncounter.CampaignBattleResult = null;
+            _logger?.LogInfo("[Enlistment] cleared the last battle's result from the reused encounter (#1021)");
+        }
+        catch (Exception ex)
+        {
+            _logger?.LogError($"[Enlistment] ForgetEndedBattleResult failed: {ex.Message}");
+        }
     }
 
     // NO DEFAULT, deliberately. The engine's own default is TRUE; this once defaulted to false,

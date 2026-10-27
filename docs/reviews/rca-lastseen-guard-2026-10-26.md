@@ -31,7 +31,7 @@ The rest were test and documentation gaps, all fixed.
 | 4 | LOW (Agents 2 and 5) | `taleworlds-api-snapshot/patch-targets.md` was not regenerated, so `engine_body_diff.py` would not diff the new target at the next engine bump. | Generated artifact not refreshed | No gate fails on a missing row; Patch122 needed the same fix-up (`f2e6efd23`). A repeat. | Fix: regenerated (339 patches, one new row), and `/verify` Step 2d plus the `api-snapshot` row in `.ai/verification.md` now run `snapshot_api_surface.ps1 -Check`, which exits 1 on a missing row (the script's help already said the verification step ran it; nothing did). |
 | 5 | LOW (Agent 2) | The binding test did not pin the parameter name `hero` that Harmony binds, and never applied the patch through real Harmony. | Binding coverage | I pinned target and category only. | Fix: the parameter-name assertion and an apply test on the installed engine (`BindingVerification`, `RequiresGameIL`), the Patch122 shape. |
 | 6 | LOW (Agent 2) | The comment said "No TAOM patch is on that stack"; TAOM patches were on outer frames. | Wording | Read from the inner exception only. | Fix: "on the throwing frames (GetLastSeenText, EncyclopediaHeroPageVM.Refresh)". |
-| 7 | LOW (Agent 5) | The log line gave no throw location and said "showing the settlement text" even when the text was "never seen" or empty. | Diagnostics | Written before the fallback had three outcomes. | Fix: the line now carries the IL offset and the text actually shown. |
+| 7 | LOW (Agent 5) | The log line gave no throw location and said "showing the settlement text" even when the text was "never seen" or empty. | Diagnostics | Written before the fallback had three outcomes. | Fix: the line now names the text actually shown; the prefix design (finding 10) throws nothing, so there is no throw location to log. |
 | 8 | LOW (Agent 5) | The feature-map Encyclopedia row cited only Patch119; the registry did not name `OnSubModuleLoad`. | Docs | No gate requires them. | Fix: both rows. |
 | 9 | LOW (Agent 2) | The registry and comment said PatchShield also wraps the target; that is true only in solo play (the shield does not install under co-op). | Wording | Read `PatchShield` without `PatchShieldPolicy`. | Fix: both say "solo play only". |
 | 10 | HIGH (Codex re-review) | The origin check still passed a small foreign prefix the JIT inlined, a foreign transpiler's inserted throw, and an NRE inside the inlined `GameTexts.FindText`: all throw in the replacement frame. | Containment scope (repeat of 1) | I narrowed the check without listing what else runs in the replacement frame; the synthetic test used a prefix that throws explicitly, which the JIT does not inline. | Fix: the prefix design; nothing is swallowed. Lesson above. |
@@ -78,7 +78,7 @@ read-only, verdicts spot-checked against the code before any edit):
 |---|---|---|
 | Patch49 | `Army.FindBestGatheringSettlementAndMoveTheLeader` | Narrowed: swallows only the two proven dead ends (`IsKnownDeadEnd`); any other NRE now propagates instead of being filed as a siege dead end. |
 | Patch20 | `SpawnNonHumanNarrativeMenuCharacter` | Finalizer replaced by a bool prefix that skips the spawn when vanilla would throw; no swallow, no half-built entity. |
-| Patch50 | `Agent.CheckToDropFlaggedItem` | Finalizer kept: deleting it required the bite route to catch first, and it does not, so an escaping exception would hang `OnMissionTick`. |
+| Patch50 | `Agent.CheckToDropFlaggedItem` | Finalizer kept and now logs the first swallowed NRE per process with its stack. The first stated reason ("the bite route has no `try`") was wrong: see finding 14. |
 | Patch56 | `GauntletSceneNotification.OpenScene` | Kept (the random cast blocks a prefix); the swallow now logs a WARNING with the whole exception. |
 | Patch69 | `TournamentVM.OnTournamentEnd` | Kept (a rethrow can hang the mission); the decision moved to the testable `Settle`, and its ERROR line carries the stack. |
 | All four kept finalizers | | A non-NRE now goes back through `RethrowStackPreserver`; a bare `return __exception` made Harmony `throw` and erased the throw site. |
@@ -88,3 +88,27 @@ swallow by design; PatchShield, Patch62, Patch65 and the rest are scoped to othe
 Tests: `ContainmentFinalizerRethrowTests` (RED first: all four handed exceptions back bare),
 `Patch49GatheringNreRuleTests`, `NarrativeMountSpawnGuardTests`; two new `ReviewedSafe` rows in
 `CoopVetoClassificationTests`.
+
+## Batch deep review (2026-10-27)
+
+Lens 5, lens 2 and Codex (`high`; prompt `codex-batch-nre-guards-2026-10-27.prompt.md`, output in `raw/`)
+reviewed the audit batch. Every confirmed finding was re-read against the installed v1.5.5 decompile
+before the fix.
+
+| # | Sev | Bug | Category | Why missed | Preventive action |
+|---|---|---|---|---|---|
+| 14 | MEDIUM (lens 5, lens 2) | I recorded that Patch50's bite route has no `try`, so a rethrow would hang `OnMissionTick`. `BehaviorTree.RunTree` catches every exception, and the warg, spider and signature-strike routes have their own catches. | Exception path traced one call short | I stopped at `BehaviorTreeAgentComponent.TickOnMissionThread` and did not open `RunTree`. `harmony-patches.md` already says to follow an exception to its next catcher before deciding a rethrow; I did not apply it. A repeat of an existing rule, not a new one. | Fix: the reason rewritten in the registry and the class comment. Mike chose keep-and-log: the finalizer now logs the first swallowed NRE per process with its stack. |
+| 15 | HIGH (Codex) | Patch20's prefix let a null `Monster.ActionSetCode` through; `MBGlobals.GetActionSet` uses it as a dictionary key, which throws `ArgumentNullException("key")` after the mount entity exists. | Precondition list incomplete | I listed the reads in the target's own body and not the ones inside the callee it passes the value to. | Fix: `CanSpawnMount` takes the raw values, the action-set code included, so a dropped check fails its test (also closes lens 5's "dropping `Item2Id` passes"). |
+| 16 | HIGH (Codex) | Patch49 still contained a foreign prefix's NRE while the army was in a dead end: Harmony opens the try block before the prefixes. | Containment scope (repeat of 1 and 10) | The narrowing checked state, not provenance. | Fix: a `Priority.Last` prefix sets `__state`; the finalizer contains only when the body was entered. The Harmony behaviour is pinned through real Harmony. |
+| 17 | MEDIUM (lens 5) | Patch123's repeat of vanilla's write was untested: deleting it, moving it or dropping its gate passed every test. | Boundary code untested | The mutation runs targeted `Decide`, not `Capture`. | Fix: the gate moved to the pure `LastSeenState.Complete`, tested for when it refreshes and that it refreshes before the settlement read. |
+| 18 | MEDIUM (Codex) | The `api-snapshot` row in `.ai/verification.md` followed a Release build, but the tool reads the Debug test bin whenever it exists. | Doc vs tool mismatch | I wrote the row from the `/verify` flow, which builds Debug. | Fix: the row names the Debug build it needs. |
+| 19 | LOW (lens 5, lens 2) | No gate checked Patch20's `____characterScene` injection or its `TargetMethod` name: `HarmonyFieldInjectionNamingTests` skips a bare `[HarmonyPatch]` class. | Binding coverage | I pinned only the prefix's own parameter names. | Fix: both rows in `ReflectionSiteBindingTests` and `reflection-sites.md`. |
+| 20 | LOW (lens 5) | Patch56 set its close flag after logging, so a failed log line would leave the input soft-locked. | State after I/O | Added the heavier log line without moving the flag. | Fix: the flag is set first (`Patch56_LoggerThrows_TheCloseIsStillRequested`). |
+| 21 | LOW (lens 5, lens 2) | Stale or wrong text: Patch69 promised full containment (it contains NREs only); Patch56 said its cast is random; Patch20 said a missing type fails silently; Patch49 claimed vanilla guards `AiBehaviorObject` downstream; `SubModule.cs` called Patch123 a finalizer. | Wording | Each was copied forward from older text. | Fix: all corrected; Patch69's dump-failure branch now has a test. |
+
+**Merge damage repaired.** Merge `a99a8cb1c` resolved two same-place insertions by keeping one side:
+it dropped the `api-snapshot` row, and in the settings counts it kept `616cf12f1`'s numbers over the
+other session's removal of two Auto-Resolve Diagnostics toggles. The `api-snapshot` row is restored
+here. The settings counts were fixed on trunk by `c72bf6ef7`, so this change keeps that version of
+`SettingsFingerprintTests`, `ServerSettingsSchemaTests`, `coop-interop.md` and
+`bannerlord-together-compat.md`. Merge `921091938` lost nothing.

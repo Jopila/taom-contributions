@@ -218,6 +218,8 @@ public static class CoopSettingsRelevance
         "EnableLoremastersLine",
         // Hearth Roll (#906): the red tint on a companion's row of the clan screen's Members list, drawn on this client only.
         "EnableUnhappyCompanionTint",
+        // Prisoner Banners (#902): the clan and kingdom banners and the noble icon on a captive hero's party screen row, drawn on this client only.
+        "PrisonerBannersEnabled",
         // Campaign map performance (Battle Load Diagnostics page, Map Performance): whether hidden settlement
         // nameplates are skipped each frame (Patch104), and whether a covered map releases its render targets and how
         // often (a layer-event handler, no patch). Both change what this client draws and how much graphics memory it holds, never the campaign.

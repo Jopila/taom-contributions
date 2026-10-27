@@ -1,0 +1,19 @@
+<Prefab>
+  <Window>
+    <Widget DoNotAcceptEvents="true" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent">
+      <Children>
+        <Widget DoNotAcceptEvents="true" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="22" SuggestedHeight="32" HorizontalAlignment="Left" VerticalAlignment="Top" MarginLeft="4" MarginTop="4" IsVisible="@HasPrisonerClanBanner">
+          <Children>
+            <MaskedTextureWidget DataSource="{PrisonerClanBanner}" DoNotAcceptEvents="true" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" Brush="Flat.Tuple.Banner.Small.Hero" AdditionalArgs="@AdditionalArgs" ImageId="@Id" TextureProviderName="@TextureProviderName" IsDisabled="true" />
+          </Children>
+        </Widget>
+        <Widget DoNotAcceptEvents="true" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="22" SuggestedHeight="32" HorizontalAlignment="Right" VerticalAlignment="Top" MarginRight="4" MarginTop="4" IsVisible="@HasPrisonerKingdomBanner">
+          <Children>
+            <MaskedTextureWidget DataSource="{PrisonerKingdomBanner}" DoNotAcceptEvents="true" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" Brush="Flat.Tuple.Banner.Small.Hero" AdditionalArgs="@AdditionalArgs" ImageId="@Id" TextureProviderName="@TextureProviderName" IsDisabled="true" />
+          </Children>
+        </Widget>
+        <Widget DoNotAcceptEvents="true" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="29" SuggestedHeight="20" HorizontalAlignment="Left" VerticalAlignment="Bottom" MarginLeft="4" MarginBottom="4" Sprite="General\Mission\noble" Color="#FFD700FF" IsVisible="@IsPrisonerClanLeader" />
+      </Children>
+    </Widget>
+  </Window>
+</Prefab>

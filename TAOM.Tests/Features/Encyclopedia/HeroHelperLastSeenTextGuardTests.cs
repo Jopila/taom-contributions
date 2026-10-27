@@ -88,6 +88,60 @@ public class HeroHelperLastSeenTextGuardTests
     public void Capture_NullHero_LeavesTheCallToVanilla() =>
         Assert.IsFalse(LastSeenState.Capture(null).ReachesUnguardedLeaderRead);
 
+    // --- vanilla's write, repeated only where vanilla would be skipped (HeroHelper.cs:30-33) ---
+
+    [TestMethod]
+    public void Complete_StructureDoesNotReach_NeitherRefreshesNorReads()
+    {
+        var calls = new List<string>();
+
+        var state = LastSeenState.Complete(State(isPrisoner: true, hasLastSeen: false), activeOrPrisoner: true,
+            () => calls.Add("refresh"), () => { calls.Add("read"); return (true, false); });
+
+        CollectionAssert.AreEqual(new string[0], calls, "Vanilla runs and makes the write itself.");
+        Assert.IsFalse(state.ReachesUnguardedLeaderRead);
+    }
+
+    [TestMethod]
+    public void Complete_ReachingStructure_RefreshesThenReadsTheSettlement()
+    {
+        var calls = new List<string>();
+
+        var state = LastSeenState.Complete(State(isPrisoner: true, partyLeaderMissing: true, hasLastSeen: false),
+            activeOrPrisoner: true, () => calls.Add("refresh"), () => { calls.Add("read"); return (true, true); });
+
+        CollectionAssert.AreEqual(new[] { "refresh", "read" }, calls);
+        Assert.IsTrue(state.ReachesUnguardedLeaderRead);
+        Assert.IsTrue(state.IsInSettlement);
+    }
+
+    [TestMethod]
+    public void Complete_ReachingStructureButNeitherActiveNorPrisoner_ReadsWithoutRefreshing()
+    {
+        var calls = new List<string>();
+
+        LastSeenState.Complete(State(hasArmy: true, armyLeaderMissing: true, hasLastSeen: false),
+            activeOrPrisoner: false, () => calls.Add("refresh"), () => { calls.Add("read"); return (true, false); });
+
+        CollectionAssert.AreEqual(new[] { "read" }, calls);
+    }
+
+    [TestMethod]
+    public void Complete_UnknownHero_NeitherRefreshesNorReads()
+    {
+        var calls = new List<string>();
+
+        LastSeenState.Complete(State(knownAndAlive: false, partyIsMobile: false, hasLastSeen: false),
+            activeOrPrisoner: true, () => calls.Add("refresh"), () => { calls.Add("read"); return (true, false); });
+
+        CollectionAssert.AreEqual(new string[0], calls);
+    }
+
+    [TestMethod]
+    public void Complete_RefreshedSettlementIsNull_DoesNotReach() =>
+        Assert.IsFalse(LastSeenState.Complete(State(partyIsMobile: false, hasLastSeen: false), true,
+            () => { }, () => (false, false)).ReachesUnguardedLeaderRead);
+
     // --- the production decision ---
 
     [TestMethod]

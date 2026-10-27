@@ -19,9 +19,9 @@ namespace TAOM.Features.Arena.Hooks;
 /// nulls <c>Participant</c> without ever resetting <c>IsValid</c> back to false. We could not
 /// reproduce that state from a full 16-entrant bracket, so it is not guarded; it IS logged.
 ///
-/// On any exception this dumps the entire bracket — every round, match, team and participant slot,
-/// with <c>IsValid</c>, whether <c>Participant</c> is null, and the character behind it — then
-/// swallows. The winner panel ends up incomplete, which is strictly better than the tournament
+/// On any exception this logs it with its stack and dumps the entire bracket (every round, match, team
+/// and participant slot, with <c>IsValid</c>, whether <c>Participant</c> is null, and the character
+/// behind it); then it swallows a <see cref="NullReferenceException"/> only and rethrows anything else. The winner panel ends up incomplete, which is strictly better than the tournament
 /// screen dying mid-input. If a bundle ever arrives with this dump in it, the offending slot is
 /// named outright and the guess becomes a root cause.
 ///
@@ -97,9 +97,9 @@ public static class Patch69_TournamentEndGuard
         // NRE costs: the prize, the leaderboard and OnTournamentFinished run before the event
         // (SandBox TournamentBehavior.cs:252-264). It stays swallowed under co-op too, because this
         // event can be raised from inside OnMissionTick and a rethrow there skips the agent tick, so the
-        // next frame's OnPreTick waits forever (v1.5.5 Mission.cs:3749, :3594-3599). A finalizer stays
-        // (no prefix) for that reason: an unforeseen exception here must not hang the mission
-        // (NRE guard audit 2026-10-27).
+        // next frame's OnPreTick waits forever (v1.5.5 Mission.cs:3749, :3594-3599). That is why the NRE
+        // stays contained by a finalizer rather than a prefix (NRE guard audit 2026-10-27). A non-NRE is
+        // still rethrown, with the same hang risk; no input is known to produce one here.
         return null;
     }
 

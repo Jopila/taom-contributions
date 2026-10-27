@@ -289,6 +289,8 @@
                     <HintWidget DataSource="{Hint}" DoNotAcceptEvents="true" Command.HoverBegin="ExecuteBeginHint" Command.HoverEnd="ExecuteEndHint" WidthSizePolicy = "StretchToParent" HeightSizePolicy = "StretchToParent"/>
                   </Children>
                 </Widget>
+                <!-- TAOM #902 prisoner banners (TaomPrisonerBanners.xml): reapply after a re-sync to vanilla -->
+                <TaomPrisonerBanners />
               </Children>
             </BrushWidget>
 

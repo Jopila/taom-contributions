@@ -50,6 +50,7 @@ VisualDefinitions, and each XPath misses when an engine update renames its node.
   has `TransitionDuration="0"` in the XML. That includes the party section headers' 0.045 s press
   squish. FormationListPanel and FormationSeperator belong to the formation dropdown, which is
   commented out in PartyScreen.xml; their zeros take effect only if it returns.
+  The two tuples also carry the block marked `TAOM #902` ([prisoner-banners.md](prisoner-banners.md)); reapply it after a re-sync to vanilla.
 - **Registration:** `UIExtender.Register` in `ClientUiExtensions.Register` (called from `ClientSubModule.OnGameStart`, once) finds the class, in
   solo and, through `CoopUiRegistrationPolicy`, under co-op (the class has no `[CoopSuppressedUi]`;
   the change is visual only). No IoC entry and no Harmony patch.

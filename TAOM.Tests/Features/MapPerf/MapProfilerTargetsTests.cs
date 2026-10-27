@@ -2,7 +2,10 @@ using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using TAOM.Client;
 using TAOM.Composition;
+using System.Reflection;
+using TAOM.Features.Enlistment;
 using TAOM.Features.MapPerf.Hooks;
+using TAOM.Tests.Migration;
 
 namespace TAOM.Tests.Features.MapPerf;
 
@@ -11,6 +14,9 @@ namespace TAOM.Tests.Features.MapPerf;
 [TestCategory("RequiresGame")]
 public class MapProfilerTargetsTests
 {
+    [ClassInitialize]
+    public static void Init(TestContext _) => GameAssemblies.EnsureLoaded();
+
     [TestCleanup]
     public void Cleanup() => ClientComposition.Current = null;
 
@@ -32,5 +38,20 @@ public class MapProfilerTargetsTests
         var assemblies = MapProfilerTargets.ViewAssemblies().ToArray();
 
         CollectionAssert.AreEqual(new[] { typeof(MapProfilerTargets).Assembly }, assemblies);
+    }
+
+    [TestMethod]
+    public void MenuTargets_ResolveToTheThreeMenuProbeMethods_InOrder()
+    {
+        var targets = MapProfilerTargets.MenuTargets();
+
+        Assert.AreEqual(3, targets.Count);
+        Assert.IsTrue(targets.All(t => t != null), "A menu probe target did not resolve.");
+        Assert.AreEqual("GameMenuVM.OnFrameTick", targets[0]!.DeclaringType!.Name + "." + targets[0]!.Name);
+        Assert.AreEqual(0, targets[0]!.GetParameters().Length);
+        Assert.AreEqual("GameMenuVM.set_ContextText", targets[1]!.DeclaringType!.Name + "." + targets[1]!.Name);
+        CollectionAssert.AreEqual(new[] { typeof(string) }, targets[1]!.GetParameters().Select(p => p.ParameterType).ToArray());
+        Assert.AreEqual(typeof(ServiceStatusService).GetMethod(nameof(ServiceStatusService.RefreshIfChanged)), targets[2]);
+        Assert.AreEqual(0, targets[2]!.GetParameters().Length);
     }
 }

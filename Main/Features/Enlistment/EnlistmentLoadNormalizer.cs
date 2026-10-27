@@ -89,8 +89,9 @@ public class EnlistmentLoadNormalizer : IEnlistmentLoadNormalizer
         // Matrix rows: Attached + in a map event -> Battle; Attached + an encounter with no map
         // event behind it (it outlived its battle) -> unchanged: the sweep does not own a leftover
         // whose encountered party is a mobile opposing leader outside a settlement (R4 returns
-        // SkipNotOurs, #1021 item 1), so it stays until a discharge or the stale-latch recovery
-        // closes it; Attached + a settlement encounter (#510 opens one on every placement, not a
+        // SkipNotOurs), so it stays until a discharge or the stale-latch recovery closes it. Since
+        // #1021 the recovery does: an Attached soldier outside a settlement whose encounter is a
+        // joined battle is a timed latch episode too. Attached + a settlement encounter (#510 opens one on every placement, not a
         // battle) -> unchanged.
         // EnlistedAttached -> EnlistedBattle is the join's own edge, so it is legal here.
         if (record.State == EnlistmentState.EnlistedAttached && presence.IsInMapEvent)

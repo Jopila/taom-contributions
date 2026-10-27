@@ -1401,6 +1401,22 @@ Wave 1 tagged every Italian kingdom and clan name `{.FN}` because `{.FN}` and `{
 - **Prevent:** before a tag goes on a name class, read the language processor and the function file for every place that reads
   the tag, and tag by the gender of the implied noun ("il regno", "il clan"), not by the one effect you were fixing.
 - **Source:** `docs/features/name-grammar-tags.md` (Solution Approach), #1023 review wave 1.
+### Flattening a TextObject to a string freezes every global it reads at that moment (#1019, 2026-10-27)
+The enlistment board was turned into a plain string once per status change so the wait menu would not rebuild a nested text every frame. The board and its nested lines use `{NEWLINE}`, a global TAOM never sets: the engine sets it (`GameTexts.SetVariable("NEWLINE", "\n")`) lazily inside its UI builders, and ending a campaign clears all globals. Rendered every frame, the board picked `NEWLINE` up whenever the engine set it. Flattened once, a board written while it was unset kept its lines run together until the next status change.
+- **Why missed:** before the flatten the board re-rendered every frame and picked `NEWLINE` up later, so the unset state had no visible effect, and the render test never started from it.
+- **Prevent:** before `TextObject.ToString()` freezes a text, set every global the text reads (here `MBTextManager.SetTextVariable("NEWLINE", "\n")`), and test the frozen result with those globals removed first.
+- **Source:** #1019; [rca-enlistment-board-render-and-probes-2026-10-26.md](../rca-enlistment-board-render-and-probes-2026-10-26.md).
+### Copy vanilla's view model arguments and sprite size with its widget, not only the names (#902, 2026-10-27)
+A banner on `Flat.Tuple.Banner.Small.Hero` was built as `new BannerImageIdentifierVM(banner)`. The brush draws its texture at
+2.5 times the widget's short side, and vanilla feeds it only nine-grid banners; a plain banner texture is the centre third of
+the banner, so the corner showed a slice of the emblem. The same change drew the 58x40 `General\Mission\noble` sprite in a
+20x20 box, and a plain `Widget` stretches its sprite to the box.
+- **Why missed:** the plan confirmed that the brush, the sprite and the constructor exist, and stopped there. A default
+  argument and a sprite's size do not fail any build or test.
+- **Prevent:** before binding a vanilla brush or sprite, find two vanilla sites that use it and copy what they pass to the
+  view model (`nineGrid: true` for every banner `MaskedTextureWidget`) and the widget's size, or read the sprite's
+  `<Width>` and `<Height>` in `NativeSpriteData.xml` and keep its aspect. Prisoner Banners pins both in its wiring tests.
+- **Source:** [rca-prisoner-banners-2026-10-27.md](../rca-prisoner-banners-2026-10-27.md) findings 1 and 2.
 ### A clan name is saved, and English never looks its key up (Tharbad swap, 2026-10-27)
 After a clan rename, a save started earlier keeps the old name in English and shows the new one in the 12 other languages.
 `Clan.Name` is a `[SaveableProperty]`, `clans.xml` loads only for a new campaign (`SandBoxManager.InitializeSandboxXMLs`),

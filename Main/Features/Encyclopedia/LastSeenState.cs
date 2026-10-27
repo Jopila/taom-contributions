@@ -1,3 +1,4 @@
+using System;
 using Helpers;
 using TaleWorlds.CampaignSystem;
 
@@ -95,19 +96,36 @@ public sealed class LastSeenState
 
             var structure = new LastSeenState(heroId, knownAndAlive, false, false, hero.IsPrisoner, hasParty,
                 party?.Id, partyIsMobile, partyLeaderMissing, hasArmy, armyLeaderMissing);
-            if (!knownAndAlive || !structure.PartyReachesUnguardedRead) return structure;
-
-            if (hero.IsActive || hero.IsPrisoner)
-                hero.UpdateLastKnownClosestSettlement(HeroHelper.GetClosestSettlement(hero));
-            var settlement = hero.LastKnownClosestSettlement;
-            return new LastSeenState(heroId, knownAndAlive, settlement != null,
-                settlement != null && settlement == hero.CurrentSettlement, hero.IsPrisoner, hasParty,
-                party?.Id, partyIsMobile, partyLeaderMissing, hasArmy, armyLeaderMissing);
+            return Complete(structure, hero.IsActive || hero.IsPrisoner,
+                () => hero.UpdateLastKnownClosestSettlement(HeroHelper.GetClosestSettlement(hero)),
+                () =>
+                {
+                    var settlement = hero.LastKnownClosestSettlement;
+                    return (settlement != null, settlement != null && settlement == hero.CurrentSettlement);
+                });
         }
         catch
         {
             return Unreadable(heroId);
         }
+    }
+
+    /// <summary>
+    /// Vanilla's refresh of the last-known settlement (:30-33) runs before its never-seen return, so the
+    /// prefix repeats it, but only for a known, alive hero whose party structure reaches a missing leader:
+    /// every other hero goes to vanilla, which makes the write itself. The settlement is read after it.
+    /// </summary>
+    internal static LastSeenState Complete(
+        LastSeenState structure, bool activeOrPrisoner, Action refresh,
+        Func<(bool HasLastSeen, bool IsInSettlement)> readSettlement)
+    {
+        if (!structure.KnownAndAlive || !structure.PartyReachesUnguardedRead) return structure;
+
+        if (activeOrPrisoner) refresh();
+        var (hasLastSeen, isInSettlement) = readSettlement();
+        return new LastSeenState(structure.HeroId, structure.KnownAndAlive, hasLastSeen, isInSettlement,
+            structure.IsPrisoner, structure.HasParty, structure.PartyId, structure.PartyIsMobile,
+            structure.PartyLeaderMissing, structure.HasArmy, structure.ArmyLeaderMissing);
     }
 
     private static LastSeenState Unreadable(string heroId) =>
