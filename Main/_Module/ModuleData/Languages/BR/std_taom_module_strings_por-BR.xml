@@ -955,6 +955,8 @@
 
     <string id="wsDNxArW" text="{PEACEMAKER_RULER.NAME} de {KINGDOM_CONSIDERING_PEACE} escolheu não fazer paz com {KINGDOM}." />
 
+    <string id="WYHqMwwo" text="{#GENDER(CLAN)}O {#}A {#}Os {#}As {#}{\#}{CLAN} {#GENDER(CLAN)}foi eliminado{#}foi eliminada{#}foram eliminados{#}foram eliminadas{#}foi eliminado{\#}." />
+
     <string id="xAuejv91" text="{RULER.NAME} de {KINGDOM} decidiu contra fazer paz com {OTHER_KINGDOM}, com {?RULER.GENDER}seu{?}seu{\?} conselho igualmente dividido sobre o assunto." />
 
     <string id="XaZyU3Cn" text="{AGGRESSOR_RULER.NAME} de {AGGRESSOR_KINGDOM} escolheu não entrar em guerra com {KINGDOM} apesar dos desejos de {?AGGRESSOR_RULER.GENDER}seu{?}seu{\?} conselho." />
@@ -983,9 +985,9 @@
 
     <string id="ZZ1oLfEq" text="{RULER.NAME} atendeu ao chamado de {CALLING_KINGDOM} e declarou guerra a {KINGDOM_TO_CALL_TO_WAR_AGAINST} com o apoio de {?RULER.GENDER}seu{?}seu{\?} conselho." />
 
-    <string id="taom_shaghana_name" text="Shaghâna" />
+    <string id="taom_shaghana_name" text="{.NS}Shaghâna" />
 
-    <string id="taom_shaghana_short_name" text="Shaghâna" />
+    <string id="taom_shaghana_short_name" text="{.NS}Shaghâna" />
 
     <string id="taom_shaghana_title" text="Taskralan de Shaghâna" />
 
@@ -993,7 +995,7 @@
 
     <string id="taom_shaghana_desc" text="Shaghâna é a região oriental de Harad, uma terra de estepes queimadas pelo sol e fortalezas antigas. Seus nove clãs tribais são guerreiros ferozes, unidos por juramentos e sangue, incutindo medo naqueles que ousam se opor a eles." />
 
-    <string id="aom_shaghana_name" text="Shaghâna" />
+    <string id="aom_shaghana_name" text="{.NS}Shaghâna" />
 
     <string id="aom_shaghana_desc" text="Os Shaghâna são um povo tribal feroz das estepes orientais de Harad, conhecidos como saqueadores implacáveis e cavaleiros habilidosos. Unidos por juramentos e clãs, eles respondem ao seu Taskral e servem aos desígnios sombrios de Sauron de suas fortalezas queimadas pelo sol." />
 
@@ -1015,23 +1017,23 @@
 
     <string id="aom_lord_SH9_1_name" text="Saluz" />
 
-    <string id="aom_clan_shaghana_1_name" text="Ezarkia" />
+    <string id="aom_clan_shaghana_1_name" text="{.NS}Ezarkia" />
 
-    <string id="aom_clan_shaghana_2_name" text="Kûmaraknis" />
+    <string id="aom_clan_shaghana_2_name" text="{.NS}Kûmaraknis" />
 
-    <string id="aom_clan_shaghana_3_name" text="Taiymâkä" />
+    <string id="aom_clan_shaghana_3_name" text="{.NS}Taiymâkä" />
 
-    <string id="aom_clan_shaghana_4_name" text="Zayaknûri" />
+    <string id="aom_clan_shaghana_4_name" text="{.NS}Zayaknûri" />
 
-    <string id="aom_clan_shaghana_5_name" text="Selarkes" />
+    <string id="aom_clan_shaghana_5_name" text="{.NS}Selarkes" />
 
-    <string id="aom_clan_shaghana_6_name" text="Uzharês" />
+    <string id="aom_clan_shaghana_6_name" text="{.NS}Uzharês" />
 
-    <string id="aom_clan_shaghana_7_name" text="Alâranin" />
+    <string id="aom_clan_shaghana_7_name" text="{.NS}Alâranin" />
 
-    <string id="aom_clan_shaghana_8_name" text="Banûgand" />
+    <string id="aom_clan_shaghana_8_name" text="{.NS}Banûgand" />
 
-    <string id="aom_clan_shaghana_9_name" text="Acammes" />
+    <string id="aom_clan_shaghana_9_name" text="{.NS}Acammes" />
 
     <string id="aom_sh_notable_0" text="Comerciante astuto de Shaghâna" />
 
@@ -1085,9 +1087,9 @@
 
     <string id="aom_sh_headman_3" text="Ancião da aldeia Shaghâna" />
 
-    <string id="taom_abanissa_name" text="Âbanissa" />
+    <string id="taom_abanissa_name" text="{.NS}Âbanissa" />
 
-    <string id="taom_abanissa_short_name" text="Âbanissa" />
+    <string id="taom_abanissa_short_name" text="{.NS}Âbanissa" />
 
     <string id="taom_abanissa_title" text="Châjaphân de Âbanissa" />
 
@@ -1095,7 +1097,7 @@
 
     <string id="taom_abanissa_desc" text="Âbanissa situa-se no extremo sul de Harad, um reino de selvas úmidas e antigas dinastias de pedra. As grandes Casas de Âbanissa comandam temíveis bestas de guerra e exércitos de guerreiros disciplinados, seu poder não responde a ninguém senão ao próprio Sauron." />
 
-    <string id="aom_abanissa_name" text="Âbanissa" />
+    <string id="aom_abanissa_name" text="{.NS}Âbanissa" />
 
     <string id="aom_abanissa_desc" text="As grandes Casas de Âbanissa governam o extremo sul de Harad, uma terra de selvas úmidas, antigos palácios de pedra e imponentes bestas de guerra. Seus exércitos marcham sob estandartes de dinastia, comandando respeito e terror através das terras do sul." />
 
@@ -1115,21 +1117,21 @@
 
     <string id="aom_lord_AB8_1_name" text="Tirdah" />
 
-    <string id="aom_clan_abanissa_1_name" text="Casa de Phaxsharân" />
+    <string id="aom_clan_abanissa_1_name" text="{.FS}Casa de Phaxsharân" />
 
-    <string id="aom_clan_abanissa_2_name" text="Casa de Hoshêdharma" />
+    <string id="aom_clan_abanissa_2_name" text="{.FS}Casa de Hoshêdharma" />
 
-    <string id="aom_clan_abanissa_3_name" text="Casa de Vasnârad" />
+    <string id="aom_clan_abanissa_3_name" text="{.FS}Casa de Vasnârad" />
 
-    <string id="aom_clan_abanissa_4_name" text="Casa de Gorazehan" />
+    <string id="aom_clan_abanissa_4_name" text="{.FS}Casa de Gorazehan" />
 
-    <string id="aom_clan_abanissa_5_name" text="Casa de Azadafrozan" />
+    <string id="aom_clan_abanissa_5_name" text="{.FS}Casa de Azadafrozan" />
 
-    <string id="aom_clan_abanissa_6_name" text="Casa de Artaxshâsan" />
+    <string id="aom_clan_abanissa_6_name" text="{.FS}Casa de Artaxshâsan" />
 
-    <string id="aom_clan_abanissa_7_name" text="Casa de Ardâcheran" />
+    <string id="aom_clan_abanissa_7_name" text="{.FS}Casa de Ardâcheran" />
 
-    <string id="aom_clan_abanissa_8_name" text="Casa de Tîrdahanâ" />
+    <string id="aom_clan_abanissa_8_name" text="{.FS}Casa de Tîrdahanâ" />
 
     <string id="aom_ab_notable_0" text="Corretor de dinastia de Harad Distante" />
 
@@ -1183,87 +1185,87 @@
 
     <string id="aom_ab_headman_3" text="Ancião da aldeia de Âbanissa" />
 
-    <string id="TAOM_ghilman_name" text="Guarda da Serpente" />
+    <string id="TAOM_ghilman_name" text="{.FS}Guarda da Serpente" />
 
-    <string id="TAOM_ghilman_short" text="Guarda da Serpente" />
+    <string id="TAOM_ghilman_short" text="{.FS}Guarda da Serpente" />
 
     <string id="TAOM_ghilman_text" text="A Guarda da Serpente são soldados montados a serviço do Senhor das Serpentes de Harad Próximo. Criados na sela nas planícies ondulantes ao sul do Ephel Dúath, são inigualáveis como arqueiros montados em todas as terras do sul da Terra-média. Em tempos de paz entre Harad e Mordor, a Guarda aluga seus serviços aos senhores haradrim e a qualquer outro poder rico o suficiente para pagar sua taxa de ouro." />
 
-    <string id="TAOM_legion_name" text="A Companhia Cinzenta" />
+    <string id="TAOM_legion_name" text="{.FS}Companhia Cinzenta" />
 
-    <string id="TAOM_legion_short" text="Companhia Cinzenta" />
+    <string id="TAOM_legion_short" text="{.FS}Companhia Cinzenta" />
 
     <string id="TAOM_legion_text" text="A Companhia Cinzenta é a última irmandade organizada dos Monteiros Dúnedain, descendentes dos reis de Arnor que perderam seu reino há eras. Eles cavalgam pelo Norte sem um lar próprio, mantendo a paz em terras que esqueceram seus nomes. Embora sua primeira lealdade seja à linhagem de Elendil, aceitam contratos de senhores por toda a Terra-média quando suas andanças os levam por terras civilizadas." />
 
-    <string id="TAOM_skolderbrotva_name" text="Machadeiros de Erebor" />
+    <string id="TAOM_skolderbrotva_name" text="{.MP}Machadeiros de Erebor" />
 
-    <string id="TAOM_skolderbrotva_short" text="Machadeiros" />
+    <string id="TAOM_skolderbrotva_short" text="{.MP}Machadeiros" />
 
     <string id="TAOM_skolderbrotva_text" text="Os Machadeiros de Erebor são veteranos das batalhas do Rei Thorin que acharam o tempo de paz inadequado ao seu temperamento. Treinados na luta corpo a corpo dos salões anões — muralha de escudos, machado curto, picareta — são formidáveis em qualquer terreno, mas se destacam nas passagens das montanhas que conectam Erebor aos reinos dos homens. Aceitam contratos de qualquer um que possa pagar sua taxa, mas não levantarão um machado contra Erebor ou Valfenda." />
 
-    <string id="TAOM_company_name" text="Lâminas Corsárias" />
+    <string id="TAOM_company_name" text="{.FP}Lâminas Corsárias" />
 
-    <string id="TAOM_company_short" text="Corsários" />
+    <string id="TAOM_company_short" text="{.MP}Corsários" />
 
     <string id="TAOM_company_text" text="As Lâminas Corsárias são veteranos de combate marítimo dos portos de Umbar que passaram a vender suas habilidades em terra. Lutam como besteiros — a arma preferida da guerra a bordo — e estão tão confortáveis num cerco quanto num convés balançante. Seu capitão, um exilado númenoreano marcado por cicatrizes, os mantém fiéis aos contratos com disciplina férrea, sabendo que sua reputação é sua carga mais valiosa." />
 
-    <string id="TAOM_beni_zilal_name" text="O Olho Cego" />
+    <string id="TAOM_beni_zilal_name" text="{.MS}Olho Cego" />
 
-    <string id="TAOM_beni_zilal_short" text="Olho Cego" />
+    <string id="TAOM_beni_zilal_short" text="{.MS}Olho Cego" />
 
     <string id="TAOM_beni_zilal_text" text="O Olho Cego é uma irmandade de contrabandistas, receptadores e assassinos de aluguel que operam pelas costas de Harad e pelo deserto profundo. Dizem que descendem de um culto de assassinos que serviu a um rei haradrim esquecido, e seus métodos — veneno, sombra e a exploração de segredos — permanecem inalterados. Senhores que desejam remover discretamente um rival, ou mercadores que precisam transportar carga sem inspeção alfandegária, sabem onde deixar uma moeda de ouro e uma carta lacrada." />
 
-    <string id="TAOM_wolfskins_name" text="Devastadores Variag" />
+    <string id="TAOM_wolfskins_name" text="{.MP}Devastadores Variag" />
 
-    <string id="TAOM_wolfskins_short" text="Devastadores" />
+    <string id="TAOM_wolfskins_short" text="{.MP}Devastadores" />
 
     <string id="TAOM_wolfskins_text" text="Os Devastadores Variag são bandos de guerra de jovens guerreiros variag das estepes de Khand que passam sua juventude em um estado de guerra ritual: não podem possuir comida cozida, dormir sob nenhum teto permanente e não demonstrar misericórdia. Embora a maioria eventualmente retorne à vida estabelecida de seus clãs, alguns nunca o fazem, e estes formam os Devastadores — fora-da-lei que atacam as estradas de Khand e fazem incursões através de suas fronteiras em Harad e Gondor." />
 
-    <string id="TAOM_brotherhood_name" text="Saqueadores Dunlendinos" />
+    <string id="TAOM_brotherhood_name" text="{.MP}Saqueadores Dunlendinos" />
 
-    <string id="TAOM_brotherhood_short" text="Saqueadores" />
+    <string id="TAOM_brotherhood_short" text="{.MP}Saqueadores" />
 
     <string id="TAOM_brotherhood_text" text="Os Saqueadores Dunlendinos são o remanescente despedaçado de um clã das colinas que outrora habitava os vales agora governados pelos rohirrim. Seus avós foram expulsos de terras férteis para as alturas rochosas, e eles nutriram essa amargura numa filosofia de saqueadores: tudo tomado de um sulista ou de um homem do rei é meramente a restauração do que foi roubado. Na prática são bandidos, mas perigosos, que conhecem cada trilha de cabras pelas colinas." />
 
-    <string id="TAOM_hidden_hand_name" text="Os Servos da Boca" />
+    <string id="TAOM_hidden_hand_name" text="{.MP}Servos da Boca" />
 
-    <string id="TAOM_hidden_hand_short" text="Servos" />
+    <string id="TAOM_hidden_hand_short" text="{.MP}Servos" />
 
     <string id="TAOM_hidden_hand_text" text="Os Servos da Boca são os Olhos de Barad-dûr operando além do Portão Negro — informantes, capangas e espiões infiltrados entre os povos que fazem fronteira com Mordor. Onde os exércitos de Sauron ainda não podem alcançar, esses agentes coletam tributos e silenciam dissidências. Eles trabalham através de suborno, chantagem e assassinatos silenciosos, garantindo que nenhuma conspiração contra o Senhor do Escuro crie raízes antes de ser arrancada e esmagada." />
 
-    <string id="TAOM_lakepike_name" text="Destruidores do Lago Comprido" />
+    <string id="TAOM_lakepike_name" text="{.MP}Destruidores do Lago Comprido" />
 
-    <string id="TAOM_lakepike_short" text="Destruidores" />
+    <string id="TAOM_lakepike_short" text="{.MP}Destruidores" />
 
     <string id="TAOM_lakepike_text" text="Os Destruidores do Lago Comprido vivem nos canaviais e velhos cais apodrecidos das margens sombrias do Lago Comprido, longe das luzes respeitáveis de Esgaroth. Eles ganham a vida atraindo barcaças para bancos de areia ocultos com lanternas falsas, depois saqueando a carga e vendendo-a através de receptadores na própria cidade. Apesar dos esforços do Mestre da Cidade do Lago e dos mercadores de Dale, os Destruidores têm amigos demais nas tavernas do cais para serem facilmente expulsos." />
 
-    <string id="TAOM_embers_name" text="Culto do Olho Sem Pálpebra" />
+    <string id="TAOM_embers_name" text="{.MS}Culto do Olho Sem Pálpebra" />
 
-    <string id="TAOM_embers_short" text="Culto do Olho" />
+    <string id="TAOM_embers_short" text="{.MS}Culto do Olho" />
 
     <string id="TAOM_embers_text" text="O Culto do Olho Sem Pálpebra é uma sociedade secreta enraizada na tradição dos Númenorianos Negros, venerando Sauron como um deus-rei que restaurará seus fiéis à glória quando ele se erguer novamente. Eles recrutam entre os despossuídos de Dunland e os cantos esquecidos do reino, prometendo favor divino e poder terreno. Na verdade, seus líderes respondem a agentes de Barad-dûr, e sua estrutura baseada em células os torna quase impossíveis de erradicar pela justiça de qualquer senhor." />
 
-    <string id="TAOM_jawwal_name" text="Os Cavaleiros da Areia" />
+    <string id="TAOM_jawwal_name" text="{.MP}Cavaleiros da Areia" />
 
-    <string id="TAOM_jawwal_short" text="Cavaleiros da Areia" />
+    <string id="TAOM_jawwal_short" text="{.MP}Cavaleiros da Areia" />
 
     <string id="TAOM_jawwal_text" text="Os Cavaleiros da Areia são os clãs nômades do deserto do interior profundo de Harad, mestres dos desertos sem água entre o Ephel Dúath e o distante mar do sul. Eles percorrem rotas conhecidas apenas por eles mesmos, exigindo tributo de qualquer caravana ousada o suficiente para cruzar seu território. Os senhores assentados do Harad Próximo os tratam como um incômodo; os Cavaleiros da Areia consideram os senhores assentados ladrões que roubaram o que o deserto já havia dado livremente." />
 
-    <string id="TAOM_karakhuzaits_name" text="Os Orientais Selvagens" />
+    <string id="TAOM_karakhuzaits_name" text="{.MP}Orientais Selvagens" />
 
-    <string id="TAOM_karakhuzaits_short" text="Selvagens" />
+    <string id="TAOM_karakhuzaits_short" text="{.MP}Selvagens" />
 
     <string id="TAOM_karakhuzaits_text" text="Os Orientais Selvagens são os clãs das estepes não conquistados do Mar de Rhûn, que resistiram à autoridade de todo senhor que tentou trazê-los ao jugo — chefe de Rhûn, tenente de Mordor e Rei de Dale igualmente. Eles vagam pelas pradarias a leste do Celduin, reunindo cavalos, atacando rebanhos e coletando tributo de estrada de qualquer caravana tola o suficiente para cruzar sua estepe sem escolta armada." />
 
-    <string id="TAOM_forest_people_name" text="Os Drúedain" />
+    <string id="TAOM_forest_people_name" text="{.MP}Drúedain" />
 
-    <string id="TAOM_forest_people_short" text="Woses" />
+    <string id="TAOM_forest_people_short" text="{.MP}Woses" />
 
     <string id="TAOM_forest_people_text" text="Os Drúedain, conhecidos pelos Homens como Woses ou os Homens Selvagens dos Bosques, são um povo antigo que habita a floresta profunda de Drúadan e os vales escondidos das Montanhas Brancas. Eles limpam o solo com fogo, cultivam o que precisam no solo rico em cinzas e seguem adiante quando a terra se esgota — um modo de vida que os povos assentados da Terra-média nunca entenderam e nunca se preocuparam em entender. Os Drúedain não querem senhor algum, não pagam impostos e pedem apenas para serem deixados no silêncio da floresta." />
 
-    <string id="TAOM_eleftheroi_name" text="Os Beornings" />
+    <string id="TAOM_eleftheroi_name" text="{.MP}Beornings" />
 
-    <string id="TAOM_eleftheroi_short" text="Beornings" />
+    <string id="TAOM_eleftheroi_short" text="{.MP}Beornings" />
 
     <string id="TAOM_eleftheroi_text" text="Os Beornings são os grandes homens dos bosques que habitam o vale do Anduin entre as Montanhas Nevoentas e a Floresta das Trevas, liderados pelos metamorfos da linhagem de Beorn. Eles não permitem que nenhum Orc cruze seu território, cobram pedágio no Vau de Carrock para financiar sua vigília e não respondem a nenhum rei na Terra-média. Embora negociem e conversem com Elfos e Anões, qualquer exército que marche através de sua floresta sem permissão descobrirá que os Beornings têm dentes muito grandes." />
 
@@ -2237,7 +2239,7 @@
 
     <string id="taom_career_grp_wolfskin_hunter_t3_b" text="Mestre da Grande Alcateia" />
 
-    <string id="taom_bandit_dunland_name" text="Saqueadores de Dunlândia" />
+    <string id="taom_bandit_dunland_name" text="{.MP}Saqueadores de Dunlândia" />
 
     <string id="taom_bandit_dunland_m1" text="Caradoc" />
 
@@ -2269,7 +2271,7 @@
 
     <string id="taom_bandit_dunland_f5" text="Olwen" />
 
-    <string id="taom_bandit_rhun_name" text="Saqueadores de Rhûn" />
+    <string id="taom_bandit_rhun_name" text="{.MP}Saqueadores de Rhûn" />
 
     <string id="taom_bandit_rhun_m1" text="Khamûl" />
 
@@ -2301,7 +2303,7 @@
 
     <string id="taom_bandit_rhun_f5" text="Sangela" />
 
-    <string id="taom_bandit_harad_name" text="Saqueadores Haradrim" />
+    <string id="taom_bandit_harad_name" text="{.MP}Saqueadores Haradrim" />
 
     <string id="taom_bandit_harad_m1" text="Suladân" />
 
@@ -2333,7 +2335,7 @@
 
     <string id="taom_bandit_harad_f5" text="Mûzana" />
 
-    <string id="taom_bandit_gundabad_name" text="Saqueadores Orcs de Gundabad" />
+    <string id="taom_bandit_gundabad_name" text="{.MP}Saqueadores Orcs de Gundabad" />
 
     <string id="taom_bandit_gundabad_m1" text="Bolg" />
 
@@ -2365,7 +2367,7 @@
 
     <string id="taom_bandit_gundabad_f5" text="Narzga" />
 
-    <string id="taom_bandit_umbar_name" text="Corsários de Umbar" />
+    <string id="taom_bandit_umbar_name" text="{.MP}Corsários de Umbar" />
 
     <string id="taom_bandit_umbar_m1" text="Castamir" />
 
@@ -2397,7 +2399,7 @@
 
     <string id="taom_bandit_umbar_f5" text="Inzilbêth" />
 
-    <string id="taom_bandit_gondor_name" text="Soldados de Gondor" />
+    <string id="taom_bandit_gondor_name" text="{.MP}Soldados de Gondor" />
 
     <string id="taom_bandit_gondor_m1" text="Bergil" />
 
@@ -2429,7 +2431,7 @@
 
     <string id="taom_bandit_gondor_f5" text="Anwen" />
 
-    <string id="taom_bandit_erebor_name" text="Blacklocks" />
+    <string id="taom_bandit_erebor_name" text="{.MP}Blacklocks" />
 
     <string id="taom_bandit_erebor_m1" text="Nargûm" />
 
@@ -2461,7 +2463,7 @@
 
     <string id="taom_bandit_erebor_f5" text="Frida" />
 
-    <string id="taom_bandit_mirkwood_name" text="Caçadores da Floresta das Trevas" />
+    <string id="taom_bandit_mirkwood_name" text="{.MP}Caçadores da Floresta das Trevas" />
 
     <string id="taom_bandit_mirkwood_m1" text="Faeglir" />
 
@@ -5361,7 +5363,7 @@
 
     <string id="taom_oob_autoassign_none" text="Nenhum herói se encaixa em um posto de capitão vago." />
 
-    <string id="taom_bandit_mirkwood_spiders_name" text="Aranhas da Floresta das Trevas" />
+    <string id="taom_bandit_mirkwood_spiders_name" text="{.FP}Aranhas da Floresta das Trevas" />
 
     <string id="taom_spider_brood_forest_name" text="Aranha Gigante" />
 
@@ -5369,7 +5371,7 @@
 
     <string id="taom_spider_brood_pale_name" text="Mãe-de-Ninhada Pálida" />
 
-    <string id="taom_bandit_wild_trolls_name" text="Trolls Selvagens" />
+    <string id="taom_bandit_wild_trolls_name" text="{.MP}Trolls Selvagens" />
 
     <string id="taom_troll_bandit_cave_name" text="Troll das Cavernas" />
 
@@ -6282,9 +6284,9 @@
 
     <string id="taom_fwatch_wait_site" text="{SCOUT} is riding to look over {SETTLEMENT}." />
 
-    <string id="taom_namegiving_lore_minas_ithil" text="Minas Ithil" />
+    <string id="taom_namegiving_lore_minas_ithil" text="{.NS}Minas Ithil" />
 
-    <string id="taom_namegiving_lore_amon_lanc" text="Amon Lanc" />
+    <string id="taom_namegiving_lore_amon_lanc" text="{.NS}Amon Lanc" />
 
     <string id="taom_namegiving_lore_deadmens_dike" text="Deadmen's Dike" />
 

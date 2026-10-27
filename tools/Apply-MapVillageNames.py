@@ -38,6 +38,7 @@ castle_E9 and castle_G1, so the dict is no longer villages-only despite the file
 added (#562); that tool writes the names itself, so no run of this script was needed.
 """
 import os, re
+import name_tags
 from _gamedir import game_dir
 
 NAMES = {
@@ -532,7 +533,12 @@ ROOT = GAME + r"\Modules\TAOM_Map\ModuleData"
 LANGS = ["BR", "CNs", "CNt", "DE", "FR", "IT", "JP", "KO", "PL", "RU", "SP", "TR"]
 
 
-def patch(path, mode):
+# The grammar tags of BR and IT names (#1023): a row the tag table knows keeps its table tag, any other keeps the tag
+# its old text carried. After a name changes, rerun tools/generate_name_tags.py --write: the head noun may have changed.
+TAG_TABLE = name_tags.load_table()
+
+
+def patch(path, mode, lang=None):
     with open(path, "rb") as f:
         data = f.read()
     text = data.decode("utf-8")
@@ -540,9 +546,11 @@ def patch(path, mode):
     for sid, new in NAMES.items():
         if mode == "master":
             pat = re.compile(r'(name="\{=Settlements\.Settlement\.name\.' + re.escape(sid) + r'\})[^"]*(")')
+            text, n = pat.subn(lambda m, v=new: m.group(1) + v + m.group(2), text)
         else:
-            pat = re.compile(r'(id="Settlements\.Settlement\.name\.' + re.escape(sid) + r'"\s+text=")[^"]*(")')
-        text, n = pat.subn(lambda m, v=new: m.group(1) + v + m.group(2), text)
+            key = "Settlements.Settlement.name." + sid
+            pat = re.compile(r'(id="' + re.escape(key) + r'"\s+text=")([^"]*)(")')
+            text, n = pat.subn(lambda m, v=new, k=key: m.group(1) + name_tags.carry_tag(lang, k, m.group(2), v, TAG_TABLE) + m.group(3), text)
         count += n
     with open(path, "wb") as f:
         f.write(text.encode("utf-8"))
@@ -552,6 +560,6 @@ def patch(path, mode):
 c = patch(os.path.join(ROOT, "settlements.xml"), "master")
 print(f"\nsettlements.xml: {c} replacements")
 for lang in LANGS:
-    c = patch(os.path.join(ROOT, "Languages", lang, "loc_settlements.xml"), "loc")
+    c = patch(os.path.join(ROOT, "Languages", lang, "loc_settlements.xml"), "loc", lang)
     print(f"{lang}: {c} replacements")
 print(f"\nGrand total: {c * 13 + len(NAMES)} string replacements (approx)")

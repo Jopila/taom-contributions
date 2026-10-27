@@ -1394,3 +1394,10 @@ rule is not "TAOM loads last": every module's file with a `name` must carry the 
   earlier in the same text in IT, SP, DE, PL and RU (Spanish "en el Minas Tirith"), which is #1023's work; French
   `{.dl}`/`{.cl}` put a bare "de" or "à" before an untagged name ("de Le Poing de Fer"), also #1023; Turkish `{._}`
   lowercases with Turkish rules ("ısengard"), as the engine's processor does for vanilla names.
+### Before tagging a translated name, check what the engine's grammar does with the tag in that language (#1023, 2026-10-26)
+Wave 1 tagged every Italian kingdom and clan name `{.FN}` because `{.FN}` and `{.MN}` both print the plain preposition. Italian
+`GENDER` maps MN to 4 and FN to 5, and 29 of the 30 vanilla selections differ between the two: `{.FN}` gave "Erebor è stata distrutta".
+- **Why missed:** the check covered the tag's effect on the preposition and stopped; the agreement code reads the same tag.
+- **Prevent:** before a tag goes on a name class, read the language processor and the function file for every place that reads
+  the tag, and tag by the gender of the implied noun ("il regno", "il clan"), not by the one effect you were fixing.
+- **Source:** `docs/features/name-grammar-tags.md` (Solution Approach), #1023 review wave 1.

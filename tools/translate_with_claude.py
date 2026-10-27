@@ -53,14 +53,14 @@ del _stream_name, _stream
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from _gamedir import ensure_exists, game_modules
+import name_tags
+from _gamedir import DEFAULT_GAME_ROOT, ensure_exists, game_modules
 from _loc_sources import TAOM_SOURCES
 
 
 # ── Configuration ──────────────────────────────────────────────────────────────
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-DEFAULT_GAME_ROOT = r"E:\Steam\steamapps\common\Mount & Blade II Bannerlord"
 
 TAOM_LANG_DIR = REPO_ROOT / "Main" / "_Module" / "ModuleData" / "Languages"
 
@@ -380,7 +380,8 @@ def _diff_files(source: Path, target: Path, skip_ids=frozenset()) -> list[Entry]
         if sid in skip_ids:
             continue
         cur_text = tgt_map.get(sid, eng_text)
-        if cur_text == eng_text:  # not yet translated
+        # A grammar tag in front of the English text does not make it a translation (#1023).
+        if name_tags.strip_leading_tags(cur_text) == eng_text:  # not yet translated
             entries.append(Entry(file_path=target, string_id=sid, english_text=eng_text, current_text=cur_text))
     return entries
 
@@ -400,7 +401,7 @@ def _diff_against_settlement_source(settlements_xml: Path, target: Path) -> list
     entries = []
     for sid, eng_text in src_map.items():
         cur_text = tgt_map.get(sid, eng_text)
-        if cur_text == eng_text:
+        if name_tags.strip_leading_tags(cur_text) == eng_text:
             entries.append(Entry(file_path=target, string_id=sid, english_text=eng_text, current_text=cur_text))
     return entries
 
@@ -466,10 +467,18 @@ CONDITIONAL_CLOSE = re.compile(r"\{\\\?\}")
 EXPRESSION_TAG = re.compile(r"\[(?:ib|if|rb|rf):[^\]]*\]")
 
 
+# Grammar tags: {.NS}, {.FN}, {.MS}, {.MP} and the like. por_br_functions.xml GENDER and
+# ItalianTextProcessor read them to choose an article or a preposition, so a translation that drops or adds
+# one changes the game text around it (#1023). The count catches both.
+GRAMMAR_TAG = re.compile(r"\{\.[A-Za-z]+\}")
+
+
 def extract_placeholders(text: str) -> dict[str, int]:
     """Return counts of each placeholder/structural token."""
     counts = {}
     for m in VAR_PATTERN.findall(text):
+        counts[m] = counts.get(m, 0) + 1
+    for m in GRAMMAR_TAG.findall(text):
         counts[m] = counts.get(m, 0) + 1
     counts["__cond_open__"] = len(CONDITIONAL_OPEN.findall(text))
     counts["__cond_mid__"] = len(CONDITIONAL_MID.findall(text))
@@ -480,7 +489,7 @@ def extract_placeholders(text: str) -> dict[str, int]:
 
 
 def placeholders_match(english: str, translated: str) -> tuple[bool, str]:
-    """Return (ok, reason): checks variable, conditional and animation-tag preservation."""
+    """Return (ok, reason): checks variable, conditional, grammar-tag and animation-tag preservation."""
     e = extract_placeholders(english)
     t = extract_placeholders(translated)
     if e != t:
@@ -872,6 +881,15 @@ def sync_missing_ids(source_path: Path, target_path: Path, dry_run: bool = False
 
 # ── Write back ─────────────────────────────────────────────────────────────────
 
+def is_repo_file(path: Path) -> bool:
+    """True for a file inside this repo; the TAOM_Map and Armory language files live in the game install."""
+    try:
+        Path(path).resolve().relative_to(REPO_ROOT.resolve())
+        return True
+    except ValueError:
+        return False
+
+
 def write_back(file_path: Path, translations: dict[str, str],
                language_tag: str) -> tuple[int, list[str]]:
     """Update the <string id=X text="..."/> entries in file_path with new translations.
@@ -941,6 +959,9 @@ def main(argv=None):
     p.add_argument("--module", default="all", choices=["TAOM", "TAOM_Map", "Armory", "all"])
     p.add_argument("--dry-run", action="store_true", help="Preview without writing")
     p.add_argument("--apply", action="store_true", help="Write translations and call API")
+    p.add_argument("--allow-live-write", action="store_true",
+                   help="add the grammar tags to BR and IT name rows written outside the repo (TAOM_Map, Armory); "
+                        "repo files are always tagged")
     p.add_argument("--max-entries", type=int, default=None,
                    help="Cap API entries for testing; 0 is a cap of zero (no provider call)")
     p.add_argument("--sync-ids", action="store_true",
@@ -979,6 +1000,8 @@ def main(argv=None):
     locale, lang_name = LANGUAGES[lang]
     overrides = load_overrides(lang)
     cache = load_cache(lang)
+    # Beside the cache, before any paid call: a missing or broken table stops the run here, not after the spend.
+    tag_table = name_tags.load_table() if lang in name_tags.TAGGED_LANGUAGES else None
 
     print(f"\n[TAOM Translator] Target: {lang_name} ({lang} / {locale})")
     print(f"  Overrides loaded: {len(overrides)}")
@@ -1052,16 +1075,23 @@ def main(argv=None):
 
     # Translate
     result = TranslationResult(total_entries=len(entries))
+    # Cache and override fills are tagged when written. Fresh model output is not: a new translation can change a
+    # name's first word, and with it the tag, so its tag waits for generate_name_tags.py.
     by_file: dict[Path, dict[str, str]] = {}
+    fresh_ids: set[str] = set()
 
-    def queue(e: Entry, translated: str):
+    def queue_known(e: Entry, translated: str):
         by_file.setdefault(e.file_path, {})[e.string_id] = translated
 
+    def queue(e: Entry, translated: str):
+        queue_known(e, translated)
+        fresh_ids.add(e.string_id)
+
     for e in via_override:
-        queue(e, overrides[e.string_id])
+        queue_known(e, overrides[e.string_id])
         result.from_overrides += 1
     for e in via_cache:
-        queue(e, cache[e.string_id])
+        queue_known(e, cache[e.string_id])
         result.from_cache += 1
 
     if need_llm:
@@ -1123,13 +1153,29 @@ def main(argv=None):
     print(f"\n  Writing {sum(len(d) for d in by_file.values())} translations to {len(by_file)} files...")
     total_written = 0
     all_unplaced: list[str] = []
+    wrote_outside_repo = False
     for file_path, translations in by_file.items():
+        outside = not is_repo_file(file_path)
+        wrote_outside_repo = wrote_outside_repo or outside
+        if tag_table is not None and (not outside or args.allow_live_write):
+            # One pass: cache and override fills get their tag, a fresh model row does not (see above).
+            translations = {sid: text if sid in fresh_ids else name_tags.tag_row(lang, sid, text, tag_table)
+                            for sid, text in translations.items()}
         n, unplaced = write_back(file_path, translations, lang_name)
         total_written += n
         all_unplaced.extend(unplaced)
         rel = file_path.name
         suffix = f"  ({len(unplaced)} ids not in file)" if unplaced else ""
         print(f"    {rel}: {n} entries{suffix}")
+    if tag_table is not None and fresh_ids:
+        named = sorted(sid for sid in fresh_ids if name_tags.tag_for(lang, sid, tag_table))
+        print(f"\n  {len(fresh_ids)} fresh {lang} translation(s) were written without a grammar tag"
+              + (f"; these are name rows of the tag table: {named[:20]}" if named else "."))
+        print(f"  To tag them: python tools/generate_name_tags.py --write, then "
+              f"python tools/name_tags.py --lang {lang} --apply")
+    if tag_table is not None and wrote_outside_repo:
+        print(f"\n  Files outside the repo were written. To tag or re-tag their {lang} names: "
+              f"python tools/name_tags.py --target live-map --apply --allow-live-write")
     if all_unplaced:
         print(f"  WARNING: {len(all_unplaced)} translation(s) had no matching id in the target "
               f"file and were discarded — add the id to the per-language file first: "

@@ -43,6 +43,7 @@ from collections import namedtuple
 from xml.sax.saxutils import quoteattr
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import name_tags  # noqa: E402
 from _gamedir import game_dir  # noqa: E402
 
 # BANNERLORD_GAME_DIR is the install path README.md requires and setup-dev-env.ps1 sets.
@@ -365,6 +366,15 @@ def save_order_findings(master_text, new_ids):
     return findings
 
 
+def tagged_rows(lang, rows, table):
+    """[(id, name)] with each BR and IT name carrying the grammar tag the table has for its id (#1023).
+
+    An id the table does not know yet stays plain; tools/generate_name_tags.py --write then
+    tools/name_tags.py --target live-map --apply tag it.
+    """
+    return [(sid, name_tags.tag_row(lang, "Settlements.Settlement.name." + sid, name, table)) for sid, name in rows]
+
+
 def loc_row(sid, name):
     return f'    <string id="Settlements.Settlement.name.{sid}" text={quoteattr(name)} />'
 
@@ -491,11 +501,12 @@ def main():
     if blocks:
         _write(LIVE, master_bom, append_settlements(master, blocks), tag)
     written = []
+    table = name_tags.load_table()
     by_id = {v.id: v for v in VILLAGES}
     for lang, (bom, text) in locs.items():
         if loc_plan[lang]:
             for anchor, group in group_by_anchor([by_id[sid] for sid, _ in loc_plan[lang]]).items():
-                text = insert_loc_rows(text, anchor, [(v.id, v.name) for v in group])
+                text = insert_loc_rows(text, anchor, tagged_rows(lang, [(v.id, v.name) for v in group], table))
             _write(_loc_path(lang), bom, text, tag)
             written.append(lang)
     print(f"\nApplied: +{n_blocks} settlement(s) in settlements.xml, +{sum(len(loc_plan[l]) for l in written)} loc row(s) "

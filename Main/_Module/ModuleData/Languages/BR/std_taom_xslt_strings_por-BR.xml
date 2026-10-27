@@ -6,44 +6,44 @@
     <tag language="Portuguese (Brazilian)" />
   </tags>
   <strings>
-    <string id="TAOM_dunland" text="Dunlândia" />
-    <string id="TAOM_dunland_short" text="Dunlândia" />
-    <string id="TAOM_dunland_title" text="Clãs da Dunlândia" />
+    <string id="TAOM_dunland" text="{.NS}Dunlândia" />
+    <string id="TAOM_dunland_short" text="{.NS}Dunlândia" />
+    <string id="TAOM_dunland_title" text="{.MP}Clãs da Dunlândia" />
     <string id="TAOM_dunland_ruler" text="Brenin" />
     <string id="TAOM_dunland_desc" text="A Dunlândia, uma terra áspera e selvagem de colinas ondulantes e florestas densas, é o lar dos ferozes e independentes dunlendinos. Frequentemente marginalizados e em desacordo com seus vizinhos, o povo da Dunlândia foi endurecido por séculos de luta e sobrevivência. Seus chefes lideram através da força e astúcia, unindo clãs sob um estandarte compartilhado de vingança e liberdade. Conhecidos por seus guerreiros ferozes e caçadores habilidosos, os dunlendinos favorecem machados, lanças e arcos, lutando com uma tenacidade nascida de sua profunda conexão com suas terras ancestrais. Embora seus costumes possam parecer primitivos para outros, os dunlendinos são orgulhosos e engenhosos, prontos para reconquistar seu lugar de direito na Terra-média." />
-    <string id="TAOM_gondor" text="Gondor" />
-    <string id="TAOM_gondor_short" text="Gondor" />
-    <string id="TAOM_gondor_title" text="Regência de Gondor" />
+    <string id="TAOM_gondor" text="{.NS}Gondor" />
+    <string id="TAOM_gondor_short" text="{.NS}Gondor" />
+    <string id="TAOM_gondor_title" text="{.FS}Regência de Gondor" />
     <string id="TAOM_gondor_ruler" text="Regente" />
     <string id="TAOM_gondor_desc" text="Gondor ergue-se como um orgulhoso bastião de força e resiliência na Terra-média, conhecida por suas imponentes cidades de pedra branca, linhagem antiga e exércitos habilidosos. Fundada por Elendil e seus filhos após a queda de Númenor, Gondor há muito protege os reinos dos homens contra a crescente escuridão no leste. Com Minas Tirith como sua capital, o reino é renomado por sua bravura, disciplina e lealdade aos Povos Livres. Embora assolada por anos de conflito com Mordor, os guerreiros e Regentes de Gondor mantiveram a esperança viva, aguardando o retorno do rei para restaurar sua antiga glória." />
-    <string id="TAOM_mordor" text="Mordor" />
-    <string id="TAOM_mordor_short" text="Mordor" />
-    <string id="TAOM_mordor_title" text="Domínio de Mordor" />
+    <string id="TAOM_mordor" text="{.NS}Mordor" />
+    <string id="TAOM_mordor_short" text="{.NS}Mordor" />
+    <string id="TAOM_mordor_title" text="{.MS}Domínio de Mordor" />
     <string id="TAOM_mordor_ruler" text="Senhor das Trevas" />
     <string id="TAOM_mordor_desc" text="Mordor é um reino sombrio e desolado, forjado nas trevas e governado pelo Senhor das Trevas Sauron. Aninhado atrás das imponentes montanhas negras, este reino transborda de exércitos orcs, trolls impiedosos e forjas ardentes produzindo armas de guerra. De sua fortaleza em Barad-dûr, Sauron comanda uma força imparável, pronta para espalhar seu domínio por toda a Terra-média. Os céus de Mordor estão nublados de cinzas, e suas terras são áridas, um domínio apropriado para a ambição distorcida e magia sombria de Sauron." />
-    <string id="TAOM_dale" text="Dale" />
-    <string id="TAOM_dale_short" text="Dale" />
-    <string id="TAOM_dale_title" text="Reino de Dale" />
+    <string id="TAOM_dale" text="{.NS}Dale" />
+    <string id="TAOM_dale_short" text="{.NS}Dale" />
+    <string id="TAOM_dale_title" text="{.MS}Reino de Dale" />
     <string id="TAOM_dale_ruler" text="Rei" />
     <string id="TAOM_dale_desc" text="Onde as águas do Rio Veloz encontram a sombra da Montanha Solitária, ergue-se Dale. A Cidade dos Homens foi reconstruída das ruínas após a Batalha dos Cinco Exércitos. Outrora um lugar de música e alegria, de comércio e salões de mercado dourados, Dale prosperou sob a proteção de Erebor. Seus mercadores navegavam barcos velozes pelo Celduin, suas ruas ecoavam com risos, e seu povo conhecia a paz. Mas a paz foi despedaçada quando o dragão chegou. Smaug, a morte alada do Norte, desceu sobre Erebor em chamas e fúria, e Dale foi a primeira a sofrer. A cidade queimou, seu povo fugiu, e por quase dois séculos, as orgulhosas torres abobadadas permaneceram silenciosas e quebradas, um monumento à tristeza. Porém, a ruína não é o fim da história de Dale. Com a morte do dragão, Bard, o Arqueiro, ergueu seu estandarte mais uma vez e chamou seu povo de volta ao lar. Das cinzas e pedra ergueu-se Dale novamente, não como era antes, mas maior. Sob o Rei Bard e seu filho Bain, a cidade prospera de novo, suas muralhas fortes, seu povo orgulhoso, e seu olhar sempre vigilante. Os Homens de Dale não são poderosos em número, nem antigos em magia, mas são resolutos e verdadeiros." />
-    <string id="TAOM_harad" text="Harad" />
-    <string id="TAOM_harad_short" text="Harad" />
+    <string id="TAOM_harad" text="{.NS}Harad" />
+    <string id="TAOM_harad_short" text="{.NS}Harad" />
     <string id="TAOM_harad_title" text="Taskralan de Harwan" />
     <string id="TAOM_harad_ruler" text="Taskral" />
     <string id="TAOM_harad_desc" text="Harad, uma vasta e diversa região ao sul de Gondor, abrange desertos áridos, selvas exuberantes e oásis férteis. Sua geografia é tão variada quanto seu povo, com dunas intermináveis dando lugar a florestas densas e rios repletos de vida. A história de Harad está mergulhada em tradições antigas, com grandes cidades e fortalezas pontilhando a paisagem, construídas por governantes cujos legados ecoam através das eras. O Grande Deserto de Haradwaith separa sua fronteira norte do interior, enquanto suas costas meridionais fervilham de comércio e pirataria. Unidas sob os estandartes de Sauron, as muitas tribos e reinos de Harad canalizam suas tradições profundamente enraizadas em seus esforços de guerra, transformando esta terra vibrante em uma potência de cultura e conflito." />
-    <string id="TAOM_rohan" text="Rohan" />
-    <string id="TAOM_rohan_short" text="Rohan" />
-    <string id="TAOM_rohan_title" text="Reino de Rohan" />
+    <string id="TAOM_rohan" text="{.NS}Rohan" />
+    <string id="TAOM_rohan_short" text="{.NS}Rohan" />
+    <string id="TAOM_rohan_title" text="{.MS}Reino de Rohan" />
     <string id="TAOM_rohan_ruler" text="Rei" />
     <string id="TAOM_rohan_desc" text="Conhecida como a Marca dos Cavaleiros, Rohan é um vasto e extenso reino de planícies abertas e colinas ondulantes, onde habitam os poderosos Rohirrim — cavaleiros habilidosos e guerreiros ferozes. Fundada por Eorl, o Jovem, após sua lendária cavalgada em auxílio a Gondor, Rohan há muito permanece como um aliado firme de Gondor contra a escuridão de Mordor. Dos salões dourados de Meduseld em Edoras, seus reis governam sobre um povo orgulhoso e resiliente que vive pelo vínculo entre cavalo e cavaleiro. Os Rohirrim são famosos por suas cargas de cavalaria, suas canções de valor e sua coragem inabalável. Embora a sombra de Saruman tenha ameaçado suas fronteiras, os filhos e filhas de Rohan permanecem sempre prontos para atender o chamado às armas, defendendo sua terra natal e os povos livres da Terra-média." />
-    <string id="TAOM_khand" text="Khand" />
-    <string id="TAOM_khand_short" text="Khand" />
-    <string id="TAOM_khand_title" text="Cavaleiros do Vento de Khand" />
+    <string id="TAOM_khand" text="{.NS}Khand" />
+    <string id="TAOM_khand_short" text="{.NS}Khand" />
+    <string id="TAOM_khand_title" text="{.MP}Cavaleiros do Vento de Khand" />
     <string id="TAOM_khand_ruler" text="Khudriag" />
     <string id="TAOM_khand_desc" text="Khand, uma terra acidentada de estepes ondulantes e planícies áridas, situa-se a sudeste de Mordor e serve como um corredor crítico entre o leste e o oeste. Seu povo, os Variags, são ferozes e nômades, conhecidos por seus cavalos velozes e lâminas curvas mortais. Vivendo em um ambiente hostil, aprimoraram suas habilidades como saqueadores e guerreiros, frequentemente entrando em conflito com seus vizinhos e servindo como mercenários para o maior licitante. A lealdade de Khand há muito é cortejada pelo Senhor das Trevas, e muitos de seus guerreiros cavalgaram para a guerra sob a sombra de Mordor. Porém, os Variags são um povo orgulhoso e independente, leais primeiro a seus clãs e chefes, que governam de acampamentos fortificados espalhados pelas planícies varridas pelo vento." />
-    <string id="TAOM_rhun" text="Rhûn" />
-    <string id="TAOM_rhun_short" text="Rhûn" />
-    <string id="TAOM_rhun_title" text="Reino Dourado de Rhûn" />
+    <string id="TAOM_rhun" text="{.NS}Rhûn" />
+    <string id="TAOM_rhun_short" text="{.NS}Rhûn" />
+    <string id="TAOM_rhun_title" text="{.MS}Reino Dourado de Rhûn" />
     <string id="TAOM_rhun_ruler" text="Loke-Kan" />
     <string id="TAOM_rhun_desc" text="Muito além do Mar de Rhûn, passadas as estepes ressequidas e a poeira vermelha de impérios esquecidos, jaz o vasto e velado Leste. Aqui habitam os Orientais, um povo orgulhoso e antigo cuja história antecede até mesmo a ascensão de Gondor. Suas terras estendem-se infinitamente sob céus amplos, das margens do mar interior às montanhas sombrias que marcam a borda do mundo conhecido. Os Orientais não são uma única nação, mas uma tapeçaria de tribos e reinos, unidos apenas em sua reverência pela força e sua longa memória de agravos contra o Ocidente. Alguns serviram o Senhor das Trevas voluntariamente, atraídos por promessas de poder e vingança; outros resistem, apegando-se aos velhos costumes e deuses mais antigos. Seus guerreiros são temidos por sua disciplina e seu domínio da biga e do arco, e suas armaduras douradas reluzem como fogo sob o sol oriental." />
     <string id="aom_dunland_male_name_1" text="Brodar" />
@@ -146,25 +146,25 @@
     <string id="aom_dunland_female_name_48" text="Fynla" />
     <string id="aom_dunland_female_name_49" text="Harwyn" />
     <string id="aom_dunland_female_name_50" text="Wynna" />
-    <string id="aom_dunland_clan_name_01" text="Os Lobos Vermelhos" />
-    <string id="aom_dunland_clan_name_02" text="As Presas de Ferro" />
-    <string id="aom_dunland_clan_name_03" text="Os Quebradores de Pedra" />
-    <string id="aom_dunland_clan_name_04" text="Os Caçadores das Sombras" />
-    <string id="aom_dunland_clan_name_05" text="Os Saqueadores das Colinas" />
-    <string id="aom_dunland_clan_name_06" text="As Lâminas Selvagens" />
-    <string id="aom_dunland_clan_name_07" text="Os Invocadores de Tempestades" />
-    <string id="aom_dunland_clan_name_08" text="Os Corvos Sangrentos" />
-    <string id="aom_dunland_clan_name_09" text="As Lanças de Osso" />
-    <string id="aom_dunland_clan_name_10" text="Os Abalatierras" />
-    <string id="aom_dunland_clan_name_11" text="Os Escudos Espinhosos" />
-    <string id="aom_dunland_clan_name_12" text="Os Lobos Sombrios" />
-    <string id="aom_dunland_clan_name_13" text="Os Machados Quebrados" />
-    <string id="aom_dunland_clan_name_14" text="Os Olhos de Corvo" />
-    <string id="aom_dunland_clan_name_15" text="O Clã Uivo Gélido" />
-    <string id="aom_dunland_clan_name_16" text="Os Vinculados ao Ferro" />
-    <string id="aom_dunland_clan_name_17" text="Os Punhos de Pedra" />
-    <string id="aom_dunland_clan_name_18" text="O Vendaval Uivante" />
-    <string id="aom_dunland_clan_name_19" text="As Sombras da Montanha" />
+    <string id="aom_dunland_clan_name_01" text="{.MP}Lobos Vermelhos" />
+    <string id="aom_dunland_clan_name_02" text="{.FP}Presas de Ferro" />
+    <string id="aom_dunland_clan_name_03" text="{.MP}Quebradores de Pedra" />
+    <string id="aom_dunland_clan_name_04" text="{.MP}Caçadores das Sombras" />
+    <string id="aom_dunland_clan_name_05" text="{.MP}Saqueadores das Colinas" />
+    <string id="aom_dunland_clan_name_06" text="{.FP}Lâminas Selvagens" />
+    <string id="aom_dunland_clan_name_07" text="{.MP}Invocadores de Tempestades" />
+    <string id="aom_dunland_clan_name_08" text="{.MP}Corvos Sangrentos" />
+    <string id="aom_dunland_clan_name_09" text="{.FP}Lanças de Osso" />
+    <string id="aom_dunland_clan_name_10" text="{.MP}Abalatierras" />
+    <string id="aom_dunland_clan_name_11" text="{.MP}Escudos Espinhosos" />
+    <string id="aom_dunland_clan_name_12" text="{.MP}Lobos Sombrios" />
+    <string id="aom_dunland_clan_name_13" text="{.MP}Machados Quebrados" />
+    <string id="aom_dunland_clan_name_14" text="{.MP}Olhos de Corvo" />
+    <string id="aom_dunland_clan_name_15" text="{.MS}Clã Uivo Gélido" />
+    <string id="aom_dunland_clan_name_16" text="{.MP}Vinculados ao Ferro" />
+    <string id="aom_dunland_clan_name_17" text="{.MP}Punhos de Pedra" />
+    <string id="aom_dunland_clan_name_18" text="{.MS}Vendaval Uivante" />
+    <string id="aom_dunland_clan_name_19" text="{.FP}Sombras da Montanha" />
     <string id="aom_harad_male_name_1" text="Azaran" />
     <string id="aom_harad_male_name_2" text="Zamir" />
     <string id="aom_harad_male_name_3" text="Khalid" />
@@ -265,26 +265,26 @@
     <string id="aom_harad_female_name_48" text="Asma" />
     <string id="aom_harad_female_name_49" text="Latifa" />
     <string id="aom_harad_female_name_50" text="Saida" />
-    <string id="aom_harad_clan_name_01" text="As Areias Ardentes" />
-    <string id="aom_harad_clan_name_02" text="As Lâminas Douradas" />
-    <string id="aom_harad_clan_name_03" text="Os Sóis do Deserto" />
-    <string id="aom_harad_clan_name_04" text="As Lanças Vermelhas" />
-    <string id="aom_harad_clan_name_05" text="Os Cavaleiros das Dunas" />
-    <string id="aom_harad_clan_name_06" text="O Vento Escaldante" />
-    <string id="aom_harad_clan_name_07" text="Os Guerreiros da Tempestade de Areia" />
-    <string id="aom_harad_clan_name_08" text="As Presas da Serpente" />
-    <string id="aom_harad_clan_name_09" text="Os Escorpiões Negros" />
-    <string id="aom_harad_clan_name_10" text="Os Guardiões dos Mûmakil" />
-    <string id="aom_harad_clan_name_11" text="Os Guardiões do Oásis" />
-    <string id="aom_harad_clan_name_12" text="Os Tições" />
-    <string id="aom_harad_clan_name_13" text="Os Escudos Carmesins" />
-    <string id="aom_harad_clan_name_14" text="O Crescente Dourado" />
-    <string id="aom_harad_clan_name_15" text="As Sombras Silenciosas" />
-    <string id="aom_harad_clan_name_16" text="Os Golpeadores do Sol" />
-    <string id="aom_harad_clan_name_17" text="Os Guardiões das Dunas" />
-    <string id="aom_harad_clan_name_18" text="Os Cavaleiros da Serpente" />
-    <string id="aom_harad_clan_name_19" text="Os Cascos Flamejantes" />
-    <string id="aom_harad_clan_name_20" text="A Areia do Crepúsculo" />
+    <string id="aom_harad_clan_name_01" text="{.FP}Areias Ardentes" />
+    <string id="aom_harad_clan_name_02" text="{.FP}Lâminas Douradas" />
+    <string id="aom_harad_clan_name_03" text="{.MP}Sóis do Deserto" />
+    <string id="aom_harad_clan_name_04" text="{.FP}Lanças Vermelhas" />
+    <string id="aom_harad_clan_name_05" text="{.MP}Cavaleiros das Dunas" />
+    <string id="aom_harad_clan_name_06" text="{.MS}Vento Escaldante" />
+    <string id="aom_harad_clan_name_07" text="{.MP}Guerreiros da Tempestade de Areia" />
+    <string id="aom_harad_clan_name_08" text="{.FP}Presas da Serpente" />
+    <string id="aom_harad_clan_name_09" text="{.MP}Escorpiões Negros" />
+    <string id="aom_harad_clan_name_10" text="{.MP}Guardiões dos Mûmakil" />
+    <string id="aom_harad_clan_name_11" text="{.MP}Guardiões do Oásis" />
+    <string id="aom_harad_clan_name_12" text="{.MP}Tições" />
+    <string id="aom_harad_clan_name_13" text="{.MP}Escudos Carmesins" />
+    <string id="aom_harad_clan_name_14" text="{.MS}Crescente Dourado" />
+    <string id="aom_harad_clan_name_15" text="{.FP}Sombras Silenciosas" />
+    <string id="aom_harad_clan_name_16" text="{.MP}Golpeadores do Sol" />
+    <string id="aom_harad_clan_name_17" text="{.MP}Guardiões das Dunas" />
+    <string id="aom_harad_clan_name_18" text="{.MP}Cavaleiros da Serpente" />
+    <string id="aom_harad_clan_name_19" text="{.MP}Cascos Flamejantes" />
+    <string id="aom_harad_clan_name_20" text="{.FS}Areia do Crepúsculo" />
     <string id="aom_rohan_male_name_1" text="Eadred" />
     <string id="aom_rohan_male_name_2" text="Eomund" />
     <string id="aom_rohan_male_name_3" text="Ceorl" />
@@ -395,16 +395,16 @@
     <string id="aom_rohan_female_name_48" text="Cynethild" />
     <string id="aom_rohan_female_name_49" text="Ealhwyn" />
     <string id="aom_rohan_female_name_50" text="Eadwynne" />
-    <string id="aom_rohan_clan_name_01" text="Harolding" />
-    <string id="aom_rohan_clan_name_02" text="Earfening" />
-    <string id="aom_rohan_clan_name_03" text="Aldoringas" />
-    <string id="aom_rohan_clan_name_04" text="Hamaingas" />
-    <string id="aom_rohan_clan_name_05" text="Arngriming" />
-    <string id="aom_rohan_clan_name_06" text="Sweordbora" />
-    <string id="aom_rohan_clan_name_07" text="Wundeming" />
-    <string id="aom_rohan_clan_name_08" text="Marovanding" />
-    <string id="aom_rohan_clan_name_09" text="Kalmundas" />
-    <string id="aom_rohan_clan_name_10" text="Earmynding" />
+    <string id="aom_rohan_clan_name_01" text="{.NS}Harolding" />
+    <string id="aom_rohan_clan_name_02" text="{.NS}Earfening" />
+    <string id="aom_rohan_clan_name_03" text="{.NS}Aldoringas" />
+    <string id="aom_rohan_clan_name_04" text="{.NS}Hamaingas" />
+    <string id="aom_rohan_clan_name_05" text="{.NS}Arngriming" />
+    <string id="aom_rohan_clan_name_06" text="{.NS}Sweordbora" />
+    <string id="aom_rohan_clan_name_07" text="{.NS}Wundeming" />
+    <string id="aom_rohan_clan_name_08" text="{.NS}Marovanding" />
+    <string id="aom_rohan_clan_name_09" text="{.NS}Kalmundas" />
+    <string id="aom_rohan_clan_name_10" text="{.NS}Earmynding" />
     <string id="aom_rhun_male_name_1" text="Khalrud" />
     <string id="aom_rhun_male_name_2" text="Torgash" />
     <string id="aom_rhun_male_name_3" text="Vaskir" />
@@ -505,143 +505,143 @@
     <string id="aom_rhun_female_name_48" text="Farnina" />
     <string id="aom_rhun_female_name_49" text="Zhalima" />
     <string id="aom_rhun_female_name_50" text="Orzina" />
-    <string id="aom_rhun_clan_name_01" text="Lanças de Ferro" />
-    <string id="aom_rhun_clan_name_02" text="Cimitarras Douradas" />
-    <string id="aom_rhun_clan_name_03" text="Estandartes Vermelhos" />
-    <string id="aom_rhun_clan_name_04" text="Lâminas Ardentes" />
-    <string id="aom_rhun_clan_name_05" text="Sangue de Rhûn" />
-    <string id="aom_rhun_clan_name_06" text="Guerreiros Carmesins" />
-    <string id="aom_rhun_clan_name_07" text="Escudos Negros" />
-    <string id="aom_rhun_clan_name_08" text="Invocadores de Tempestades" />
-    <string id="aom_rhun_clan_name_09" text="Guardiões Escarlates" />
-    <string id="aom_rhun_clan_name_10" text="Horda Dourada" />
-    <string id="aom_empire_name" text="Dunlandinos" />
+    <string id="aom_rhun_clan_name_01" text="{.FP}Lanças de Ferro" />
+    <string id="aom_rhun_clan_name_02" text="{.FP}Cimitarras Douradas" />
+    <string id="aom_rhun_clan_name_03" text="{.MP}Estandartes Vermelhos" />
+    <string id="aom_rhun_clan_name_04" text="{.FP}Lâminas Ardentes" />
+    <string id="aom_rhun_clan_name_05" text="{.MS}Sangue de Rhûn" />
+    <string id="aom_rhun_clan_name_06" text="{.MP}Guerreiros Carmesins" />
+    <string id="aom_rhun_clan_name_07" text="{.MP}Escudos Negros" />
+    <string id="aom_rhun_clan_name_08" text="{.MP}Invocadores de Tempestades" />
+    <string id="aom_rhun_clan_name_09" text="{.MP}Guardiões Escarlates" />
+    <string id="aom_rhun_clan_name_10" text="{.FS}Horda Dourada" />
+    <string id="aom_empire_name" text="{.MP}Dunlandinos" />
     <string id="aom_empire_desc" text="Os Dunlandinos são um povo rude e feroz, que habita as colinas selvagens e terras indomadas a oeste de Rohan. Há muito ressentidos com os Rohirrim, a quem veem como invasores de suas terras ancestrais, os Dunlandinos são unidos por sua herança compartilhada e feroz independência. Hábeis em guerrilha e sobrevivência, confiam na astúcia e ferocidade para superar seus inimigos. Embora frequentemente desprezados como simples montanheses, os Dunlandinos são um povo orgulhoso e resistente, que protege ferozmente suas terras e modo de vida. Movidos por um rancor profundo contra Rohan, aliaram-se às forças das trevas, buscando vingança e a restauração de suas terras perdidas." />
-    <string id="aom_aserai_name" text="Haradrim" />
+    <string id="aom_aserai_name" text="{.MP}Haradrim" />
     <string id="aom_aserai_desc" text="Os Haradrim são um povo orgulhoso e feroz originário dos desertos e savanas do distante sul. Renomados por seu domínio de bestas exóticas como os mûmakil, seus guerreiros combinam habilidade, resistência e precisão mortal em batalha. Harad é uma terra de extremos, com seu sol escaldante, areias douradas e oásis vibrantes. Seu povo é unido por antigas tradições, lealdade às suas tribos e o chamado de seus chefes e reis. Frequentemente aliados às forças das trevas, os Haradrim são motivados pela vingança contra Gondor e pela promessa de poder e domínio oferecida por Sauron." />
-    <string id="aom_vlandia_name" text="Rohirrim" />
+    <string id="aom_vlandia_name" text="{.MP}Rohirrim" />
     <string id="aom_vlandia_desc" text="Os Rohirrim, ou Senhores dos Cavalos de Rohan, são renomados por sua cavalaria incomparável e profundo vínculo com seus corcéis. Orgulhosos e de espírito livre, habitam as planícies ondulantes de Riddermark, vivendo em aldeias e fortalezas como Edoras. Guiados por seu Rei e leais ao seu povo, os Rohirrim prezam a honra, lealdade e coragem. Seus guerreiros cavalgam destemidamente para a batalha, formando a espinha dorsal da resistência da Terra-média contra a sombra. Embora firmes em suas tradições, os Rohirrim estão sempre prontos para defender suas terras e aliados, empunhando lanças, espadas e escudos com precisão." />
-    <string id="aom_khuzait_name" text="Orientais" />
+    <string id="aom_khuzait_name" text="{.MP}Orientais" />
     <string id="aom_khuzait_desc" text="Os Orientais são um povo diverso e temível das distantes terras de Rhûn. Conhecidos por sua lealdade a Sauron, marcham para a guerra com precisão e disciplina, empunhando lâminas curvas, lanças e enormes tambores de guerra que ecoam pelo campo de batalha. Suas armaduras douradas e estandartes carmesins refletem seu feroz orgulho e proeza marcial. Divididos em clãs e tribos, os Orientais se unem sob poderosos chefes para trazer o poder de Rhûn contra os Povos Livres da Terra-média." />
-    <string id="TAOM_sturgia_culture" text="Bardense" />
+    <string id="TAOM_sturgia_culture" text="{.NS}Bardense" />
     <string id="TAOM_sturgia_desc" text="Os Bardenses de Dale, assim nomeados em honra a Bard, o Arqueiro, são um povo orgulhoso e trabalhador que ascendeu à proeminência após reconquistar sua terra natal da sombra de Smaug. Situada entre a Montanha Solitária e o Lago Comprido, Dale prospera como um centro de comércio e cultura. Conhecidos por sua resiliência e artesanato, os Bardenses se destacam na forja de armas e armaduras, rivalizando até mesmo com os Anões de Erebor. Seus exércitos, compostos por arqueiros disciplinados, espadachins robustos e escaramuçadores ágeis, defendem suas terras com determinação feroz. Unidos sob líderes nobres, os Bardenses estão sempre vigilantes, protegendo contra as trevas que avançam e preservando seu rico patrimônio." />
-    <string id="TAOM_battania_culture" text="Variag" />
+    <string id="TAOM_battania_culture" text="{.NS}Variag" />
     <string id="TAOM_battania_desc" text="Os Variags de Khand são um povo feroz e belicoso, oriundos das terras áridas e acidentadas a leste de Mordor. Conhecidos por sua perícia mercenária e lealdade a Sauron, os Variags lutam com ferocidade incomparável. Eles cavalgam cavalos de guerra velozes em batalha, empunhando lâminas curvas e longas lanças com precisão mortal. Sua armadura de bronze e carmesim, adornada com desenhos intrincados, reflete sua herança orgulhosa e marcial. Divididos em tribos e clãs, os Variags se unem sob poderosos senhores da guerra, trazendo medo e caos aos inimigos do Senhor Sombrio." />
-    <string id="TAOM_clan_empire_north_1" text="Blaidd-luth" />
-    <string id="TAOM_clan_empire_north_2" text="Turch-luth" />
-    <string id="TAOM_clan_empire_north_3" text="Uch-luth" />
-    <string id="TAOM_clan_empire_north_4" text="Arth-luth" />
-    <string id="TAOM_clan_empire_north_5" text="Cigfran-luth" />
-    <string id="TAOM_clan_empire_north_6" text="Hebog-luth" />
-    <string id="TAOM_clan_empire_north_7" text="Draig-luth" />
-    <string id="TAOM_clan_empire_north_8" text="Caru-luth" />
-    <string id="TAOM_clan_empire_north_9" text="Avanc-luth" />
-    <string id="TAOM_clan_empire_west_1" text="Casa de Húrinionath" />
-    <string id="TAOM_clan_empire_west_2" text="Casa de Imrazôrionath" />
-    <string id="TAOM_clan_empire_west_3" text="Casa de Eärnurionath" />
-    <string id="TAOM_clan_empire_west_4" text="Casa de Barahirionath" />
-    <string id="TAOM_clan_empire_west_5" text="Casa de Ausirionath" />
-    <string id="TAOM_clan_empire_west_6" text="Casa de Halboronionath" />
-    <string id="TAOM_clan_empire_west_7" text="Casa de Malandilionath" />
-    <string id="TAOM_clan_empire_west_8" text="Casa de Olindurionath" />
-    <string id="TAOM_clan_empire_west_9" text="Casa de Danuhirionath" />
-    <string id="TAOM_clan_empire_south_1" text="Dôlgubêth" />
-    <string id="TAOM_clan_empire_south_2" text="Goearnediad" />
-    <string id="TAOM_clan_empire_south_3" text="Melkondili" />
-    <string id="TAOM_clan_empire_south_4" text="Môrgukar" />
-    <string id="TAOM_clan_empire_south_5" text="Bolgrûkig" />
-    <string id="TAOM_clan_empire_south_6" text="Kâm Lagúrz" />
-    <string id="TAOM_clan_empire_south_7" text="Bragzûkish" />
-    <string id="TAOM_clan_empire_south_8" text="Khôrahîm" />
-    <string id="TAOM_clan_empire_south_9" text="Wâwrim" />
-    <string id="TAOM_clan_sturgia_1" text="Casa de Girion" />
-    <string id="TAOM_clan_sturgia_2" text="Casa de Bard" />
-    <string id="TAOM_clan_sturgia_3" text="Casa de Brand" />
-    <string id="TAOM_clan_sturgia_4" text="Casa de Bain" />
-    <string id="TAOM_clan_sturgia_5" text="Casa de Esgaroth" />
-    <string id="TAOM_clan_sturgia_6" text="Casa do Rio" />
-    <string id="TAOM_clan_sturgia_7" text="Casa dos Arqueiros" />
-    <string id="TAOM_clan_sturgia_8" text="Casa do Lago Comprido" />
-    <string id="TAOM_clan_sturgia_9" text="Casa do Matador de Dragões" />
-    <string id="TAOM_clan_aserai_1" text="Ayerikkä" />
-    <string id="TAOM_clan_aserai_2" text="Khadnomäa" />
-    <string id="TAOM_clan_aserai_3" text="Kamalakä" />
-    <string id="TAOM_clan_aserai_4" text="Calmacilioni" />
-    <string id="TAOM_clan_aserai_5" text="Tacfimin" />
-    <string id="TAOM_clan_aserai_6" text="Medjanomä" />
-    <string id="TAOM_clan_aserai_7" text="Ziyalokkä" />
-    <string id="TAOM_clan_aserai_8" text="Awzalikä" />
-    <string id="TAOM_clan_aserai_9" text="Ikendakä" />
-    <string id="TAOM_clan_vlandia_1" text="Casa de Eorling" />
-    <string id="TAOM_clan_vlandia_2" text="Casa de Cerdicing" />
-    <string id="TAOM_clan_vlandia_3" text="Casa de Grimingas" />
-    <string id="TAOM_clan_vlandia_4" text="Casa de Felánding" />
-    <string id="TAOM_clan_vlandia_5" text="Casa de Oscyteling" />
-    <string id="TAOM_clan_vlandia_6" text="Casa de Ordlacing" />
-    <string id="TAOM_clan_vlandia_7" text="Casa de Æthellafing" />
-    <string id="TAOM_clan_vlandia_8" text="Casa de Grimmóding" />
-    <string id="TAOM_clan_vlandia_9" text="Casa de Dúning" />
-    <string id="TAOM_clan_vlandia_10" text="Casa de Eoforing" />
-    <string id="TAOM_clan_vlandia_11" text="Casa de Tordaging" />
-    <string id="TAOM_clan_battania_1" text="Vangaris" />
-    <string id="TAOM_clan_battania_2" text="Araz" />
-    <string id="TAOM_clan_battania_3" text="Torabai" />
-    <string id="TAOM_clan_battania_4" text="Khorvash" />
-    <string id="TAOM_clan_battania_5" text="Khurdan" />
-    <string id="TAOM_clan_battania_6" text="Urdash" />
-    <string id="TAOM_clan_battania_7" text="Karhatai" />
-    <string id="TAOM_clan_battania_8" text="Varyash" />
-    <string id="TAOM_ghilman_name" text="Guarda da Serpente" />
-    <string id="TAOM_ghilman_short" text="Guarda da Serpente" />
+    <string id="TAOM_clan_empire_north_1" text="{.NS}Blaidd-luth" />
+    <string id="TAOM_clan_empire_north_2" text="{.NS}Turch-luth" />
+    <string id="TAOM_clan_empire_north_3" text="{.NS}Uch-luth" />
+    <string id="TAOM_clan_empire_north_4" text="{.NS}Arth-luth" />
+    <string id="TAOM_clan_empire_north_5" text="{.NS}Cigfran-luth" />
+    <string id="TAOM_clan_empire_north_6" text="{.NS}Hebog-luth" />
+    <string id="TAOM_clan_empire_north_7" text="{.NS}Draig-luth" />
+    <string id="TAOM_clan_empire_north_8" text="{.NS}Caru-luth" />
+    <string id="TAOM_clan_empire_north_9" text="{.NS}Avanc-luth" />
+    <string id="TAOM_clan_empire_west_1" text="{.FS}Casa de Húrinionath" />
+    <string id="TAOM_clan_empire_west_2" text="{.FS}Casa de Imrazôrionath" />
+    <string id="TAOM_clan_empire_west_3" text="{.FS}Casa de Eärnurionath" />
+    <string id="TAOM_clan_empire_west_4" text="{.FS}Casa de Barahirionath" />
+    <string id="TAOM_clan_empire_west_5" text="{.FS}Casa de Ausirionath" />
+    <string id="TAOM_clan_empire_west_6" text="{.FS}Casa de Halboronionath" />
+    <string id="TAOM_clan_empire_west_7" text="{.FS}Casa de Malandilionath" />
+    <string id="TAOM_clan_empire_west_8" text="{.FS}Casa de Olindurionath" />
+    <string id="TAOM_clan_empire_west_9" text="{.FS}Casa de Danuhirionath" />
+    <string id="TAOM_clan_empire_south_1" text="{.NS}Dôlgubêth" />
+    <string id="TAOM_clan_empire_south_2" text="{.NS}Goearnediad" />
+    <string id="TAOM_clan_empire_south_3" text="{.NS}Melkondili" />
+    <string id="TAOM_clan_empire_south_4" text="{.NS}Môrgukar" />
+    <string id="TAOM_clan_empire_south_5" text="{.NS}Bolgrûkig" />
+    <string id="TAOM_clan_empire_south_6" text="{.NS}Kâm Lagúrz" />
+    <string id="TAOM_clan_empire_south_7" text="{.NS}Bragzûkish" />
+    <string id="TAOM_clan_empire_south_8" text="{.NS}Khôrahîm" />
+    <string id="TAOM_clan_empire_south_9" text="{.NS}Wâwrim" />
+    <string id="TAOM_clan_sturgia_1" text="{.FS}Casa de Girion" />
+    <string id="TAOM_clan_sturgia_2" text="{.FS}Casa de Bard" />
+    <string id="TAOM_clan_sturgia_3" text="{.FS}Casa de Brand" />
+    <string id="TAOM_clan_sturgia_4" text="{.FS}Casa de Bain" />
+    <string id="TAOM_clan_sturgia_5" text="{.FS}Casa de Esgaroth" />
+    <string id="TAOM_clan_sturgia_6" text="{.FS}Casa do Rio" />
+    <string id="TAOM_clan_sturgia_7" text="{.FS}Casa dos Arqueiros" />
+    <string id="TAOM_clan_sturgia_8" text="{.FS}Casa do Lago Comprido" />
+    <string id="TAOM_clan_sturgia_9" text="{.FS}Casa do Matador de Dragões" />
+    <string id="TAOM_clan_aserai_1" text="{.NS}Ayerikkä" />
+    <string id="TAOM_clan_aserai_2" text="{.NS}Khadnomäa" />
+    <string id="TAOM_clan_aserai_3" text="{.NS}Kamalakä" />
+    <string id="TAOM_clan_aserai_4" text="{.NS}Calmacilioni" />
+    <string id="TAOM_clan_aserai_5" text="{.NS}Tacfimin" />
+    <string id="TAOM_clan_aserai_6" text="{.NS}Medjanomä" />
+    <string id="TAOM_clan_aserai_7" text="{.NS}Ziyalokkä" />
+    <string id="TAOM_clan_aserai_8" text="{.NS}Awzalikä" />
+    <string id="TAOM_clan_aserai_9" text="{.NS}Ikendakä" />
+    <string id="TAOM_clan_vlandia_1" text="{.FS}Casa de Eorling" />
+    <string id="TAOM_clan_vlandia_2" text="{.FS}Casa de Cerdicing" />
+    <string id="TAOM_clan_vlandia_3" text="{.FS}Casa de Grimingas" />
+    <string id="TAOM_clan_vlandia_4" text="{.FS}Casa de Felánding" />
+    <string id="TAOM_clan_vlandia_5" text="{.FS}Casa de Oscyteling" />
+    <string id="TAOM_clan_vlandia_6" text="{.FS}Casa de Ordlacing" />
+    <string id="TAOM_clan_vlandia_7" text="{.FS}Casa de Æthellafing" />
+    <string id="TAOM_clan_vlandia_8" text="{.FS}Casa de Grimmóding" />
+    <string id="TAOM_clan_vlandia_9" text="{.FS}Casa de Dúning" />
+    <string id="TAOM_clan_vlandia_10" text="{.FS}Casa de Eoforing" />
+    <string id="TAOM_clan_vlandia_11" text="{.FS}Casa de Tordaging" />
+    <string id="TAOM_clan_battania_1" text="{.NS}Vangaris" />
+    <string id="TAOM_clan_battania_2" text="{.NS}Araz" />
+    <string id="TAOM_clan_battania_3" text="{.NS}Torabai" />
+    <string id="TAOM_clan_battania_4" text="{.NS}Khorvash" />
+    <string id="TAOM_clan_battania_5" text="{.NS}Khurdan" />
+    <string id="TAOM_clan_battania_6" text="{.NS}Urdash" />
+    <string id="TAOM_clan_battania_7" text="{.NS}Karhatai" />
+    <string id="TAOM_clan_battania_8" text="{.NS}Varyash" />
+    <string id="TAOM_ghilman_name" text="{.FS}Guarda da Serpente" />
+    <string id="TAOM_ghilman_short" text="{.FS}Guarda da Serpente" />
     <string id="TAOM_ghilman_text" text="A Guarda da Serpente são soldados montados a serviço do Senhor das Serpentes de Harad Próximo. Criados na sela nas planícies ondulantes ao sul do Ephel Dúath, são inigualáveis como arqueiros montados em todas as terras do sul da Terra-média. Em tempos de paz entre Harad e Mordor, a Guarda aluga seus serviços aos senhores haradrim e a qualquer outro poder rico o suficiente para pagar sua taxa de ouro." />
-    <string id="TAOM_legion_name" text="A Companhia Cinzenta" />
-    <string id="TAOM_legion_short" text="Companhia Cinzenta" />
+    <string id="TAOM_legion_name" text="{.FS}Companhia Cinzenta" />
+    <string id="TAOM_legion_short" text="{.FS}Companhia Cinzenta" />
     <string id="TAOM_legion_text" text="A Companhia Cinzenta é a última irmandade organizada dos Monteiros Dúnedain, descendentes dos reis de Arnor que perderam seu reino há eras. Eles cavalgam pelo Norte sem um lar próprio, mantendo a paz em terras que esqueceram seus nomes. Embora sua primeira lealdade seja à linhagem de Elendil, aceitam contratos de senhores por toda a Terra-média quando suas andanças os levam por terras civilizadas." />
-    <string id="TAOM_skolderbrotva_name" text="Machadeiros de Erebor" />
-    <string id="TAOM_skolderbrotva_short" text="Machadeiros" />
+    <string id="TAOM_skolderbrotva_name" text="{.MP}Machadeiros de Erebor" />
+    <string id="TAOM_skolderbrotva_short" text="{.MP}Machadeiros" />
     <string id="TAOM_skolderbrotva_text" text="Os Machadeiros de Erebor são veteranos das batalhas do Rei Thorin que acharam o tempo de paz inadequado ao seu temperamento. Treinados na luta corpo a corpo dos salões anões — muralha de escudos, machado curto, picareta — são formidáveis em qualquer terreno, mas se destacam nas passagens das montanhas que conectam Erebor aos reinos dos homens. Aceitam contratos de qualquer um que possa pagar sua taxa, mas não levantarão um machado contra Erebor ou Valfenda." />
-    <string id="TAOM_company_name" text="Lâminas Corsárias" />
-    <string id="TAOM_company_short" text="Corsários" />
+    <string id="TAOM_company_name" text="{.FP}Lâminas Corsárias" />
+    <string id="TAOM_company_short" text="{.MP}Corsários" />
     <string id="TAOM_company_text" text="As Lâminas Corsárias são veteranos de combate marítimo dos portos de Umbar que passaram a vender suas habilidades em terra. Lutam como besteiros — a arma preferida da guerra a bordo — e estão tão confortáveis num cerco quanto num convés balançante. Seu capitão, um exilado númenoreano marcado por cicatrizes, os mantém fiéis aos contratos com disciplina férrea, sabendo que sua reputação é sua carga mais valiosa." />
-    <string id="TAOM_beni_zilal_name" text="O Olho Cego" />
-    <string id="TAOM_beni_zilal_short" text="Olho Cego" />
+    <string id="TAOM_beni_zilal_name" text="{.MS}Olho Cego" />
+    <string id="TAOM_beni_zilal_short" text="{.MS}Olho Cego" />
     <string id="TAOM_beni_zilal_text" text="O Olho Cego é uma irmandade de contrabandistas, receptadores e assassinos de aluguel que operam pelas costas de Harad e pelo deserto profundo. Dizem que descendem de um culto de assassinos que serviu a um rei haradrim esquecido, e seus métodos — veneno, sombra e a exploração de segredos — permanecem inalterados. Senhores que desejam remover discretamente um rival, ou mercadores que precisam transportar carga sem inspeção alfandegária, sabem onde deixar uma moeda de ouro e uma carta lacrada." />
-    <string id="TAOM_wolfskins_name" text="Devastadores Variag" />
-    <string id="TAOM_wolfskins_short" text="Devastadores" />
+    <string id="TAOM_wolfskins_name" text="{.MP}Devastadores Variag" />
+    <string id="TAOM_wolfskins_short" text="{.MP}Devastadores" />
     <string id="TAOM_wolfskins_text" text="Os Devastadores Variag são bandos de guerra de jovens guerreiros variag das estepes de Khand que passam sua juventude em um estado de guerra ritual: não podem possuir comida cozida, dormir sob nenhum teto permanente e não demonstrar misericórdia. Embora a maioria eventualmente retorne à vida estabelecida de seus clãs, alguns nunca o fazem, e estes formam os Devastadores — fora-da-lei que atacam as estradas de Khand e fazem incursões através de suas fronteiras em Harad e Gondor." />
-    <string id="TAOM_brotherhood_name" text="Saqueadores Dunlendinos" />
-    <string id="TAOM_brotherhood_short" text="Saqueadores" />
+    <string id="TAOM_brotherhood_name" text="{.MP}Saqueadores Dunlendinos" />
+    <string id="TAOM_brotherhood_short" text="{.MP}Saqueadores" />
     <string id="TAOM_brotherhood_text" text="Os Saqueadores Dunlendinos são o remanescente despedaçado de um clã das colinas que outrora habitava os vales agora governados pelos rohirrim. Seus avós foram expulsos de terras férteis para as alturas rochosas, e eles nutriram essa amargura numa filosofia de saqueadores: tudo tomado de um sulista ou de um homem do rei é meramente a restauração do que foi roubado. Na prática são bandidos, mas perigosos, que conhecem cada trilha de cabras pelas colinas." />
-    <string id="TAOM_hidden_hand_name" text="Os Servos da Boca" />
-    <string id="TAOM_hidden_hand_short" text="Servos" />
+    <string id="TAOM_hidden_hand_name" text="{.MP}Servos da Boca" />
+    <string id="TAOM_hidden_hand_short" text="{.MP}Servos" />
     <string id="TAOM_hidden_hand_text" text="Os Servos da Boca são os Olhos de Barad-dûr operando além do Portão Negro — informantes, capangas e espiões infiltrados entre os povos que fazem fronteira com Mordor. Onde os exércitos de Sauron ainda não podem alcançar, esses agentes coletam tributos e silenciam dissidências. Eles trabalham através de suborno, chantagem e assassinatos silenciosos, garantindo que nenhuma conspiração contra o Senhor do Escuro crie raízes antes de ser arrancada e esmagada." />
-    <string id="TAOM_lakepike_name" text="Destruidores do Lago Comprido" />
-    <string id="TAOM_lakepike_short" text="Destruidores" />
+    <string id="TAOM_lakepike_name" text="{.MP}Destruidores do Lago Comprido" />
+    <string id="TAOM_lakepike_short" text="{.MP}Destruidores" />
     <string id="TAOM_lakepike_text" text="Os Destruidores do Lago Comprido vivem nos canaviais e velhos cais apodrecidos das margens sombrias do Lago Comprido, longe das luzes respeitáveis de Esgaroth. Eles ganham a vida atraindo barcaças para bancos de areia ocultos com lanternas falsas, depois saqueando a carga e vendendo-a através de receptadores na própria cidade. Apesar dos esforços do Mestre da Cidade do Lago e dos mercadores de Dale, os Destruidores têm amigos demais nas tavernas do cais para serem facilmente expulsos." />
-    <string id="TAOM_embers_name" text="Culto do Olho Sem Pálpebra" />
-    <string id="TAOM_embers_short" text="Culto do Olho" />
+    <string id="TAOM_embers_name" text="{.MS}Culto do Olho Sem Pálpebra" />
+    <string id="TAOM_embers_short" text="{.MS}Culto do Olho" />
     <string id="TAOM_embers_text" text="O Culto do Olho Sem Pálpebra é uma sociedade secreta enraizada na tradição dos Númenorianos Negros, venerando Sauron como um deus-rei que restaurará seus fiéis à glória quando ele se erguer novamente. Eles recrutam entre os despossuídos de Dunland e os cantos esquecidos do reino, prometendo favor divino e poder terreno. Na verdade, seus líderes respondem a agentes de Barad-dûr, e sua estrutura baseada em células os torna quase impossíveis de erradicar pela justiça de qualquer senhor." />
-    <string id="TAOM_jawwal_name" text="Os Cavaleiros da Areia" />
-    <string id="TAOM_jawwal_short" text="Cavaleiros da Areia" />
+    <string id="TAOM_jawwal_name" text="{.MP}Cavaleiros da Areia" />
+    <string id="TAOM_jawwal_short" text="{.MP}Cavaleiros da Areia" />
     <string id="TAOM_jawwal_text" text="Os Cavaleiros da Areia são os clãs nômades do deserto do interior profundo de Harad, mestres dos desertos sem água entre o Ephel Dúath e o distante mar do sul. Eles percorrem rotas conhecidas apenas por eles mesmos, exigindo tributo de qualquer caravana ousada o suficiente para cruzar seu território. Os senhores assentados do Harad Próximo os tratam como um incômodo; os Cavaleiros da Areia consideram os senhores assentados ladrões que roubaram o que o deserto já havia dado livremente." />
-    <string id="TAOM_karakhuzaits_name" text="Os Orientais Selvagens" />
-    <string id="TAOM_karakhuzaits_short" text="Selvagens" />
+    <string id="TAOM_karakhuzaits_name" text="{.MP}Orientais Selvagens" />
+    <string id="TAOM_karakhuzaits_short" text="{.MP}Selvagens" />
     <string id="TAOM_karakhuzaits_text" text="Os Orientais Selvagens são os clãs das estepes não conquistados do Mar de Rhûn, que resistiram à autoridade de todo senhor que tentou trazê-los ao jugo — chefe de Rhûn, tenente de Mordor e Rei de Dale igualmente. Eles vagam pelas pradarias a leste do Celduin, reunindo cavalos, atacando rebanhos e coletando tributo de estrada de qualquer caravana tola o suficiente para cruzar sua estepe sem escolta armada." />
-    <string id="TAOM_forest_people_name" text="Os Drúedain" />
-    <string id="TAOM_forest_people_short" text="Woses" />
+    <string id="TAOM_forest_people_name" text="{.MP}Drúedain" />
+    <string id="TAOM_forest_people_short" text="{.MP}Woses" />
     <string id="TAOM_forest_people_text" text="Os Drúedain, conhecidos pelos Homens como Woses ou os Homens Selvagens dos Bosques, são um povo antigo que habita a floresta profunda de Drúadan e os vales escondidos das Montanhas Brancas. Eles limpam o solo com fogo, cultivam o que precisam no solo rico em cinzas e seguem adiante quando a terra se esgota — um modo de vida que os povos assentados da Terra-média nunca entenderam e nunca se preocuparam em entender. Os Drúedain não querem senhor algum, não pagam impostos e pedem apenas para serem deixados no silêncio da floresta." />
-    <string id="TAOM_eleftheroi_name" text="Os Beornings" />
-    <string id="TAOM_eleftheroi_short" text="Beornings" />
+    <string id="TAOM_eleftheroi_name" text="{.MP}Beornings" />
+    <string id="TAOM_eleftheroi_short" text="{.MP}Beornings" />
     <string id="TAOM_eleftheroi_text" text="Os Beornings são os grandes homens dos bosques que habitam o vale do Anduin entre as Montanhas Nevoentas e a Floresta das Trevas, liderados pelos metamorfos da linhagem de Beorn. Eles não permitem que nenhum Orc cruze seu território, cobram pedágio no Vau de Carrock para financiar sua vigília e não respondem a nenhum rei na Terra-média. Embora negociem e conversem com Elfos e Anões, qualquer exército que marche através de sua floresta sem permissão descobrirá que os Beornings têm dentes muito grandes." />
-    <string id="TAOM_clan_khuzait_1" text="Hûz" />
-    <string id="TAOM_clan_khuzait_2" text="Salurian" />
-    <string id="TAOM_clan_khuzait_3" text="Nikathian" />
-    <string id="TAOM_clan_khuzait_4" text="Karmian" />
-    <string id="TAOM_clan_khuzait_5" text="Amdûrid" />
-    <string id="TAOM_clan_khuzait_6" text="Khundolar" />
-    <string id="TAOM_clan_khuzait_7" text="Kuzaithian" />
-    <string id="TAOM_clan_khuzait_8" text="Mashakian" />
-    <string id="TAOM_clan_khuzait_9" text="Bozorganith" />
+    <string id="TAOM_clan_khuzait_1" text="{.NS}Hûz" />
+    <string id="TAOM_clan_khuzait_2" text="{.NS}Salurian" />
+    <string id="TAOM_clan_khuzait_3" text="{.NS}Nikathian" />
+    <string id="TAOM_clan_khuzait_4" text="{.NS}Karmian" />
+    <string id="TAOM_clan_khuzait_5" text="{.NS}Amdûrid" />
+    <string id="TAOM_clan_khuzait_6" text="{.NS}Khundolar" />
+    <string id="TAOM_clan_khuzait_7" text="{.NS}Kuzaithian" />
+    <string id="TAOM_clan_khuzait_8" text="{.NS}Mashakian" />
+    <string id="TAOM_clan_khuzait_9" text="{.NS}Bozorganith" />
     <string id="aom_lord_1_1_name" text="Brenin Wulf, o Mão de Ferro" />
     <string id="aom_lord_1_2_name" text="Freya Coração de Lobo" />
     <string id="aom_lord_1_3_name" text="Gorwulf, o Javali" />

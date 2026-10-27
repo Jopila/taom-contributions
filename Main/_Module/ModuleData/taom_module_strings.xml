@@ -575,6 +575,7 @@
 	<string id="taom_the_fix_VWoHoUin" text="{=VWoHoUin}There will be no peace between us and {ENEMY_INFORMAL_NAME}, any more than the wolf makes peace with the sheep." />
 	<string id="taom_the_fix_wijL0mTy" text="{=wijL0mTy}{FACTION_LEADER} will decide if an alliance will be formed with {KINGDOM_NAME}. You can pick your stance regarding this decision." />
 	<string id="taom_the_fix_wsDNxArW" text="{=wsDNxArW}{PEACEMAKER_RULER.NAME} of {KINGDOM_CONSIDERING_PEACE} has chosen not to make peace with {KINGDOM}." />
+	<string id="taom_the_fix_WYHqMwwo" text="{=WYHqMwwo}{CLAN} has been eliminated." />
 	<string id="taom_the_fix_xAuejv91" text="{=xAuejv91}{RULER.NAME} of {KINGDOM} has decided against making peace with {OTHER_KINGDOM}, with his {?RULER.GENDER}her{?}his{\?} council evenly divided on the matter." />
 	<string id="taom_the_fix_XaZyU3Cn" text="{=XaZyU3Cn}{AGGRESSOR_RULER.NAME} of {AGGRESSOR_KINGDOM} chose not to go to war with {KINGDOM} despite the wishes of {?AGGRESSOR_RULER.GENDER}her{?}his{\?} council." />
 	<string id="taom_the_fix_XbYCVCbR" text="{=XbYCVCbR}We oppose calling our ally {CALLED_KINGDOM} to war." />

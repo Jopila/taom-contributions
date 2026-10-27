@@ -6,14 +6,14 @@
     <tag language="Italian" />
   </tags>
   <strings>
-    <string id="aom_abanissa_clan_1" text="Casa di Phaxsharân" />
-    <string id="aom_abanissa_clan_2" text="Casa di Hoshêdharma" />
-    <string id="aom_abanissa_clan_3" text="Casa di Vasnârad" />
-    <string id="aom_abanissa_clan_4" text="Casa di Gorazehan" />
-    <string id="aom_abanissa_clan_5" text="Casa di Azadafrozan" />
-    <string id="aom_abanissa_clan_6" text="Casa di Artaxshâsan" />
-    <string id="aom_abanissa_clan_7" text="Casa di Ardâcheran" />
-    <string id="aom_abanissa_clan_8" text="Casa di Tîrdahanâ" />
+    <string id="aom_abanissa_clan_1" text="{.FS}Casa di Phaxsharân" />
+    <string id="aom_abanissa_clan_2" text="{.FS}Casa di Hoshêdharma" />
+    <string id="aom_abanissa_clan_3" text="{.FS}Casa di Vasnârad" />
+    <string id="aom_abanissa_clan_4" text="{.FS}Casa di Gorazehan" />
+    <string id="aom_abanissa_clan_5" text="{.FS}Casa di Azadafrozan" />
+    <string id="aom_abanissa_clan_6" text="{.FS}Casa di Artaxshâsan" />
+    <string id="aom_abanissa_clan_7" text="{.FS}Casa di Ardâcheran" />
+    <string id="aom_abanissa_clan_8" text="{.FS}Casa di Tîrdahanâ" />
     <string id="aom_abanissa_female_name_1" text="Phaxara" />
     <string id="aom_abanissa_female_name_10" text="Khorba" />
     <string id="aom_abanissa_female_name_11" text="Farzana" />
@@ -74,21 +74,21 @@
     <string id="aom_abanissa_male_name_7" text="Ardach" />
     <string id="aom_abanissa_male_name_8" text="Tirdah" />
     <string id="aom_abanissa_male_name_9" text="Sharun" />
-    <string id="aom_bluecraig_clan_1" text="Orda di Blue Craig" />
-    <string id="aom_bluecraig_clan_10" text="Predoni dei Monti Grigi" />
-    <string id="aom_bluecraig_clan_11" text="Orda delle Ettenbrughiere" />
-    <string id="aom_bluecraig_clan_12" text="Banda degli Snaga" />
-    <string id="aom_bluecraig_clan_13" text="Stirpe di Skarnak" />
-    <string id="aom_bluecraig_clan_14" text="Clan Dentenero" />
-    <string id="aom_bluecraig_clan_15" text="Flagello dei Monti Azzurri" />
-    <string id="aom_bluecraig_clan_2" text="Clan di Blue Craig" />
-    <string id="aom_bluecraig_clan_3" text="Lupi dei Monti Nebbiosi" />
-    <string id="aom_bluecraig_clan_4" text="Branco di Warg" />
-    <string id="aom_bluecraig_clan_5" text="Orda dei Giganti di Pietra" />
-    <string id="aom_bluecraig_clan_6" text="Residui di Nogrod" />
-    <string id="aom_bluecraig_clan_7" text="Prole della Foce del Lune" />
-    <string id="aom_bluecraig_clan_8" text="Progenie della Rupe" />
-    <string id="aom_bluecraig_clan_9" text="Banda di Carn Dûm" />
+    <string id="aom_bluecraig_clan_1" text="{.FS}Orda di Blue Craig" />
+    <string id="aom_bluecraig_clan_10" text="{.MP}Predoni dei Monti Grigi" />
+    <string id="aom_bluecraig_clan_11" text="{.FS}Orda delle Ettenbrughiere" />
+    <string id="aom_bluecraig_clan_12" text="{.FS}Banda degli Snaga" />
+    <string id="aom_bluecraig_clan_13" text="{.FS}Stirpe di Skarnak" />
+    <string id="aom_bluecraig_clan_14" text="{.MS}Clan Dentenero" />
+    <string id="aom_bluecraig_clan_15" text="{.MS}Flagello dei Monti Azzurri" />
+    <string id="aom_bluecraig_clan_2" text="{.MS}Clan di Blue Craig" />
+    <string id="aom_bluecraig_clan_3" text="{.MP}Lupi dei Monti Nebbiosi" />
+    <string id="aom_bluecraig_clan_4" text="{.MS}Branco di Warg" />
+    <string id="aom_bluecraig_clan_5" text="{.FS}Orda dei Giganti di Pietra" />
+    <string id="aom_bluecraig_clan_6" text="{.MP}Residui di Nogrod" />
+    <string id="aom_bluecraig_clan_7" text="{.FS}Prole della Foce del Lune" />
+    <string id="aom_bluecraig_clan_8" text="{.FS}Progenie della Rupe" />
+    <string id="aom_bluecraig_clan_9" text="{.FS}Banda di Carn Dûm" />
     <string id="aom_bluecraig_desc" text="I goblin di Blue Craig occupano i contrafforti occidentali degli Ered Luin, separati dai loro simili sotto gli Ered Luin da tutta la lunghezza dell'Eriador. Depredano le strade dei Nani e le coste del Lune, e gli Elfi di Mithlond li considerano il nemico più prossimo." />
     <string id="aom_bluecraig_female_name_1" text="Gralza" />
     <string id="aom_bluecraig_female_name_10" text="Ulzara" />
@@ -190,22 +190,22 @@
     <string id="aom_bluecraig_male_name_7" text="Gragor" />
     <string id="aom_bluecraig_male_name_8" text="Durmash" />
     <string id="aom_bluecraig_male_name_9" text="Vorgoth" />
-    <string id="aom_bluecraig_name" text="Goblin di Blue Craig" />
-    <string id="aom_dolguldur_clan_1" text="Schiavi del Negromante" />
-    <string id="aom_dolguldur_clan_10" text="Esploratori dell'Ombra" />
-    <string id="aom_dolguldur_clan_11" text="Limite della Corruzione" />
-    <string id="aom_dolguldur_clan_12" text="Orda della Foresta Oscura" />
-    <string id="aom_dolguldur_clan_13" text="Guardia Spettrale" />
-    <string id="aom_dolguldur_clan_14" text="Servi di Khamûl" />
-    <string id="aom_dolguldur_clan_15" text="Predoni del Crepuscolo" />
-    <string id="aom_dolguldur_clan_2" text="Schiera d'Ombra" />
-    <string id="aom_dolguldur_clan_3" text="Guarnigione di Dol Guldur" />
-    <string id="aom_dolguldur_clan_4" text="Banda di Guerra di Morgul" />
-    <string id="aom_dolguldur_clan_5" text="Cacciatori di Bosco Atro" />
-    <string id="aom_dolguldur_clan_6" text="Cavalcatori di Ragni" />
-    <string id="aom_dolguldur_clan_7" text="Guardia dello Stregone Nero" />
-    <string id="aom_dolguldur_clan_8" text="Progenie di Amon Lanc" />
-    <string id="aom_dolguldur_clan_9" text="Custodi delle Bestie Crudeli" />
+    <string id="aom_bluecraig_name" text="{.MP}Goblin di Blue Craig" />
+    <string id="aom_dolguldur_clan_1" text="{.MP}Schiavi del Negromante" />
+    <string id="aom_dolguldur_clan_10" text="{.MP}Esploratori dell'Ombra" />
+    <string id="aom_dolguldur_clan_11" text="{.MS}Limite della Corruzione" />
+    <string id="aom_dolguldur_clan_12" text="{.FS}Orda della Foresta Oscura" />
+    <string id="aom_dolguldur_clan_13" text="{.FS}Guardia Spettrale" />
+    <string id="aom_dolguldur_clan_14" text="{.MP}Servi di Khamûl" />
+    <string id="aom_dolguldur_clan_15" text="{.MP}Predoni del Crepuscolo" />
+    <string id="aom_dolguldur_clan_2" text="{.FS}Schiera d'Ombra" />
+    <string id="aom_dolguldur_clan_3" text="{.FS}Guarnigione di Dol Guldur" />
+    <string id="aom_dolguldur_clan_4" text="{.FS}Banda di Guerra di Morgul" />
+    <string id="aom_dolguldur_clan_5" text="{.MP}Cacciatori di Bosco Atro" />
+    <string id="aom_dolguldur_clan_6" text="{.MP}Cavalcatori di Ragni" />
+    <string id="aom_dolguldur_clan_7" text="{.FS}Guardia dello Stregone Nero" />
+    <string id="aom_dolguldur_clan_8" text="{.FS}Progenie di Amon Lanc" />
+    <string id="aom_dolguldur_clan_9" text="{.MP}Custodi delle Bestie Crudeli" />
     <string id="aom_dolguldur_desc" text="Dol Guldur è una fortezza d'ombra e malizia. Un tempo roccaforte di Sauron a Bosco Atro, è ora governata dagli oscuri luogotenenti del Negromante. Gli eserciti di Dol Guldur sono una temibile mescolanza di orchi, warg e magia nera. Questo bastione del male corrompe la foresta che lo circonda, diffondendo decadenza e disperazione. I guerrieri di Dol Guldur sono implacabili, spinti dalla volontà del loro oscuro padrone." />
     <string id="aom_dolguldur_female_name_1" text="Thrulza" />
     <string id="aom_dolguldur_female_name_10" text="Kazria" />
@@ -307,22 +307,22 @@
     <string id="aom_dolguldur_male_name_7" text="Vorthak" />
     <string id="aom_dolguldur_male_name_8" text="Narzugh" />
     <string id="aom_dolguldur_male_name_9" text="Durkar" />
-    <string id="aom_dolguldur_name" text="Orchi di Dol Guldur" />
-    <string id="aom_erebor_clan_1" text="Barbalunga" />
-    <string id="aom_erebor_clan_10" text="Ascia d'Argento" />
-    <string id="aom_erebor_clan_11" text="Scudodiquercia" />
-    <string id="aom_erebor_clan_12" text="Martelcaduto" />
-    <string id="aom_erebor_clan_13" text="Scavafondo" />
-    <string id="aom_erebor_clan_14" text="Piccapietra" />
-    <string id="aom_erebor_clan_15" text="Barbagrigia" />
-    <string id="aom_erebor_clan_2" text="Piediferro" />
-    <string id="aom_erebor_clan_3" text="Elmodipietra" />
-    <string id="aom_erebor_clan_4" text="Largospalle" />
-    <string id="aom_erebor_clan_5" text="Barbadifuoco" />
-    <string id="aom_erebor_clan_6" text="Barbarigida" />
-    <string id="aom_erebor_clan_7" text="Chiomanera" />
-    <string id="aom_erebor_clan_8" text="Pugnoferreo" />
-    <string id="aom_erebor_clan_9" text="Goleli" />
+    <string id="aom_dolguldur_name" text="{.MP}Orchi di Dol Guldur" />
+    <string id="aom_erebor_clan_1" text="{.MN}Barbalunga" />
+    <string id="aom_erebor_clan_10" text="{.FS}Ascia d'Argento" />
+    <string id="aom_erebor_clan_11" text="{.MN}Scudodiquercia" />
+    <string id="aom_erebor_clan_12" text="{.MN}Martelcaduto" />
+    <string id="aom_erebor_clan_13" text="{.MN}Scavafondo" />
+    <string id="aom_erebor_clan_14" text="{.MN}Piccapietra" />
+    <string id="aom_erebor_clan_15" text="{.MN}Barbagrigia" />
+    <string id="aom_erebor_clan_2" text="{.MN}Piediferro" />
+    <string id="aom_erebor_clan_3" text="{.MN}Elmodipietra" />
+    <string id="aom_erebor_clan_4" text="{.MN}Largospalle" />
+    <string id="aom_erebor_clan_5" text="{.MN}Barbadifuoco" />
+    <string id="aom_erebor_clan_6" text="{.MN}Barbarigida" />
+    <string id="aom_erebor_clan_7" text="{.MN}Chiomanera" />
+    <string id="aom_erebor_clan_8" text="{.MN}Pugnoferreo" />
+    <string id="aom_erebor_clan_9" text="{.MN}Goleli" />
     <string id="aom_erebor_desc" text="I Barbalunga di Erebor sono una stirpe fiera e laboriosa, che dimora nelle sale della Montagna Solitaria. Maestri dell'artigianato e dell'estrazione mineraria, sono rinomati per la loro abilità nel forgiare armi, armature e tesori di bellezza impareggiabile. Guidati dal loro Re sotto la Montagna, i Nani di Erebor sono un popolo tenace, ferocemente geloso della propria terra e delle sue ricchezze." />
     <string id="aom_erebor_female_name_1" text="Bryndis" />
     <string id="aom_erebor_female_name_10" text="Karna" />
@@ -424,22 +424,22 @@
     <string id="aom_erebor_male_name_7" text="Rundrin" />
     <string id="aom_erebor_male_name_8" text="Hanar" />
     <string id="aom_erebor_male_name_9" text="Galar" />
-    <string id="aom_erebor_name" text="Nani" />
-    <string id="aom_goblin_clan_1" text="Orda di Città degli Orchi" />
-    <string id="aom_goblin_clan_10" text="Predoni dei Monti Grigi" />
-    <string id="aom_goblin_clan_11" text="Orda delle Lande di Etten" />
-    <string id="aom_goblin_clan_12" text="Banda degli Snaga" />
-    <string id="aom_goblin_clan_13" text="Stirpe di Bolg" />
-    <string id="aom_goblin_clan_14" text="Clan Dentenero" />
-    <string id="aom_goblin_clan_15" text="Flagello dei Colli Ferrosi" />
-    <string id="aom_goblin_clan_2" text="Clan di Città degli Orchi" />
-    <string id="aom_goblin_clan_3" text="Lupi dei Monti Nebbiosi" />
-    <string id="aom_goblin_clan_4" text="Branco di Warg" />
-    <string id="aom_goblin_clan_5" text="Orda dei Giganti di Pietra" />
-    <string id="aom_goblin_clan_6" text="Residui di Moria" />
-    <string id="aom_goblin_clan_7" text="Covata di Cirith Ungol" />
-    <string id="aom_goblin_clan_8" text="Figli di Angmar" />
-    <string id="aom_goblin_clan_9" text="Banda di Carn Dum" />
+    <string id="aom_erebor_name" text="{.MP}Nani" />
+    <string id="aom_goblin_clan_1" text="{.FS}Orda di Città degli Orchi" />
+    <string id="aom_goblin_clan_10" text="{.MP}Predoni dei Monti Grigi" />
+    <string id="aom_goblin_clan_11" text="{.FS}Orda delle Lande di Etten" />
+    <string id="aom_goblin_clan_12" text="{.FS}Banda degli Snaga" />
+    <string id="aom_goblin_clan_13" text="{.FS}Stirpe di Bolg" />
+    <string id="aom_goblin_clan_14" text="{.MS}Clan Dentenero" />
+    <string id="aom_goblin_clan_15" text="{.MS}Flagello dei Colli Ferrosi" />
+    <string id="aom_goblin_clan_2" text="{.MS}Clan di Città degli Orchi" />
+    <string id="aom_goblin_clan_3" text="{.MP}Lupi dei Monti Nebbiosi" />
+    <string id="aom_goblin_clan_4" text="{.MS}Branco di Warg" />
+    <string id="aom_goblin_clan_5" text="{.FS}Orda dei Giganti di Pietra" />
+    <string id="aom_goblin_clan_6" text="{.MP}Residui di Moria" />
+    <string id="aom_goblin_clan_7" text="{.FS}Covata di Cirith Ungol" />
+    <string id="aom_goblin_clan_8" text="{.MP}Figli di Angmar" />
+    <string id="aom_goblin_clan_9" text="{.FS}Banda di Carn Dum" />
     <string id="aom_goblin_desc" text="I Goblin di Goblinopoli sciamano nei cunicoli sotto l'Alto Passo dei Monti Nebbiosi. Codardi se soli ma travolgenti per numero, si riproducono senza fine nell'oscurità e si riversano fuori per tendere imboscate ai viandanti sulle strade di montagna. Sotto il loro Grande Goblin e i suoi capitani tormentano Elfi, Nani e Uomini allo stesso modo, servendo l'Ombra crescente per bottino e malvagità." />
     <string id="aom_goblin_female_name_1" text="Gralza" />
     <string id="aom_goblin_female_name_10" text="Ulzara" />
@@ -541,22 +541,22 @@
     <string id="aom_goblin_male_name_7" text="Gragor" />
     <string id="aom_goblin_male_name_8" text="Durmash" />
     <string id="aom_goblin_male_name_9" text="Vorgoth" />
-    <string id="aom_goblin_name" text="Goblin" />
-    <string id="aom_gondor_clan_1" text="Casa di Húrin" />
-    <string id="aom_gondor_clan_10" text="Casa di Ethir" />
-    <string id="aom_gondor_clan_11" text="Casa di Anfalas" />
-    <string id="aom_gondor_clan_12" text="Casa di Lamedon" />
-    <string id="aom_gondor_clan_13" text="Casa di Ithilien" />
-    <string id="aom_gondor_clan_14" text="Casa di Cair Andros" />
-    <string id="aom_gondor_clan_15" text="Casa di Tarnost" />
-    <string id="aom_gondor_clan_2" text="Casa di Dol Amroth" />
-    <string id="aom_gondor_clan_3" text="Casa di Anárion" />
-    <string id="aom_gondor_clan_4" text="Casa di Lossarnach" />
-    <string id="aom_gondor_clan_5" text="Casa di Pinnath Gelin" />
-    <string id="aom_gondor_clan_6" text="Casa di Morthond" />
-    <string id="aom_gondor_clan_7" text="Casa di Ringló" />
-    <string id="aom_gondor_clan_8" text="Casa di Lebennin" />
-    <string id="aom_gondor_clan_9" text="Casa di Pelargir" />
+    <string id="aom_goblin_name" text="{.MP}Goblin" />
+    <string id="aom_gondor_clan_1" text="{.FS}Casa di Húrin" />
+    <string id="aom_gondor_clan_10" text="{.FS}Casa di Ethir" />
+    <string id="aom_gondor_clan_11" text="{.FS}Casa di Anfalas" />
+    <string id="aom_gondor_clan_12" text="{.FS}Casa di Lamedon" />
+    <string id="aom_gondor_clan_13" text="{.FS}Casa di Ithilien" />
+    <string id="aom_gondor_clan_14" text="{.FS}Casa di Cair Andros" />
+    <string id="aom_gondor_clan_15" text="{.FS}Casa di Tarnost" />
+    <string id="aom_gondor_clan_2" text="{.FS}Casa di Dol Amroth" />
+    <string id="aom_gondor_clan_3" text="{.FS}Casa di Anárion" />
+    <string id="aom_gondor_clan_4" text="{.FS}Casa di Lossarnach" />
+    <string id="aom_gondor_clan_5" text="{.FS}Casa di Pinnath Gelin" />
+    <string id="aom_gondor_clan_6" text="{.FS}Casa di Morthond" />
+    <string id="aom_gondor_clan_7" text="{.FS}Casa di Ringló" />
+    <string id="aom_gondor_clan_8" text="{.FS}Casa di Lebennin" />
+    <string id="aom_gondor_clan_9" text="{.FS}Casa di Pelargir" />
     <string id="aom_gondor_desc" text="Il popolo di Gondor è una gente fiera e tenace, erede del più grande regno degli Uomini nella Terra di Mezzo. Fondato dagli esuli númenóreani Isildur e Anárion, Gondor è un bastione di forza e speranza contro l'avanzare delle tenebre di Mordor. Le sue città di pietra, coronate dalla maestosa Minas Tirith, sono meraviglie di ingegneria e resistenza. Guidati da nobili sovrintendenti e valorosi capitani, schierano eserciti disciplinati di fanti incrollabili e rapidi cavalieri a cavallo, un faro splendente di sfida di fronte alla disperazione." />
     <string id="aom_gondor_female_name_1" text="Lothíriel" />
     <string id="aom_gondor_female_name_10" text="Silmariën" />
@@ -659,21 +659,21 @@
     <string id="aom_gondor_male_name_8" text="Elendil" />
     <string id="aom_gondor_male_name_9" text="Thorongil" />
     <string id="aom_gondor_name" text="Gondoriano" />
-    <string id="aom_gundabad_clan_1" text="Tribù del Monte Gundabad" />
-    <string id="aom_gundabad_clan_10" text="Predoni delle Montagne Grigie" />
-    <string id="aom_gundabad_clan_11" text="Orda delle Paludi dei Troll" />
-    <string id="aom_gundabad_clan_12" text="Banda degli Snaga" />
-    <string id="aom_gundabad_clan_13" text="Stirpe di Bolg" />
-    <string id="aom_gundabad_clan_14" text="Clan Dentenero" />
-    <string id="aom_gundabad_clan_15" text="Flagello dei Colli Ferrosi" />
-    <string id="aom_gundabad_clan_2" text="Clan della Città degli Orchi" />
-    <string id="aom_gundabad_clan_3" text="Lupi dei Monti Nebbiosi" />
-    <string id="aom_gundabad_clan_4" text="Branco di Warg" />
-    <string id="aom_gundabad_clan_5" text="Orda dei Giganti di Pietra" />
-    <string id="aom_gundabad_clan_6" text="Residui di Moria" />
-    <string id="aom_gundabad_clan_7" text="Progenie di Cirith Ungol" />
-    <string id="aom_gundabad_clan_8" text="Figli di Angmar" />
-    <string id="aom_gundabad_clan_9" text="Banda di Carn Dûm" />
+    <string id="aom_gundabad_clan_1" text="{.FS}Tribù del Monte Gundabad" />
+    <string id="aom_gundabad_clan_10" text="{.MP}Predoni delle Montagne Grigie" />
+    <string id="aom_gundabad_clan_11" text="{.FS}Orda delle Paludi dei Troll" />
+    <string id="aom_gundabad_clan_12" text="{.FS}Banda degli Snaga" />
+    <string id="aom_gundabad_clan_13" text="{.FS}Stirpe di Bolg" />
+    <string id="aom_gundabad_clan_14" text="{.MS}Clan Dentenero" />
+    <string id="aom_gundabad_clan_15" text="{.MS}Flagello dei Colli Ferrosi" />
+    <string id="aom_gundabad_clan_2" text="{.MS}Clan della Città degli Orchi" />
+    <string id="aom_gundabad_clan_3" text="{.MP}Lupi dei Monti Nebbiosi" />
+    <string id="aom_gundabad_clan_4" text="{.MS}Branco di Warg" />
+    <string id="aom_gundabad_clan_5" text="{.FS}Orda dei Giganti di Pietra" />
+    <string id="aom_gundabad_clan_6" text="{.MP}Residui di Moria" />
+    <string id="aom_gundabad_clan_7" text="{.FS}Progenie di Cirith Ungol" />
+    <string id="aom_gundabad_clan_8" text="{.MP}Figli di Angmar" />
+    <string id="aom_gundabad_clan_9" text="{.FS}Banda di Carn Dûm" />
     <string id="aom_gundabad_desc" text="Gli Orchi di Gundabad dei Monti Nebbiosi sono selvaggi e implacabili. Dall'antica fortezza del Monte Gundabad, saccheggiano le terre circostanti, spinti da una sete di vendetta e conquista. Sotto il dominio di potenti capitribù, radunano legioni di goblin, warg e troll. I guerrieri di Gundabad sono brutali e astuti, maestri dell'imboscata e della forza schiacciante." />
     <string id="aom_gundabad_female_name_1" text="Gralza" />
     <string id="aom_gundabad_female_name_10" text="Ulzara" />
@@ -775,22 +775,22 @@
     <string id="aom_gundabad_male_name_7" text="Gragor" />
     <string id="aom_gundabad_male_name_8" text="Durmash" />
     <string id="aom_gundabad_male_name_9" text="Vorgoth" />
-    <string id="aom_gundabad_name" text="Orchi di Gundabad" />
-    <string id="aom_isengard_clan_1" text="Mano Bianca" />
-    <string id="aom_isengard_clan_10" text="Combattenti della Fossa" />
-    <string id="aom_isengard_clan_11" text="Eletti di Saruman" />
-    <string id="aom_isengard_clan_12" text="Guardia della Torre" />
-    <string id="aom_isengard_clan_13" text="Predoni di Fangorn" />
-    <string id="aom_isengard_clan_14" text="Razziatori del Westfold" />
-    <string id="aom_isengard_clan_15" text="Clan del Ferro Nero" />
-    <string id="aom_isengard_clan_2" text="Uruk-hai Combattenti" />
-    <string id="aom_isengard_clan_3" text="Avanguardia di Isengard" />
-    <string id="aom_isengard_clan_4" text="Cavalcatori di Warg" />
-    <string id="aom_isengard_clan_5" text="Banda dei Berserker" />
-    <string id="aom_isengard_clan_6" text="Guardia di Orthanc" />
-    <string id="aom_isengard_clan_7" text="Legione del Pugno di Ferro" />
-    <string id="aom_isengard_clan_8" text="Alleati Dunlandiani" />
-    <string id="aom_isengard_clan_9" text="Banda Guerriera di Nan Curunír" />
+    <string id="aom_gundabad_name" text="{.MP}Orchi di Gundabad" />
+    <string id="aom_isengard_clan_1" text="{.FS}Mano Bianca" />
+    <string id="aom_isengard_clan_10" text="{.MP}Combattenti della Fossa" />
+    <string id="aom_isengard_clan_11" text="{.MP}Eletti di Saruman" />
+    <string id="aom_isengard_clan_12" text="{.FS}Guardia della Torre" />
+    <string id="aom_isengard_clan_13" text="{.MP}Predoni di Fangorn" />
+    <string id="aom_isengard_clan_14" text="{.MP}Razziatori del Westfold" />
+    <string id="aom_isengard_clan_15" text="{.MS}Clan del Ferro Nero" />
+    <string id="aom_isengard_clan_2" text="{.MP}Uruk-hai Combattenti" />
+    <string id="aom_isengard_clan_3" text="{.FS}Avanguardia di Isengard" />
+    <string id="aom_isengard_clan_4" text="{.MP}Cavalcatori di Warg" />
+    <string id="aom_isengard_clan_5" text="{.FS}Banda dei Berserker" />
+    <string id="aom_isengard_clan_6" text="{.FS}Guardia di Orthanc" />
+    <string id="aom_isengard_clan_7" text="{.FS}Legione del Pugno di Ferro" />
+    <string id="aom_isengard_clan_8" text="{.MP}Alleati Dunlandiani" />
+    <string id="aom_isengard_clan_9" text="{.FS}Banda Guerriera di Nan Curunír" />
     <string id="aom_isengard_desc" text="Il popolo di Isengard è costituito dalle legioni di Saruman, forgiate dall'industria e alimentate da una cupa visione di dominio. Raccolta attorno all'inespugnabile torre di Orthanc, Isengard è la patria degli Uruk-hai, allevati per forza, resistenza e obbedienza. Con macchine da guerra e l'astuzia del loro padrone, schiacciano ogni opposizione con spietata precisione." />
     <string id="aom_isengard_female_name_1" text="Grishna" />
     <string id="aom_isengard_female_name_10" text="Durgra" />
@@ -892,22 +892,22 @@
     <string id="aom_isengard_male_name_7" text="Mordruk" />
     <string id="aom_isengard_male_name_8" text="Zogash" />
     <string id="aom_isengard_male_name_9" text="Narzug" />
-    <string id="aom_isengard_name" text="Isengard" />
-    <string id="aom_lindon_clan_1" text="Casa di Círdan" />
-    <string id="aom_lindon_clan_10" text="Casa di Elmoth" />
-    <string id="aom_lindon_clan_11" text="Cirdanath" />
-    <string id="aom_lindon_clan_12" text="Casa di Salmar" />
-    <string id="aom_lindon_clan_13" text="Casa di Nimloth" />
-    <string id="aom_lindon_clan_14" text="Casa di Gil-galad" />
-    <string id="aom_lindon_clan_15" text="Casa di Círdan" />
-    <string id="aom_lindon_clan_2" text="Casa di Falathar" />
-    <string id="aom_lindon_clan_3" text="Casa di Galdor" />
-    <string id="aom_lindon_clan_4" text="Casa di Aerandir" />
-    <string id="aom_lindon_clan_5" text="Casa di Erellont" />
-    <string id="aom_lindon_clan_6" text="Gwaith-i-Falath" />
-    <string id="aom_lindon_clan_7" text="Casa di Nimros" />
-    <string id="aom_lindon_clan_8" text="Casa di Gildor" />
-    <string id="aom_lindon_clan_9" text="Casa di Belegon" />
+    <string id="aom_isengard_name" text="{.FN}Isengard" />
+    <string id="aom_lindon_clan_1" text="{.FS}Casa di Círdan" />
+    <string id="aom_lindon_clan_10" text="{.FS}Casa di Elmoth" />
+    <string id="aom_lindon_clan_11" text="{.MN}Cirdanath" />
+    <string id="aom_lindon_clan_12" text="{.FS}Casa di Salmar" />
+    <string id="aom_lindon_clan_13" text="{.FS}Casa di Nimloth" />
+    <string id="aom_lindon_clan_14" text="{.FS}Casa di Gil-galad" />
+    <string id="aom_lindon_clan_15" text="{.FS}Casa di Círdan" />
+    <string id="aom_lindon_clan_2" text="{.FS}Casa di Falathar" />
+    <string id="aom_lindon_clan_3" text="{.FS}Casa di Galdor" />
+    <string id="aom_lindon_clan_4" text="{.FS}Casa di Aerandir" />
+    <string id="aom_lindon_clan_5" text="{.FS}Casa di Erellont" />
+    <string id="aom_lindon_clan_6" text="{.MN}Gwaith-i-Falath" />
+    <string id="aom_lindon_clan_7" text="{.FS}Casa di Nimros" />
+    <string id="aom_lindon_clan_8" text="{.FS}Casa di Gildor" />
+    <string id="aom_lindon_clan_9" text="{.FS}Casa di Belegon" />
     <string id="aom_lindon_desc" text="I Falathrim di Lindon sono gli ultimi costruttori di navi dei Sindar, e dimorano a Mithlond, dove il Golfo di Lune incontra il mare. Círdan custodisce i Porti Grigi sin dalla Prima Era, e dalle sue banchine le navi bianche salpano verso l'Occidente." />
     <string id="aom_lindon_female_name_1" text="Anariel" />
     <string id="aom_lindon_female_name_10" text="Silwen" />
@@ -1018,22 +1018,22 @@
     <string id="aom_lindon_male_name_7" text="Saranion" />
     <string id="aom_lindon_male_name_8" text="Ithralion" />
     <string id="aom_lindon_male_name_9" text="Valendil" />
-    <string id="aom_lindon_name" text="Elfi Falathrim" />
-    <string id="aom_lothlorien_clan_1" text="Casa di Galadriel" />
-    <string id="aom_lothlorien_clan_10" text="Clan del Rivo d'Argento" />
-    <string id="aom_lothlorien_clan_11" text="Compagnia del Bosco d'Oro" />
-    <string id="aom_lothlorien_clan_12" text="Guardia di Cerin Amroth" />
-    <string id="aom_lothlorien_clan_13" text="Clan dei Tessitori di Stelle" />
-    <string id="aom_lothlorien_clan_14" text="Casa di Haldir" />
-    <string id="aom_lothlorien_clan_15" text="Guardia di Lothlann" />
-    <string id="aom_lothlorien_clan_2" text="Casa di Celeborn" />
-    <string id="aom_lothlorien_clan_3" text="Guardia Galadhrim" />
-    <string id="aom_lothlorien_clan_4" text="Guardiani delle Marche" />
-    <string id="aom_lothlorien_clan_5" text="Circolo dei Mallorn" />
-    <string id="aom_lothlorien_clan_6" text="Custodi del Naith" />
-    <string id="aom_lothlorien_clan_7" text="Gente di Caras Galadhon" />
-    <string id="aom_lothlorien_clan_8" text="Parenti di Nimrodel" />
-    <string id="aom_lothlorien_clan_9" text="Il Lascito di Amroth" />
+    <string id="aom_lindon_name" text="{.MP}Elfi Falathrim" />
+    <string id="aom_lothlorien_clan_1" text="{.FS}Casa di Galadriel" />
+    <string id="aom_lothlorien_clan_10" text="{.MS}Clan del Rivo d'Argento" />
+    <string id="aom_lothlorien_clan_11" text="{.FS}Compagnia del Bosco d'Oro" />
+    <string id="aom_lothlorien_clan_12" text="{.FS}Guardia di Cerin Amroth" />
+    <string id="aom_lothlorien_clan_13" text="{.MS}Clan dei Tessitori di Stelle" />
+    <string id="aom_lothlorien_clan_14" text="{.FS}Casa di Haldir" />
+    <string id="aom_lothlorien_clan_15" text="{.FS}Guardia di Lothlann" />
+    <string id="aom_lothlorien_clan_2" text="{.FS}Casa di Celeborn" />
+    <string id="aom_lothlorien_clan_3" text="{.FS}Guardia Galadhrim" />
+    <string id="aom_lothlorien_clan_4" text="{.MP}Guardiani delle Marche" />
+    <string id="aom_lothlorien_clan_5" text="{.MS}Circolo dei Mallorn" />
+    <string id="aom_lothlorien_clan_6" text="{.MP}Custodi del Naith" />
+    <string id="aom_lothlorien_clan_7" text="{.FS}Gente di Caras Galadhon" />
+    <string id="aom_lothlorien_clan_8" text="{.MP}Parenti di Nimrodel" />
+    <string id="aom_lothlorien_clan_9" text="{.MS}Lascito di Amroth" />
     <string id="aom_lothlorien_desc" text="Gli Elfi di Lothlórien, noti come Galadhrim, sono un popolo nobile ed enigmatico che dimora nel Bosco d'Oro. Guidati dalla saggezza e dal potere della Dama Galadriel e di Lord Celeborn, sono i custodi di uno degli ultimi bastioni di bellezza e tranquillità elfica nella Terra di Mezzo. I Galadhrim sono arcieri insuperabili, capaci di fondersi perfettamente con gli aurei alberi di mallorn della loro terra." />
     <string id="aom_lothlorien_female_name_1" text="Calenwen" />
     <string id="aom_lothlorien_female_name_10" text="Tauriel" />
@@ -1135,22 +1135,22 @@
     <string id="aom_lothlorien_male_name_7" text="Carathion" />
     <string id="aom_lothlorien_male_name_8" text="Velanor" />
     <string id="aom_lothlorien_male_name_9" text="Taurion" />
-    <string id="aom_lothlorien_name" text="Elfi Galadhrim" />
-    <string id="aom_mirkwood_clan_1" text="Casa di Thranduil" />
-    <string id="aom_mirkwood_clan_10" text="Guardia di Emyn Duir" />
-    <string id="aom_mirkwood_clan_11" text="Guardia di Amon Lanc" />
-    <string id="aom_mirkwood_clan_12" text="Clan Spinargento" />
-    <string id="aom_mirkwood_clan_13" text="Parenti del Re degli Elfi" />
-    <string id="aom_mirkwood_clan_14" text="Popolo del Fiume Fluente" />
-    <string id="aom_mirkwood_clan_15" text="Clan Foglissia" />
-    <string id="aom_mirkwood_clan_2" text="Tawarwaith" />
-    <string id="aom_mirkwood_clan_3" text="Guardia di Boscoverde" />
-    <string id="aom_mirkwood_clan_4" text="Vigilanza Silvana" />
-    <string id="aom_mirkwood_clan_5" text="Uomini dei Boschi di Valle" />
-    <string id="aom_mirkwood_clan_6" text="Compagnia di Galion" />
-    <string id="aom_mirkwood_clan_7" text="Custodi della Foresta" />
-    <string id="aom_mirkwood_clan_8" text="Clan Ramoquercia" />
-    <string id="aom_mirkwood_clan_9" text="Sentinelle della Luce Stellare" />
+    <string id="aom_lothlorien_name" text="{.MP}Elfi Galadhrim" />
+    <string id="aom_mirkwood_clan_1" text="{.FS}Casa di Thranduil" />
+    <string id="aom_mirkwood_clan_10" text="{.FS}Guardia di Emyn Duir" />
+    <string id="aom_mirkwood_clan_11" text="{.FS}Guardia di Amon Lanc" />
+    <string id="aom_mirkwood_clan_12" text="{.MS}Clan Spinargento" />
+    <string id="aom_mirkwood_clan_13" text="{.MP}Parenti del Re degli Elfi" />
+    <string id="aom_mirkwood_clan_14" text="{.MS}Popolo del Fiume Fluente" />
+    <string id="aom_mirkwood_clan_15" text="{.MS}Clan Foglissia" />
+    <string id="aom_mirkwood_clan_2" text="{.MN}Tawarwaith" />
+    <string id="aom_mirkwood_clan_3" text="{.FS}Guardia di Boscoverde" />
+    <string id="aom_mirkwood_clan_4" text="{.FS}Vigilanza Silvana" />
+    <string id="aom_mirkwood_clan_5" text="{.MP}Uomini dei Boschi di Valle" />
+    <string id="aom_mirkwood_clan_6" text="{.FS}Compagnia di Galion" />
+    <string id="aom_mirkwood_clan_7" text="{.MP}Custodi della Foresta" />
+    <string id="aom_mirkwood_clan_8" text="{.MS}Clan Ramoquercia" />
+    <string id="aom_mirkwood_clan_9" text="{.FP}Sentinelle della Luce Stellare" />
     <string id="aom_mirkwood_desc" text="Gli Elfi Silvani di Bosco Atro, noto anche come il Reame Boscoso, sono un popolo fiero e tenace che considera la vasta foresta la propria casa. Governati da Re Thranduil, sono abili cacciatori e guerrieri, e si muovono tra i boschi ombrosi con agilità e precisione ineguagliabili. Gli Elfi di Bosco Atro sono maestri dell'arco, e colpiscono rapidi e silenziosi dagli alberi." />
     <string id="aom_mirkwood_female_name_1" text="Calenwen" />
     <string id="aom_mirkwood_female_name_10" text="Tauriel" />
@@ -1252,22 +1252,22 @@
     <string id="aom_mirkwood_male_name_7" text="Taurandir" />
     <string id="aom_mirkwood_male_name_8" text="Elenar" />
     <string id="aom_mirkwood_male_name_9" text="Sildarion" />
-    <string id="aom_mirkwood_name" text="Elfi Silvani" />
-    <string id="aom_mistymountainorcs_clan_1" text="Schiera dei Monti Nebbiosi" />
-    <string id="aom_mistymountainorcs_clan_10" text="Predoni dei Monti Grigi" />
-    <string id="aom_mistymountainorcs_clan_11" text="Orda delle Paludi di Etten" />
-    <string id="aom_mistymountainorcs_clan_12" text="Banda Snaga" />
-    <string id="aom_mistymountainorcs_clan_13" text="Stirpe di Bolg" />
-    <string id="aom_mistymountainorcs_clan_14" text="Clan Dentenero" />
-    <string id="aom_mistymountainorcs_clan_15" text="Flagello dei Colli Ferrosi" />
-    <string id="aom_mistymountainorcs_clan_2" text="Clan di Goblinville" />
-    <string id="aom_mistymountainorcs_clan_3" text="Lupi dei Monti Nebbiosi" />
-    <string id="aom_mistymountainorcs_clan_4" text="Branco di Warg" />
-    <string id="aom_mistymountainorcs_clan_5" text="Orda dei Giganti di Pietra" />
-    <string id="aom_mistymountainorcs_clan_6" text="Residui di Moria" />
-    <string id="aom_mistymountainorcs_clan_7" text="Covata di Cirith Ungol" />
-    <string id="aom_mistymountainorcs_clan_8" text="Figli di Angmar" />
-    <string id="aom_mistymountainorcs_clan_9" text="Banda Guerriera di Carn Dûm" />
+    <string id="aom_mirkwood_name" text="{.MP}Elfi Silvani" />
+    <string id="aom_mistymountainorcs_clan_1" text="{.FS}Schiera dei Monti Nebbiosi" />
+    <string id="aom_mistymountainorcs_clan_10" text="{.MP}Predoni dei Monti Grigi" />
+    <string id="aom_mistymountainorcs_clan_11" text="{.FS}Orda delle Paludi di Etten" />
+    <string id="aom_mistymountainorcs_clan_12" text="{.FS}Banda Snaga" />
+    <string id="aom_mistymountainorcs_clan_13" text="{.FS}Stirpe di Bolg" />
+    <string id="aom_mistymountainorcs_clan_14" text="{.MS}Clan Dentenero" />
+    <string id="aom_mistymountainorcs_clan_15" text="{.MS}Flagello dei Colli Ferrosi" />
+    <string id="aom_mistymountainorcs_clan_2" text="{.MS}Clan di Goblinville" />
+    <string id="aom_mistymountainorcs_clan_3" text="{.MP}Lupi dei Monti Nebbiosi" />
+    <string id="aom_mistymountainorcs_clan_4" text="{.MS}Branco di Warg" />
+    <string id="aom_mistymountainorcs_clan_5" text="{.FS}Orda dei Giganti di Pietra" />
+    <string id="aom_mistymountainorcs_clan_6" text="{.MP}Residui di Moria" />
+    <string id="aom_mistymountainorcs_clan_7" text="{.FS}Covata di Cirith Ungol" />
+    <string id="aom_mistymountainorcs_clan_8" text="{.MP}Figli di Angmar" />
+    <string id="aom_mistymountainorcs_clan_9" text="{.FS}Banda Guerriera di Carn Dûm" />
     <string id="aom_mistymountainorcs_desc" text="Gli Orchi dei Monti Nebbiosi sono una selvaggia schiera guerriera che dimora tra le alte cime e i luoghi profondi della catena. Mossi da un antico odio per gli Elfi e i Nani, radunano legioni vaste e male armate e si riversano sulle terre sottostanti, al servizio dei poteri oscuri che si agitano a Oriente." />
     <string id="aom_mistymountainorcs_female_name_1" text="Gralza" />
     <string id="aom_mistymountainorcs_female_name_10" text="Ulzara" />
@@ -1369,22 +1369,22 @@
     <string id="aom_mistymountainorcs_male_name_7" text="Gragor" />
     <string id="aom_mistymountainorcs_male_name_8" text="Durmash" />
     <string id="aom_mistymountainorcs_male_name_9" text="Vorgoth" />
-    <string id="aom_mistymountainorcs_name" text="Orchi dei Monti Nebbiosi" />
-    <string id="aom_mordor_clan_1" text="Legione dell'Occhio Rosso" />
-    <string id="aom_mordor_clan_10" text="Corona di Ferro" />
-    <string id="aom_mordor_clan_11" text="Orda di Udûn" />
-    <string id="aom_mordor_clan_12" text="Schiera d'Ombra" />
-    <string id="aom_mordor_clan_13" text="Guardia di Barad-dûr" />
-    <string id="aom_mordor_clan_14" text="Fucina del Monte Fato" />
-    <string id="aom_mordor_clan_15" text="Guarnigione di Durthang" />
-    <string id="aom_mordor_clan_2" text="Ratti di Morgul" />
-    <string id="aom_mordor_clan_3" text="Uruk Neri" />
-    <string id="aom_mordor_clan_4" text="Guardia della Torre" />
-    <string id="aom_mordor_clan_5" text="Banda di Gorgoroth" />
-    <string id="aom_mordor_clan_6" text="Branco di Cirith Ungol" />
-    <string id="aom_mordor_clan_7" text="Tribù dei Monti di Cenere" />
-    <string id="aom_mordor_clan_8" text="Schiavi di Nûrn" />
-    <string id="aom_mordor_clan_9" text="Predoni di Lithlad" />
+    <string id="aom_mistymountainorcs_name" text="{.MP}Orchi dei Monti Nebbiosi" />
+    <string id="aom_mordor_clan_1" text="{.FS}Legione dell'Occhio Rosso" />
+    <string id="aom_mordor_clan_10" text="{.FS}Corona di Ferro" />
+    <string id="aom_mordor_clan_11" text="{.FS}Orda di Udûn" />
+    <string id="aom_mordor_clan_12" text="{.FS}Schiera d'Ombra" />
+    <string id="aom_mordor_clan_13" text="{.FS}Guardia di Barad-dûr" />
+    <string id="aom_mordor_clan_14" text="{.FS}Fucina del Monte Fato" />
+    <string id="aom_mordor_clan_15" text="{.FS}Guarnigione di Durthang" />
+    <string id="aom_mordor_clan_2" text="{.MP}Ratti di Morgul" />
+    <string id="aom_mordor_clan_3" text="{.MP}Uruk Neri" />
+    <string id="aom_mordor_clan_4" text="{.FS}Guardia della Torre" />
+    <string id="aom_mordor_clan_5" text="{.FS}Banda di Gorgoroth" />
+    <string id="aom_mordor_clan_6" text="{.MS}Branco di Cirith Ungol" />
+    <string id="aom_mordor_clan_7" text="{.FS}Tribù dei Monti di Cenere" />
+    <string id="aom_mordor_clan_8" text="{.MP}Schiavi di Nûrn" />
+    <string id="aom_mordor_clan_9" text="{.MP}Predoni di Lithlad" />
     <string id="aom_mordor_desc" text="Gli Orchi di Mordor sono una forza brutale e implacabile, allevati nelle fosse oscure di Barad-dûr per servire la volontà di Sauron. Crudeli e selvaggi, marciano alla guerra in orde infinite, brandendo armi rozze ma letali forgiate nei fuochi del Monte Fato. Coperti di armature dentellate e portando stendardi neri fregiati dell'Occhio Rosso, recano terrore e distruzione ovunque mettano piede. Vincolati alla ferrea volontà del loro Oscuro Signore, gli Orchi di Mordor sono divisi in bande guidate da capitani spietati, uniti soltanto dal desiderio di conquista." />
     <string id="aom_mordor_female_name_1" text="Gûlsha" />
     <string id="aom_mordor_female_name_10" text="Ûrgha" />
@@ -1486,22 +1486,22 @@
     <string id="aom_mordor_male_name_7" text="Ufthak" />
     <string id="aom_mordor_male_name_8" text="Snaga" />
     <string id="aom_mordor_male_name_9" text="Gothmog" />
-    <string id="aom_mordor_name" text="Mordor" />
-    <string id="aom_rivendell_clan_1" text="Casa di Elrond" />
-    <string id="aom_rivendell_clan_10" text="Casa di Erestor" />
-    <string id="aom_rivendell_clan_11" text="Lambengolmor" />
-    <string id="aom_rivendell_clan_12" text="Casa di Lindir" />
-    <string id="aom_rivendell_clan_13" text="Casa di Arwen" />
-    <string id="aom_rivendell_clan_14" text="Casa di Gil-galad" />
-    <string id="aom_rivendell_clan_15" text="Casa di Cirdan" />
-    <string id="aom_rivendell_clan_2" text="Casa di Fëanor" />
-    <string id="aom_rivendell_clan_3" text="Casa di Fingolfin" />
-    <string id="aom_rivendell_clan_4" text="Casa di Finarfin" />
-    <string id="aom_rivendell_clan_5" text="Casa di Turgon" />
-    <string id="aom_rivendell_clan_6" text="Gwaith-i-Mírdain" />
-    <string id="aom_rivendell_clan_7" text="Casa di Celebrimbor" />
-    <string id="aom_rivendell_clan_8" text="Casa di Gildor" />
-    <string id="aom_rivendell_clan_9" text="Casa di Glorfindel" />
+    <string id="aom_mordor_name" text="{.FN}Mordor" />
+    <string id="aom_rivendell_clan_1" text="{.FS}Casa di Elrond" />
+    <string id="aom_rivendell_clan_10" text="{.FS}Casa di Erestor" />
+    <string id="aom_rivendell_clan_11" text="{.MN}Lambengolmor" />
+    <string id="aom_rivendell_clan_12" text="{.FS}Casa di Lindir" />
+    <string id="aom_rivendell_clan_13" text="{.FS}Casa di Arwen" />
+    <string id="aom_rivendell_clan_14" text="{.FS}Casa di Gil-galad" />
+    <string id="aom_rivendell_clan_15" text="{.FS}Casa di Cirdan" />
+    <string id="aom_rivendell_clan_2" text="{.FS}Casa di Fëanor" />
+    <string id="aom_rivendell_clan_3" text="{.FS}Casa di Fingolfin" />
+    <string id="aom_rivendell_clan_4" text="{.FS}Casa di Finarfin" />
+    <string id="aom_rivendell_clan_5" text="{.FS}Casa di Turgon" />
+    <string id="aom_rivendell_clan_6" text="{.MN}Gwaith-i-Mírdain" />
+    <string id="aom_rivendell_clan_7" text="{.FS}Casa di Celebrimbor" />
+    <string id="aom_rivendell_clan_8" text="{.FS}Casa di Gildor" />
+    <string id="aom_rivendell_clan_9" text="{.FS}Casa di Glorfindel" />
     <string id="aom_rivendell_desc" text="Gli Elfi Noldor di Gran Burrone sono un popolo saggio e antico, celebre per il sapere, l'arte e il valore senza pari. Sotto la guida di Lord Elrond, custodiscono la bellezza e le tradizioni ormai in declino dei Giorni Antichi nel rifugio nascosto di Imladris. Maestri sia della spada sia dell'arco, i Noldor uniscono l'abilità marziale alla grazia e alla precisione della loro stirpe." />
     <string id="aom_rivendell_female_name_1" text="Anariel" />
     <string id="aom_rivendell_female_name_10" text="Silwen" />
@@ -1612,16 +1612,16 @@
     <string id="aom_rivendell_male_name_7" text="Saranion" />
     <string id="aom_rivendell_male_name_8" text="Ithralion" />
     <string id="aom_rivendell_male_name_9" text="Valendil" />
-    <string id="aom_rivendell_name" text="Elfi Ñoldor" />
-    <string id="aom_shaghana_clan_1" text="Ezarkia" />
-    <string id="aom_shaghana_clan_2" text="Kûmaraknis" />
-    <string id="aom_shaghana_clan_3" text="Taiymâkä" />
-    <string id="aom_shaghana_clan_4" text="Zayaknûri" />
-    <string id="aom_shaghana_clan_5" text="Selarkes" />
-    <string id="aom_shaghana_clan_6" text="Uzharês" />
-    <string id="aom_shaghana_clan_7" text="Alâranin" />
-    <string id="aom_shaghana_clan_8" text="Banûgand" />
-    <string id="aom_shaghana_clan_9" text="Acammes" />
+    <string id="aom_rivendell_name" text="{.MP}Elfi Ñoldor" />
+    <string id="aom_shaghana_clan_1" text="{.MN}Ezarkia" />
+    <string id="aom_shaghana_clan_2" text="{.MN}Kûmaraknis" />
+    <string id="aom_shaghana_clan_3" text="{.MN}Taiymâkä" />
+    <string id="aom_shaghana_clan_4" text="{.MN}Zayaknûri" />
+    <string id="aom_shaghana_clan_5" text="{.MN}Selarkes" />
+    <string id="aom_shaghana_clan_6" text="{.MN}Uzharês" />
+    <string id="aom_shaghana_clan_7" text="{.MN}Alâranin" />
+    <string id="aom_shaghana_clan_8" text="{.MN}Banûgand" />
+    <string id="aom_shaghana_clan_9" text="{.MN}Acammes" />
     <string id="aom_shaghana_female_name_1" text="Zarkha" />
     <string id="aom_shaghana_female_name_10" text="Zarima" />
     <string id="aom_shaghana_female_name_11" text="Halima" />
@@ -1682,21 +1682,21 @@
     <string id="aom_shaghana_male_name_7" text="Azrak" />
     <string id="aom_shaghana_male_name_8" text="Samir" />
     <string id="aom_shaghana_male_name_9" text="Kazan" />
-    <string id="aom_umbar_clan_1" text="Flotta delle Vele Nere" />
-    <string id="aom_umbar_clan_10" text="Alleanza Sudrona" />
-    <string id="aom_umbar_clan_11" text="Clan del Lupo di Mare" />
-    <string id="aom_umbar_clan_12" text="Predoni della Baia di Belfalas" />
-    <string id="aom_umbar_clan_13" text="Esuli di Pelargir" />
-    <string id="aom_umbar_clan_14" text="Flagello di Dol Amroth" />
-    <string id="aom_umbar_clan_15" text="Clan del Signore dei Venti" />
-    <string id="aom_umbar_clan_2" text="Fratellanza dei Corsari" />
-    <string id="aom_umbar_clan_3" text="Figli di Castamir" />
-    <string id="aom_umbar_clan_4" text="Alleati Haradrim" />
-    <string id="aom_umbar_clan_5" text="Guardia del Serpente" />
-    <string id="aom_umbar_clan_6" text="Signori della Tempesta" />
-    <string id="aom_umbar_clan_7" text="Razziatori della Marea Rossa" />
-    <string id="aom_umbar_clan_8" text="Guardia del Porto" />
-    <string id="aom_umbar_clan_9" text="Númenóreani Neri" />
+    <string id="aom_umbar_clan_1" text="{.FS}Flotta delle Vele Nere" />
+    <string id="aom_umbar_clan_10" text="{.FS}Alleanza Sudrona" />
+    <string id="aom_umbar_clan_11" text="{.MS}Clan del Lupo di Mare" />
+    <string id="aom_umbar_clan_12" text="{.MP}Predoni della Baia di Belfalas" />
+    <string id="aom_umbar_clan_13" text="{.MP}Esuli di Pelargir" />
+    <string id="aom_umbar_clan_14" text="{.MS}Flagello di Dol Amroth" />
+    <string id="aom_umbar_clan_15" text="{.MS}Clan del Signore dei Venti" />
+    <string id="aom_umbar_clan_2" text="{.FS}Fratellanza dei Corsari" />
+    <string id="aom_umbar_clan_3" text="{.MP}Figli di Castamir" />
+    <string id="aom_umbar_clan_4" text="{.MP}Alleati Haradrim" />
+    <string id="aom_umbar_clan_5" text="{.FS}Guardia del Serpente" />
+    <string id="aom_umbar_clan_6" text="{.MP}Signori della Tempesta" />
+    <string id="aom_umbar_clan_7" text="{.MP}Razziatori della Marea Rossa" />
+    <string id="aom_umbar_clan_8" text="{.FS}Guardia del Porto" />
+    <string id="aom_umbar_clan_9" text="{.MP}Númenóreani Neri" />
     <string id="aom_umbar_desc" text="Il popolo di Umbar è composto da guerrieri del mare e corsari, padroni delle acque a sud di Gondor. Discendenti degli esuli númenóreani, sono noti per l'astuzia e la ferocia in battaglia. Sotto vele nere, le loro flotte razziano le coste, seminando il terrore nei cuori dei nemici. Sebbene la loro fedeltà sia rivolta a Sauron, i Corsari di Umbar sono fieramente indipendenti e pongono la forza e l'astuzia al di sopra di tutto." />
     <string id="aom_umbar_female_name_1" text="Selara" />
     <string id="aom_umbar_female_name_10" text="Kalima" />
@@ -1798,19 +1798,19 @@
     <string id="aom_umbar_male_name_7" text="Jorvin" />
     <string id="aom_umbar_male_name_8" text="Rohzar" />
     <string id="aom_umbar_male_name_9" text="Nazrin" />
-    <string id="aom_umbar_name" text="Umbar" />
-    <string id="aom_arthedain_clan_1" text="Casa di Amlaith" />
-    <string id="aom_arthedain_clan_10" text="Casa del Fossato dei Morti" />
-    <string id="aom_arthedain_clan_11" text="Casa delle Colline del Vento" />
-    <string id="aom_arthedain_clan_12" text="Casa di Nenuial" />
-    <string id="aom_arthedain_clan_2" text="Casa di Fornost" />
-    <string id="aom_arthedain_clan_3" text="Casa di Annúminas" />
-    <string id="aom_arthedain_clan_4" text="Casa di Amon Sûl" />
-    <string id="aom_arthedain_clan_5" text="Casa delle Colline del Nord" />
-    <string id="aom_arthedain_clan_6" text="Casa di Evendim" />
-    <string id="aom_arthedain_clan_7" text="Casa del Baranduin" />
-    <string id="aom_arthedain_clan_8" text="Casa dell'Angolo" />
-    <string id="aom_arthedain_clan_9" text="Casa di Brea" />
+    <string id="aom_umbar_name" text="{.FN}Umbar" />
+    <string id="aom_arthedain_clan_1" text="{.FS}Casa di Amlaith" />
+    <string id="aom_arthedain_clan_10" text="{.FS}Casa del Fossato dei Morti" />
+    <string id="aom_arthedain_clan_11" text="{.FS}Casa delle Colline del Vento" />
+    <string id="aom_arthedain_clan_12" text="{.FS}Casa di Nenuial" />
+    <string id="aom_arthedain_clan_2" text="{.FS}Casa di Fornost" />
+    <string id="aom_arthedain_clan_3" text="{.FS}Casa di Annúminas" />
+    <string id="aom_arthedain_clan_4" text="{.FS}Casa di Amon Sûl" />
+    <string id="aom_arthedain_clan_5" text="{.FS}Casa delle Colline del Nord" />
+    <string id="aom_arthedain_clan_6" text="{.FS}Casa di Evendim" />
+    <string id="aom_arthedain_clan_7" text="{.FS}Casa del Baranduin" />
+    <string id="aom_arthedain_clan_8" text="{.FS}Casa dell'Angolo" />
+    <string id="aom_arthedain_clan_9" text="{.FS}Casa di Brea" />
     <string id="aom_arthedain_desc" text="I Dúnedain di Arthedain sono gli ultimi eredi di Arnor, il Reame del Nord fondato da Elendil. Da Forlindon... da Fornost sulle Colline del Nord, la stirpe di Arvedui mantiene ancora la veglia che gli eredi di Isildur custodiscono da mille anni, benché le loro città siano poche, i loro signori poveri e l'ombra di Angmar non abbandoni mai le colline. Sono meno numerosi dei loro parenti del sud e più orgogliosi di quanto il loro numero giustifichi, e a ogni stagione le terre selvagge incalzano più vicine." />
     <string id="aom_arthedain_female_name_1" text="Gilraen" />
     <string id="aom_arthedain_female_name_10" text="Rhiannel" />
@@ -1876,7 +1876,7 @@
     <string id="aom_arthedain_male_name_7" text="Argeleb" />
     <string id="aom_arthedain_male_name_8" text="Arveleg" />
     <string id="aom_arthedain_male_name_9" text="Araphor" />
-    <string id="aom_arthedain_name" text="Arthedain" />
+    <string id="aom_arthedain_name" text="{.FN}Arthedain" />
     <string id="aom_cardolan_clan_1" text="House of Tyrn Gorthad" />
     <string id="aom_cardolan_clan_10" text="House of the Greenway" />
     <string id="aom_cardolan_clan_11" text="House of Swanfleet" />
@@ -1954,7 +1954,7 @@
     <string id="aom_cardolan_male_name_7" text="Celebros" />
     <string id="aom_cardolan_male_name_8" text="Dagnir" />
     <string id="aom_cardolan_male_name_9" text="Dorthar" />
-    <string id="aom_cardolan_name" text="Cardolan" />
+    <string id="aom_cardolan_name" text="{.FN}Cardolan" />
     <string id="aom_rhudaur_clan_1" text="House of Cameth Brin" />
     <string id="aom_rhudaur_clan_10" text="House of Egladil" />
     <string id="aom_rhudaur_clan_11" text="House of the Fells" />
@@ -2032,6 +2032,6 @@
     <string id="aom_rhudaur_male_name_7" text="Dunhal" />
     <string id="aom_rhudaur_male_name_8" text="Eredhir" />
     <string id="aom_rhudaur_male_name_9" text="Fengar" />
-    <string id="aom_rhudaur_name" text="Rhudaur" />
+    <string id="aom_rhudaur_name" text="{.FN}Rhudaur" />
   </strings>
 </base>

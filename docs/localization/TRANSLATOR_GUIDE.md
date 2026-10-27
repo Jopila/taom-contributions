@@ -421,6 +421,32 @@ English-only override's language row, except the pairs in that file, which keep 
 translator does not discover it, and `rebuild_translation_files.py` and `generate_translation_template.py` leave it out,
 unless the language file already holds a row for that id.
 
+## Name grammar tags (Portuguese and Italian)
+
+A kingdom, minor faction, clan, culture or settlement name in the `BR` and `IT` language files starts with a grammar tag such as
+`{.NS}Erebor`, `{.MN}Mordor` or `{.FS}Casa di Bard`. The game's text code reads the tag to pick an article or a preposition; a
+name without one reads wrong in vanilla sentences. The tag is not part of the translation:
+
+- **A translator never writes a tag.** `translate_with_claude.py` counts grammar tags in its placeholder check, so a translation
+  that drops or adds one is rejected. The cache and the overrides hold the plain name only.
+- **The tags come from `tools/translation_name_tags.json`**, which maps (language, id) to a tag, by rule: a proper name gets
+  `{.NS}` (BR) or `{.FN}` (IT); a name led by a common noun gets the noun's tag ("Aldeia" `{.FS}`, "Villaggio" `{.MS}`, a plural
+  such as "Saqueadores" or "Predoni" `{.MP}`; Italian kingdoms, minor factions, clans and untitled castles take `{.MN}`, the
+  masculine noun). The translator's `main()` adds the tag when it writes a file, and
+  `python tools/name_tags.py --lang all --apply` adds it to the files already written.
+- **After a translation run that touches names,** run `python tools/generate_name_tags.py --write` and read
+  `--list-undecided`: a new translation can change a name's first word, and with it the tag. `generate_name_tags.py --check`
+  and the tools suite fail on a tag that is not what the rules give for the row.
+- **A name in a hand-made translation** is tagged by the same step; write it without the tag.
+- **Italian depends on #1026.** The Italian tags are read only once the Italian text processor runs; until the `language_data.xml`
+  fix ships, they are written but inert.
+- **Fresh model output is written untagged.** The translator tags only the cache and override fills it writes; it prints the fresh
+  rows that are names with the two commands to rerun. A file outside the repo (TAOM_Map, Armory) is tagged only with `--allow-live-write`.
+- **Other languages carry no tags.** A tag in an English, Chinese, Japanese, Korean or Turkish name row fails
+  `NameGrammarTagTests`.
+
+The design and the in-game checks are in [name-grammar-tags.md](../features/name-grammar-tags.md).
+
 ---
 
 ## Adding Canonical Translations to Overrides

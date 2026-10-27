@@ -6,131 +6,131 @@
     <tag language="Italian" />
   </tags>
   <strings>
-    <string id="aom_clan_bluecraig_1_name" text="Banda Guerriera di Blue Craig" />
-    <string id="aom_clan_bluecraig_2_name" text="Progenie della Rupe" />
-    <string id="aom_clan_bluecraig_3_name" text="Agguatatori del Lune" />
-    <string id="aom_clan_bluecraig_4_name" text="Razziatori di Ered Luin" />
-    <string id="aom_clan_bluecraig_5_name" text="Tribù della Pietra Tetra" />
-    <string id="aom_clan_dolguldur_10_name" text="Drûzgûl" />
-    <string id="aom_clan_dolguldur_11_name" text="Vrûkmog" />
-    <string id="aom_clan_dolguldur_12_name" text="Hlakûrz" />
-    <string id="aom_clan_dolguldur_13_name" text="Throzbûz" />
-    <string id="aom_clan_dolguldur_14_name" text="Rhâzgor" />
-    <string id="aom_clan_dolguldur_15_name" text="Uzghûl" />
-    <string id="aom_clan_dolguldur_1_name" text="Hîondrûs" />
-    <string id="aom_clan_dolguldur_2_name" text="Gûrzrak" />
-    <string id="aom_clan_dolguldur_3_name" text="Maugdur" />
-    <string id="aom_clan_dolguldur_4_name" text="Dûrzan" />
-    <string id="aom_clan_dolguldur_5_name" text="Krâzgoth" />
-    <string id="aom_clan_dolguldur_6_name" text="Zûrbak" />
-    <string id="aom_clan_dolguldur_7_name" text="Ghâshrûz" />
-    <string id="aom_clan_dolguldur_8_name" text="Morbhak" />
-    <string id="aom_clan_dolguldur_9_name" text="Skûlgath" />
-    <string id="aom_clan_empire_south_10_name" text="Ârki" />
-    <string id="aom_clan_empire_south_11_name" text="Îkhon" />
-    <string id="aom_clan_empire_south_12_name" text="Akheth" />
-    <string id="aom_clan_empire_south_13_name" text="Zarûnik" />
-    <string id="aom_clan_empire_south_14_name" text="Ûgrakhûr" />
-    <string id="aom_clan_empire_south_15_name" text="Brughash" />
-    <string id="aom_clan_empire_west_10_name" text="Casa di Hýarthulionath" />
-    <string id="aom_clan_empire_west_11_name" text="Casa di Caladionath" />
-    <string id="aom_clan_empire_west_12_name" text="Casa di Garvirionath" />
-    <string id="aom_clan_empire_west_13_name" text="Casa di Hirilionath" />
-    <string id="aom_clan_empire_west_14_name" text="Casa di Baranionath" />
-    <string id="aom_clan_erebor_1_name" text="Bit Durin" />
-    <string id="aom_clan_erebor_2_name" text="Bit Lóni" />
-    <string id="aom_clan_erebor_3_name" text="Bit Rár" />
-    <string id="aom_clan_erebor_4_name" text="Bit Gror" />
-    <string id="aom_clan_erebor_5_name" text="Bit Górli" />
-    <string id="aom_clan_erebor_6_name" text="Bit Róri" />
-    <string id="aom_clan_erebor_7_name" text="Bit Nórin" />
-    <string id="aom_clan_goblin_1_name" text="Skrithak" />
-    <string id="aom_clan_goblin_2_name" text="Yaghûl" />
-    <string id="aom_clan_goblin_3_name" text="Gorkil" />
-    <string id="aom_clan_goblin_4_name" text="Schiera Snaga" />
-    <string id="aom_clan_goblin_5_name" text="Mughrat" />
-    <string id="aom_clan_gundabad_10_name" text="Throkmaw" />
-    <string id="aom_clan_gundabad_1_name" text="Ashmog" />
-    <string id="aom_clan_gundabad_2_name" text="Gundruk" />
-    <string id="aom_clan_gundabad_3_name" text="Zarbag" />
-    <string id="aom_clan_gundabad_4_name" text="Morzûg" />
-    <string id="aom_clan_gundabad_5_name" text="Krûgash" />
-    <string id="aom_clan_gundabad_6_name" text="Grishûk" />
-    <string id="aom_clan_gundabad_7_name" text="Lugdush" />
-    <string id="aom_clan_gundabad_8_name" text="Maukrim" />
-    <string id="aom_clan_gundabad_9_name" text="Skarzag" />
-    <string id="aom_clan_isengard_10_name" text="La Guardia di Cenere" />
-    <string id="aom_clan_isengard_11_name" text="Gli Spaccapietre" />
-    <string id="aom_clan_isengard_1_name" text="La Mano Bianca" />
-    <string id="aom_clan_isengard_2_name" text="La Schiera Rossa" />
-    <string id="aom_clan_isengard_3_name" text="La Schiera Nera" />
-    <string id="aom_clan_isengard_4_name" text="Le Fauci Nere" />
-    <string id="aom_clan_isengard_5_name" text="Il Pugno di Ferro" />
-    <string id="aom_clan_isengard_6_name" text="La Guardia di Sangue" />
-    <string id="aom_clan_isengard_7_name" text="I Predoni dell'Ombra" />
-    <string id="aom_clan_isengard_8_name" text="Gli Spaccacranio" />
-    <string id="aom_clan_isengard_9_name" text="I Mastini di Guerra" />
-    <string id="aom_clan_khuzait_10_name" text="Illnoria" />
-    <string id="aom_clan_khuzait_11_name" text="Shakhalian" />
-    <string id="aom_clan_khuzait_12_name" text="Hûz" />
-    <string id="aom_clan_khuzait_13_name" text="Adekig" />
-    <string id="aom_clan_khuzait_14_name" text="Cilzeron" />
-    <string id="aom_clan_khuzait_15_name" text="Kalkian" />
-    <string id="aom_clan_khuzait_16_name" text="Zorian" />
-    <string id="aom_clan_khuzait_17_name" text="Mithruntai" />
-    <string id="aom_clan_khuzait_18_name" text="Vazevian" />
-    <string id="aom_clan_khuzait_19_name" text="Bozorganith" />
-    <string id="aom_clan_lindon_1_name" text="Falathrim" />
-    <string id="aom_clan_lindon_2_name" text="Edhil Mithlond" />
-    <string id="aom_clan_lothlorien_1_name" text="Nos Finarfin" />
-    <string id="aom_clan_lothlorien_2_name" text="Guardiani del Naith" />
-    <string id="aom_clan_lothlorien_3_name" text="Nos Malgalad" />
-    <string id="aom_clan_mirkwood_1_name" text="Nos Lasgalen" />
-    <string id="aom_clan_mirkwood_2_name" text="Nos Oropher" />
-    <string id="aom_clan_mirkwood_3_name" text="Nos Taurion" />
-    <string id="aom_clan_mirkwood_4_name" text="Nos Galengrim" />
-    <string id="aom_clan_mirkwood_5_name" text="Nos Alenwé" />
-    <string id="aom_clan_mirkwood_6_name" text="Nos Iminyé" />
-    <string id="aom_clan_mistymountainorcs_10_name" text="Lugbúrz" />
-    <string id="aom_clan_mistymountainorcs_11_name" text="Hrakdûr" />
-    <string id="aom_clan_mistymountainorcs_12_name" text="Uzgnâsh" />
-    <string id="aom_clan_mistymountainorcs_13_name" text="Vrakmaw" />
-    <string id="aom_clan_mistymountainorcs_14_name" text="Gashrim" />
-    <string id="aom_clan_mistymountainorcs_15_name" text="Morzûk" />
-    <string id="aom_clan_mistymountainorcs_1_name" text="Bûrzghâsh" />
-    <string id="aom_clan_mistymountainorcs_2_name" text="Krimpâsh" />
-    <string id="aom_clan_mistymountainorcs_3_name" text="Dushnakh" />
-    <string id="aom_clan_mistymountainorcs_4_name" text="Morgrim" />
-    <string id="aom_clan_mistymountainorcs_5_name" text="Vargrim" />
-    <string id="aom_clan_mistymountainorcs_6_name" text="Grobûrz" />
-    <string id="aom_clan_mistymountainorcs_7_name" text="Skarnâk" />
-    <string id="aom_clan_mistymountainorcs_8_name" text="Maughâsh" />
-    <string id="aom_clan_mistymountainorcs_9_name" text="Throgmaw" />
-    <string id="aom_clan_rivendell_1_name" text="Nos Peredhel" />
-    <string id="aom_clan_rivendell_2_name" text="Nos Glorfindel" />
-    <string id="aom_clan_rivendell_3_name" text="Elen-Nolmarë" />
-    <string id="aom_clan_umbar_1_name" text="Casa di Casîmirionî" />
-    <string id="aom_clan_vlandia_12_name" text="Casa di Ælfwiging" />
-    <string id="aom_clan_vlandia_13_name" text="Casa di Celmunding" />
-    <string id="aom_clan_vlandia_14_name" text="Casa di Widmunding" />
-    <string id="aom_clan_vlandia_15_name" text="Casa di Ordgaring" />
-    <string id="aom_clan_vlandia_16_name" text="Casa di Hunthelming" />
-    <string id="aom_clan_vlandia_17_name" text="Casa di Bregdaning" />
-    <string id="aom_clan_vlandia_18_name" text="Casa di Deáfringas" />
-    <string id="aom_clan_vlandia_19_name" text="Casa di Marhad" />
-    <string id="aom_clan_vlandia_20_name" text="Casa di Morcargas" />
-    <string id="aom_clan_vlandia_21_name" text="Casa di Halethring" />
-    <string id="aom_clan_vlandia_22_name" text="Casa di Rungaring" />
-    <string id="aom_clan_umbar_2_name" text="Casata di Jarjâx" />
-    <string id="aom_clan_umbar_3_name" text="Casata di Heshlâ" />
-    <string id="aom_clan_umbar_4_name" text="Casata di Bel Inzûl" />
-    <string id="aom_clan_umbar_5_name" text="Casata di Halrax" />
-    <string id="aom_clan_umbar_6_name" text="Casata di Khatûg" />
-    <string id="aom_clan_arthedain_1_name" text="Casa di Arvedui" />
-    <string id="aom_clan_arthedain_2_name" text="Casa di Evendim" />
-    <string id="aom_clan_arthedain_3_name" text="Custodi di Amon Sûl" />
-    <string id="aom_clan_arthedain_4_name" text="Casa del Baranduin" />
-    <string id="aom_clan_arthedain_5_name" text="Casa di Emyn Beraid" />
+    <string id="aom_clan_bluecraig_1_name" text="{.FS}Banda Guerriera di Blue Craig" />
+    <string id="aom_clan_bluecraig_2_name" text="{.FS}Progenie della Rupe" />
+    <string id="aom_clan_bluecraig_3_name" text="{.MP}Agguatatori del Lune" />
+    <string id="aom_clan_bluecraig_4_name" text="{.MP}Razziatori di Ered Luin" />
+    <string id="aom_clan_bluecraig_5_name" text="{.FS}Tribù della Pietra Tetra" />
+    <string id="aom_clan_dolguldur_10_name" text="{.MN}Drûzgûl" />
+    <string id="aom_clan_dolguldur_11_name" text="{.MN}Vrûkmog" />
+    <string id="aom_clan_dolguldur_12_name" text="{.MN}Hlakûrz" />
+    <string id="aom_clan_dolguldur_13_name" text="{.MN}Throzbûz" />
+    <string id="aom_clan_dolguldur_14_name" text="{.MN}Rhâzgor" />
+    <string id="aom_clan_dolguldur_15_name" text="{.MN}Uzghûl" />
+    <string id="aom_clan_dolguldur_1_name" text="{.MN}Hîondrûs" />
+    <string id="aom_clan_dolguldur_2_name" text="{.MN}Gûrzrak" />
+    <string id="aom_clan_dolguldur_3_name" text="{.MN}Maugdur" />
+    <string id="aom_clan_dolguldur_4_name" text="{.MN}Dûrzan" />
+    <string id="aom_clan_dolguldur_5_name" text="{.MN}Krâzgoth" />
+    <string id="aom_clan_dolguldur_6_name" text="{.MN}Zûrbak" />
+    <string id="aom_clan_dolguldur_7_name" text="{.MN}Ghâshrûz" />
+    <string id="aom_clan_dolguldur_8_name" text="{.MN}Morbhak" />
+    <string id="aom_clan_dolguldur_9_name" text="{.MN}Skûlgath" />
+    <string id="aom_clan_empire_south_10_name" text="{.MN}Ârki" />
+    <string id="aom_clan_empire_south_11_name" text="{.MN}Îkhon" />
+    <string id="aom_clan_empire_south_12_name" text="{.MN}Akheth" />
+    <string id="aom_clan_empire_south_13_name" text="{.MN}Zarûnik" />
+    <string id="aom_clan_empire_south_14_name" text="{.MN}Ûgrakhûr" />
+    <string id="aom_clan_empire_south_15_name" text="{.MN}Brughash" />
+    <string id="aom_clan_empire_west_10_name" text="{.FS}Casa di Hýarthulionath" />
+    <string id="aom_clan_empire_west_11_name" text="{.FS}Casa di Caladionath" />
+    <string id="aom_clan_empire_west_12_name" text="{.FS}Casa di Garvirionath" />
+    <string id="aom_clan_empire_west_13_name" text="{.FS}Casa di Hirilionath" />
+    <string id="aom_clan_empire_west_14_name" text="{.FS}Casa di Baranionath" />
+    <string id="aom_clan_erebor_1_name" text="{.MN}Bit Durin" />
+    <string id="aom_clan_erebor_2_name" text="{.MN}Bit Lóni" />
+    <string id="aom_clan_erebor_3_name" text="{.MN}Bit Rár" />
+    <string id="aom_clan_erebor_4_name" text="{.MN}Bit Gror" />
+    <string id="aom_clan_erebor_5_name" text="{.MN}Bit Górli" />
+    <string id="aom_clan_erebor_6_name" text="{.MN}Bit Róri" />
+    <string id="aom_clan_erebor_7_name" text="{.MN}Bit Nórin" />
+    <string id="aom_clan_goblin_1_name" text="{.MN}Skrithak" />
+    <string id="aom_clan_goblin_2_name" text="{.MN}Yaghûl" />
+    <string id="aom_clan_goblin_3_name" text="{.MN}Gorkil" />
+    <string id="aom_clan_goblin_4_name" text="{.FS}Schiera Snaga" />
+    <string id="aom_clan_goblin_5_name" text="{.MN}Mughrat" />
+    <string id="aom_clan_gundabad_10_name" text="{.MN}Throkmaw" />
+    <string id="aom_clan_gundabad_1_name" text="{.MN}Ashmog" />
+    <string id="aom_clan_gundabad_2_name" text="{.MN}Gundruk" />
+    <string id="aom_clan_gundabad_3_name" text="{.MN}Zarbag" />
+    <string id="aom_clan_gundabad_4_name" text="{.MN}Morzûg" />
+    <string id="aom_clan_gundabad_5_name" text="{.MN}Krûgash" />
+    <string id="aom_clan_gundabad_6_name" text="{.MN}Grishûk" />
+    <string id="aom_clan_gundabad_7_name" text="{.MN}Lugdush" />
+    <string id="aom_clan_gundabad_8_name" text="{.MN}Maukrim" />
+    <string id="aom_clan_gundabad_9_name" text="{.MN}Skarzag" />
+    <string id="aom_clan_isengard_10_name" text="{.FS}Guardia di Cenere" />
+    <string id="aom_clan_isengard_11_name" text="{.MP}Spaccapietre" />
+    <string id="aom_clan_isengard_1_name" text="{.FS}Mano Bianca" />
+    <string id="aom_clan_isengard_2_name" text="{.FS}Schiera Rossa" />
+    <string id="aom_clan_isengard_3_name" text="{.FS}Schiera Nera" />
+    <string id="aom_clan_isengard_4_name" text="{.FP}Fauci Nere" />
+    <string id="aom_clan_isengard_5_name" text="{.MS}Pugno di Ferro" />
+    <string id="aom_clan_isengard_6_name" text="{.FS}Guardia di Sangue" />
+    <string id="aom_clan_isengard_7_name" text="{.MP}Predoni dell'Ombra" />
+    <string id="aom_clan_isengard_8_name" text="{.MP}Spaccacranio" />
+    <string id="aom_clan_isengard_9_name" text="{.MP}Mastini di Guerra" />
+    <string id="aom_clan_khuzait_10_name" text="{.MN}Illnoria" />
+    <string id="aom_clan_khuzait_11_name" text="{.MN}Shakhalian" />
+    <string id="aom_clan_khuzait_12_name" text="{.MN}Hûz" />
+    <string id="aom_clan_khuzait_13_name" text="{.MN}Adekig" />
+    <string id="aom_clan_khuzait_14_name" text="{.MN}Cilzeron" />
+    <string id="aom_clan_khuzait_15_name" text="{.MN}Kalkian" />
+    <string id="aom_clan_khuzait_16_name" text="{.MN}Zorian" />
+    <string id="aom_clan_khuzait_17_name" text="{.MN}Mithruntai" />
+    <string id="aom_clan_khuzait_18_name" text="{.MN}Vazevian" />
+    <string id="aom_clan_khuzait_19_name" text="{.MN}Bozorganith" />
+    <string id="aom_clan_lindon_1_name" text="{.MN}Falathrim" />
+    <string id="aom_clan_lindon_2_name" text="{.MN}Edhil Mithlond" />
+    <string id="aom_clan_lothlorien_1_name" text="{.MN}Nos Finarfin" />
+    <string id="aom_clan_lothlorien_2_name" text="{.MP}Guardiani del Naith" />
+    <string id="aom_clan_lothlorien_3_name" text="{.MN}Nos Malgalad" />
+    <string id="aom_clan_mirkwood_1_name" text="{.MN}Nos Lasgalen" />
+    <string id="aom_clan_mirkwood_2_name" text="{.MN}Nos Oropher" />
+    <string id="aom_clan_mirkwood_3_name" text="{.MN}Nos Taurion" />
+    <string id="aom_clan_mirkwood_4_name" text="{.MN}Nos Galengrim" />
+    <string id="aom_clan_mirkwood_5_name" text="{.MN}Nos Alenwé" />
+    <string id="aom_clan_mirkwood_6_name" text="{.MN}Nos Iminyé" />
+    <string id="aom_clan_mistymountainorcs_10_name" text="{.MN}Lugbúrz" />
+    <string id="aom_clan_mistymountainorcs_11_name" text="{.MN}Hrakdûr" />
+    <string id="aom_clan_mistymountainorcs_12_name" text="{.MN}Uzgnâsh" />
+    <string id="aom_clan_mistymountainorcs_13_name" text="{.MN}Vrakmaw" />
+    <string id="aom_clan_mistymountainorcs_14_name" text="{.MN}Gashrim" />
+    <string id="aom_clan_mistymountainorcs_15_name" text="{.MN}Morzûk" />
+    <string id="aom_clan_mistymountainorcs_1_name" text="{.MN}Bûrzghâsh" />
+    <string id="aom_clan_mistymountainorcs_2_name" text="{.MN}Krimpâsh" />
+    <string id="aom_clan_mistymountainorcs_3_name" text="{.MN}Dushnakh" />
+    <string id="aom_clan_mistymountainorcs_4_name" text="{.MN}Morgrim" />
+    <string id="aom_clan_mistymountainorcs_5_name" text="{.MN}Vargrim" />
+    <string id="aom_clan_mistymountainorcs_6_name" text="{.MN}Grobûrz" />
+    <string id="aom_clan_mistymountainorcs_7_name" text="{.MN}Skarnâk" />
+    <string id="aom_clan_mistymountainorcs_8_name" text="{.MN}Maughâsh" />
+    <string id="aom_clan_mistymountainorcs_9_name" text="{.MN}Throgmaw" />
+    <string id="aom_clan_rivendell_1_name" text="{.MN}Nos Peredhel" />
+    <string id="aom_clan_rivendell_2_name" text="{.MN}Nos Glorfindel" />
+    <string id="aom_clan_rivendell_3_name" text="{.MN}Elen-Nolmarë" />
+    <string id="aom_clan_umbar_1_name" text="{.FS}Casa di Casîmirionî" />
+    <string id="aom_clan_vlandia_12_name" text="{.FS}Casa di Ælfwiging" />
+    <string id="aom_clan_vlandia_13_name" text="{.FS}Casa di Celmunding" />
+    <string id="aom_clan_vlandia_14_name" text="{.FS}Casa di Widmunding" />
+    <string id="aom_clan_vlandia_15_name" text="{.FS}Casa di Ordgaring" />
+    <string id="aom_clan_vlandia_16_name" text="{.FS}Casa di Hunthelming" />
+    <string id="aom_clan_vlandia_17_name" text="{.FS}Casa di Bregdaning" />
+    <string id="aom_clan_vlandia_18_name" text="{.FS}Casa di Deáfringas" />
+    <string id="aom_clan_vlandia_19_name" text="{.FS}Casa di Marhad" />
+    <string id="aom_clan_vlandia_20_name" text="{.FS}Casa di Morcargas" />
+    <string id="aom_clan_vlandia_21_name" text="{.FS}Casa di Halethring" />
+    <string id="aom_clan_vlandia_22_name" text="{.FS}Casa di Rungaring" />
+    <string id="aom_clan_umbar_2_name" text="{.FS}Casata di Jarjâx" />
+    <string id="aom_clan_umbar_3_name" text="{.FS}Casata di Heshlâ" />
+    <string id="aom_clan_umbar_4_name" text="{.FS}Casata di Bel Inzûl" />
+    <string id="aom_clan_umbar_5_name" text="{.FS}Casata di Halrax" />
+    <string id="aom_clan_umbar_6_name" text="{.FS}Casata di Khatûg" />
+    <string id="aom_clan_arthedain_1_name" text="{.FS}Casa di Arvedui" />
+    <string id="aom_clan_arthedain_2_name" text="{.FS}Casa di Evendim" />
+    <string id="aom_clan_arthedain_3_name" text="{.MP}Custodi di Amon Sûl" />
+    <string id="aom_clan_arthedain_4_name" text="{.FS}Casa del Baranduin" />
+    <string id="aom_clan_arthedain_5_name" text="{.FS}Casa di Emyn Beraid" />
     <string id="aom_clan_sturgia_10_name" text="House of the Running River" />
     <string id="aom_clan_sturgia_11_name" text="House of the Carnen" />
     <string id="aom_clan_sturgia_12_name" text="House of Ravenhill" />

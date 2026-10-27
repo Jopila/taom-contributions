@@ -36,11 +36,11 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from _gamedir import ENV_VAR, ensure_exists, game_dir, game_modules   # noqa: E402
+import name_tags   # noqa: E402
+from _gamedir import DEFAULT_GAME_ROOT, ENV_VAR, ensure_exists, game_dir, game_modules   # noqa: E402
 from validate_xml_schemas import _parse_like_engine   # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-DEFAULT_GAME_ROOT = r"E:\Steam\steamapps\common\Mount & Blade II Bannerlord"
 BASELINE = REPO_ROOT / "tools" / "external-loc-coverage-baseline.json"
 
 LANGUAGES = ["BR", "CNs", "CNt", "DE", "FR", "IT", "JP", "KO", "PL", "RU", "SP", "TR"]
@@ -78,7 +78,8 @@ def untranslated(modules_root, lang):
         for key, default in INLINE_KEY.findall(settlements.read_text(encoding="utf-8")):
             src.setdefault(key, default)
         tgt = _rows(target, strip_keys=False)
-        map_count = sum(1 for k, v in src.items() if tgt.get(k, v) == v)
+        # A name that is still English stays untranslated once it carries a grammar tag (#1023).
+        map_count = sum(1 for k, v in src.items() if name_tags.strip_leading_tags(tgt.get(k, v)) == v)
 
     # Armory: root loc_*.xml are the English side, the per-language dir mirrors them.
     armory_root = modules_root / "LOTRLOME_Armory" / "ModuleData" / "Languages"
@@ -174,6 +175,61 @@ def processors_only():
     return 0
 
 
+def tag_report(modules_root, lang, table):
+    """How many of the table's names the live TAOM_Map loc_settlements.xml holds with the right tag. Read only.
+
+    Returns None for a language without tags or a missing file; else a dict with `expected` (table ids the
+    file holds), `correct`, `missing` (no leading tag), `wrong` (a different leading tag) and `orphan` (rows that
+    start with a tag the table does not call for).
+    """
+    if lang not in table["languages"]:
+        return None
+    target = modules_root / "TAOM_Map" / "ModuleData" / "Languages" / lang / "loc_settlements.xml"
+    if not target.exists():
+        return None
+    rows = _rows(target, strip_keys=False)
+    report = {"expected": 0, "correct": 0, "missing": [], "wrong": [], "orphan": 0}
+    for sid, text in rows.items():
+        tag = name_tags.tag_for(lang, sid, table)
+        if not tag:
+            if name_tags.LEADING_TAGS.match(text):
+                report["orphan"] += 1
+            continue
+        report["expected"] += 1
+        have = name_tags.LEADING_TAGS.match(text)
+        if have and name_tags.leads_with_article(lang, text, table):
+            report["wrong"].append(sid)     # a tag on top of an article prints it twice
+        elif have and have.group(0) == tag:
+            report["correct"] += 1
+        elif have:
+            report["wrong"].append(sid)
+        else:
+            report["missing"].append(sid)
+    return report
+
+
+def format_tag_report(lang, report):
+    state = ("complete" if report["correct"] == report["expected"]
+             else "report only until the live file is applied")
+    return (f"  {lang}: {report['correct']}/{report['expected']} live settlement names carry their grammar tag "
+            f"({len(report['missing'])} missing, {len(report['wrong'])} wrong, {report['orphan']} orphan): {state}")
+
+
+def tags_errors(reports):
+    """Messages for a report that cannot be trusted: no live file, or no table id in it (exit 2 under --require-tags)."""
+    return [f"{lang}: " + ("no live loc_settlements.xml to check" if r is None else "the live file holds none of the table's names")
+            for lang, r in reports.items() if r is None or r["expected"] == 0]
+
+
+def tags_failure(reports):
+    """Messages for a language whose live names lack their tag or carry one the table does not call for."""
+    out = [f"{lang}: {r['expected'] - r['correct']} live name(s) lack their grammar tag"
+           for lang, r in reports.items() if r and r["correct"] != r["expected"]]
+    out += [f"{lang}: {r['orphan']} live row(s) start with a grammar tag the table does not call for"
+            for lang, r in reports.items() if r and r["orphan"]]
+    return out
+
+
 def measure():
     modules = game_modules(DEFAULT_GAME_ROOT)
     if not modules.exists():
@@ -182,7 +238,7 @@ def measure():
              for lang in LANGUAGES}, modules)
 
 
-def main():
+def main(argv=None):
     p = argparse.ArgumentParser(description=__doc__,
                                 formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("--update-baseline", action="store_true",
@@ -190,7 +246,9 @@ def main():
     p.add_argument("--processors-only", action="store_true",
                    help="run only the text-processor check (exit 0 clean, 1 mismatch, 2 not found); "
                         "reads no baseline")
-    args = p.parse_args()
+    p.add_argument("--require-tags", action="store_true",
+                   help="fail when the live loc_settlements.xml lacks a grammar tag (default: report only)")
+    args = p.parse_args(argv)
 
     if args.processors_only:
         return processors_only()
@@ -219,6 +277,19 @@ def main():
               f"run with --update-baseline once to record the current state.", file=sys.stderr)
         return 1 if bad else 2
 
+    table = name_tags.load_table()
+    reports = {lang: tag_report(modules, lang, table) for lang in name_tags.TAGGED_LANGUAGES}
+    print("Name grammar tags in the live TAOM_Map loc_settlements.xml (tools/translation_name_tags.json):")
+    for lang, report in reports.items():
+        print(format_tag_report(lang, report) if report else f"  {lang}: no live loc_settlements.xml to check")
+    if args.require_tags:
+        errors = tags_errors(reports)
+        if errors:
+            print("\nERROR: --require-tags cannot judge the live file.", file=sys.stderr)
+            print("\n".join(f"  {m}" for m in errors), file=sys.stderr)
+            return 2
+    tag_failures = tags_failure(reports) if args.require_tags else []
+
     baseline = json.loads(BASELINE.read_text(encoding="utf-8"))
     regressions, improvements = [], []
     for lang in LANGUAGES:
@@ -243,10 +314,17 @@ def main():
         print("\n".join(regressions), file=sys.stderr)
         print("\nThese files live in the game install and are not tracked here, so a module "
               "reinstall silently reverts them. Re-apply with:\n"
-              "  python tools/translate_with_claude.py --lang <L> --module TAOM_Map --apply",
+              "  python tools/translate_with_claude.py --lang <L> --module TAOM_Map --apply --allow-live-write\n"
+              "then re-tag the BR and IT names with:\n"
+              "  python tools/name_tags.py --target live-map --apply --allow-live-write",
               file=sys.stderr)
 
     if regressions or bad:
+        return 1
+
+    if tag_failures:
+        print("\nFAIL: grammar tags are missing from the live file.", file=sys.stderr)
+        print("\n".join(f"  {m}" for m in tag_failures), file=sys.stderr)
         return 1
 
     total = sum(v["taom_map"] + v["armory"] for v in current.values())
