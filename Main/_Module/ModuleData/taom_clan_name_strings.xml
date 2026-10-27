@@ -13,8 +13,8 @@
 	<string id="aom_clan_bluecraig_4_name" text="{=aom_clan_bluecraig_4_name}Ered Luin Raiders" />
 	<string id="aom_clan_bluecraig_5_name" text="{=aom_clan_bluecraig_5_name}Mirkstone Tribe" />
 	<string id="aom_clan_cardolan_1_name" text="{=aom_clan_cardolan_1_name}House of Tyrn Gorthad" />
-	<string id="aom_clan_cardolan_2_name" text="{=aom_clan_cardolan_2_name}House of Minas Eithel" />
-	<string id="aom_clan_cardolan_3_name" text="{=aom_clan_cardolan_3_name}House of Tharbad" />
+	<string id="aom_clan_cardolan_2_name" text="{=aom_clan_cardolan_2_name}House of Tharbad" />
+	<string id="aom_clan_cardolan_3_name" text="{=aom_clan_cardolan_3_name}House of Minas Eithel" />
 	<string id="aom_clan_cardolan_4_name" text="{=aom_clan_cardolan_4_name}Wardens of Sarn Ford" />
 	<string id="aom_clan_dolguldur_10_name" text="{=aom_clan_dolguldur_10_name}Drûzgûl" />
 	<string id="aom_clan_dolguldur_11_name" text="{=aom_clan_dolguldur_11_name}Vrûkmog" />

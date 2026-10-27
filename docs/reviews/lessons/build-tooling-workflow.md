@@ -4541,3 +4541,13 @@ The text-processor gate skipped a file it could not parse, passed when it found 
 - **Why missed:** the gate was proven on the live install that showed the fault, and its pass test for the release step was the absence of a FAIL line, which a run that never starts also meets.
 - **Prevent:** read inputs the way the consumer (the engine) reads them; exit 2 on an unreadable file, an empty reference set or zero files checked; give a release check a PASS line and an exit code with one meaning; kill a mutant of each guard (skip the parse, drop the exit code) before trusting the tests.
 - **Source:** [rca-text-processors-2026-10-26.md](../rca-text-processors-2026-10-26.md) findings 3 to 5.
+
+### Before a rename, grep for every holder of the old name (Tharbad swap, 2026-10-27)
+Swapping two Cardolan town and clan names changed the XML and one generator table, but `generate_new_faction_kingdoms.py`
+also wrote the clan names, so its `--check` and `test_generator_regions_in_sync.py` failed, and a re-run would have
+reverted `clans.xml` alone. This repeats "Change data a generator owns through that generator" (2026-10-20).
+- **Why missed:** the plan listed the generators it knew; it did not search `tools/` for the old names.
+- **Prevent:** before the first edit, grep `tools/`, `docs/`, the memory card and open issues for the old name, then run
+  the gates of every file kind that holds it. The clan and TAOM_Map rows of the gate table in `moduledata-validation.md`
+  now name `test_generator_regions_in_sync.py` and `add_map_fortifications.py --check`, which compares live names too.
+- **Source:** `docs/reviews/rca-tharbad-swap-2026-10-27.md`.

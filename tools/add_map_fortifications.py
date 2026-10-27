@@ -21,8 +21,9 @@ New rows are appended at the end of the file, towns first (the save-order rule,
 add_map_villages.append_settlements). `after` places only the loc rows.
 
 Idempotent per id: an id already in the master is skipped. `--check` fails on any table id whose
-row, loc row or scene entity is missing, or whose position or gate drifted from the scene, and
-when this batch's rows (BATCH: the FORTS ids not in RELEASED, plus the villages bound to them) are
+row, loc row or scene entity is missing, whose master name differs from the table's (the live map
+is unversioned, so the table is the repo's only record of each name), or whose position or gate
+drifted from the scene, and when this batch's rows (BATCH: the FORTS ids not in RELEASED, plus the villages bound to them) are
 not the file's tail under a town.
 
 Usage:
@@ -84,8 +85,8 @@ FORTS = [
     # the capital and the castle nearest it; each other clan one fief. Scenes: unused vanilla empire
     # towns and Gondor's castles, as Arthedain's.
     Fort("town_CA2", "Caras Gorthad", "clan_cardolan_1", "cardolan", "town", "empire_town_f", 2800, "castle_village_G6_3"),
-    Fort("town_CA1", "Minas Eithel", "clan_cardolan_2", "cardolan", "town", "empire_town_k", 2400, "town_CA2"),
-    Fort("town_CA3", "Tharbad", "clan_cardolan_3", "cardolan", "town", "empire_town_l", 2400, "town_CA1"),
+    Fort("town_CA1", "Tharbad", "clan_cardolan_2", "cardolan", "town", "empire_town_k", 2400, "town_CA2"),
+    Fort("town_CA3", "Minas Eithel", "clan_cardolan_3", "cardolan", "town", "empire_town_l", 2400, "town_CA1"),
     Fort("castle_CA1", "Tyrn Gorthad", "clan_cardolan_1", "cardolan", "castle", "taom_gondor_castle_001_forceatmo", 800, "town_CA3"),
     Fort("castle_CA2", "Sarn Ford", "clan_cardolan_4", "cardolan", "castle", "taom_gondor_castle_002_forceatmo", 800, "castle_CA1"),
     Fort("town_RH1", "Cameth Brin", "clan_rhudaur_1", "rhudaur", "town", "empire_town_m", 2400, "castle_CA2"),
@@ -335,12 +336,20 @@ def master_gate(master_text, sid):
     return (float(m.group(1)), float(m.group(2))) if m else None
 
 
+def master_name(master_text, sid):
+    m = re.search(r'<Settlement id=' + re.escape(f'"{sid}"') + r'[^>]*?\sname="\{=[^}]*\}([^"]*)"', master_text)
+    return m.group(1) if m else None
+
+
 def check(forts, master_text, scene_text, loc_texts, villages=(), released=frozenset()):
     findings = amv.save_order_findings(master_text, batch_ids(forts, villages, released))
     for f in forts:
         pos = amv.settlement_position(master_text, f.id)
         if not pos:
             findings.append(f"{f.id}: no <Settlement> row in settlements.xml")
+        name = master_name(master_text, f.id)
+        if name is not None and name != f.name:
+            findings.append(f"{f.id}: settlements.xml names it {name!r}, the table {f.name!r}")
         for lang, text in loc_texts.items():
             if f'id="Settlements.Settlement.name.{f.id}"' not in text:
                 findings.append(f"{f.id}: no loc row in Languages/{lang}/loc_settlements.xml")
@@ -386,7 +395,7 @@ def main():
         if findings:
             print(f"\n{len(findings)} finding(s) across {len(FORTS)} table id(s).")
             return 1
-        print(f"OK: all {len(FORTS)} fortifications present with loc rows; positions and gates match the scene; "
+        print(f"OK: all {len(FORTS)} fortifications present with loc rows; names match the table; positions and gates match the scene; "
               f"the batch's {len(batch_ids())} rows are the file's tail under a town.")
         return 0
 

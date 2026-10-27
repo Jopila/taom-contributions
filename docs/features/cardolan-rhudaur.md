@@ -79,8 +79,8 @@ C#: VolunteerRecruitmentService.Cardolan.cs / .Rhudaur.cs, the culture rows of t
 | Realm | Clan (tier) | Holds |
 |-------|-------------|-------|
 | Cardolan, King Aranthir | House of Tyrn Gorthad (4) | Caras Gorthad `town_CA2` (capital), Tyrn Gorthad `castle_CA1` |
-| | House of Minas Eithel (3) | Minas Eithel `town_CA1` |
-| | House of Tharbad (2) | Tharbad `town_CA3` |
+| | House of Tharbad (3) | Tharbad `town_CA1` |
+| | House of Minas Eithel (2) | Minas Eithel `town_CA3` |
 | | Wardens of Sarn Ford (2) | Sarn Ford `castle_CA2` |
 | Rhudaur, King Belegorn | House of Cameth Brin (4) | Cameth Brin `town_RH1` (capital), Egladil `castle_RH1` |
 | | House of Ettendale (3) | Ettendale Hold `castle_RH2` |
@@ -178,6 +178,13 @@ new rows sit at the end of the file under `town_CA2`, so the first of them throw
 are dropped; every older settlement has already loaded. The mechanism is Arthedain's
 ([arthedain.md](arthedain.md) "Save Compatibility"), and the in-game check on an old save is owed.
 
+Names behave differently from ids. A town's name is not saved: `Settlement.Deserialize` reads it
+from `settlements.xml` on every load, so a renamed town shows its new name in every save. A clan's
+name is saved (`Clan.Name` is a `[SaveableProperty]`), and `clans.xml` loads only for a new campaign.
+English shows the saved text as it is, while the other 12 languages look its `{=key}` up in their
+language files. So a campaign started before the 2026-10-27 swap (Changelog) keeps the old house
+names in English and shows the new ones in the other languages.
+
 ## How to Change a Realm
 
 The steps in [arthedain.md](arthedain.md) "How to Change the Realm" apply, with each realm's own
@@ -230,6 +237,17 @@ generator and `--only <culture>`. Both `generate_new_faction_kingdoms.py` and
     `--apply`; the troop self-check catches a two-handed axe carried with a shield.
   - Arthedain's start point moved to Fornost Erain's live position (464.975, 1162.654), and its
     faction card no longer calls it the only Arnor realm still standing.
+- 2026-10-27 (Mike): Tharbad and Minas Eithel swapped names. `town_CA1` stands where Tharbad is on
+  Tolkien's map, at the Greyflood crossing of the North-South Road, so it is now Tharbad, and
+  `town_CA3` in Minhiriath is Minas Eithel. Their clans swapped names with them, so each house still
+  names its seat: `clan_cardolan_2` is House of Tharbad and `clan_cardolan_3` House of Minas Eithel.
+  The villages keep their names (Mike's call). Ids, owners and positions did not change.
+  - Live `TAOM_Map`: `settlements.xml` and the 12 `loc_settlements.xml` (backups
+    `*.bak_ca_swap_20261027`). Repo: `clans.xml`, `taom_clan_name_strings.xml` and its 12 language
+    files, and the tables of `add_map_fortifications.py` and `generate_new_faction_kingdoms.py`.
+  - `add_map_fortifications.py --check` now compares each fortification's live name with its table
+    row, so a reinstall that restores the old names fails the check.
+  - Campaigns started before the swap keep the old house names in English ("Save Compatibility").
 
 ## GitHub Issue
 

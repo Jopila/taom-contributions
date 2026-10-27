@@ -1401,3 +1401,12 @@ Wave 1 tagged every Italian kingdom and clan name `{.FN}` because `{.FN}` and `{
 - **Prevent:** before a tag goes on a name class, read the language processor and the function file for every place that reads
   the tag, and tag by the gender of the implied noun ("il regno", "il clan"), not by the one effect you were fixing.
 - **Source:** `docs/features/name-grammar-tags.md` (Solution Approach), #1023 review wave 1.
+### A clan name is saved, and English never looks its key up (Tharbad swap, 2026-10-27)
+After a clan rename, a save started earlier keeps the old name in English and shows the new one in the 12 other languages.
+`Clan.Name` is a `[SaveableProperty]`, `clans.xml` loads only for a new campaign (`SandBoxManager.InitializeSandboxXMLs`),
+and `MBTextManager.GetLocalizedText` returns the saved inline text in English. A town name is not saved, so it changes in
+every save.
+- **Why missed:** the clan behaviour was inferred from the town behaviour.
+- **Prevent:** before telling Mike what an old save shows, check whether the field is saveable and whether its XML loads
+  for a saved game.
+- **Source:** `docs/reviews/rca-tharbad-swap-2026-10-27.md` row 3.
