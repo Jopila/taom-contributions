@@ -1354,3 +1354,12 @@ grammar functions need a gender tag or a `{@Type}` attribute that TAOM's names l
   on TAOM's names. Keep TAOM's row where vanilla's would render wrong, and record the pair with its reason in
   `kept-vanilla-key-rows.txt`. Decode vanilla's language files by their BOM: the TR files declare utf-16 but are UTF-8.
 - **Source:** `docs/reviews/rca-english-only-overrides-2026-10-26.md` findings 2 and 3.
+
+### A prefab gate resolves names the way the engine does: on the runtime type, and for every element kind it reads (#1024, 2026-10-26)
+Gauntlet resolves `A.B` on the runtime value of `A`, so a gate that judged `B` on `A`'s declared type had to skip
+interface-typed `LayoutImp` and accepted any misspelled suffix there. The gate also skipped `VisualDefinition` elements,
+whose loader reads only five attribute names, so four dead `EaseIn` attributes passed.
+- **Why missed:** "not judged" and "structural" looked safe, but each is an unchecked hole, not a pass.
+- **Prevent:** map a known interface property to the type the widget's constructor assigns, fail any other unknown, and
+  check every element kind against the loader that reads it.
+- **Source:** [rca-prefab-attribute-gate-2026-10-26.md](../rca-prefab-attribute-gate-2026-10-26.md) findings 2 and 3.

@@ -179,17 +179,22 @@ Rebuild at the tag before anything ships.
    lists is left out of the copy, whatever the module. Once Mike's test shows the game uses a
    Kit-built sack, TAOM's and the Armory's may ship; TAOM_Map's never does. Read them with
    [release-process.md](../../../docs/reference/release-process.md) step 9.
-   It proves the DLLs only. Deploys never delete, so the install also holds files from every
-   earlier deploy. Before packaging, prune only what neither the tag nor its build owns:
+   It proves the DLLs, and it also refuses a TAOM file the tag does not track. Deploys never
+   delete, so the install also holds files from every earlier deploy. Before packaging, prune only
+   what neither the tag nor its build owns:
    - **`<game>/Modules/TAOM/` outside `bin/`:** remove what `Main/_Module/` does not hold at the
      tag (`git ls-tree -r --name-only vX.Y.Z -- Main/_Module`). Compare paths
      case-insensitively, as Windows resolves them: the tag spells `GUI/PreFabs/`, the install
      `GUI/Prefabs/`, and an exact comparison deletes every live prefab. Leave
      `RuntimeDataCache*` alone: the packager already excludes it unless `--keep-rdc` asks for it.
-     `AssetPackages/pack0.tpac` is what packaging TAOM in the editor writes and is not needed:
-     delete it. The other tpacs there are git-tracked (field camp and refuge prefabs) and stay.
+     `AssetPackages/pack0.tpac` is what packaging TAOM in the editor writes. In the dev install
+     (it has loose `Assets/`) it is a leftover: delete it. In an editor-published channel folder (no
+     loose `Assets/`) it is the packed TAOM UI: never delete it, and the check knows the difference.
+     The other tpacs there are git-tracked (field camp and refuge prefabs) and stay.
      A leftover test-troop file (a `taom_test_` id under `ModuleData/`) is one of these; the packager
-     refuses it, dry runs included, so the step 2 dry run fails until it is pruned.
+     refuses it, dry runs included, so the step 2 dry run fails until it is pruned. So does any
+     other untracked TAOM file; the message names the folder checked: delete the file there, or
+     commit it first if it is Kit output the repo has not taken yet.
    - **Shader sources:** the same dry run refuses a shader in a planned module's
      `Shaders/D3D11/shader_compile_report.log` that has no complete source in the package (a `taom_`
      shader needs all six `.rs` pass files under `TAOM/Shaders/Sources`, so deploy a build first), and
@@ -221,6 +226,8 @@ Rebuild at the tag before anything ships.
    prune and hand over; never write a package with the command above.
 4. Once his editor package exists (in `E:\LOTRAOM_Releases\<channel>\Modules\`), offer step 2's dry
    run with `--source` pointing at that folder (and `--game-root "<game>"`) before he uploads it.
+   It refuses an untracked TAOM file there too, but never `AssetPackages/pack0.tpac`: in a channel
+   folder that is the TAOM UI package, so do not delete it.
 5. ShaderCacheKeeper, which ships beside the modules: at the tag, `python Native/ShaderCacheKeeper/build.py`
    and `pwsh -File Native/ShaderCacheKeeper/test/run_tests.ps1` both exit 0. Offer to copy
    `Native/ShaderCacheKeeper/out/xinput9_1_0.dll` to `E:\LOTRAOM_Releases\<channel>\bin\Win64_Shipping_Client\`

@@ -54,9 +54,9 @@
                           </ItemTemplate>
                         </NavigatableGridWidget>
 
-                        <Widget DoNotAcceptEvents="true" WidthSizePolicy="StretchToParent" HeightSizePolicy="Fixed" SuggestedHeight="50" VertialAlignment="Center" Sprite="SPGeneral\SPScoreboard\leaderboard_shadow" Color="#000000FF" />
+                        <Widget DoNotAcceptEvents="true" WidthSizePolicy="StretchToParent" HeightSizePolicy="Fixed" SuggestedHeight="50" Sprite="SPGeneral\SPScoreboard\leaderboard_shadow" Color="#000000FF" />
 
-                        <Widget DoNotAcceptEvents="true" WidthSizePolicy="StretchToParent" HeightSizePolicy="Fixed" SuggestedHeight="50" VertialAlignment="Center" MarginTop="650" Sprite="SPGeneral\SPScoreboard\leaderboard_shadow"  Color="#000000FF" VerticalFlip="true"/>
+                        <Widget DoNotAcceptEvents="true" WidthSizePolicy="StretchToParent" HeightSizePolicy="Fixed" SuggestedHeight="50" MarginTop="650" Sprite="SPGeneral\SPScoreboard\leaderboard_shadow"  Color="#000000FF" VerticalFlip="true"/>
 
                       </Children>
                     </Widget>
