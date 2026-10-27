@@ -18,7 +18,8 @@ internal static class LadderQuests
     /// <summary>
     /// The owner's running quest with this definition id. Per owner, like the ladder's state: another hero's quest on
     /// the same rung (the player's hero before a Player Switcher change) must not block this one, and two quests may
-    /// share a definition id (the quest list is a plain list; the engine keys only map markers by id).
+    /// share a definition id (the quest list is a plain list). The engine keys map markers and the journal record
+    /// (<c>JournalLogEntry.IsRelatedTo</c>) by quest StringId, so two quests started here share one journal entry.
     /// </summary>
     public static CareerQuest? Find(string questId, string ownerHeroId) =>
         Campaign.Current?.QuestManager?.Quests?.OfType<CareerQuest>().FirstOrDefault(q => q.IsOngoing

@@ -21,7 +21,7 @@ AI lords scatter at the sight of an army besieging a settlement, even when they 
 
 ### Solution Approach
 
-`TaomMobilePartyAIModel : DefaultMobilePartyAIModel` overrides only `ShouldConsiderAvoiding`: vanilla's answer first, then `UnlookedForAidService.Decide(facts)` (`base.ShouldConsiderAvoiding(...) && _service.Decide(...)`, so the reader only runs when vanilla already says avoid). `SiegeAvoidanceFactsReader` (the ADR-007 boundary) turns the two parties into a readonly struct of primitives. The feature module registers the model through `GameModelDecl.Of<MobilePartyAIModel, TaomMobilePartyAIModel>(ModelTarget.Campaign, ...)`, one line in `Main/Composition/FeatureModules.cs`; `Main/IoC.cs` and `Main/SubModule.cs` are untouched.
+`TaomMobilePartyAIModel : DefaultMobilePartyAIModel` overrides `ShouldConsiderAvoiding` for this feature: vanilla's answer first, then `UnlookedForAidService.Decide(facts)` (`base.ShouldConsiderAvoiding(...) && _service.Decide(...)`, so the reader only runs when vanilla already says avoid). `SiegeAvoidanceFactsReader` (the ADR-007 boundary) turns the two parties into a readonly struct of primitives. The feature module registers the model through `GameModelDecl.Of<MobilePartyAIModel, TaomMobilePartyAIModel>(ModelTarget.Campaign, ...)`, one line in `Main/Composition/FeatureModules.cs`; `Main/IoC.cs` and `Main/SubModule.cs` are untouched.
 
 **The rules** (all in `UnlookedForAidService`, pure over the facts):
 
@@ -90,7 +90,7 @@ A bare postfix with no strength check (a weak lord would walk into a siege that 
 | File | Purpose |
 |------|---------|
 | `Main/Features/UnlookedForAid/UnlookedForAidModule.cs` | feature module, the model declaration, the registrations |
-| `Main/Features/UnlookedForAid/Models/TaomMobilePartyAIModel.cs` | the `ShouldConsiderAvoiding` override |
+| `Main/Features/UnlookedForAid/Models/TaomMobilePartyAIModel.cs` | the `ShouldConsiderAvoiding` override; it also carries Fire and Tribute's own-side rule on `ShouldConsiderAttacking` and `ShouldConsiderAvoiding` ([fire-and-tribute.md](fire-and-tribute.md)) |
 | `Main/Features/UnlookedForAid/Models/SiegeAvoidanceFactsReader.cs` | boundary reader, engine types to primitives |
 | `Main/Features/UnlookedForAid/UnlookedForAidService.cs` | the decision (a concrete class, no interface: nothing fakes it) |
 | `Main/Features/UnlookedForAid/UnlookedForAidConfigProvider.cs` | validating JSON loader |

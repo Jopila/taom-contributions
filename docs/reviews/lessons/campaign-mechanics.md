@@ -1083,3 +1083,12 @@ An engine-ordering claim (`MapEventSide.Clear()` nulls the main party's map even
 - **Why missed:** every test built the snapshot by hand with the claimed shape, so no test could disagree with the engine.
 - **Prevent:** a guard justified by engine ordering cites the decompiled lines, and its test fixtures are built from the shapes those lines produce.
 - **Source:** [rca-enlistment-battle-encounter-rule-2026-10-26.md](../rca-enlistment-battle-encounter-rule-2026-10-26.md) F1.
+### Read the co-op predicate table before gating a world mutation, not the nearest precedent (career quests, 2026-10-27)
+A repeat of "Presence is not authority" above. A sweep that cancels a former player hero's career quest gated on
+`ICoopPresenceProvider.IsCoopActive`, so a solo player with the Coop module enabled never got the fix, and a dedicated
+server was protected only by the presence probe. The single-player predicate is `CoopSessionPolicy.IsSinglePlayerAuthority`.
+- **Why missed:** the gate was copied from `PlayerPossessionService`, whose presence check is a documented heir
+  discriminator, not an authority decision; neither this lesson nor the coop-interop "four questions" table was read.
+- **Prevent:** before a co-op gate on code that changes the world, read `docs/features/coop-interop.md` "Which predicate
+  to use" and pick by what the code decides; a precedent's predicate answers that precedent's question.
+- **Source:** [rca-career-quest-owner-change-2026-10-27.md](../rca-career-quest-owner-change-2026-10-27.md) finding 1.

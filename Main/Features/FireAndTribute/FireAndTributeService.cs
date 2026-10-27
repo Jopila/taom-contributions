@@ -122,6 +122,7 @@ public sealed partial class FireAndTributeService : IFireAndTributeService
     public void ResetForNewSession()
     {
         _state = new FireAndTributeState();
+        _ownSide = NoHosts;
         _planned.Clear();
         _spawnedToday = 0;
         _raidsToday = 0;
@@ -161,6 +162,7 @@ public sealed partial class FireAndTributeService : IFireAndTributeService
             else if (!_adapter.Read(record.PartyId).Exists)
                 Lost(record);
         }
+        PublishOwnSide();
     }
 
     /// <summary>
@@ -176,6 +178,7 @@ public sealed partial class FireAndTributeService : IFireAndTributeService
             _logger.LogInfo($"{Tag} {record.HostId} ({record.PartyId}) released: {why}");
         }
         _state.Hosts.Clear();
+        _ownSide = NoHosts;
     }
 
     /// <summary>
@@ -196,7 +199,7 @@ public sealed partial class FireAndTributeService : IFireAndTributeService
             _logger.LogDebug($"{Tag} {record.HostId} ({record.PartyId}) cannot be removed yet ({why}); it is tried again next hour");
             return;
         }
-        _state.Hosts.Remove(record);
+        RemoveHost(record);
         _logger.LogInfo($"{Tag} {record.HostId} ({record.PartyId}) removed: {why}");
     }
 
@@ -217,7 +220,7 @@ public sealed partial class FireAndTributeService : IFireAndTributeService
     /// <summary>The party is gone and no event said so: drop the record and let the side rest.</summary>
     private void Lost(RaidHostRecord record)
     {
-        _state.Hosts.Remove(record);
+        RemoveHost(record);
         StartCooldown(record.Side);
         _logger.LogWarning($"{Tag} {record.HostId} ({record.PartyId}) is no longer on the map; its side rests");
     }

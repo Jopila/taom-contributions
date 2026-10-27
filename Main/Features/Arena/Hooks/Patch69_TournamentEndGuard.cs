@@ -1,8 +1,10 @@
 using System;
+using System.Reflection;
 using System.Text;
 using HarmonyLib;
 using SandBox.ViewModelCollection.Tournament;
 using TAOM.Core.Logging;
+using TAOM.Dependencies.Foundation;
 
 namespace TAOM.Features.Arena.Hooks;
 
@@ -50,18 +52,28 @@ public static class Patch69_TournamentEndGuard
     /// <summary>Module-unload lifecycle hook — drop the cached IoC reference.</summary>
     public static void ResetForUnload() => _logger = null;
 
+    // Cold target (once per tournament), so binding __originalMethod for the rethrow marker is cheap.
     [HarmonyFinalizer]
-    public static Exception Finalizer(Exception __exception, TournamentVM __instance)
+    public static Exception Finalizer(Exception __exception, TournamentVM __instance, MethodBase __originalMethod)
     {
         if (__exception == null) return null;
+        return Settle(__exception, GetLogger(), () => TournamentBracketFormatter.Dump(__instance), __originalMethod);
+    }
 
-        var logger = GetLogger();
-        if (logger == null) return __exception;   // no way to report it — let vanilla propagation stand
+    /// <summary>
+    /// The finalizer's decision without the <c>TournamentVM</c> type, so TAOM.Tests can run it. Logs the
+    /// exception with its stack (a foreign NRE must be attributable from the log alone), then swallows
+    /// only an NRE; everything else goes back with its throw site kept.
+    /// </summary>
+    internal static Exception Settle(Exception exception, IModLogger logger, Func<string> dumpBracket, MethodBase site)
+    {
+        // No way to report it: let vanilla propagation stand.
+        if (logger == null) return RethrowStackPreserver.PreserveForRethrow(exception, site);
 
         try
         {
-            logger.LogError($"{Tag} OnTournamentEnd threw {__exception.GetType().Name}: {__exception.Message}");
-            logger.LogError($"{Tag} {TournamentBracketFormatter.Dump(__instance)}");
+            logger.LogError($"{Tag} OnTournamentEnd threw {exception}");
+            logger.LogError($"{Tag} {dumpBracket()}");
         }
         catch (Exception dumpFailure)
         {
@@ -79,13 +91,15 @@ public static class Patch69_TournamentEndGuard
         // a real bracket-construction bug into a silently half-drawn screen with no report, which is
         // strictly worse than the crash. Same reasoning as PatchShield's ShouldSwallow, which only
         // eats the engine-drift trinity and rethrows everything else.
-        if (!ShouldSwallow(__exception)) return __exception;
+        if (!ShouldSwallow(exception)) return RethrowStackPreserver.PreserveForRethrow(exception, site);
 
         // The tournament screen survives with an incomplete winner panel. That is all the swallowed
         // NRE costs: the prize, the leaderboard and OnTournamentFinished run before the event
         // (SandBox TournamentBehavior.cs:252-264). It stays swallowed under co-op too, because this
         // event can be raised from inside OnMissionTick and a rethrow there skips the agent tick, so the
-        // next frame's OnPreTick waits forever (v1.5.5 Mission.cs:3749, :3594-3599).
+        // next frame's OnPreTick waits forever (v1.5.5 Mission.cs:3749, :3594-3599). A finalizer stays
+        // (no prefix) for that reason: an unforeseen exception here must not hang the mission
+        // (NRE guard audit 2026-10-27).
         return null;
     }
 

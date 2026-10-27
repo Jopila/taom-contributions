@@ -18,7 +18,7 @@ internal sealed class UnlookedForAidModule : TaomFeatureModule
     private static readonly GameModelDecl[] Models =
     {
         GameModelDecl.Of<MobilePartyAIModel, TaomMobilePartyAIModel>(ModelTarget.Campaign,
-            r => new TaomMobilePartyAIModel(r.Resolve<UnlookedForAidService>())),
+            r => new TaomMobilePartyAIModel(r.Resolve<UnlookedForAidService>(), r.Resolve<FireAndTribute.IRaidHostOwnSideQuery>())),
     };
 
     public override string Id => "UnlookedForAid";

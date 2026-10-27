@@ -157,7 +157,7 @@ Not yet checked in game.
 | `Main/Features/Encyclopedia/HeroLevelHeader.cs`, `Client/Features/Encyclopedia/UI/EncyclopediaHeroLevelHeaderMixin.cs` | The level header rule and its mixin |
 | `Main/_Module/ModuleData/encyclopedia/hero_filters.json` | Race groups and age bounds |
 | `Main/_Module/GUI/PreFabs/Encyclopedia/EncyclopediaSubPages/EncyclopediaHeroPage.xml` | Family block above Allies, retuned margins |
-| `Main/Features/Encyclopedia/Hooks/HeroHelper_GetLastSeenText_Patch.cs` | Patch123 finalizer: contains the v1.5.x vanilla "last seen" NRE for a known lord held by a leaderless party, or in an army whose leading party has no leader (crash 9b2a103e) |
+| `Main/Features/Encyclopedia/Hooks/HeroHelper_GetLastSeenText_Patch.cs` | Patch123 prefix: answers the v1.5.x vanilla "last seen" helper for a known lord held by a leaderless party, or in an army whose leading party has no leader, where vanilla throws (crash 9b2a103e) |
 | `Main/Features/Encyclopedia/LastSeenState.cs` | The hero state Patch123 reads, and the rule for which states reach vanilla's unguarded leader reads |
 
 ## Dependencies
@@ -172,7 +172,7 @@ Not yet checked in game.
 | `EncyclopediaHeroFilterAdapterTests.cs`, `EncyclopediaHeroFilterPatchTests.cs` | The filter groups and predicates; the postfix keeps a lazy input in order, handles a null result, and leaves the result untouched on a throw or with no adapter; the patch category and ProcessLoad phase |
 | `HeroLevelHeaderTests.cs`, `EncyclopediaHeroLevelHeaderMixinTests.cs` | The header rule; the mixin hooks `Refresh`, does not call `OnRefresh` in its constructor |
 | `EncyclopediaHeroPageLayoutTests.cs` | The prefab layout described above |
-| `HeroHelperLastSeenTextGuardTests.cs` | The state rule per vanilla branch; the fallback text and both variables; one log per hero; an NRE the target did not throw propagates, and real Harmony shows a foreign prefix's NRE is not judged as the target's; the category attaches one finalizer to the installed `HeroHelper.GetLastSeenText(Hero)` |
+| `HeroHelperLastSeenTextGuardTests.cs` | The state rule per vanilla branch; the prefix decision (a reaching state skips vanilla with the fallback text, any other runs vanilla untouched, a failed settlement-link read still skips with the never-seen text); one log per hero; the category attaches one prefix to the installed `HeroHelper.GetLastSeenText(Hero)` |
 
 ## How to Add a New Encyclopedia Restriction Override
 

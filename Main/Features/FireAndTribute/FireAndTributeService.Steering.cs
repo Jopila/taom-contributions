@@ -161,7 +161,7 @@ public sealed partial class FireAndTributeService
         if (!RemovePlanned(record.PartyId))
             return; // the engine refused (a battle just began); the next hour tries again
 
-        _state.Hosts.Remove(record);
+        RemoveHost(record);
         StartCooldown(record.Side);
         _notices.ShowWentHome(NameOf(record));
         _logger.LogInfo($"{Tag} {record.HostId} ({record.PartyId}) went home after {record.Raids}/{record.Quota} raids");
@@ -187,7 +187,7 @@ public sealed partial class FireAndTributeService
         if (record == null)
             return;
 
-        _state.Hosts.Remove(record);
+        RemoveHost(record);
         StartCooldown(record.Side);
         _notices.ShowBroken(NameOf(record));
         _logger.LogInfo($"{Tag} {record.HostId} ({partyId}) was broken after {record.Raids}/{record.Quota} raids");

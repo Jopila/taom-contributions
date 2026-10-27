@@ -21,5 +21,7 @@ public static class FireAndTributeIoC
         registrator.Register<ITributeEnvoyAdapter, TributeEnvoyAdapter>(Reuse.Singleton);
         registrator.Register<IEnvoyPresenterAdapter, EnvoyPresenterAdapter>(Reuse.Singleton);
         registrator.Register<IFireAndTributeService, FireAndTributeService>(Reuse.Singleton);
+        // The party AI model's view of the same singleton (TaomMobilePartyAIModel, UnlookedForAidModule).
+        registrator.RegisterMapping<IRaidHostOwnSideQuery, IFireAndTributeService>();
     }
 }

@@ -13,6 +13,7 @@ using TAOM.Composition;
 using TAOM.Core.Infrastructure;
 using TAOM.Core.Logging;
 using TAOM.Features;
+using TAOM.Features.FireAndTribute;
 using TAOM.Features.UnlookedForAid;
 using TAOM.Features.UnlookedForAid.Models;
 using TAOM.Tests.Infrastructure;
@@ -98,6 +99,37 @@ public class UnlookedForAidWiringTests
 
     [TestMethod]
     [TestCategory("RequiresGame")]
+    public void TheAttackOverride_AsksTheHostsThenCallsBase_AndReadsNoSettingsAndNoIoC()
+    {
+        var method = typeof(TaomMobilePartyAIModel).GetMethod(nameof(TaomMobilePartyAIModel.ShouldConsiderAttacking), All)!;
+        var calls = IlCallScanner.ExtractCalledMethods(method, method.GetMethodBody()!.GetILAsByteArray()).ToArray();
+
+        Assert.IsTrue(calls.Any(m => m.DeclaringType == typeof(DefaultMobilePartyAIModel) && m.Name == nameof(MobilePartyAIModel.ShouldConsiderAttacking)));
+        Assert.IsTrue(calls.Any(m => m.Name == "OwnSideMeetsHost"), "the own-side check runs on the attack path");
+        AssertNoThreadUnsafeReads(calls);
+    }
+
+    [TestMethod]
+    [TestCategory("RequiresGame")]
+    public void TheOwnSideHelpers_ReadNoSettingsAndNoIoC()
+    {
+        foreach (var name in new[] { "OwnSideMeetsHost", "KingdomIdOf" })
+        {
+            var method = typeof(TaomMobilePartyAIModel).GetMethod(name, All)!;
+            AssertNoThreadUnsafeReads(IlCallScanner.ExtractCalledMethods(method, method.GetMethodBody()!.GetILAsByteArray()).ToArray());
+        }
+    }
+
+    [TestMethod]
+    public void TheHostsOwnSideQuery_ReadsNoSettingsAndNoIoC()
+    {
+        var type = typeof(FireAndTributeService);
+        foreach (var method in new MethodBase[] { type.GetProperty(nameof(IRaidHostOwnSideQuery.AnyHost))!.GetMethod!, type.GetMethod(nameof(IRaidHostOwnSideQuery.IsOwnSide))! })
+            AssertNoThreadUnsafeReads(IlCallScanner.ExtractCalledMethods(method, method.GetMethodBody()!.GetILAsByteArray()).ToArray());
+    }
+
+    [TestMethod]
+    [TestCategory("RequiresGame")]
     public void TheFactsReader_ReadsNoSettingsAndNoIoC()
     {
         foreach (var method in typeof(SiegeAvoidanceFactsReader).GetMethods(All))
@@ -120,6 +152,8 @@ public class UnlookedForAidWiringTests
         paths.ModuleDataPath.Returns(RepoPaths.RepoPath("Main", "_Module", "ModuleData"));
         container.RegisterInstance(paths);
         container.RegisterInstance(Substitute.For<IModLogger>());
+        // Fire and Tribute registers the hosts' own-side view in its own module.
+        container.RegisterInstance(Substitute.For<IRaidHostOwnSideQuery>());
         var module = new UnlookedForAidModule();
         module.RegisterServices(container);
 
@@ -130,14 +164,16 @@ public class UnlookedForAidWiringTests
 
     [TestMethod]
     [TestCategory("RequiresGame")]
-    public void TaomMobilePartyAIModel_OverridesOnlyShouldConsiderAvoiding()
+    public void TaomMobilePartyAIModel_OverridesOnlyTheAttackAndAvoidChecks()
     {
         var overridden = typeof(TaomMobilePartyAIModel)
             .GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly)
             .Select(m => m.Name)
+            .OrderBy(n => n, StringComparer.Ordinal)
             .ToList();
 
-        CollectionAssert.AreEqual(new[] { nameof(MobilePartyAIModel.ShouldConsiderAvoiding) }, overridden);
+        CollectionAssert.AreEqual(
+            new[] { nameof(MobilePartyAIModel.ShouldConsiderAttacking), nameof(MobilePartyAIModel.ShouldConsiderAvoiding) }, overridden);
         Assert.AreEqual(typeof(DefaultMobilePartyAIModel), typeof(TaomMobilePartyAIModel).BaseType);
     }
 

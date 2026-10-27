@@ -1,8 +1,11 @@
 # Auto-Resolve Diagnostics
 
-> **Status:** shipped 2026-08-08. Diagnostic only — changes no gameplay.
-> **MCM toggles:** `Battle Tactics/Auto-Resolve Diagnostics` → `Log Auto-Resolved Battles` **default ON**
-> (master switch), and `Log Troop Census` **default OFF** (see [Turning it off](#turning-it-off)).
+> **Status:** REMOVED 2026-10-26 (v2.0.35). Mike retired the battle log once its questions were
+> answered: it wrote about 52,700 records (126 MB) in one 50-minute session, one synchronous disk write
+> per AI battle. The code, its tests, its MCM toggles and `tools/analyze_battle_logs.py` are gone; git
+> history keeps them. The engine notes below on how a simulated battle scores still hold.
+>
+> Shipped 2026-08-08. Diagnostic only; it changed no gameplay.
 
 ## Why this exists
 

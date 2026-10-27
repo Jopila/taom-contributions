@@ -593,7 +593,7 @@ Twelve more features ship the same shape.
   looked like validated config; none was ever on a read path.
 - **Prevent:** when a knob is exposed in MCM, the compiled default is the only fallback that runs. Keep
   it as a constant in the settings provider and pin it against `new TaomSettings()`
-  (`AutoResolveDiagnosticsSettingsProviderTests` is the pattern). A JSON earns its place only for
+  (`BanditScalingSettingsProviderTests` is the pattern). A JSON earns its place only for
   fields MCM does not expose, and the doc for it must say which those are.
 - **Source:** #559 bandit scaling MCM, 2026-09-11.
 

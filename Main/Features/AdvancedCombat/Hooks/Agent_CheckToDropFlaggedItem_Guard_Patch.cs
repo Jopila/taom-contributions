@@ -1,5 +1,6 @@
 using System;
 using HarmonyLib;
+using TAOM.Dependencies.Foundation;
 using TaleWorlds.Core;
 using TaleWorlds.Library;
 using TaleWorlds.MountAndBlade;
@@ -95,5 +96,5 @@ public static class Agent_CheckToDropFlaggedItem_Guard_Patch
 
     [HarmonyFinalizer]
     public static Exception Finalizer(Exception __exception)
-        => __exception is NullReferenceException ? null : __exception;
+        => __exception is NullReferenceException ? null : RethrowStackPreserver.PreserveForRethrow(__exception, null);
 }

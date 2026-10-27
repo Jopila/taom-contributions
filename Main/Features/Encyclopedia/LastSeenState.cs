@@ -1,12 +1,12 @@
+using Helpers;
 using TaleWorlds.CampaignSystem;
-using TaleWorlds.Localization;
 
 namespace TAOM.Features.Encyclopedia;
 
 /// <summary>
-/// The hero state that vanilla v1.5.5 <c>HeroHelper.GetLastSeenText</c> branches on, captured after the
-/// call threw. <see cref="ReachesUnguardedLeaderRead"/> says whether that state reaches one of the
-/// method's unguarded reads, so Patch123 contains only the defect it exists for.
+/// The hero state that vanilla v1.5.5 <c>HeroHelper.GetLastSeenText</c> branches on.
+/// <see cref="ReachesUnguardedLeaderRead"/> says whether vanilla would read a missing leader hero, so
+/// Patch123 answers only that case and leaves every other call to vanilla.
 /// </summary>
 public sealed class LastSeenState
 {
@@ -14,19 +14,19 @@ public sealed class LastSeenState
         string heroId,
         bool knownAndAlive,
         bool hasLastSeen,
+        bool isInSettlement,
         bool isPrisoner,
         bool hasParty,
         string? partyId,
         bool partyIsMobile,
         bool partyLeaderMissing,
         bool hasArmy,
-        bool armyLeaderMissing,
-        TextObject? settlementLink,
-        bool isInSettlement)
+        bool armyLeaderMissing)
     {
         HeroId = heroId;
         KnownAndAlive = knownAndAlive;
         HasLastSeen = hasLastSeen;
+        IsInSettlement = isInSettlement;
         IsPrisoner = isPrisoner;
         HasParty = hasParty;
         PartyId = partyId;
@@ -34,13 +34,12 @@ public sealed class LastSeenState
         PartyLeaderMissing = partyLeaderMissing;
         HasArmy = hasArmy;
         ArmyLeaderMissing = armyLeaderMissing;
-        SettlementLink = settlementLink;
-        IsInSettlement = isInSettlement;
     }
 
     public string HeroId { get; }
     public bool KnownAndAlive { get; }
     public bool HasLastSeen { get; }
+    public bool IsInSettlement { get; }
     public bool IsPrisoner { get; }
     public bool HasParty { get; }
     public string? PartyId { get; }
@@ -48,27 +47,36 @@ public sealed class LastSeenState
     public bool PartyLeaderMissing { get; }
     public bool HasArmy { get; }
     public bool ArmyLeaderMissing { get; }
-    public TextObject? SettlementLink { get; }
-    public bool IsInSettlement { get; }
 
     /// <summary>
-    /// True when vanilla reads a missing leader hero (v1.5.5 HeroHelper.cs). Dead, fugitive, unknown,
-    /// never-seen and partyless heroes return before any read (:22-40). A prisoner of a mobile party
-    /// reads the army leader in an army (:53, :80), else the captor's leader (:58, :86), at sea or on
-    /// land alike; a prisoner in a settlement reads none (:91-93). Anyone else reads the army leader in
-    /// an army (:65, :98), and a settlement party's <c>MobileParty.Army</c> (:95).
+    /// True when the party structure leads vanilla to a missing leader hero (v1.5.5 HeroHelper.cs).
+    /// A prisoner of a mobile party reads the army leader in an army (:53, :80), else the captor's
+    /// leader (:58, :86), at sea or on land alike; a prisoner in a settlement reads none (:91-93).
+    /// Anyone else reads the army leader in an army (:65, :98), and a settlement party's
+    /// <c>MobileParty.Army</c> (:95). A hero with no party reads none (:38-45).
     /// </summary>
-    public bool ReachesUnguardedLeaderRead
+    public bool PartyReachesUnguardedRead
     {
         get
         {
-            if (!KnownAndAlive || !HasLastSeen || !HasParty) return false;
+            if (!HasParty) return false;
             if (IsPrisoner) return PartyIsMobile && (HasArmy ? ArmyLeaderMissing : PartyLeaderMissing);
             return !PartyIsMobile || (HasArmy && ArmyLeaderMissing);
         }
     }
 
-    /// <summary>Engine boundary: reads the hero. A failed read gives a state that contains nothing.</summary>
+    /// <summary>
+    /// <see cref="PartyReachesUnguardedRead"/>, after vanilla's early returns: dead, fugitive, unknown
+    /// and never-seen heroes return before any read (:22-37).
+    /// </summary>
+    public bool ReachesUnguardedLeaderRead => KnownAndAlive && HasLastSeen && PartyReachesUnguardedRead;
+
+    /// <summary>
+    /// Engine boundary: reads the hero. Only when the party structure reaches a missing leader does it
+    /// repeat vanilla's refresh of the last-known settlement (:30-33), which vanilla runs before its
+    /// never-seen return; every other hero is left untouched for vanilla. A failed read leaves the call
+    /// to vanilla.
+    /// </summary>
     public static LastSeenState Capture(Hero? hero)
     {
         var heroId = "<null>";
@@ -76,22 +84,25 @@ public sealed class LastSeenState
         {
             if (hero == null) return Unreadable(heroId);
             heroId = hero.StringId ?? "<null>";
+            var knownAndAlive = !hero.IsDead && !hero.IsFugitive && hero.IsKnownToPlayer;
             var party = hero.PartyBelongedTo?.Party ?? hero.PartyBelongedToAsPrisoner;
             var army = party?.MobileParty?.Army;
+            var hasParty = party != null;
+            var partyIsMobile = party?.IsMobile == true;
+            var partyLeaderMissing = party?.LeaderHero == null;
+            var hasArmy = army != null;
+            var armyLeaderMissing = army != null && army.LeaderParty?.LeaderHero == null;
+
+            var structure = new LastSeenState(heroId, knownAndAlive, false, false, hero.IsPrisoner, hasParty,
+                party?.Id, partyIsMobile, partyLeaderMissing, hasArmy, armyLeaderMissing);
+            if (!knownAndAlive || !structure.PartyReachesUnguardedRead) return structure;
+
+            if (hero.IsActive || hero.IsPrisoner)
+                hero.UpdateLastKnownClosestSettlement(HeroHelper.GetClosestSettlement(hero));
             var settlement = hero.LastKnownClosestSettlement;
-            return new LastSeenState(
-                heroId,
-                knownAndAlive: !hero.IsDead && !hero.IsFugitive && hero.IsKnownToPlayer,
-                hasLastSeen: settlement != null,
-                isPrisoner: hero.IsPrisoner,
-                hasParty: party != null,
-                partyId: party?.Id,
-                partyIsMobile: party?.IsMobile == true,
-                partyLeaderMissing: party?.LeaderHero == null,
-                hasArmy: army != null,
-                armyLeaderMissing: army != null && army.LeaderParty?.LeaderHero == null,
-                settlementLink: settlement?.EncyclopediaLinkWithName,
-                isInSettlement: settlement != null && settlement == hero.CurrentSettlement);
+            return new LastSeenState(heroId, knownAndAlive, settlement != null,
+                settlement != null && settlement == hero.CurrentSettlement, hero.IsPrisoner, hasParty,
+                party?.Id, partyIsMobile, partyLeaderMissing, hasArmy, armyLeaderMissing);
         }
         catch
         {
@@ -99,6 +110,6 @@ public sealed class LastSeenState
         }
     }
 
-    private static LastSeenState Unreadable(string heroId) => new(
-        heroId, false, false, false, false, null, false, false, false, false, null, false);
+    private static LastSeenState Unreadable(string heroId) =>
+        new(heroId, false, false, false, false, false, null, false, false, false, false);
 }

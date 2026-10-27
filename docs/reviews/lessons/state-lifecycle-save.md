@@ -907,7 +907,8 @@ The ladder's rungs are per hero, but taking one up checked for anyone's running 
 the hand-in looked only at the main hero's. A CareerQuest is a special quest, which `QuestManager.OnPlayerCharacterChanged`
 never cancels, so after a Player Switcher change the old hero's rung quest blocked the new hero for good.
 - **Why missed:** the check came from the one-quest Lord's Harness ("a second would share the first's quest id"),
-  and that premise was never re-derived: the quest list is a plain list, and the engine keys only map markers by id.
+  and that premise was never re-derived: the quest list is a plain list. (Correction, 2026-10-27: the engine also
+  keys the journal record by quest StringId, `JournalLogEntry.IsRelatedTo`, so same-id quests share one journal entry.)
 - **Prevent:** when state is per hero, every "is it running" check filters on the same owner; test the start, the
   credit and the hand-in with two owners. A repeat of the career-quest dedup fix (Codex P2, 2026-08-01).
 - **Source:** `docs/reviews/rca-lords-gear-ladder-2026-09-28.md` row 2 (Data flow A).
