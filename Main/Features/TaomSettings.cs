@@ -2729,6 +2729,15 @@ public class TaomSettings : AttributeGlobalSettings<TaomSettings>
     [SettingPropertyBool("Tint Unhappy Companions", Order = 0, RequireRestart = false,
         HintText = "On the Members tab of the clan screen, gives the row of a companion of your clan a faint red tint when their relation with you has fallen below zero, a warning before they leave. The age beside each child's name is always shown. Applies the next time the clan screen opens. Default: on.")]
     public bool EnableUnhappyCompanionTint { get; set; } = true;
+    // --- Prisoner Banners (docs/features/prisoner-banners.md, #902) ---
+    //
+    // The switch is read through PrisonerBannersSettingsProvider's one cached settings
+    // reference each time a party screen row refreshes, so it needs no restart. A new setting, so the default (on) reaches every install.
+
+    [SettingPropertyGroup("World/Prisoner Banners", GroupOrder = 75)]
+    [SettingPropertyBool("Show Prisoner Banners", Order = 0, RequireRestart = false,
+        HintText = "On the party screen, a captive lord's row shows the clan's banner at the top left of the portrait, the kingdom's banner at the top right (when the clan belongs to a kingdom), and a gold noble icon at the bottom left when the lord leads the clan. Applies the next time the party screen opens. Default: on.")]
+    public bool PrisonerBannersEnabled { get; set; } = TAOM.Features.PrisonerBanners.PrisonerBannersSettingsProvider.DefaultEnabled;
     // --- Sworn Anew (docs/features/sworn-anew.md, #869) ---
     //
     // Read at each conversation question (the diplomacy option and the ruler's prisoner line), through

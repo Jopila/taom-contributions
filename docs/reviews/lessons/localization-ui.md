@@ -1406,3 +1406,14 @@ The enlistment board was turned into a plain string once per status change so th
 - **Why missed:** before the flatten the board re-rendered every frame and picked `NEWLINE` up later, so the unset state had no visible effect, and the render test never started from it.
 - **Prevent:** before `TextObject.ToString()` freezes a text, set every global the text reads (here `MBTextManager.SetTextVariable("NEWLINE", "\n")`), and test the frozen result with those globals removed first.
 - **Source:** #1019; [rca-enlistment-board-render-and-probes-2026-10-26.md](../rca-enlistment-board-render-and-probes-2026-10-26.md).
+### Copy vanilla's view model arguments and sprite size with its widget, not only the names (#902, 2026-10-27)
+A banner on `Flat.Tuple.Banner.Small.Hero` was built as `new BannerImageIdentifierVM(banner)`. The brush draws its texture at
+2.5 times the widget's short side, and vanilla feeds it only nine-grid banners; a plain banner texture is the centre third of
+the banner, so the corner showed a slice of the emblem. The same change drew the 58x40 `General\Mission\noble` sprite in a
+20x20 box, and a plain `Widget` stretches its sprite to the box.
+- **Why missed:** the plan confirmed that the brush, the sprite and the constructor exist, and stopped there. A default
+  argument and a sprite's size do not fail any build or test.
+- **Prevent:** before binding a vanilla brush or sprite, find two vanilla sites that use it and copy what they pass to the
+  view model (`nineGrid: true` for every banner `MaskedTextureWidget`) and the widget's size, or read the sprite's
+  `<Width>` and `<Height>` in `NativeSpriteData.xml` and keep its aspect. Prisoner Banners pins both in its wiring tests.
+- **Source:** [rca-prisoner-banners-2026-10-27.md](../rca-prisoner-banners-2026-10-27.md) findings 1 and 2.

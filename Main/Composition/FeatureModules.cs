@@ -19,6 +19,7 @@ internal static class FeatureModules
         new Features.NamedCompanions.Oaths.OathsOfServiceModule(),
         new Features.LinesOfDescent.FamilyTreeModule(),
         new Features.HearthRoll.HearthRollModule(),
+        new Features.PrisonerBanners.PrisonerBannersModule(),
         new Features.CreatureBandits.CreatureBanditsModule(),
         new Features.ArmourAcquisition.ArmourAcquisitionModule(),
         new Features.RealmBorders.RealmBordersModule(),
