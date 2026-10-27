@@ -157,6 +157,8 @@ Not yet checked in game.
 | `Main/Features/Encyclopedia/HeroLevelHeader.cs`, `Client/Features/Encyclopedia/UI/EncyclopediaHeroLevelHeaderMixin.cs` | The level header rule and its mixin |
 | `Main/_Module/ModuleData/encyclopedia/hero_filters.json` | Race groups and age bounds |
 | `Main/_Module/GUI/PreFabs/Encyclopedia/EncyclopediaSubPages/EncyclopediaHeroPage.xml` | Family block above Allies, retuned margins |
+| `Main/Features/Encyclopedia/Hooks/HeroHelper_GetLastSeenText_Patch.cs` | Patch123 finalizer: contains the v1.5.x vanilla "last seen" NRE for a known lord held by a leaderless party, or in an army whose leading party has no leader (crash 9b2a103e) |
+| `Main/Features/Encyclopedia/LastSeenState.cs` | The hero state Patch123 reads, and the rule for which states reach vanilla's unguarded leader reads |
 
 ## Dependencies
 - `TaomSettings` (MCM `AttributeGlobalSettings<TaomSettings>`) — provides the setting value via `TaomSettings.Instance`
@@ -170,6 +172,7 @@ Not yet checked in game.
 | `EncyclopediaHeroFilterAdapterTests.cs`, `EncyclopediaHeroFilterPatchTests.cs` | The filter groups and predicates; the postfix keeps a lazy input in order, handles a null result, and leaves the result untouched on a throw or with no adapter; the patch category and ProcessLoad phase |
 | `HeroLevelHeaderTests.cs`, `EncyclopediaHeroLevelHeaderMixinTests.cs` | The header rule; the mixin hooks `Refresh`, does not call `OnRefresh` in its constructor |
 | `EncyclopediaHeroPageLayoutTests.cs` | The prefab layout described above |
+| `HeroHelperLastSeenTextGuardTests.cs` | The state rule per vanilla branch; the fallback text and both variables; one log per hero; an NRE the target did not throw propagates, and real Harmony shows a foreign prefix's NRE is not judged as the target's; the category attaches one finalizer to the installed `HeroHelper.GetLastSeenText(Hero)` |
 
 ## How to Add a New Encyclopedia Restriction Override
 
@@ -180,6 +183,8 @@ Not yet checked in game.
 ## Changelog
 
 - 2026-05-13 — #145: replaced concrete-singleton coupling (`TaomSettings.Instance?.ShowAllEncyclopediaCharacters`) in `TaomInformationRestrictionModel` with an injected `IEncyclopediaSettingsProvider` (new `EncyclopediaSettingsProvider` + `EncyclopediaIoC`, registered in `Main/IoC.cs`); tests updated to NSubstitute on the new interface.
+
+- 2026-10-26: crash 9b2a103e: Patch123 contains the vanilla v1.5.x `HeroHelper.GetLastSeenText` NRE. Its new prisoner and army branches read the captor's or army leader's hero without a null check, so the page of a known lord held by a leaderless party (bandits, for example) crashed. The page now shows "last seen near X" for him. Needs an in-game check.
 
 - 2026-10-24: #907: race and age filters on the hero page (Patch119), Family block above Allies, level in the skills heading; corrected the documented default of Show All Characters to `true`.
 

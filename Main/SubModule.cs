@@ -538,6 +538,10 @@ public class SubModule : MBSubModuleBase
         // No TAOM patch is on the stack; aggressive Patch22 targeting just makes it more reachable.
         // Crash report 2026-06-17. See the patch's doc-comment.
         TryPatchCategory("Patch49_ArmyGatheringNreGuard");
+        // Patch123: Finalizer containing the v1.5.x vanilla HeroHelper.GetLastSeenText NRE (a lord
+        // held by a leaderless party, e.g. bandits, crashed his encyclopedia page). Crash 9b2a103e.
+        Features.Encyclopedia.Hooks.HeroHelper_GetLastSeenText_Patch.Initialize(logger);
+        TryPatchCategory("Patch123_LastSeenTextGuard");
         // Patch59: CaravanTrade — four postfixes on CaravansCampaignBehavior private methods
         // (war gate, destination re-weight, range envelope, budget-factor floor) so AI/player caravans
         // range past the local town cluster instead of shuttling. Campaign-behavior target, so applied

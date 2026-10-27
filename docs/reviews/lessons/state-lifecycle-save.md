@@ -1101,16 +1101,21 @@ silent. Slow compile and wedge cannot be told apart from that log.
 
 ### The end of the log is a second silence anchor when no watchdog line exists (2026-10-26)
 A player log from 2026-10-25 again got the DRAINING verdict: three `WaitingForRender` samples (2771, 2737, 2704),
-then 117 s of `[MemSample]` lines and no watchdog line, because the player closed the frozen game about 2 minutes
-into the wait. The 2026-10-18 fix measured the silence only up to the watchdog line, so with no watchdog it
-measured nothing and fell back to "draining".
-- **Why missed:** the fix assumed every frozen load lasts until the 300 s watchdog. A player who closes a "not
-  responding" window earlier produces a log with no watchdog line at all.
-- **Prevent:** a silence check needs an anchor that always exists. `[MemSample]` runs on a timer thread, so its
-  lines keep coming while the game thread is frozen. The tool now measures to the newest stamped line of any kind
-  when there is no watchdog line (`Timeline.last_ts`), and the report says "before the log ended".
-- **Source:** player log `taom_debug_2026-10-25_17-36-25.log` (TAOM `84f0459bc`); fix in
-  `tools/triage_battle_load.py`, test `test_silent_stream_before_the_log_ends_is_not_called_draining`.
+then 117 s of `[MemSample]` lines and no watchdog line, because the game ended about 2 minutes into the wait
+(the player probably closed it; the log cannot tell). The 2026-10-18 fix measured the silence only up to the
+watchdog line, so with no watchdog it measured nothing and fell back to "draining". The first cut of this fix then
+chose its anchor by asking whether the log held any watchdog line at all. The watchdog fires once per loading
+window, so the only line can belong to an earlier load, or to a long scene load earlier in the same window, and
+both shapes still read as draining (deep review, 2026-10-26).
+- **Why missed:** the fix assumed every frozen load lasts until the 300 s watchdog, and that a watchdog line in the
+  log belongs to the wait being judged. Neither holds.
+- **Prevent:** a silence check needs a second anchor, and an anchor counts only when it was written at or after the
+  last sample. `[MemSample]` runs on a timer thread, so its lines keep coming while the game thread is frozen (with
+  the memory sampler on, its default). `_render_silence` uses the watchdog line when it is not older than the last
+  sample, else the newest stamped line of any kind (`Timeline.last_ts`), and the report names the anchor.
+- **Source:** player log `taom_debug_2026-10-25_17-36-25.log` (TAOM `84f0459bc`, #1025); fix in
+  `tools/triage_battle_load.py`; tests in `RenderWaitSilenceTests`; RCA
+  `docs/reviews/rca-triage-render-silence-2026-10-26.md`.
 
 ### A feature that reads another feature's computed state gates on that feature's toggle, not on its state machine (#822, 2026-10-18)
 Watchful Holds reads the Realm Borders provinces through `RealmTerritoryService.State == Ready`. Realm Borders builds

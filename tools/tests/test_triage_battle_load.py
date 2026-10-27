@@ -1734,7 +1734,7 @@ class RenderWaitSilenceTests(unittest.TestCase):
         self.assertNotIn("slow load", report)
         self.assertIn("frozen", v.summary)
         self.assertIn("went silent", report)
-        self.assertIn("293s", report)
+        self.assertIn("293s before the watchdog fired", report)
         self.assertIn("compile_shader", report)
         self.assertIn("rgl_log_<pid>.txt", report)
         self.assertIn("Phase 2b", report)
@@ -1777,8 +1777,43 @@ class RenderWaitSilenceTests(unittest.TestCase):
         self.assertIn("frozen", v.summary)
         self.assertIn("117s before the log ended", v.summary)
         self.assertIn("117s before the log ended", report)
-        self.assertNotIn("watchdog fired", v.summary)
+        self.assertNotIn("watchdog fired", report)
+        self.assertNotIn("two samples", report)
         self.assertEqual(117, tb.classify_phase_timings(tl)["render_wait"]["silent_s"])
+
+    def test_silence_runs_to_the_last_stamped_line_of_any_kind(self):
+        text = self._ended_log("2026-10-25 17:40:07") + _line(
+            "WARNING", "[CrashReport] off-main-thread capture; UI inquiry skipped to avoid "
+                       "render-thread invocation", ts="2026-10-25 17:41:37") + "\n"
+        tl = tb.parse_battle_load_log(text)
+
+        self.assertEqual(117, tb.classify_phase_timings(tl)["render_wait"]["silent_s"])
+
+    def _assert_silent_to_log_end(self, text):
+        tl = tb.parse_battle_load_log(text)
+        v = tb.classify(tl)
+        report = tb.format_report(v, tl, None)
+
+        self.assertIn("117s before the log ended", v.summary)
+        self.assertNotIn("DRAINING", report)
+        self.assertEqual(117, tb.classify_phase_timings(tl)["render_wait"]["silent_s"])
+
+    def test_watchdog_from_earlier_in_the_same_load_is_not_the_anchor(self):
+        # The watchdog fires once per loading window. A scene load past 300 s fires it before
+        # the render wait, and a later freeze in the same load writes no second line.
+        self._assert_silent_to_log_end(_log(
+            _init(), _init_done(),
+            self._wd("2026-10-25 17:39:20", shaders=0),
+            _finish_begin(), _after_start_begin(), _after_start_done(), _finish_done(),
+            self._rw(55, 21113, 0, 2771, "2026-10-25 17:39:35"),
+            self._rw(56, 24748, 3636, 2737, "2026-10-25 17:39:39"),
+            self._rw(57, 26417, 5305, 2704, "2026-10-25 17:39:40"),
+            _mem(ts="2026-10-25 17:41:37")))
+
+    def test_watchdog_from_an_earlier_mission_is_not_the_anchor(self):
+        self._assert_silent_to_log_end(_log(
+            _init(seq=1, ms=1000), self._wd("2026-10-25 17:20:00"), _playable(),
+            self._ended_log("2026-10-25 17:41:37")))
 
     def test_log_ending_soon_after_the_last_sample_keeps_the_draining_message(self):
         tl = tb.parse_battle_load_log(self._ended_log("2026-10-25 17:39:50"))
@@ -1798,7 +1833,7 @@ class RenderWaitSilenceTests(unittest.TestCase):
         self.assertNotIn("went silent", report)
         self.assertIsNone(tb.classify_phase_timings(tl)["render_wait"]["silent_s"])
 
-    def test_no_watchdog_line_keeps_the_draining_message(self):
+    def test_no_watchdog_and_no_later_line_keeps_the_draining_message(self):
         text = _log(
             _init(), _init_done(), _finish_begin(), _after_start_begin(),
             _after_start_done(), _finish_done(),

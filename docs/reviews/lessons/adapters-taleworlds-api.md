@@ -1538,3 +1538,16 @@ with his own Medicine and Cheat Death, and the redirect made some players more l
 - **Prevent:** before code that makes up for an engine gap (a missing role, perk or bonus), read the engine getter that
   fills that role and quote its fallback in the comment. If the fallback already covers the case, delete the workaround.
 - **Source:** [rca-camp-work-2026-10-26.md](../rca-camp-work-2026-10-26.md) Follow-ups.
+
+### An engine rewrite can add unguarded reads to a method TAOM never patched (HeroHelper.GetLastSeenText, crash 9b2a103e, 2026-10-26)
+v1.5.x rewrote vanilla `HeroHelper.GetLastSeenText`. The v1.4.8 method read only `LastKnownClosestSettlement`; the new one
+reads `partyBase.LeaderHero` and `Army.LeaderParty.LeaderHero` with no null check. Vanilla lets bandits take a lord
+prisoner (`MapEvent.CaptureDefeatedPartyMembers`), and `PartyBase.LeaderHero` is null for them, so opening the page of
+such a lord the player knows ended the game. TAOM's map carries over 1,000 bandit parties (1,065 in the bundle's MapLoad
+census), which makes the state common. Patch123 contains it.
+- **Why missed:** the v1.5.x bump checked methods TAOM patches, binds or calls. This one TAOM never touches; only the
+  encyclopedia calls it.
+- **Prevent:** at an engine bump, scan the body diff of UI helpers that format another object's links
+  (`EncyclopediaLinkWithName`, `.Name` on a `LeaderHero`) for new reads through a nullable getter, and ask which states
+  TAOM makes common (leaderless captors, a lord without a party) that vanilla rarely reaches.
+- **Source:** player crash bundle 9b2a103e (v2.0.34); [registry](../../reference/harmony-patch-registry.md#patch123_lastseentextguard).
