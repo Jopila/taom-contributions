@@ -318,6 +318,7 @@ the engine version, the reported date) rather than inventing a commit range.
 - [docs/ai-includes/git-and-commits.md](../ai-includes/git-and-commits.md)
 - [docs/features/coop-dedicated-server.md](../features/coop-dedicated-server.md)
 - [docs/features/dale-lord-expansion.md](../features/dale-lord-expansion.md)
+- [docs/features/ered-luin.md](../features/ered-luin.md)
 - [docs/features/war-chronicle.md](../features/war-chronicle.md)
 - [docs/modding/editing-safely.md](../modding/editing-safely.md)
 - [docs/modding/module-dependencies.md](../modding/module-dependencies.md)

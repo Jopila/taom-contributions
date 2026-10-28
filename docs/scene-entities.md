@@ -122,3 +122,13 @@ Extracted from `E:\Steam\steamapps\common\Mount & Blade II Bannerlord\Modules\TA
 
 No anomalies detected.
 
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/INDEX.md](./INDEX.md)
+- [docs/modding/settlements.md](modding/settlements.md)
+
+<!-- backlinks-end -->

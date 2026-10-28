@@ -461,6 +461,7 @@ Every count was produced on 2026-09-05 by the command beside it, except the rows
 
 ## Referenced by
 
+- [docs/features/ered-luin.md](../features/ered-luin.md)
 - [docs/INDEX.md](../INDEX.md)
 - [docs/kitbash/map-icons.md](../kitbash/map-icons.md)
 - [docs/modding/balance-levers.md](./balance-levers.md)

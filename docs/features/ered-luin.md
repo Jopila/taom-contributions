@@ -473,3 +473,26 @@ Restart Bannerlord fully, then start a new campaign.
 
 - **Issue:** not created yet (see Known gaps).
 - **Status:** built in data; in-game check owed ("How to verify in game").
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/features/armour-acquisition.md](./armour-acquisition.md)
+- [docs/features/army-targeting.md](./army-targeting.md)
+- [docs/features/cardolan-rhudaur.md](./cardolan-rhudaur.md)
+- [docs/features/career-system.md](./career-system.md)
+- [docs/features/coop-dedicated-server.md](./coop-dedicated-server.md)
+- [docs/features/kingdom-creation.md](./kingdom-creation.md)
+- [docs/features/no-mount-cultures.md](./no-mount-cultures.md)
+- [docs/features/starting-equipment-tuning.md](./starting-equipment-tuning.md)
+- [docs/INDEX.md](../INDEX.md)
+- [docs/modding/settlements.md](../modding/settlements.md)
+- [docs/reference/feature-map.md](../reference/feature-map.md)
+- [docs/reference/release-process.md](../reference/release-process.md)
+- [docs/reference/taom-map-settlement-naming.md](../reference/taom-map-settlement-naming.md)
+- [docs/reviews/rca-ered-luin-2026-10-27.md](../reviews/rca-ered-luin-2026-10-27.md)
+
+<!-- backlinks-end -->

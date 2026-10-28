@@ -290,6 +290,8 @@ both map tools append and `add_map_fortifications.py --check` refuses any other 
 ## Referenced by
 
 - [docs/features/cardolan-rhudaur.md](./cardolan-rhudaur.md)
+- [docs/features/ered-luin.md](./ered-luin.md)
+- [docs/features/kingdom-creation.md](./kingdom-creation.md)
 - [docs/INDEX.md](../INDEX.md)
 - [docs/modding/recipe-add-a-kingdom.md](../modding/recipe-add-a-kingdom.md)
 - [docs/reference/feature-map.md](../reference/feature-map.md)

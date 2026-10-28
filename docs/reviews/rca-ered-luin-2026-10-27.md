@@ -83,3 +83,14 @@ the edit, and its diff against the base is the review of that edit.
 
 Each `FOLLOW-UP` above names no issue because creating issues needs Mike's word this session; the
 list is in the commit body and in [ered-luin.md](../features/ered-luin.md) "Known gaps".
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/reviews/lessons/build-tooling-workflow.md](lessons/build-tooling-workflow.md)
+- [docs/reviews/lessons/data-content-cultures.md](lessons/data-content-cultures.md)
+
+<!-- backlinks-end -->

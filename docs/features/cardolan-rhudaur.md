@@ -264,7 +264,10 @@ generator and `--only <culture>`. Both `generate_new_faction_kingdoms.py` and
 ## Referenced by
 
 - [docs/features/arthedain.md](./arthedain.md)
+- [docs/features/ered-luin.md](./ered-luin.md)
+- [docs/features/kingdom-creation.md](./kingdom-creation.md)
 - [docs/INDEX.md](../INDEX.md)
+- [docs/modding/recipe-add-a-kingdom.md](../modding/recipe-add-a-kingdom.md)
 - [docs/reference/feature-map.md](../reference/feature-map.md)
 
 <!-- backlinks-end -->
