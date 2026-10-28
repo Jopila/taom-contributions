@@ -72,8 +72,8 @@ The validator accepts 46 culture ids <!-- measured: python tools/validate_module
 | `lothlorien` | Lothlorien | `Culture.lothlorien` | `taom_spkingdoms.xml` | Free |
 | `mirkwood` | Lasgalen | `Culture.mirkwood` | `taom_spkingdoms.xml` | Free |
 | `lindon` | Lindon | `Culture.lindon` | `taom_spkingdoms.xml` | not in that table |
-| `arthedain` | Kingdom of Arthedain | `Culture.arthedain` | `taom_spkingdoms.xml` (added 2026-10-07) | Free |
-| `eredluin` | Kingdom of Ered Luin | `Culture.eredluin` | `taom_spkingdoms.xml` (added 2026-10-27) | Free (`alignment.json`; not in that table) |
+| `arthedain` | Arthedain | `Culture.arthedain` | `taom_spkingdoms.xml` (added 2026-10-07) | Free |
+| `eredluin` | Ered Luin | `Culture.eredluin` | `taom_spkingdoms.xml` (added 2026-10-27) | Free (`alignment.json`; not in that table) |
 | `empire_s` | Mordor | `Culture.mordor` | `spkingdoms.xslt:71-94` | Dark Power |
 | `isengard` | Isengard | `Culture.isengard` | `taom_spkingdoms.xml` | Dark Power |
 | `gundabad` | Gundabad | `Culture.gundabad` | `taom_spkingdoms.xml` | Dark Power |
@@ -88,8 +88,8 @@ The validator accepts 46 culture ids <!-- measured: python tools/validate_module
 | `shaghana` | Shaghâna | `Culture.shaghana` | `taom_spkingdoms.xml` | not in that table |
 | `abanissa` | Âbanissa | `Culture.abanissa` | `taom_spkingdoms.xml` | not in that table |
 | `battania` | Khand | `Culture.battania` | `spkingdoms.xslt:163-188` | Neutral |
-| `cardolan` | Kingdom of Cardolan | `Culture.cardolan` | `taom_spkingdoms.xml` (added 2026-10-23) | Neutral (`alignment.json`; not in that table) |
-| `rhudaur` | Kingdom of Rhudaur | `Culture.rhudaur` | `taom_spkingdoms.xml` (added 2026-10-23) | Neutral (`alignment.json`; not in that table) |
+| `cardolan` | Cardolan | `Culture.cardolan` | `taom_spkingdoms.xml` (added 2026-10-23) | Neutral (`alignment.json`; not in that table) |
+| `rhudaur` | Rhudaur | `Culture.rhudaur` | `taom_spkingdoms.xml` (added 2026-10-23) | Neutral (`alignment.json`; not in that table) |
 
 Do not lift the kingdom tables in `docs/features/alignment-aware-execution.md` (lines 233-234 label `empire` Rohan and `vlandia` Arthedain) or `docs/features/execution.md` (lines 77-78 label `empire_w` Rohan and `vlandia` Gondor); the XSLT above says otherwise. A player-founded kingdom gets an engine-generated `new_kingdom*` id that is in no shipped table, which is why the alignment lookups fall back to the culture id (`docs/reviews/agents-md-review-lessons-archive.md:5`, review 70).
 

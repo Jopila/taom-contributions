@@ -1265,3 +1265,9 @@ Codex rated the career rename `shieldguard_of_belegost` -> `hewer_of_belegost` H
 - **Why missed:** the code path was traced (correctly) without asking whether the input can exist.
 - **Prevent:** for a renamed persisted id, check the release tags (`git tag --contains <commit>`), the debug log of each session on a deployed build (a `SyncData` line means a save), and the save folder's timestamps before writing a migration or an alias. A path no save can reach is a known limitation; the general unknown-id handling gets its own issue (#1046).
 - **Source:** [rca-ered-luin-two-handed-career-2026-10-28.md](../rca-ered-luin-two-handed-career-2026-10-28.md) finding 1.
+
+### A saved `{=KEY}` text is re-localized on load in every language but English (#1050, 2026-10-28)
+A kingdom name lives in the save as `{=taom_arthedain_name}Kingdom of Arthedain`. After the name changed to "Arthedain", an old save still showed "Kingdom of Arthedain" in English, because English shows the inline text, while every translated language looked the key up and showed the new row.
+- **Why missed:** "the game saves the name" was written down without reading how a saved `TextObject` resolves.
+- **Prevent:** when you change the English of a saved text, state the old-save result per language: English keeps the saved inline text; the other languages follow the key (`MBTextManager.GetLocalizedText`, v1.5.6).
+- **Source:** [rca-bare-kingdom-names-2026-10-28.md](../rca-bare-kingdom-names-2026-10-28.md) finding 1.

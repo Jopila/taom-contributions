@@ -372,7 +372,7 @@ generator and `--only eredluin`. `generate_new_faction_kingdoms.py` and
 
 Restart Bannerlord fully, then start a new campaign.
 
-1. Open the encyclopedia. Confirm the Kingdom of Ered Luin, its four clans and 16 lords.
+1. Open the encyclopedia. Confirm the kingdom, listed as "Ered Luin", its four clans and 16 lords.
 2. Find Thorin's Halls, Belegost and Nogrod west of the Shire, around the Gulf of Lune. Confirm all
    8 fortifications and 23 villages show Ered Luin's banner.
 3. Visit an Ered Luin town. Confirm notables, wanderers and guards are dwarves and clothed.

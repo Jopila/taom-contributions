@@ -20,6 +20,8 @@ MD = os.path.join(ROOT, "Main", "_Module", "ModuleData")
 CH = os.path.join(MD, "characters")
 
 # ---------- design data ----------
+# `name` is the bare realm name, as every shipped kingdom has it; "Kingdom of X" goes in `title` (and on the
+# faction card), never in `name` (#1050; KingdomNameTests in tools/tests/test_generate_new_faction_kingdoms.py).
 KINGDOMS = {
     "goblin": dict(
         region="GB", culture="goblin", race="goblin", capital="town_GT1", tmpl="gundabad",
@@ -76,7 +78,7 @@ KINGDOMS = {
     "arthedain": dict(
         region="AN", culture="arthedain", race=None, capital="town_AN2", tmpl="rivendell", lords="human",
         equip="arthedain", side="free", color="0xFF4870B8", color2="0xFFC8CCD8",
-        name="Kingdom of Arthedain", short="Arthedain", title="North-Kingdom of Arthedain", ruler="King",
+        name="Arthedain", short="Arthedain", title="North-Kingdom of Arthedain", ruler="King",
         desc="The last of the three realms into which Arnor was sundered, Arthedain did not fall. Arvedui's line still holds Fornost upon the North Downs, though its lords are few, its towns poor, and Angmar's shadow lies always on the northern hills.",
         # The templates' own skill sets: lords.xml rows carry inline skills equal to their template
         # (SKILL_TEMPLATE_MISMATCH), so a clone keeps its source's set until docs/ai-includes/lord-skills-authoring.md retunes it.
@@ -119,7 +121,7 @@ KINGDOMS = {
     "cardolan": dict(
         region="CA", culture="cardolan", race=None, capital="town_CA2", tmpl="rivendell", lords="human",
         equip="cardolan", side="neutral", color="0xFF885040", color2="0xFFD8C8A0",
-        name="Kingdom of Cardolan", short="Cardolan", title="Kingdom of Cardolan", ruler="King",
+        name="Cardolan", short="Cardolan", title="Kingdom of Cardolan", ruler="King",
         desc="The southern of the three realms into which Arnor was sundered. Its kings lie in the barrows of Tyrn Gorthad and its riders keep the plains between the Baranduin and the Greyflood, but its towns are few and its lords contend with Arthedain and Rhudaur for the crown of Arnor.",
         lord_skill=("taom_gondor_knight_skills", "taom_gondor_knight_skills", "taom_gondor_young_lady_skills"),
         lords_per_clan=4,  # 4 clans x 4 = 16 lords (2 male + 2 female, married within the clan)
@@ -151,7 +153,7 @@ KINGDOMS = {
     "rhudaur": dict(
         region="RH", culture="rhudaur", race=None, capital="town_RH1", tmpl="rivendell", lords="human",
         equip="rhudaur", side="neutral", color="0xFF603830", color2="0xFFC8B8A8",
-        name="Kingdom of Rhudaur", short="Rhudaur", title="Kingdom of Rhudaur", ruler="King",
+        name="Rhudaur", short="Rhudaur", title="Kingdom of Rhudaur", ruler="King",
         desc="The eastern of the three realms into which Arnor was sundered, a hill kingdom between the Hoarwell and the Loudwater. Its Dunedain lords hold Cameth Brin and the Angle and rule a hard people of hill-men, with trolls in the fells and orcs on every pass.",
         lord_skill=("taom_gondor_knight_skills", "taom_gondor_knight_skills", "taom_gondor_young_lady_skills"),
         lords_per_clan=4,  # 3 clans x 4 = 12 lords (2 male + 2 female, married within the clan)
@@ -179,7 +181,7 @@ KINGDOMS = {
     "eredluin": dict(
         region="EL", culture="eredluin", race="dwarf", capital="town_EL3", tmpl="rivendell", lords="dwarf",
         equip="eredluin", side="free", color="0xFF3E5A7A", color2="0xFFB8C4CC",
-        name="Kingdom of Ered Luin", short="Ered Luin", title="Kingdom of Ered Luin", ruler="King",
+        name="Ered Luin", short="Ered Luin", title="Kingdom of Ered Luin", ruler="King",
         desc="The dwarf kingdom of the Blue Mountains. Durin's Folk made Thorin's Halls there in their exile, and in this age the Broadbeams and the Firebeards hold Belegost and Nogrod again. Its lords are few and its halls are poorer than those of its kin in the east, but its smiths are the oldest in the West, and its axes keep the goblins of Blue Craig from the roads to Lindon.",
         # The dwarf templates' own skill sets (SKILL_TEMPLATE_MISMATCH, as Arthedain's note says).
         lord_skill=("taom_dwarf_lord_skills", "taom_dwarf_lord_skills", "taom_dwarf_lady_skills"),

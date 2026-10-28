@@ -3,7 +3,7 @@
 
 	<!-- Generated kingdom-identity strings (name/short_name/title/ruler_title/text): extracted from taom_spkingdoms.xml by tools/generate_name_localization_strings.py. Do not hand-edit; re-run the generator after adding a kingdom. -->
 	<string id="taom_arthedain_desc" text="{=taom_arthedain_desc}The last of the three realms into which Arnor was sundered, Arthedain did not fall. Arvedui's line still holds Fornost upon the North Downs, though its lords are few, its towns poor, and Angmar's shadow lies always on the northern hills." />
-	<string id="taom_arthedain_name" text="{=taom_arthedain_name}Kingdom of Arthedain" />
+	<string id="taom_arthedain_name" text="{=taom_arthedain_name}Arthedain" />
 	<string id="taom_arthedain_ruler_title" text="{=taom_arthedain_ruler_title}King" />
 	<string id="taom_arthedain_short_name" text="{=taom_arthedain_short_name}Arthedain" />
 	<string id="taom_arthedain_title" text="{=taom_arthedain_title}North-Kingdom of Arthedain" />
@@ -13,7 +13,7 @@
 	<string id="taom_bluecraig_short_name" text="{=taom_bluecraig_short_name}Blue Craig" />
 	<string id="taom_bluecraig_title" text="{=taom_bluecraig_title}Goblin-Realm of Blue Craig" />
 	<string id="taom_cardolan_desc" text="{=taom_cardolan_desc}The southern of the three realms into which Arnor was sundered. Its kings lie in the barrows of Tyrn Gorthad and its riders keep the plains between the Baranduin and the Greyflood, but its towns are few and its lords contend with Arthedain and Rhudaur for the crown of Arnor." />
-	<string id="taom_cardolan_name" text="{=taom_cardolan_name}Kingdom of Cardolan" />
+	<string id="taom_cardolan_name" text="{=taom_cardolan_name}Cardolan" />
 	<string id="taom_cardolan_ruler_title" text="{=taom_cardolan_ruler_title}King" />
 	<string id="taom_cardolan_short_name" text="{=taom_cardolan_short_name}Cardolan" />
 	<string id="taom_cardolan_title" text="{=taom_cardolan_title}Kingdom of Cardolan" />
@@ -28,7 +28,7 @@
 	<string id="taom_erebor_short_name" text="{=taom_erebor_short_name}Erebor" />
 	<string id="taom_erebor_title" text="{=taom_erebor_title}Kingdom of Erebor" />
 	<string id="taom_eredluin_desc" text="{=taom_eredluin_desc}The dwarf kingdom of the Blue Mountains. Durin's Folk made Thorin's Halls there in their exile, and in this age the Broadbeams and the Firebeards hold Belegost and Nogrod again. Its lords are few and its halls are poorer than those of its kin in the east, but its smiths are the oldest in the West, and its axes keep the goblins of Blue Craig from the roads to Lindon." />
-	<string id="taom_eredluin_name" text="{=taom_eredluin_name}Kingdom of Ered Luin" />
+	<string id="taom_eredluin_name" text="{=taom_eredluin_name}Ered Luin" />
 	<string id="taom_eredluin_ruler_title" text="{=taom_eredluin_ruler_title}King" />
 	<string id="taom_eredluin_short_name" text="{=taom_eredluin_short_name}Ered Luin" />
 	<string id="taom_eredluin_title" text="{=taom_eredluin_title}Kingdom of Ered Luin" />
@@ -68,7 +68,7 @@
 	<string id="taom_mistymountainorcs_short_name" text="{=taom_mistymountainorcs_short_name}Misty Orcs" />
 	<string id="taom_mistymountainorcs_title" text="{=taom_mistymountainorcs_title}Orc-Host of the Misty Mountains" />
 	<string id="taom_rhudaur_desc" text="{=taom_rhudaur_desc}The eastern of the three realms into which Arnor was sundered, a hill kingdom between the Hoarwell and the Loudwater. Its Dunedain lords hold Cameth Brin and the Angle and rule a hard people of hill-men, with trolls in the fells and orcs on every pass." />
-	<string id="taom_rhudaur_name" text="{=taom_rhudaur_name}Kingdom of Rhudaur" />
+	<string id="taom_rhudaur_name" text="{=taom_rhudaur_name}Rhudaur" />
 	<string id="taom_rhudaur_ruler_title" text="{=taom_rhudaur_ruler_title}King" />
 	<string id="taom_rhudaur_short_name" text="{=taom_rhudaur_short_name}Rhudaur" />
 	<string id="taom_rhudaur_title" text="{=taom_rhudaur_title}Kingdom of Rhudaur" />

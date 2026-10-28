@@ -8,7 +8,9 @@ clans.xml, lords.xml and heroes.xml. upsert() deleted the Arthedain block and re
 the closing tag, so --check reported drift for a change of position alone, and --apply would have
 moved Arthedain below Dale.
 """
+import glob
 import os
+import re
 import sys
 import unittest
 
@@ -95,6 +97,56 @@ class BannerTests(unittest.TestCase):
             self.assertTrue(k.get("banner"), rid)
             self.assertIn("kingdom_icon", k, rid)
             self.assertEqual(len(k["clans"]), len(k.get("clan_icons", [])), rid)
+
+
+class KingdomNameTests(unittest.TestCase):
+    """A kingdom's name is the bare realm name, as Erebor, Imladris and Lindon are; "Kingdom of X" belongs to the
+    title and the faction card (#1050: Arthedain, Cardolan, Rhudaur and Ered Luin shipped as "Kingdom of X")."""
+
+    # Each language's word for "kingdom", from the old "Kingdom of Arthedain" rows the translator wrote.
+    KINGDOM_WORDS = {
+        "BR": ["Reino"], "SP": ["Reino"], "IT": ["Regno"], "FR": ["Royaume"], "DE": ["Königreich"],
+        "PL": ["Królestwo"], "RU": ["Королевство"], "TR": ["Krallığı"], "CNs": ["王国"], "CNt": ["王國"],
+        "JP": ["王国"], "KO": ["왕국"],
+    }
+    NAME = re.compile(r'<Kingdom\b[^>]*?\bname="\{\{?=([^}]+)\}\}?([^"]*)"', re.S)
+    ROW = re.compile(r'<string id="([^"]+)" text="([^"]*)"')
+
+    def shipped_names(self, md=None):
+        md = md or gen.MD
+        names = []
+        for f in ("taom_spkingdoms.xml", "spkingdoms.xslt"):
+            with open(os.path.join(md, f), encoding="utf-8") as fh:
+                names += self.NAME.findall(fh.read())
+        return names
+
+    def language_offenders(self, md=None):
+        md = md or gen.MD
+        bare = [(key, text) for key, text in self.shipped_names(md) if "Kingdom" not in text]
+        found = []
+        for lang, words in self.KINGDOM_WORDS.items():
+            rows = {}
+            for path in glob.glob(os.path.join(md, "Languages", lang, "*.xml")):
+                with open(path, encoding="utf-8") as fh:
+                    rows.update(self.ROW.findall(fh.read()))
+            for key, _ in bare:
+                row = rows.get(key)
+                if row is None or any(w in row for w in words):
+                    found.append(f"{lang} {key}: {row!r}")
+        return found
+
+    def test_no_generated_kingdom_name_starts_with_kingdom_of(self):
+        for rid, k in gen.KINGDOMS.items():
+            self.assertFalse(k["name"].startswith("Kingdom of "), f"{rid}: {k['name']!r}; put it in title=")
+
+    def test_no_shipped_kingdom_name_starts_with_kingdom_of(self):
+        names = self.shipped_names()
+        self.assertGreaterEqual(len(names), 20, "the kingdom regex matched too little to prove anything")
+        self.assertEqual([t for _, t in names if t.startswith("Kingdom of ")], [])
+
+    def test_no_language_row_of_a_bare_kingdom_name_adds_the_word_for_kingdom(self):
+        # Also refuses a missing row: a bare name with no row in a language cannot be proven bare there.
+        self.assertEqual(self.language_offenders(), [])
 
 if __name__ == "__main__":
     unittest.main()

@@ -67,22 +67,22 @@
     <string id="taom_umbar_short_name" text="Умбар" />
     <string id="taom_umbar_title" text="Гавань Умбара" />
     <string id="taom_arthedain_desc" text="Последнее из трёх королевств, на которые был разделён Арнор, Артедайн не пал. Род Арведуи всё ещё удерживает Форност на Северном нагорье, хотя лордов его немного, города бедны, а тень Ангмара вечно лежит на северных холмах." />
-    <string id="taom_arthedain_name" text="Королевство Артедайн" />
+    <string id="taom_arthedain_name" text="Артедайн" />
     <string id="taom_arthedain_ruler_title" text="Король" />
     <string id="taom_arthedain_short_name" text="Артедайн" />
     <string id="taom_arthedain_title" text="Северное королевство Артедайн" />
     <string id="taom_cardolan_desc" text="The southern of the three realms into which Arnor was sundered. Its kings lie in the barrows of Tyrn Gorthad and its riders keep the plains between the Baranduin and the Greyflood, but its towns are few and its lords contend with Arthedain and Rhudaur for the crown of Arnor." />
-    <string id="taom_cardolan_name" text="Kingdom of Cardolan" />
+    <string id="taom_cardolan_name" text="Cardolan" />
     <string id="taom_cardolan_ruler_title" text="King" />
     <string id="taom_cardolan_short_name" text="Cardolan" />
     <string id="taom_cardolan_title" text="Kingdom of Cardolan" />
     <string id="taom_rhudaur_desc" text="The eastern of the three realms into which Arnor was sundered, a hill kingdom between the Hoarwell and the Loudwater. Its Dunedain lords hold Cameth Brin and the Angle and rule a hard people of hill-men, with trolls in the fells and orcs on every pass." />
-    <string id="taom_rhudaur_name" text="Kingdom of Rhudaur" />
+    <string id="taom_rhudaur_name" text="Rhudaur" />
     <string id="taom_rhudaur_ruler_title" text="King" />
     <string id="taom_rhudaur_short_name" text="Rhudaur" />
     <string id="taom_rhudaur_title" text="Kingdom of Rhudaur" />
     <string id="taom_eredluin_desc" text="The dwarf kingdom of the Blue Mountains. Durin's Folk made Thorin's Halls there in their exile, and in this age the Broadbeams and the Firebeards hold Belegost and Nogrod again. Its lords are few and its halls are poorer than those of its kin in the east, but its smiths are the oldest in the West, and its axes keep the goblins of Blue Craig from the roads to Lindon." />
-    <string id="taom_eredluin_name" text="Kingdom of Ered Luin" />
+    <string id="taom_eredluin_name" text="Ered Luin" />
     <string id="taom_eredluin_ruler_title" text="King" />
     <string id="taom_eredluin_short_name" text="Ered Luin" />
     <string id="taom_eredluin_title" text="Kingdom of Ered Luin" />
