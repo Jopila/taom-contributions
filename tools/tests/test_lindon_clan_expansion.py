@@ -84,8 +84,10 @@ def faction_attrs(text, cid):
 
 
 def elven_sheet_icons():
-    """{icon id: material} of TAOM's banner icons."""
-    return {i.get("id"): i.get("material_name") for i in ET.parse(MD / "banner_icons.xml").iter("Icon")}
+    """{icon id: its group's name} of TAOM's banner icons. The group, not the sheet: #1047 packed the
+    elven icons onto shared taom_banners_packed_* sheets."""
+    return {i.get("id"): g.get("name") for g in ET.parse(MD / "banner_icons.xml").iter("BannerIconGroup")
+            for i in g.iter("Icon")}
 
 
 def sigil_layers(case, owner, key, icons):
@@ -95,7 +97,7 @@ def sigil_layers(case, owner, key, icons):
     layers = [parts[i:i + 10] for i in range(0, len(parts), 10)]
     case.assertGreater(len(layers), 1, f"{owner} flies no sigil")
     for layer in layers[1:]:
-        case.assertRegex(icons.get(layer[0], "undefined"), r"^taom_banners_(noldor|sindar|silvan)_", (owner, layer[0]))
+        case.assertRegex(icons.get(layer[0], "undefined"), r"^\{=!\}TAOM (Noldor|Sindar|Silvan|Lindon) ", (owner, layer[0]))
     return tuple(layer[0] for layer in layers[1:])
 
 

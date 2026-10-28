@@ -98,7 +98,8 @@ kingdom touches")
 | House of Emyn Beraid | 2 | Emyn Beraid `castle_AN8`, Forochel `castle_AN11` |
 
 Four lords per clan (two married couples), each with a distinct face taken from a shipped Gondor
-lord, and each clan flying its own Arnor icon (11000 to 11004) in silver on Arnor blue.
+lord, and each clan flying its own Arnor icon (11000 to 11004) in silver on Arnor blue. The realm and
+its royal house fly the crown of Arnor (11004); the White Tree (11000) is clan 5's.
 
 ### Troop tree
 

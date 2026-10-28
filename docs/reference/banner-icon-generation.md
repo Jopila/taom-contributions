@@ -91,6 +91,29 @@ The flag draws from the **material** (`_mtl.tpac`), which references the **textu
 - **`material_name` ≠ `ui_taom_bannericons_N`.** The XML points at the *material* (`taom_banners_*`); the `ui_taom_bannericons` atlas is the separate sprite side. Don't conflate them.
 - **Two pipelines, both needed.** Wiring the XML + one pipeline isn't enough.
 
+## Packing partly used sheets (#1047)
+
+A banner key, a saved banner and a UI sprite name only the icon id, so an icon can move to another
+sheet by changing its `<Icon>` row alone. `python tools/pack_banner_sheets.py` packs every sheet that
+uses fewer than 16 cells into `taom_banners_packed_alpha_NN` (first fit decreasing, cells copied
+verbatim, free cells in the red and green checkerboard). On 2026-10-28 it packed 20 sheets (150
+icons) into 10. All TAOM banner materials share one shader (their `_mtl.tpac` files differ only in
+GUIDs, name and checksum), so an ornament sheet and an alpha sheet can share a texture.
+
+1. `python tools/pack_banner_sheets.py`, read the plan, then `--apply`: it writes the packed sources
+   (repo and install) and repoints the `<Icon>` rows.
+2. Modding Kit: Step 4a for each packed sheet, then copy both `.tpac` into `Main/_Module/Assets/BannerIcons/`.
+3. `python tools/pack_banner_sheets.py --prune --backup-dir <dir>`: deletes every sheet no icon names,
+   in the repo (source, `.tpac`) and the install (the same, plus the texture's
+   `RuntimeDataCache/<GUID>.rdc`, read from bytes 8 to 23 of its `_tex.tpac`). It refuses while a
+   named material lacks its packages.
+
+`python tools/pack_banner_sheets.py --audit` is the gate (`tools/tests/test_pack_banner_sheets.py`):
+every icon names a sheet that exists and a cell that holds art, no two icons share a cell, no art
+cell is unnamed, every icon has its sprite and every material its packages, no source sheet is
+unused, and the partly used sheets cannot be merged into fewer. A new emblem goes into a free
+packed cell before a new sheet is started.
+
 ## Current inventory (2026-06 batch)
 
 | Sheet | material_name (Step 4a) | group | Icon ids / sprite `<id>.png` (Step 4b) |

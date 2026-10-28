@@ -92,8 +92,11 @@ copied face key is only nudged (`HeroFaceVarietyDataTests`). The template's hair
 styles that match no woman's hair, and with no match the native roll falls back to the template
 keys' hair indices, where a woman's index 0 is bald. So each lady carries her own
 `<hair_tag name="empire" />` (10 of the 22 adult female hairs, none bald), written by the
-generator's `female_hair_tag` and pinned by `FemaleLordHairDataTests`. Banners: the Arnor icons (group 110) in
-silver on palette 154 for Cardolan and 99 for Rhudaur.
+generator's `female_hair_tag` and pinned by `FemaleLordHairDataTests`. Banners: Rhudaur flies the Arnor icons
+(group 110) in silver on palette 99. Cardolan (#1047) flies green (palette 2027, `0xFF28745C`, also its realm
+colour) with white emblems; the realm and the House of Tyrn Gorthad fly 31005 (an interlace ring around a
+lozenge, with seven stars), the House of Tharbad flies its icon in gold (238). The generator's `sigil` and
+`clan_sigils` fill the `{fg}` slot of the realm's banner template.
 
 ### Troop trees
 

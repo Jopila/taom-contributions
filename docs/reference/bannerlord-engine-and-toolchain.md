@@ -72,13 +72,16 @@ precede B3 and do not include that client deployment:
 | `MirrorWin64ShippingClientToEditor` | `Main/TAOM.csproj` | `Modules/TAOM/bin/Win64_Shipping_wEditor/` | 12 |
 | `MirrorWin64ShippingClientToServer` | `Main/TAOM.csproj` | `Modules/TAOM/bin/Win64_Shipping_Server/` | 10 before B3; now excludes `TAOM.Client.*` |
 | `MirrorWin64ShippingClientToServer` | `Dependencies/TAOM.Dependencies.csproj` | `Modules/TAOM.Dependencies/bin/Win64_Shipping_Server/` | 42 (same set as Client) |
+| `MirrorWin64ShippingClientToEditor` | `Dependencies/TAOM.Dependencies.csproj` | `Modules/TAOM.Dependencies/bin/Win64_Shipping_wEditor/` | same set as Client (added 2026-10-28) |
 
-Both server targets run `AfterTargets="PostBuildCopyToModules"`, gated on `$(DisableModuleCopy) != 'true'`
+All four targets run `AfterTargets="PostBuildCopyToModules"`, gated on `$(DisableModuleCopy) != 'true'`
 and on the assembled client folder existing. **Mirroring the assembled folder rather than the build output
 is deliberate**: it picks up the NuGet
-companions that only exist after `PostBuildCopyToModules`. There is no editor mirror in
-`TAOM.Dependencies.csproj`, so `Modules/TAOM.Dependencies/bin/Win64_Shipping_wEditor/` being empty is
-expected, not a bug.
+companions that only exist after `PostBuildCopyToModules`. The Dependencies editor mirror is required:
+the Kit loads each submodule's DLL from its own `Win64_Shipping_wEditor` folder only, and with that folder
+empty TAOM fails in the Kit with `Could not load file or assembly '0Harmony'` (and `MCMv5`,
+`Bannerlord.UIExtenderEx`) behind a "missing or conflicting dependency" box. Before 2026-10-28 the
+standalone `Bannerlord.*` community modules supplied those assemblies; installs no longer carry them.
 
 Two caveats on the server mirror. A spike build of TAOM has booted on the co-op dedicated server to
 SERVING (2026-10-22, 2026-10-23), and the committed build `0fb0e6c13` did too on 2026-10-23, with one

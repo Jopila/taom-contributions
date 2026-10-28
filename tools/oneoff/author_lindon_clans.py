@@ -10,8 +10,8 @@ Writes, in the shape of tools/oneoff/author_dale_lords.py (marker-delimited, so 
 the block in place instead of duplicating it):
   - characters/clans.xml   - four <Faction> rows. Culture.lindon under Kingdom.lindon, keys
                              aom_clan_lindon_N_name, party template reused from clan_lindon_2,
-                             an elven banner per house (BANNERS, gold on light blue; it replaced
-                             the clan_gundabad_1 crest the generator cloned, 2026-10-28), colours
+                             an elven banner per house (BANNERS, Lindon's own emblems since #1047;
+                             it replaced the clan_gundabad_1 crest the generator cloned), colours
                              authored here.
   - characters/lords.xml   - 13 NPCCharacter blocks in the shape of lord_LN1_2 (race elf, battania
                              hair and beard tags, BodyProperties age 22.01; a hero renders at its
@@ -84,9 +84,13 @@ CLANS_NEW = [
 ]
 # One sigil per house from the Noldor and Sindar sheets (banner_icons.xml), gold (171) on light blue (286),
 # Mike's recommendation of 2026-10-28; clan_lindon_1 and _2 (outside this block) carry 15000 and 15003 in the same form.
-BANNER = "11.286.286.1528.1528.764.764.1.0.0.{icon}.171.171.483.483.764.764.0.0.0"
-BANNERS = {"clan_lindon_3": BANNER.format(icon=16004), "clan_lindon_4": BANNER.format(icon=15002),
-           "clan_lindon_5": BANNER.format(icon=15004), "clan_lindon_6": BANNER.format(icon=15005)}
+# Lindon's own emblems (31001-31004) in Mike's palette (banner_icons.xml 2016-2023, #1047):
+# field, emblem, icon. Sea Mist 2017, Pine 2021, Pearl field 2023; Sea Mist 2016, Pine 2020, Pearl 2022.
+BANNER = "11.{bg}.{bg}.1528.1528.764.764.1.0.0.{icon}.{fg}.{fg}.483.483.764.764.0.0.0"
+BANNERS = {"clan_lindon_3": BANNER.format(bg=2017, fg=2022, icon=31001),
+           "clan_lindon_4": BANNER.format(bg=2023, fg=2020, icon=31002),
+           "clan_lindon_5": BANNER.format(bg=2021, fg=2022, icon=31003),
+           "clan_lindon_6": BANNER.format(bg=2023, fg=2016, icon=31004)}
 
 # id, name, sex, age, voice, archetype, clan, father, mother, spouse
 # Spouse is written on the wife's row only. Every parent is at least 14 years older than the child.

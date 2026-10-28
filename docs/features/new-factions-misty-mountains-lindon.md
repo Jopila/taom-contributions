@@ -216,16 +216,19 @@ bluecraig has its own `Culture.bluecraig` ones since its promotion (`child_templ
   colours-only entries in `clan_heraldry/rivendell.json`.
 - **Banners (2026-10-28):** all six Lindon clans flew the Gundabad orc crest (icons 22000 and 22001): the
   generator cloned every new-faction clan from `clan_gundabad_1`, and the #1039 one-off copied `clan_lindon_1`'s
-  key into the four new clans. The kingdom, cloned from Rivendell's, flew Rivendell's exact banner. Each house now
-  has its own elven sigil in gold (171) on light blue (286): Falathrim 15000 (the lozenge of stars), Edhil
-  Mithlond 15003, Nos Galdor 16004 (Sindar), Nos Brithombar 15002 (the compass rose), Wardens of Ered Luin 15004,
-  Nos Eglarest 15005; the kingdom flies the Falathrim key, so Mithlond and the ruling house show the lozenge of
-  stars (a ruling clan shows its kingdom's banner). Banner Injection applies the keys to kingdoms and non-ruling
+  key into the four new clans. The kingdom, cloned from Rivendell's, flew Rivendell's exact banner. Since #1047
+  each house flies Lindon's own emblem (group 310, drawn for TAOM in a sober Tolkien heraldic style) in Mike's
+  palette (`banner_icons.xml` 2016 to 2023): Falathrim 15000, Gil-galad's lozenge of stars, Grey Havens Silver
+  on Sea Mist Blue; Edhil Mithlond 31000 (wings and star) and Nos Galdor 31001 (crescent and star), white on Sea
+  Mist; Nos Brithombar 31002 (swan and wave), Pine on white; Wardens of Ered Luin 31003 (twin towers), white on
+  Pine; Nos Eglarest 31004 (twin swans), Sea Mist on white. The kingdom flies the Falathrim key, and its banner
+  and map colours are Sea Mist `0xFF7FAFC9` and Silver `0xFFC9CED4`, so Mithlond and the ruling house show the
+  lozenge of stars (a ruling clan shows its kingdom's banner). Banner Injection applies the keys to kingdoms and non-ruling
   clans in existing saves at the next session ([banner-injection.md](banner-injection.md)); the deployed module
   needs a build first. Known limitation: in an older save, the clans keep the Gundabad banner colours they
   saved, which the engine uses only if a Lindon clan leaves its kingdom (until the next load).
   `test_every_lindon_clan_flies_its_own_elven_banner` and `test_the_lindon_kingdom_flies_an_elven_banner_of_its_own`
-  keep every sigil on the Noldor, Sindar or Silvan sheets.
+  keep every sigil in the Noldor, Sindar, Silvan or Lindon icon groups.
 - **Renames (display names only):** Gondor's `castle_EW1` is Harlond Quays, `village_LN1_1` is Eryn Lhûn and
   `village_LN1_3` is Ninglas, so no Lindon name repeats another on the map.
 - **Tests:** `tools/tests/test_lindon_clan_expansion.py` pins the owners, homes, lord-to-clan map, the renamed

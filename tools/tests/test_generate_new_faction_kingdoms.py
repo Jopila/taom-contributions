@@ -98,6 +98,27 @@ class BannerTests(unittest.TestCase):
             self.assertIn("kingdom_icon", k, rid)
             self.assertEqual(len(k["clans"]), len(k.get("clan_icons", [])), rid)
 
+    def test_a_banner_with_an_emblem_colour_slot_names_that_colour_for_every_clan(self):
+        for rid in gen.REGENERATABLE:
+            k = gen.KINGDOMS[rid]
+            if "{fg}" not in k["banner"]:
+                continue
+            self.assertIn("sigil", k, rid)
+            self.assertEqual(len(k["clans"]), len(k.get("clan_sigils", k["clans"])), rid)
+            for ci in range(len(k["clans"])):
+                self.assertNotIn("None", gen.clan_banner(k, ci), (rid, ci))
+
+    def test_cardolan_flies_white_on_green_and_tharbad_gold(self):
+        k = gen.KINGDOMS["cardolan"]
+        self.assertEqual(gen.kingdom_banner(k), "11.2027.2027.1528.1528.764.764.1.0.0.31005.2004.2004.700.700.764.764.0.0.0")
+        self.assertEqual(gen.clan_banner(k, 0), gen.kingdom_banner(k))
+        self.assertIn(".11006.238.238.", gen.clan_banner(k, 1))
+        self.assertIn(".11000.2004.2004.", gen.clan_banner(k, 2))
+        self.assertIn(".11001.2004.2004.", gen.clan_banner(k, 3))
+
+    def test_a_realm_without_the_slot_keeps_its_one_emblem_colour(self):
+        k = gen.KINGDOMS["arthedain"]
+        self.assertEqual(gen.kingdom_banner(k), "11.190.190.1528.1528.764.764.1.0.0.11004.110.110.700.700.764.764.0.0.0")
 
 class KingdomNameTests(unittest.TestCase):
     """A kingdom's name is the bare realm name, as Erebor, Imladris and Lindon are; "Kingdom of X" belongs to the

@@ -263,6 +263,21 @@ public class ClientDeploymentTests
     }
 
     [TestMethod]
+    public void DependenciesCsproj_EditorMirror_CopiesTheAssembledClientBinIntoTheEditorBin()
+    {
+        var target = Target("Dependencies/TAOM.Dependencies.csproj", "MirrorWin64ShippingClientToEditor");
+
+        Assert.AreEqual("PostBuildCopyToModules", (string?)target.Attribute("AfterTargets"),
+            "The source bin is only populated once Bannerlord.BuildResources has copied into it.");
+        var copy = target.Descendants("Copy").Single();
+        StringAssert.Contains((string?)copy.Attribute("DestinationFolder") ?? "", "Win64_Shipping_wEditor",
+            "Without it the Modding Kit finds no Harmony, MCM or UIExtenderEx, and TAOM fails to load in the editor.");
+        var source = target.Descendants("ItemGroup").Elements()
+            .Single(i => $"@({i.Name.LocalName})" == (string?)copy.Attribute("SourceFiles"));
+        StringAssert.Contains((string?)source.Attribute("Include") ?? "", @"bin\Win64_Shipping_Client\*.*");
+    }
+
+    [TestMethod]
     public void ClientCsproj_Deploy_RunsAfterBuild()
     {
         var target = Target("Client/TAOM.Client.csproj", "DeployTaomClientToTaomModule");

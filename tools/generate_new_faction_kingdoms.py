@@ -96,9 +96,10 @@ KINGDOMS = {
                       "Calwen", "Maethil", "Tirwen"],
         party_template="PartyTemplate.kingdom_hero_party_arthedain_template",
         # Arnor icon group 110 (Main/_Module/ModuleData/banner_icons.xml) in silver (palette 110) on
-        # Arnor blue (palette 190); one icon per clan so no two clans fly the same banner.
+        # Arnor blue (palette 190); one icon per clan so no two clans fly the same banner. The realm and
+        # its royal house fly the crown of Arnor (11004, Mike 2026-10-28); the White Tree went to clan 5.
         banner="11.190.190.1528.1528.764.764.1.0.0.{icon}.110.110.700.700.764.764.0.0.0",
-        kingdom_icon=11000, clan_icons=[11000, 11001, 11002, 11003, 11004],
+        kingdom_icon=11004, clan_icons=[11004, 11001, 11002, 11003, 11000],
         clan_colors=[("FF4870B8", "FFC8CCD8"), ("FF3A6298", "FFC8CCD8"), ("FF5960A8", "FFD2D6D5"),
                      ("FF2E4A78", "FFCACCCB"), ("FF4E75BC", "FFEAEEEF")],
         # Day-one stances. value < 0 or isAtWar declares war at load (Kingdom.Deserialize,
@@ -120,7 +121,7 @@ KINGDOMS = {
     # every realm at the start, so the War of the Ring does not draw them in on either side.
     "cardolan": dict(
         region="CA", culture="cardolan", race=None, capital="town_CA2", tmpl="rivendell", lords="human",
-        equip="cardolan", side="neutral", color="0xFF885040", color2="0xFFD8C8A0",
+        equip="cardolan", side="neutral", color="0xFF28745C", color2="0xFFFFFFFF",
         name="Cardolan", short="Cardolan", title="Kingdom of Cardolan", ruler="King",
         desc="The southern of the three realms into which Arnor was sundered. Its kings lie in the barrows of Tyrn Gorthad and its riders keep the plains between the Baranduin and the Greyflood, but its towns are few and its lords contend with Arthedain and Rhudaur for the crown of Arnor.",
         lord_skill=("taom_gondor_knight_skills", "taom_gondor_knight_skills", "taom_gondor_young_lady_skills"),
@@ -135,10 +136,11 @@ KINGDOMS = {
         female_names=["Elendis", "Aerin", "Daeriel", "Eilinel", "Gwaeren", "Lindis", "Mirwen", "Saelind",
                       "Nimloth", "Andreth"],
         party_template="PartyTemplate.kingdom_hero_party_cardolan_template",
-        # Arnor icons (group 110) in silver (palette 110) on Cardolan brown (palette 154), so no clan
-        # flies Arthedain's blue banner.
-        banner="11.154.154.1528.1528.764.764.1.0.0.{icon}.110.110.700.700.764.764.0.0.0",
-        kingdom_icon=11005, clan_icons=[11005, 11006, 11000, 11001],
+        # Cardolan green (palette 2027) with white emblems (2004), Tharbad in gold (238) (Mike 2026-10-28,
+        # #1047). The realm and its royal house fly the interlace of Tyrn Gorthad (31005).
+        banner="11.2027.2027.1528.1528.764.764.1.0.0.{icon}.{fg}.{fg}.700.700.764.764.0.0.0",
+        kingdom_icon=31005, clan_icons=[31005, 11006, 11000, 11001],
+        sigil=2004, clan_sigils=[2004, 238, 2004, 2004],
         clan_colors=[("FF885040", "FFD8C8A0"), ("FF7A4A3A", "FFD8C8A0"), ("FF94603F", "FFE0D4B8"),
                      ("FF6E4632", "FFCACCCB")],
         relationships={"gundabad": (0, False), "empire": (0, False), "isengard": (0, False),
@@ -238,6 +240,17 @@ ELF_M = ["Galdor", "Gildor", "Aearion", "Falphen", "Lindael", "Mírdan", "Thalio
          "Nárdir", "Lhúnedhel", "Faelon", "Aeglir", "Celebrin", "Edronil", "Mithlas", "Orvael"]
 ELF_F = ["Nimwen", "Lindis", "Galadwen", "Faelwen", "Nárwen", "Lhúneth", "Celebriel", "Mírwen", "Aewen", "Eälinde"]
 ELF_LEADER = "Círdan"
+
+
+def kingdom_banner(k):
+    """The realm's banner key; `{fg}` in its template takes the realm's emblem colour (`sigil`)."""
+    return k["banner"].format(icon=k["kingdom_icon"], fg=k.get("sigil"))
+
+
+def clan_banner(k, ci):
+    """Clan `ci`'s banner key: its own icon, and its own emblem colour when the realm lists `clan_sigils`."""
+    fg = k["clan_sigils"][ci] if k.get("clan_sigils") else k.get("sigil")
+    return k["banner"].format(icon=k["clan_icons"][ci], fg=fg)
 
 
 def get_block(text, pattern):
@@ -367,7 +380,7 @@ def main():
         blk = re.sub(r'ruler_title="\{=[^}]*\}[^"]*"', f'ruler_title="{{=taom_{kid}_ruler_title}}{k["ruler"]}"', blk, count=1)
         blk = re.sub(r'text="\{=[^}]*\}[^"]*"', f'text="{{=taom_{kid}_desc}}{k["desc"]}"', blk, count=1)
         if k.get("banner"):
-            blk, n = re.subn(r'banner_key="[^"]*"', f'banner_key="{k["banner"].format(icon=k["kingdom_icon"])}"', blk, count=1)
+            blk, n = re.subn(r'banner_key="[^"]*"', f'banner_key="{kingdom_banner(k)}"', blk, count=1)
             if n != 1:
                 raise RuntimeError(f"{kid}: template kingdom has no banner_key to replace")
         if k.get("relationships"):
@@ -415,7 +428,7 @@ def main():
                     ("clan_colors", r'\bcolor="[0-9A-Fa-f]+"', lambda: f'color="{k["clan_colors"][ci][0]}"'),
                     ("clan_colors", r'\bcolor2="[0-9A-Fa-f]+"', lambda: f'color2="{k["clan_colors"][ci][1]}"'),
                     ("clan_icons", r'banner_key="[^"]*"',
-                     lambda: f'banner_key="{k["banner"].format(icon=k["clan_icons"][ci])}"')):
+                     lambda: f'banner_key="{clan_banner(k, ci)}"')):
                 if k.get(key):
                     c, n = re.subn(pattern, value(), c, count=1)
                     if n != 1:

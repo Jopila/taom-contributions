@@ -123,16 +123,11 @@ Pairs separated by commas: `{0:0.5},{50:2},{100:0.5}`. Each pair is `{percent:st
 
 ## Editor compatibility (launching the modding kit)
 
-TAOM.dll loads in the standalone Bannerlord modding kit (`Win64_Shipping_wEditor`) when the launcher's editor profile has TAOM **and** its community-mod runtime dependencies all active:
+TAOM.dll loads in the standalone Bannerlord modding kit (`Win64_Shipping_wEditor`) when the launcher's editor profile has `TAOM.Dependencies` and `TAOM` active. `TAOM.Dependencies` carries Harmony, UIExtenderEx, ButterLib and MCMv5, and its submodules carry `IsNoRenderModeElement=false` and `DedicatedServerType=none`, so the engine activates them in the editor's no-render context. Their DLLs enter the AppDomain and satisfy TAOM.dll's references to those types.
 
-- `Bannerlord.Harmony`
-- `Bannerlord.UIExtenderEx`
-- `Bannerlord.MBOptionScreen` (MCMv5)
-- `Bannerlord.ButterLib`
+The Kit loads each submodule's DLL from that module's own `bin/Win64_Shipping_wEditor/` folder only. The `MirrorWin64ShippingClientToEditor` target in `Dependencies/TAOM.Dependencies.csproj` fills that folder on every deploying build (added 2026-10-28; pinned by `ClientDeploymentTests`). Until then the folder was empty, and the standalone `Bannerlord.Harmony`, `Bannerlord.UIExtenderEx`, `Bannerlord.MBOptionScreen` and `Bannerlord.ButterLib` modules supplied the assemblies; current installs no longer carry those modules.
 
-These mods' SubModule.xml files carry `IsNoRenderModeElement=false` + `DedicatedServerType=none` (added during this project's early editor-mode work — see `Bannerlord.*/SubModule.xml`), so the engine activates them in the editor's no-render context. Their DLLs enter the AppDomain, satisfying TAOM.dll's compile-time references to UIExtenderEx and Harmony types.
-
-**If you launch with only TAOM active** (community mods unchecked), the engine still loads `Modules/TAOM/bin/Win64_Shipping_wEditor/TAOM.dll` but `Assembly.GetTypes()` throws `ReflectionTypeLoadException: Could not load file or assembly 'Bannerlord.UIExtenderEx'` → `TaleWorlds.ModuleManager.Debug.FailedAssert` → user-cancelable crash dialog. Fix: enable the four community mods in the launcher's editor profile.
+**If the Dependencies editor folder is empty**, the engine still loads `Modules/TAOM/bin/Win64_Shipping_wEditor/TAOM.dll`, but `Assembly.GetTypes()` throws `ReflectionTypeLoadException: Could not load file or assembly '0Harmony'` (and `MCMv5`, `Bannerlord.UIExtenderEx`), and the Kit shows "`TAOM.TAOM` submodule could not be loaded due to a missing or conflicting dependency". Fix: run `./build.ps1` with the Kit closed.
 
 `Modules/TAOM/bin/Win64_Shipping_wEditor/` is automatically mirrored from `Win64_Shipping_Client/` on every build by the `MirrorWin64ShippingClientToEditor` target in `Main/TAOM.csproj` (runs `AfterTargets="PostBuildCopyToModules"`). This covers TAOM.dll + .pdb plus the NuGet companion DLLs (DryIoc, Newtonsoft.Json, System.Runtime.CompilerServices.Unsafe). The editor bin also holds `TAOM.Client.dll`, which `Client/TAOM.Client.csproj` deploys; a deploying build of `Main/TAOM.csproj` alone removes it, and the Kit then shows a "Cannot find" box until `./build.ps1` runs.
 
@@ -142,7 +137,7 @@ The mirror was previously manual — `Bannerlord.BuildResources`'s `CopyBinaries
 
 > For a non-developer-facing version of this checklist, see [map-maker-quickstart.md](../scene-scripts/map-maker-quickstart.md).
 
-1. Open your launcher, switch to the editor profile. Verify enabled: Bannerlord.Harmony, Bannerlord.UIExtenderEx, Bannerlord.MBOptionScreen, Bannerlord.ButterLib, TAOM (plus TAOM_Map if you want the TAOM main map open by default).
+1. Open your launcher, switch to the editor profile. Verify enabled: TAOM.Dependencies, TAOM (plus TAOM_Map if you want the TAOM main map open by default).
 2. Launch the modding kit (`Win64_Shipping_wEditor`). It should open without a crash dialog.
 3. Open a test scene; add a generic entity.
 4. Component picker → search "CS_Road" → attach.
