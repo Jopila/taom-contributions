@@ -2129,7 +2129,7 @@
 		color="FF758DA2"
 		color2="FF203054"
 		default_party_template="PartyTemplate.kingdom_hero_party_rivendell_lindon_1_template"
-		banner_key="11.330.166.1528.1528.764.764.1.0.0.22000.149.171.700.700.764.764.0.0.0.22001.142.116.350.350.765.854.1.0.0" />
+		banner_key="11.286.286.1528.1528.764.764.1.0.0.15000.171.171.483.483.764.764.0.0.0" />
   <Faction
 		id="clan_lindon_2"
 		initial_home_settlement="Settlement.town_LN2"
@@ -2142,7 +2142,7 @@
 		color="FF7F8FA9"
 		color2="FF252E61"
 		default_party_template="PartyTemplate.kingdom_hero_party_rivendell_lindon_2_template"
-		banner_key="11.330.166.1528.1528.764.764.1.0.0.22000.149.171.700.700.764.764.0.0.0.22001.142.116.350.350.765.854.1.0.0" />
+		banner_key="11.286.286.1528.1528.764.764.1.0.0.15003.171.171.483.483.764.764.0.0.0" />
   <!-- TAOM-NEWFACTIONS:lindon:END -->
   <!-- TAOM-DALE-EXPANSION:BEGIN -->
   <Faction
@@ -2386,7 +2386,7 @@
 		color="FF6F8FA8"
 		color2="FF1E2F4F"
 		default_party_template="PartyTemplate.kingdom_hero_party_rivendell_lindon_2_template"
-		banner_key="11.330.166.1528.1528.764.764.1.0.0.22000.149.171.700.700.764.764.0.0.0.22001.142.116.350.350.765.854.1.0.0" />
+		banner_key="11.286.286.1528.1528.764.764.1.0.0.16004.171.171.483.483.764.764.0.0.0" />
   <Faction
 		id="clan_lindon_4"
 		initial_home_settlement="Settlement.castle_LN1"
@@ -2399,7 +2399,7 @@
 		color="FF8A9AB0"
 		color2="FF2B3A5C"
 		default_party_template="PartyTemplate.kingdom_hero_party_rivendell_lindon_2_template"
-		banner_key="11.330.166.1528.1528.764.764.1.0.0.22000.149.171.700.700.764.764.0.0.0.22001.142.116.350.350.765.854.1.0.0" />
+		banner_key="11.286.286.1528.1528.764.764.1.0.0.15002.171.171.483.483.764.764.0.0.0" />
   <Faction
 		id="clan_lindon_5"
 		initial_home_settlement="Settlement.castle_LN2"
@@ -2412,7 +2412,7 @@
 		color="FF5E7FA6"
 		color2="FF1B2A4A"
 		default_party_template="PartyTemplate.kingdom_hero_party_rivendell_lindon_2_template"
-		banner_key="11.330.166.1528.1528.764.764.1.0.0.22000.149.171.700.700.764.764.0.0.0.22001.142.116.350.350.765.854.1.0.0" />
+		banner_key="11.286.286.1528.1528.764.764.1.0.0.15004.171.171.483.483.764.764.0.0.0" />
   <Faction
 		id="clan_lindon_6"
 		initial_home_settlement="Settlement.castle_LN3"
@@ -2425,7 +2425,7 @@
 		color="FF7C9CB4"
 		color2="FF23365A"
 		default_party_template="PartyTemplate.kingdom_hero_party_rivendell_lindon_2_template"
-		banner_key="11.330.166.1528.1528.764.764.1.0.0.22000.149.171.700.700.764.764.0.0.0.22001.142.116.350.350.765.854.1.0.0" />
+		banner_key="11.286.286.1528.1528.764.764.1.0.0.15005.171.171.483.483.764.764.0.0.0" />
   <!-- TAOM-LINDON-EXPANSION:END -->
   <!-- TAOM-NEWFACTIONS:eredluin:BEGIN -->
   <Faction

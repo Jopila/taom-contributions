@@ -10,7 +10,9 @@ Writes, in the shape of tools/oneoff/author_dale_lords.py (marker-delimited, so 
 the block in place instead of duplicating it):
   - characters/clans.xml   - four <Faction> rows. Culture.lindon under Kingdom.lindon, keys
                              aom_clan_lindon_N_name, party template reused from clan_lindon_2,
-                             the banner key clan_lindon_1 and _2 share, colours authored here.
+                             an elven banner per house (BANNERS, gold on light blue; it replaced
+                             the clan_gundabad_1 crest the generator cloned, 2026-10-28), colours
+                             authored here.
   - characters/lords.xml   - 13 NPCCharacter blocks in the shape of lord_LN1_2 (race elf, battania
                              hair and beard tags, BodyProperties age 22.01; a hero renders at its
                              age= attribute, which Hero.Age is seeded from). Inline <skills> are the live
@@ -80,6 +82,11 @@ CLANS_NEW = [
     ("clan_lindon_5", "Wardens of Ered Luin", 3, "lord_LN5_1", "castle_LN2", "FF5E7FA6", "FF1B2A4A", "lindon house 5 - Barad Luin"),
     ("clan_lindon_6", "Nos Eglarest", 2, "lord_LN6_1", "castle_LN3", "FF7C9CB4", "FF23365A", "lindon house 6 - Tirith Aear"),
 ]
+# One sigil per house from the Noldor and Sindar sheets (banner_icons.xml), gold (171) on light blue (286),
+# Mike's recommendation of 2026-10-28; clan_lindon_1 and _2 (outside this block) carry 15000 and 15003 in the same form.
+BANNER = "11.286.286.1528.1528.764.764.1.0.0.{icon}.171.171.483.483.764.764.0.0.0"
+BANNERS = {"clan_lindon_3": BANNER.format(icon=16004), "clan_lindon_4": BANNER.format(icon=15002),
+           "clan_lindon_5": BANNER.format(icon=15004), "clan_lindon_6": BANNER.format(icon=15005)}
 
 # id, name, sex, age, voice, archetype, clan, father, mother, spouse
 # Spouse is written on the wife's row only. Every parent is at least 14 years older than the child.
@@ -291,7 +298,6 @@ def main():
         assert f'id="{clan[0]}"' not in co, f"{clan[0]} already defined outside the block"
         assert clan[3] in [r[0] for r in L], f"owner {clan[3]} is not one of the new lords"
     assert f'<MBPartyTemplate id="{TEMPLATE}">' in party, f"party template {TEMPLATE} missing"
-    banner = re.search(r'id="clan_lindon_1".*?banner_key="([^"]+)"', co, re.S).group(1)
     names = [r[1] for r in L]
     assert len(set(names)) == len(names), "duplicate display name inside the new lords"
     taken = set(re.findall(r'name="\{=[^}]+\}([^"]+)"', lo)) | set(re.findall(r'name">\{=[^}]+\}([^<]+)<', xslt))
@@ -318,7 +324,7 @@ def main():
     npcs = [npc_block(r, i, set_values, picks[r[0]]) for i, r in enumerate(L)]
     lords_new = with_block(lords, npcs, "NPCCharacters")
     heroes_new = with_block(heroes, [hero_row(r) for r in L], "Heroes")
-    clans_new = with_block(clans, [clan_row(c, banner) for c in CLANS_NEW], "Factions")
+    clans_new = with_block(clans, [clan_row(c, BANNERS[c[0]]) for c in CLANS_NEW], "Factions")
     spec_new = spec_text(spec_old)
 
     for label, txt in (("lords", lords_new), ("heroes", heroes_new), ("clans", clans_new)):

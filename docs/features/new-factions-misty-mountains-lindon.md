@@ -214,6 +214,18 @@ bluecraig has its own `Culture.bluecraig` ones since its promotion (`child_templ
   heroes are the `TAOM-LINDON-EXPANSION` blocks in `characters/clans.xml`, `lords.xml` and `heroes.xml`, written
   by the finished one-off `tools/oneoff/author_lindon_clans.py` (it refuses to run without `--rerun-retired`);
   colours-only entries in `clan_heraldry/rivendell.json`.
+- **Banners (2026-10-28):** all six Lindon clans flew the Gundabad orc crest (icons 22000 and 22001): the
+  generator cloned every new-faction clan from `clan_gundabad_1`, and the #1039 one-off copied `clan_lindon_1`'s
+  key into the four new clans. The kingdom, cloned from Rivendell's, flew Rivendell's exact banner. Each house now
+  has its own elven sigil in gold (171) on light blue (286): Falathrim 15000 (the lozenge of stars), Edhil
+  Mithlond 15003, Nos Galdor 16004 (Sindar), Nos Brithombar 15002 (the compass rose), Wardens of Ered Luin 15004,
+  Nos Eglarest 15005; the kingdom flies the Falathrim key, so Mithlond and the ruling house show the lozenge of
+  stars (a ruling clan shows its kingdom's banner). Banner Injection applies the keys to kingdoms and non-ruling
+  clans in existing saves at the next session ([banner-injection.md](banner-injection.md)); the deployed module
+  needs a build first. Known limitation: in an older save, the clans keep the Gundabad banner colours they
+  saved, which the engine uses only if a Lindon clan leaves its kingdom (until the next load).
+  `test_every_lindon_clan_flies_its_own_elven_banner` and `test_the_lindon_kingdom_flies_an_elven_banner_of_its_own`
+  keep every sigil on the Noldor, Sindar or Silvan sheets.
 - **Renames (display names only):** Gondor's `castle_EW1` is Harlond Quays, `village_LN1_1` is Eryn Lhûn and
   `village_LN1_3` is Ninglas, so no Lindon name repeats another on the map.
 - **Tests:** `tools/tests/test_lindon_clan_expansion.py` pins the owners, homes, lord-to-clan map, the renamed
@@ -234,6 +246,8 @@ After `/engine-bump`, with TAOM, TAOM_Map and LOTRLOME_Armory loaded:
 5. Enter Harlond, Forlond, the three castles, and Brithlas, Hîthlin, Luinbar and Ram Luin (whose scenes were
    corrected); each loads.
 6. `taom.audit_settlement_entrances` reports no unreachable entrance among the new settlements.
+7. On the map, Harlond, Forlond and the three castles show gold elven sigils on light blue, each house its own,
+   not the dark Gundabad crest; Mithlond and the Falathrim show the lozenge of stars, not Rivendell's banner.
 
 ## Key Files
 

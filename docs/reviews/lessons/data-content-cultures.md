@@ -2158,6 +2158,22 @@ the `banner_icons` files. `ShippedHeraldryBannerKeyTests` checks only the key's 
   clans that render correctly (Dale uses clans 2 to 9's).
 - **Source:** `docs/reviews/rca-dale-lord-expansion-2026-10-20.md`.
 
+### A culture cloned from a template inherits its banner: read the sigil, not only the key (Lindon, 2026-10-28)
+`generate_new_faction_kingdoms.py` clones every new-faction clan from `clan_gundabad_1`, banner key included,
+unless the realm names a `banner`; Lindon's entry named none, so its clans flew the Gundabad orc crest (icons 22000
+and 22001), and its kingdom, cloned from Rivendell's, flew Rivendell's exact banner. The #1039 one-off then copied
+`clan_lindon_1`'s key into four new clans, and every gate passed: the key parsed and each icon id resolved. Mike
+saw the dark crest over Harlond and Forlond on the map.
+- **Why missed:** the shape gate and the icon lookup above answer "does it render", not "is it this culture's
+  emblem"; nobody looked at the sigil.
+- **Prevent:** when cloning a culture or donating a key, look the icon ids up in `banner_icons.xml` and check the
+  `material_name` sheet belongs to the new culture (the per-emblem PNGs in
+  `GUI/SpriteParts/ui_taom_bannericons/<id>.png` show the sigil, white on transparent: view them on a dark
+  background), and that the key is not another realm's word for word. A realm's shipped-data test pins its
+  sheets (`test_every_lindon_clan_flies_its_own_elven_banner`), and `test_generate_new_faction_kingdoms.py`
+  requires every regeneratable realm to name a banner and one icon per clan.
+- **Source:** #1039, Mike's report of 2026-10-28; [rca-lindon-banners-2026-10-28.md](../rca-lindon-banners-2026-10-28.md).
+
 ### A default_group fix is a retag and a restat, and its gate must check both directions (#953, 2026-10-20)
 The bow-only Dunland Hunter was tagged `Infantry` and three Falcon horse archers `Cavalry`, so they
 fought as melee troops, and the Falcons fought sieges as infantry. Retagging them left their skills on

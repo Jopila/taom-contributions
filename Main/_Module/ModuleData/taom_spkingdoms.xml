@@ -1170,7 +1170,7 @@
         id="lindon"
         owner="Hero.lord_LN1_1"
         initial_home_settlement="Settlement.town_LN1"
-        banner_key="11.76.166.1528.1528.764.764.0.0.0.503.101.101.338.338.764.764.0.0.0.503.76.101.265.265.764.764.0.0.0.15009.202.12.435.435.764.764.1.0.0.15008.172.328.583.583.764.764.1.0.0"        primary_banner_color="0xFF50A090"
+        banner_key="11.286.286.1528.1528.764.764.1.0.0.15000.171.171.483.483.764.764.0.0.0"        primary_banner_color="0xFF50A090"
         secondary_banner_color="0xFFC8E0D8"
         color="0xFF50A090"
         color2="0xFFC8E0D8"      

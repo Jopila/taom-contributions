@@ -103,6 +103,7 @@ Banner keys are declared in:
 
 ## Referenced by
 
+- [docs/features/new-factions-misty-mountains-lindon.md](./new-factions-misty-mountains-lindon.md)
 - [docs/INDEX.md](../INDEX.md)
 - [docs/modding/banners-and-heraldry.md](../modding/banners-and-heraldry.md)
 - [docs/modding/clans.md](../modding/clans.md)

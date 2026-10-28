@@ -10,6 +10,7 @@ import codecs
 import re
 import sys
 import unittest
+import xml.etree.ElementTree as ET
 from collections import Counter
 from pathlib import Path
 
@@ -82,6 +83,22 @@ def faction_attrs(text, cid):
     return dict(re.findall(r'(\w+)="([^"]*)"', m.group(0)))
 
 
+def elven_sheet_icons():
+    """{icon id: material} of TAOM's banner icons."""
+    return {i.get("id"): i.get("material_name") for i in ET.parse(MD / "banner_icons.xml").iter("Icon")}
+
+
+def sigil_layers(case, owner, key, icons):
+    """The sigil icon ids of a banner key, after asserting it has at least one and each is on an elven sheet."""
+    parts = key.split(".")
+    case.assertEqual(0, len(parts) % 10, owner)
+    layers = [parts[i:i + 10] for i in range(0, len(parts), 10)]
+    case.assertGreater(len(layers), 1, f"{owner} flies no sigil")
+    for layer in layers[1:]:
+        case.assertRegex(icons.get(layer[0], "undefined"), r"^taom_banners_(noldor|sindar|silvan)_", (owner, layer[0]))
+    return tuple(layer[0] for layer in layers[1:])
+
+
 class LindonClanExpansionDataTests(unittest.TestCase):
     def test_new_clans_names_tiers_homes_and_owners(self):
         text = block(MD / "characters" / "clans.xml")
@@ -99,11 +116,21 @@ class LindonClanExpansionDataTests(unittest.TestCase):
         a = faction_attrs(read(MD / "characters" / "clans.xml"), "clan_lindon_2")
         self.assertEqual("Settlement.town_LN2", a["initial_home_settlement"])
 
-    def test_every_new_clan_uses_the_lindon_banner(self):
-        clans = read(MD / "characters" / "clans.xml")
-        lindon = faction_attrs(clans, "clan_lindon_1")["banner_key"]
-        keys = re.findall(r'banner_key="([^"]+)"', block(MD / "characters" / "clans.xml"))
-        self.assertEqual([lindon] * len(NEW_CLANS), keys)
+    def test_every_lindon_clan_flies_its_own_elven_banner(self):
+        # The generator cloned every new-faction clan from clan_gundabad_1, so all six Lindon clans flew its orc crest
+        # (icons 22000 and 22001) until Mike's 2026-10-28 report; each house now has its own Noldor or Sindar sigil.
+        icons = elven_sheet_icons()
+        keys = {f.get("id"): f.get("banner_key") or "" for f in ET.parse(MD / "characters" / "clans.xml").iter("Faction")
+                if f.get("super_faction") == "Kingdom.lindon"}
+        self.assertLessEqual({f"clan_lindon_{n}" for n in range(1, 7)}, set(keys))
+        sigils = {cid: sigil_layers(self, cid, key, icons) for cid, key in keys.items()}
+        self.assertEqual(len(keys), len(set(sigils.values())), sigils)
+
+    def test_the_lindon_kingdom_flies_an_elven_banner_of_its_own(self):
+        # Kingdom.lindon was cloned from Kingdom.rivendell banner and all; the ruling clan shows the kingdom's banner.
+        kingdoms = {k.get("id"): k.get("banner_key") or "" for k in ET.parse(MD / "taom_spkingdoms.xml").iter("Kingdom")}
+        sigil_layers(self, "Kingdom.lindon", kingdoms["lindon"], elven_sheet_icons())
+        self.assertNotEqual(kingdoms["rivendell"], kingdoms["lindon"])
 
     def test_every_new_lord_is_a_hero_of_its_clan_and_each_owner_leads_his_own(self):
         heroes = dict(re.findall(r'id="(lord_LN\d_\d+)"[^/]*?faction="Faction\.(clan_lindon_\d)"',

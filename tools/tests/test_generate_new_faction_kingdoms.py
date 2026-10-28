@@ -86,5 +86,15 @@ class UpsertTests(unittest.TestCase):
         self.assertIn("a\\1b", gen.upsert(doc("", after=DALE), "</Factions>", rows, MARKER))
 
 
+class BannerTests(unittest.TestCase):
+    """A cloned clan keeps clan_gundabad_1's orc crest unless its realm names a banner (Lindon did not, 2026-10-28)."""
+
+    def test_every_regeneratable_realm_names_a_banner_for_its_kingdom_and_each_clan(self):
+        for rid in gen.REGENERATABLE:
+            k = gen.KINGDOMS[rid]
+            self.assertTrue(k.get("banner"), rid)
+            self.assertIn("kingdom_icon", k, rid)
+            self.assertEqual(len(k["clans"]), len(k.get("clan_icons", [])), rid)
+
 if __name__ == "__main__":
     unittest.main()

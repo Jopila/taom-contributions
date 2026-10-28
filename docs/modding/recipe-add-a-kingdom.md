@@ -326,9 +326,10 @@ Code: No code changes needed
   `<Hero id="lord_X_1" faction="Faction.clan_{id}_{N}" />`
   ([`kingdom-creation.md:516-525`](../features/kingdom-creation.md)).
 - **A generated clan keeps its template's banner.** The generator rewrites ids, names, tiers and
-  colours and deliberately leaves `banner_key` alone, so 38 of the 172 clans in `characters/clans.xml`
-  fly the same banner as `clan_gundabad_1`, all six Lindon elf clans included.
-  <!-- measured: python -c "import xml.etree.ElementTree as ET;f=[e for e in ET.parse('Main/_Module/ModuleData/characters/clans.xml').getroot().iter('Faction')];k={e.get('id'):e.get('banner_key') for e in f};print(sum(1 for v in k.values() if v==k['clan_gundabad_1']))" 2026-10-27 -->
+  colours and deliberately leaves `banner_key` alone, so 32 of the 172 clans in `characters/clans.xml`
+  fly the same banner as `clan_gundabad_1` (the six Lindon clans did too, until 2026-10-28; a realm that names a
+  `banner` and `clan_icons` gets its own).
+  <!-- measured: python -c "import xml.etree.ElementTree as ET;f=[e for e in ET.parse('Main/_Module/ModuleData/characters/clans.xml').getroot().iter('Faction')];k={e.get('id'):e.get('banner_key') for e in f};print(sum(1 for v in k.values() if v==k['clan_gundabad_1']))" 2026-10-28 -->
   Fixing it is a per-clan copy from a source clan, or the in-game banner editor
   ([banners-and-heraldry](banners-and-heraldry.md)).
 - **Wanderers with the wrong `culture` never appear.** They spawn only in settlements of the culture
@@ -374,7 +375,7 @@ Code: No code changes needed
 | 26 | culture entries in `startup_resources_config.xml` | `python -c "import xml.etree.ElementTree as ET;print(len(ET.parse('Main/_Module/ModuleData/startup_resources/startup_resources_config.xml').getroot().findall('.//Culture')))"` |
 | 26 | entries in `charactercreation/cultures.json` | `python -c "import json;d=json.load(open('Main/_Module/ModuleData/charactercreation/cultures.json'));print(len(d))"` |
 | 172 | `<Faction>` entries in `characters/clans.xml` | `rg -c '<Faction\b' Main/_Module/ModuleData/characters/clans.xml` |
-| 38 | of those clans share `clan_gundabad_1`'s `banner_key` | the ElementTree one-liner in Gotchas |
+| 32 | of those clans share `clan_gundabad_1`'s `banner_key` (2026-10-28) | the ElementTree one-liner in Gotchas |
 | 1106 / 1286 | `<Hero>` entries in `characters/heroes.xml` and `<NPCCharacter>` entries in `characters/lords.xml` | `rg -c '<Hero\b' Main/_Module/ModuleData/characters/heroes.xml ; rg -c '<NPCCharacter\b' Main/_Module/ModuleData/characters/lords.xml` |
 | 27 / 1699 / 6 to 80 | `npcs_*.xml` files, `<NPCCharacter>` entries in them, and the per-file range; the 6 is `npcs_harad_lords.xml`, which holds Harad lord troops, so the culture notable files run from 28 to 80 | `python -c "import glob,xml.etree.ElementTree as ET;n=[len([x for x in ET.parse(p).getroot().iter('NPCCharacter')]) for p in glob.glob('Main/_Module/ModuleData/characters/npcs_*.xml')];print(len(n),sum(n),min(n),max(n))"` |
 | 281 / 26 / 19 | wanderer entries, cultures covered, and cultures with exactly 10 | `python -c "import xml.etree.ElementTree as ET,collections;c=collections.Counter(e.get('culture') for e in ET.parse('Main/_Module/ModuleData/taom_wanderers.xml').getroot().iter('NPCCharacter'));print(sum(c.values()),len(c),sum(1 for v in c.values() if v==10))"` |
