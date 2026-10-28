@@ -25,7 +25,9 @@ Do not use the deploying default of `build.ps1` as a review-time check. Without
 the game, skip the `managed-build` and `managed-tests` rows and run these three
 commands in order, from the repository root: `dotnet build TAOM.Tests -p:TaomGameRefs=RefAsm -p:DisableModuleCopy=true -p:ModuleId=`;
 `dotnet test TAOM.Tests --no-build -p:TaomGameRefs=RefAsm -p:DisableModuleCopy=true -p:ModuleId= --filter
-"TestCategory!=RequiresGame&TestCategory!=LiveInstall&TestCategory!=BindingVerification"`; and
+"TestCategory!=RequiresGame&TestCategory!=LiveInstall&TestCategory!=BindingVerification"`; and,
+with `BANNERLORD_GAME_DIR` set to the absolute path of
+`TAOM.Tests/bin/Debug/net472/refasm-game` for that one command only,
 `dotnet test TAOM.Tests --no-build -p:TaomGameRefs=RefAsm -p:DisableModuleCopy=true -p:ModuleId= --settings
 TAOM.Tests/binding-gate.runsettings --filter
 "TestCategory=BindingVerification&TestCategory!=RequiresGameIL&TestCategory!=LiveInstall"`. The build (its implicit restore
@@ -34,10 +36,12 @@ from `GameReferences.targets` are downloaded; a restore without it downloads
 none), the unit tests and the binding gate. All three use the Debug
 configuration, and the gate reads `TAOM.Tests/bin/Debug/net472/refasm-game`,
 which only a Debug RefAsm build writes; adding `-c Release` to one step and not
-the others tests a stale or missing DLL. An unfiltered run executes the tests
+the others tests a stale or missing DLL. `GameAssemblies` reads that folder only
+through the variable: without it the gate loads no module assembly and fails
+most of its tests (509 of 593 on 2026-10-28). An unfiltered run executes the tests
 tagged `RequiresGame` on stubs and fails. On a machine that has the game, unset
-`BANNERLORD_GAME_DIR` and `BANNERLORD_OVERRIDE_DIR` before the build, not only
-before the tests: the build records the install as the test DLL's
+`BANNERLORD_GAME_DIR` and `BANNERLORD_OVERRIDE_DIR` before the build and the unit
+tests, not only before the tests: the build records the install as the test DLL's
 `TaomGameFolder` metadata, and the tests fall back to it, loading the real
 module assemblies beside the stubs. Such a run cannot execute the tests tagged
 `RequiresGame`, `RequiresGameIL` or `LiveInstall`, so it is partial evidence. Missing
