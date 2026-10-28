@@ -429,8 +429,9 @@ Code: No code changes needed
    villages, and by party-template and recruitment XML. Everything else on the tag is editable.
 2. **Rename:** edit the default text after `{=key}` in `settlements.xml` and the matching `text=` in
    all 12 `loc_settlements.xml`. `python tools/Apply-MapVillageNames.py` does the 13 files in one
-   pass; edit its `NAMES` dict first, then remove the renamed ids from `tools/translation_cache/<lang>.json`
-   (the tool does not, and the translator would write the old wording back).
+   pass; edit its `NAMES` dict, read the dry run, then `--apply`. It writes only the ids whose English
+   changed and removes them from `tools/translation_cache/<lang>.json`, which the translator would
+   otherwise use to write the old wording back (#1042).
 3. **Re-own:** change `owner="Faction.<clan>"`, which exists only on towns and castles. Villages have
    no `owner` and inherit through `bound=`. `python tools/Assign-SettlementOwners.py` is the
    rules-driven version, dry-run by default.

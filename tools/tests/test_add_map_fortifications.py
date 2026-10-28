@@ -161,6 +161,12 @@ class CheckTests(unittest.TestCase):
         found = amf.check([self.FORT], renamed, self.scene, self.loc)
         self.assertTrue(any("names it 'Elsewhere'" in f for f in found))
 
+    def test_a_name_another_settlement_carries_is_named(self):
+        # Harlond, Forlond and Edhellond each named two settlements before #1039.
+        twin = self.master + '<Settlement id="castle_Y1" name="{=Settlements.Settlement.name.castle_Y1}Checkton" />'
+        found = amf.check([self.FORT], twin, self.scene, self.loc)
+        self.assertTrue(any("'Checkton' is already on the map (castle_Y1)" in f for f in found))
+
 
 def row(sid, common=False):
     areas = "<CommonAreas><Area type=\"Backstreet\" name=\"x\" /></CommonAreas>" if common else ""

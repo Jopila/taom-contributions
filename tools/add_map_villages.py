@@ -19,7 +19,8 @@ save made before the batch still loads this file (until the distance cache is re
 #1041), and a new village or town ahead of an existing
 row makes that save skip the existing row (2026-10-07, docs/modding/settlements.md "Add"). The
 row's `after` anchor (default INSERT_AFTER) now places only its loc rows, after that anchor's last
-row in each language, same display name in all 12 (Tolkien proper nouns do not translate). A row
+row in each language, same display name in all 12 (Tolkien proper nouns do not translate). A name
+another settlement already carries is refused, and named by `--check` (name_collisions). A row
 whose `bound` settlement has no row is refused, and named by `--check`. `hearth` is per row too (default HEARTH):
 the #597 Gondor rows sit at 350 like their EW10/EW11 castle-village neighbours; the Isengard and
 Gundabad rows at those cultures' 500 floor. Idempotent per id: an id already in the master is skipped. Byte discipline per
@@ -36,6 +37,7 @@ Usage:
 """
 import argparse
 import datetime
+import json
 import os
 import re
 import sys
@@ -54,6 +56,7 @@ MAP = GAME + r"/Modules/TAOM_Map"
 LIVE = MAP + r"/ModuleData/settlements.xml"
 SCENE = MAP + r"/SceneObj/Main_map/scene.xscene"
 LANGS = ["BR", "CNs", "CNt", "DE", "FR", "IT", "JP", "KO", "PL", "RU", "SP", "TR"]
+CACHE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "translation_cache")
 
 # Every VillageType id in the live file (21) plus the ones DefaultVillageTypes registers that TAOM
 # does not use yet. add_bluecraig_castles.py's copy omitted the five horse ranches.
@@ -388,6 +391,55 @@ def save_order_findings(master_text, new_ids):
     return findings
 
 
+def master_names(master_text):
+    """{settlement id: name} from each row's name= fallback, the English text every language starts from."""
+    return dict(re.findall(r'<Settlement id="([^"]+)"[^>]*?\sname="\{=[^}]*\}([^"]*)"', master_text))
+
+
+def name_collisions(rows, master_text):
+    """Findings for each (id, name) whose name a DIFFERENT settlement already carries in settlements.xml.
+
+    The tables check their names only against each other, so Harlond, Forlond and Edhellond each
+    named two settlements before #1039 (#1042). Case is ignored; a row is never its own collision.
+    """
+    taken = {}
+    for sid, name in master_names(master_text).items():
+        taken.setdefault(name.casefold(), []).append(sid)
+    findings = []
+    for sid, name in rows:
+        others = sorted(o for o in taken.get(name.casefold(), []) if o != sid)
+        if others:
+            findings.append(f"{sid}: the name {name!r} is already on the map ({', '.join(others)})")
+    return findings
+
+
+def evict_cached_names(ids_by_lang, cache_dir=CACHE_DIR, field="name"):
+    """Remove each settlement's `field` row (name, or text for a description) from tools/translation_cache/<lang>.json; returns {lang: removed}.
+
+    The cache keys on the string id alone (TRANSLATOR_GUIDE.md), so a name whose English changed keeps
+    its old translation there and the next translator run writes it back. A file is rewritten only when
+    a key goes, in its own shape: translate_with_claude.save_cache's dump options, its own newline and
+    its own final newline.
+    """
+    removed = {}
+    for lang, ids in ids_by_lang.items():
+        path = os.path.join(cache_dir, f"{lang.lower()}.json")
+        raw = open(path, "rb").read().decode("utf-8")
+        cache = json.loads(raw)
+        keys = [k for k in (f"Settlements.Settlement.{field}.{sid}" for sid in ids) if k in cache]
+        removed[lang] = len(keys)
+        if not keys:
+            continue
+        for k in keys:
+            del cache[k]
+        nl = "\r\n" if "\r\n" in raw else "\n"
+        text = json.dumps(cache, ensure_ascii=False, indent=2, sort_keys=True).replace("\n", nl)
+        if raw.endswith(nl):
+            text += nl
+        open(path, "wb").write(text.encode("utf-8"))
+    return removed
+
+
 def tagged_rows(lang, rows, table):
     """[(id, name)] with each BR and IT name carrying the grammar tag the table has for its id (#1023).
 
@@ -420,8 +472,8 @@ def insert_loc_rows(loc_text, anchor_id, rows):
 
 
 def check(villages, master_text, scene_text, loc_texts, tolerance=0.01):
-    """Findings (strings) for any table id whose data is missing or whose position drifted."""
-    findings = []
+    """Findings (strings) for any table id whose data is missing, whose position drifted or whose name is taken."""
+    findings = name_collisions([(v.id, v.name) for v in villages], master_text)
     for v in villages:
         pos = settlement_position(master_text, v.id)
         if not pos:
@@ -482,7 +534,7 @@ def main():
         if findings:
             print(f"\n{len(findings)} finding(s) across {len(VILLAGES)} table id(s).")
             return 1
-        print(f"OK: all {len(VILLAGES)} villages present in settlements.xml, all {len(locs)} loc files and scene.xscene; positions match.")
+        print(f"OK: all {len(VILLAGES)} villages present in settlements.xml, all {len(locs)} loc files and scene.xscene; positions match; no other settlement carries their names.")
         return 0
 
     loc_texts = {lang: text for lang, (_, text) in locs.items()}
@@ -497,6 +549,10 @@ def main():
     if orphans:
         print("REFUSING: bound settlement has no row in settlements.xml (run add_map_fortifications.py "
               "first): " + ", ".join(orphans), file=sys.stderr)
+        return 1
+    clashes = name_collisions([(v.id, v.name) for v in todo], master)
+    if clashes:
+        print("REFUSING: rename the row in VILLAGES first:\n  " + "\n  ".join(clashes), file=sys.stderr)
         return 1
     blocks, placeholders, per_parent = [], 0, {}
     print(f"Plan: +{len(todo)} village(s) ({len(VILLAGES) - len(todo)} already present), appended at the end")

@@ -375,6 +375,7 @@ def master_name(master_text, sid):
 
 def check(forts, master_text, scene_text, loc_texts, villages=(), released=frozenset()):
     findings = amv.save_order_findings(master_text, batch_ids(forts, villages, released))
+    findings += amv.name_collisions([(f.id, f.name) for f in forts], master_text)
     for f in forts:
         pos = amv.settlement_position(master_text, f.id)
         if not pos:
@@ -427,7 +428,7 @@ def main():
         if findings:
             print(f"\n{len(findings)} finding(s) across {len(FORTS)} table id(s).")
             return 1
-        print(f"OK: all {len(FORTS)} fortifications present with loc rows; names match the table; positions and gates match the scene; "
+        print(f"OK: all {len(FORTS)} fortifications present with loc rows; names match the table and no other settlement carries them; positions and gates match the scene; "
               f"the batch's {len(batch_ids())} rows are the file's tail under a town.")
         return 0
 
@@ -455,6 +456,7 @@ def main():
             continue
         blocks.append((f, fort_block(f, pos, gate, nl)))
         print(f"  {f.id:12} {f.name:18} {f.kind:6} owner {f.owner:17} at {pos[0]}, {pos[1]}  gate {gate[0]:.3f}, {gate[1]:.3f}  {f.scene}")
+    errors += amv.name_collisions([(f.id, f.name) for f in todo], master)
     if errors:
         print("REFUSING:\n  " + "\n  ".join(errors), file=sys.stderr)
         return 1

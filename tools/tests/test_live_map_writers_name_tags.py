@@ -39,25 +39,38 @@ def loc_xml(rows):
 
 
 class ApplyMapVillageNamesTests(unittest.TestCase):
-    def _run(self, td, rows_by_lang):
+    MASTER = (f'<S><Settlement id="village_RU8_4" name="{{={P}village_RU8_4}}Old" />'
+              f'<Settlement id="village_RU8_3" name="{{={P}village_RU8_3}}Old" />'
+              f'<Settlement id="village_RU8_2" name="{{={P}village_RU8_2}}Iôrig-Vargh" /></S>')
+    ROWS = [("village_RU8_4", "Old"), ("village_RU8_2", "Ыыы")]
+
+    def _run(self, td, rows_by_lang, argv=("--apply",)):
         data = Path(td) / "Modules" / "TAOM_Map" / "ModuleData"
-        data.mkdir(parents=True)
-        (data / "settlements.xml").write_bytes(
-            f'<S><Settlement id="village_RU8_4" name="{{={P}village_RU8_4}}Old" /></S>'.encode("utf-8"))
-        for lang in LANGS:
-            f = data / "Languages" / lang / "loc_settlements.xml"
-            f.parent.mkdir(parents=True)
-            f.write_bytes(loc_xml(rows_by_lang.get(lang, [("village_RU8_4", "Old")])).encode("utf-8"))
+        cache = Path(td) / "cache"
+        if not data.exists():
+            data.mkdir(parents=True)
+            cache.mkdir()
+            (data / "settlements.xml").write_bytes(self.MASTER.encode("utf-8"))
+            for lang in LANGS:
+                f = data / "Languages" / lang / "loc_settlements.xml"
+                f.parent.mkdir(parents=True)
+                f.write_bytes(loc_xml(rows_by_lang.get(lang, self.ROWS)).encode("utf-8"))
+                (cache / f"{lang.lower()}.json").write_bytes(
+                    ('{\n  "' + P + 'village_RU8_2": "Ыыы",\n  "' + P + 'village_RU8_4": "Altes"\n}').encode("utf-8"))
         old = os.environ.get("BANNERLORD_GAME_DIR")
         os.environ["BANNERLORD_GAME_DIR"] = td
         try:
             with mock.patch.object(nt, "load_table", return_value=TABLE), contextlib.redirect_stdout(io.StringIO()):
-                runpy.run_path(str(APPLY), run_name="apply_map_village_names")
+                ns = runpy.run_path(str(APPLY), run_name="apply_map_village_names")
+                code = ns["main"](list(argv), cache_dir=str(cache))
         finally:
             if old is None:
                 del os.environ["BANNERLORD_GAME_DIR"]
             else:
                 os.environ["BANNERLORD_GAME_DIR"] = old
+        self.assertEqual(code, 0)
+        self.master_after = (data / "settlements.xml").read_text(encoding="utf-8")
+        self.cache_after = {lang: (cache / f"{lang.lower()}.json").read_text(encoding="utf-8") for lang in LANGS}
         return {lang: (data / "Languages" / lang / "loc_settlements.xml").read_text(encoding="utf-8") for lang in LANGS}
 
     def test_script_TableIdInBrazilianAndItalian_KeepsTheTableTag(self):
@@ -71,30 +84,39 @@ class ApplyMapVillageNamesTests(unittest.TestCase):
             out = self._run(td, {})
         for lang in ("CNs", "DE", "FR", "RU", "TR"):
             self.assertIn('text="Iôrig-Mukh"', out[lang])
-            self.assertNotIn("{.", out[lang])
+            self.assertNotIn('text="{.', out[lang])
 
     def test_script_IdNotInTheTable_KeepsTheOldRowsTag(self):
         with tempfile.TemporaryDirectory() as td:
             out = self._run(td, {"BR": [("village_RU8_3", "{.FS}Velha")]})
         self.assertIn('text="{.FS}Iôrig-Tün"', out["BR"])
 
+    def test_script_RenamedId_UpdatesTheMasterAndLeavesTheCache(self):
+        with tempfile.TemporaryDirectory() as td:
+            self._run(td, {})
+        self.assertIn('}Iôrig-Mukh"', self.master_after)
+        self.assertNotIn("village_RU8_4", self.cache_after["DE"])
+
+    def test_script_UnchangedName_KeepsItsTranslationAndCacheRow(self):
+        # The English of village_RU8_2 already matches the table, so its translated row stays.
+        with tempfile.TemporaryDirectory() as td:
+            out = self._run(td, {})
+        self.assertIn('text="Ыыы"', out["RU"])
+        self.assertIn("village_RU8_2", self.cache_after["RU"])
+
+    def test_script_DryRun_WritesNothing(self):
+        with tempfile.TemporaryDirectory() as td:
+            out = self._run(td, {}, argv=())
+        self.assertIn('village_RU8_4}Old"', self.master_after)
+        self.assertIn('text="Old"', out["DE"])
+        self.assertIn("village_RU8_4", self.cache_after["DE"])
+
     def test_script_SecondRun_ChangesNothing(self):
         with tempfile.TemporaryDirectory() as td:
             first = self._run(td, {})
-            data = Path(td) / "Modules" / "TAOM_Map" / "ModuleData"
-            old = os.environ.get("BANNERLORD_GAME_DIR")
-            os.environ["BANNERLORD_GAME_DIR"] = td
-            try:
-                with mock.patch.object(nt, "load_table", return_value=TABLE), contextlib.redirect_stdout(io.StringIO()):
-                    runpy.run_path(str(APPLY), run_name="apply_map_village_names")
-            finally:
-                if old is None:
-                    del os.environ["BANNERLORD_GAME_DIR"]
-                else:
-                    os.environ["BANNERLORD_GAME_DIR"] = old
-            second = (data / "Languages" / "BR" / "loc_settlements.xml").read_text(encoding="utf-8")
-        self.assertEqual(first["BR"], second)
-        self.assertEqual(second.count("{.NS}"), 1)
+            second = self._run(td, {})
+        self.assertEqual(first["BR"], second["BR"])
+        self.assertEqual(second["BR"].count("{.NS}"), 1)
 
 
 class AddMapVillagesTests(unittest.TestCase):

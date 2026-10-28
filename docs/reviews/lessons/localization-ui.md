@@ -1437,3 +1437,4 @@ master file, and this session first misread those rows as good translations.
 - **Prevent:** after any rename, remove the renamed ids from `tools/translation_cache/<lang>.json`, and read a sample of
   every output file a writer touches before calling it safe or unsafe.
 - **Source:** #1039.
+- **Fixed (#1042):** the renamer now writes only the ids whose English changed and evicts them from the cache; `tools/oneoff/reset_stale_village_loc_rows.py` reset the 4,633 stale rows to the English for #763.

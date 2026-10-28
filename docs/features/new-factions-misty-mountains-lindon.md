@@ -170,7 +170,7 @@ troops; clans 2 to 6 share the second template.
 | `tools/generate_new_factions.py` | `troops_{c}.xml`, `npcs_{c}.xml`, `taom_equipment_sets_{c}.xml` (orc cultures) |
 | `tools/insert_new_factions.py` | Inserts wanderers, wanderer-equipment, party templates, culture blocks, SubModule regs, culture loc-strings (marker-wrapped, idempotent) |
 | `tools/generate_new_faction_kingdoms.py` | 4 kingdoms + clans + ~130 lords + heroes (templates read by id, parametrized) |
-| `tools/generate_new_faction_settlements.py` | `<Settlement>` blocks; `--apply` writes the live `TAOM_Map/settlements.xml` (+ timestamped backup) |
+| `tools/generate_new_faction_settlements.py` | `<Settlement>` blocks; `--apply` appends only the layout ids the live `TAOM_Map/settlements.xml` lacks (+ backup) and never rewrites a row; all 49 are on the map, so a run does nothing (#1042) |
 | `tools/assign_orc_village_types.py` | Per-fief orc/goblin village economy (animal food + 1 mine; `VALID_VILLAGE_TYPES` guard); `--apply` edits the live settlements.xml in place |
 | `tools/make_new_factions_playable.py` | The 4 CC faction-map cards in `factions.json` (`--apply` dry-run guard); then `tools/harvest_factionmap_strings.py` propagates the card strings into `taom_module_strings.xml` |
 | `tools/insert_new_faction_cc_menus.py` | Clones gundabad's CC narrative menu entries → goblin/mistymountainorcs (parents/youth/adulthood/education); childhood is culture-independent. Fixes blank CC stages. |

@@ -8,21 +8,28 @@ The new settlements reuse vanilla interior/menu scenes by culture family:
   * orc cultures (mistymountainorcs, goblin)  -> sturgia_* scenes (same as gundabad)
   * rivendell (Lindon)                          -> battania_* scenes (same as Rivendell)
 
-Inserts the blocks immediately before </Settlements> in the LIVE external file
+Appends ONLY the layout ids the LIVE external file lacks, at the end of the file (the save-order rule
+in tools/add_map_villages.append_settlements):
   E:/Steam/.../Modules/TAOM_Map/ModuleData/settlements.xml
-Idempotent: strips any previously-inserted block whose id is in the layout, then
-re-inserts. Always writes a timestamped .bak first.
+A row already on the map is never stripped or rewritten. All 49 layout ids have shipped since June
+2026 and have changed since (the Lindon batch, #1039; renames; the economy floors), so until
+2026-10-27 (#1042) this tool's strip-and-reinsert would have reverted them to the values below. A run on
+today's map does nothing. A row it does add carries the first-pass prosperity (3000 town, 600
+castle) and hearth (300), so run python tools/validate_moduledata.py afterwards
+(SETTLEMENT_ECONOMY_FLOOR) and raise it to the floor. Byte discipline as in add_map_villages.py:
+binary read, BOM and newline kept, the output parsed before the write, a non-.xml backup first.
+New settlements for these kingdoms go through tools/add_map_fortifications.py and add_map_villages.py.
 
 Usage:
-  python tools/generate_new_faction_settlements.py            # dry-run (prints XML, no write)
-  python tools/generate_new_faction_settlements.py --apply    # writes the live file (+ backup)
+  python tools/generate_new_faction_settlements.py            # dry run: lists the ids it would add
+  python tools/generate_new_faction_settlements.py --apply    # appends them to the live file (+ backup)
 """
-import argparse, json, os, re, shutil, sys
-from datetime import datetime
+import argparse, datetime, json, os, re, sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from assign_orc_village_types import fief_types, ORC_CULTURES  # per-fief orc village-type rule
 from _gamedir import game_dir
+import add_map_villages as amv  # noqa: E402  _read, _write, detect_newline, append_settlements
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 LAYOUT = os.path.join(ROOT, "tools", "taom_new_factions_layout.json")
@@ -74,6 +81,15 @@ def disp_name(sid, idx):
 
 def scene_family(culture):
     return "battania" if culture == "rivendell" else "sturgia"
+
+
+def shipped_culture(s):
+    """The culture the row's kingdom has now: the layout predates promote_borrowed_cultures.py."""
+    if s["culture"] == "rivendell":
+        return "lindon"
+    if "_GBC" in s["id"]:
+        return "bluecraig"
+    return s["culture"]
 
 
 def town_block(s, idx, is_castle):
@@ -141,7 +157,7 @@ def town_block(s, idx, is_castle):
     is_castle_attr = "true" if is_castle else "false"
     return (
         f'  <Settlement id="{sid}" name="{{=Settlements.Settlement.name.{sid}}}{name}" owner="Faction.{owner}" '
-        f'posX="{s["posX"]}" posY="{s["posY"]}" culture="Culture.{cul}" gate_posX="{gx}" gate_posY="{gy}">\n'
+        f'posX="{s["posX"]}" posY="{s["posY"]}" culture="Culture.{shipped_culture(s)}" gate_posX="{gx}" gate_posY="{gy}">\n'
         f'    <Components>\n'
         f'      <Town id="{comp_id}" is_castle="{is_castle_attr}" background_crop_position="0.0" background_mesh="{bg}" wait_mesh="wait_{fam}_town" gate_rotation="{grot}" prosperity="{prosperity}">\n'
         f'        <Buildings>\n{bld}\n        </Buildings>\n'
@@ -160,7 +176,7 @@ def village_block(s, idx, vtype):
     center = f"{fam}_village_m" if fam == "battania" else f"{fam}_village_f"
     return (
         f'  <Settlement id="{sid}" name="{{=Settlements.Settlement.name.{sid}}}{name}" '
-        f'posX="{s["posX"]}" posY="{s["posY"]}" culture="Culture.{cul}">\n'
+        f'posX="{s["posX"]}" posY="{s["posY"]}" culture="Culture.{shipped_culture(s)}">\n'
         f'    <Components>\n'
         f'      <Village id="{comp_id}" village_type="VillageType.{vtype}" hearth="300" bound="Settlement.{s["bound"]}" '
         f'background_crop_position="0.0" background_mesh="gui_bg_village_{fam}" wait_mesh="wait_{fam}_village" castle_background_mesh="gui_bg_castle_{fam}" />\n'
@@ -214,46 +230,41 @@ def build_blocks(layout):
     return blocks
 
 
+def missing_blocks(layout, master_text):
+    """[(id, block)] for the layout ids with no <Settlement> row in `master_text`, in build order."""
+    return [(sid, block) for sid, block in build_blocks(layout)
+            if not re.search(r'<Settlement id="' + re.escape(sid) + r'"', master_text)]
+
+
+def append_blocks(master_text, blocks):
+    """`master_text` with the blocks appended at the end, in the file's own newline."""
+    nl = amv.detect_newline(master_text)
+    return amv.append_settlements(master_text, [block.replace("\n", nl) for _, block in blocks])
+
+
 def main():
-    ap = argparse.ArgumentParser()
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--apply", action="store_true")
     args = ap.parse_args()
     layout = json.load(open(LAYOUT, encoding="utf-8"))
-    blocks = build_blocks(layout)
-    new_ids = {bid for bid, _ in blocks}
-    xml = "".join(b for _, b in blocks)
-
-    print(f"Built {len(blocks)} settlement blocks ({sum(1 for s in layout['settlements'] if s['type']=='town')} towns, "
-          f"{sum(1 for s in layout['settlements'] if s['type']=='castle')} castles, "
-          f"{sum(1 for s in layout['settlements'] if s['type']=='village')} villages).")
-    if not args.apply:
-        print("\n--- DRY RUN (first 2 blocks shown) ---\n")
-        print(blocks[0][1])
-        print(blocks[len(blocks)//2][1] if len(blocks) > 2 else "")
-        print(f"... ({len(blocks)} total). Re-run with --apply to write live file.")
-        return
-
     if not os.path.exists(LIVE):
         sys.exit(f"LIVE settlements.xml not found: {LIVE}")
-    src = open(LIVE, encoding="utf-8").read()
-    # backup
-    ts = datetime.now().strftime("%Y%m%d_%H%M%S")
-    bak = LIVE + f".bak_newfactions_{ts}"
-    shutil.copy2(LIVE, bak)
-    print(f"Backed up live file -> {bak}")
-
-    # idempotency: remove any existing <Settlement id="<newid>"...>...</Settlement>
-    for bid in new_ids:
-        src = re.sub(r'[ \t]*<Settlement id="' + re.escape(bid) + r'".*?</Settlement>\n', "", src, flags=re.DOTALL)
-
-    if "</Settlements>" not in src:
-        sys.exit("Could not find </Settlements> closing tag.")
-    src = src.replace("</Settlements>", "  <!-- TAOM new factions: Misty Mountain Orcs / Goblins / Lindon -->\n" + xml + "</Settlements>")
-    open(LIVE, "w", encoding="utf-8").write(src)
-    # validate well-formedness
-    import xml.etree.ElementTree as ET
-    ET.parse(LIVE)
-    print(f"Inserted {len(blocks)} settlements into live file; XML well-formed.")
+    had_bom, src = amv._read(LIVE)
+    blocks = missing_blocks(layout, src)
+    print(f"{len(layout['settlements'])} layout ids, {len(layout['settlements']) - len(blocks)} already on the map "
+          f"(never rewritten), {len(blocks)} missing.")
+    if not blocks:
+        print("Nothing to do.")
+        return
+    for sid, _ in blocks:
+        print(f"  + {sid}")
+    out = append_blocks(src, blocks)
+    if not args.apply:
+        print("\nDRY RUN: re-run with --apply to append them to the live file.")
+        return
+    amv._write(LIVE, had_bom, out, "newfactions_" + datetime.datetime.now().strftime("%Y%m%d_%H%M%S"))
+    print(f"Appended {len(blocks)} settlement(s); the file parses. Run python tools/validate_moduledata.py next "
+          "(SETTLEMENT_ECONOMY_FLOOR). This tool writes no loc rows: add the 12 as add_map_villages.py does.")
 
 
 if __name__ == "__main__":
