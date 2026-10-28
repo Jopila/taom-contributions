@@ -6502,6 +6502,11 @@
 
     <string id="taom_round_xp_notice" text="Standing a round teaches you a little about winning a room (+{XP} {SKILL_NAME} experience)." />
 
+
+    <string id="taom_str_last_seen_encyclopedia_entry_leading_army" text="Last seen leading an army {?IS_IN_SETTLEMENT}at{?}near{\?} {SETTLEMENT}." />
+
+    <string id="taom_str_last_seen_encyclopedia_entry_at_sea_leading_army" text="Last seen leading an army sailing near {SETTLEMENT}." />
+
   </strings>
 
 </base>

@@ -42,6 +42,11 @@ VERDICT: CLEAN / ISSUES FOUND
 ### Lessons From Prior Reviews (87 reviews, 193+ bugs found), distilled
 
 **What Codex does especially well (2026-09-01 memory-diagnostics review: 4/4 HIGH real, 0 false positives).**
+- **Traces precedence through merge and tick-order chains to the consumer** (2026-10-27, engine bump v1.5.6, 3 of 3 real, 0 false
+  positives): where three Claude readers repeated that the first-loaded GameText variation wins, Codex followed the XML merge
+  (matched by `@id`, the later module overwrites the earlier) to the row the game reads, and later traced `HandleMouse` through the
+  game tick to show that a patch reads the previous frame's latch. For a precedence or ordering claim, ask for the chain from the
+  source of the value to the line that consumes it.
 - **Weighs a path the lenses only listed** (2026-10-21, co-op player attribution, 3 of 3 real): the Claude lenses
   had tabled co-op's prisoner recruit replacement as pre-existing; Codex quoted the replacement handler and the
   config row and raised it with its cost (2,000 per Mumakil rider). It also confirmed an id format in the installed
@@ -204,6 +209,10 @@ an area with prior history. Convention: add each new essay to the top of the tra
 archive the 6th-oldest, harvest durable patterns into `docs/reviews/lessons/<category>.md`.
 
 **Look harder here — what a scoped per-feature pass structurally misses (Codex's edge):**
+- **Input routing: read the full click handler, not only the predicate a patch targets** (2026-10-27, engine bump v1.5.6: a
+  Codex miss the engine-compatibility lens caught). Codex did not reach the click route, so it missed
+  that `HandleMouse` sends every Left Ctrl click on a party or settlement to the parley handler, so a Ctrl + Space turbo click stopped
+  moving the party. For a patch on an input predicate, ask the reviewer to quote each branch of the handler that calls it.
 - **What a flag does in its consumer** (2026-10-21, co-op player attribution: a Codex miss the Completeness lens
   caught). Codex classed "Unknown counts as player-owned" as a decision cost; the service uses that flag only to
   choose an MCM toggle, both default on, so nothing was protected. When a change sets a flag to get an outcome, ask
@@ -630,7 +639,7 @@ Engine concepts come from the process docs; signatures come only from the instal
 
 ### Pre-Decompiled Source (`E:\Decompiled_Bannerlord\`)
 
-The entire Bannerlord v1.5.5 codebase is pre-decompiled and organized by category (`E:\Decompiled_Bannerlord\_categories_v1.5.5`; older trees beside it):
+The entire Bannerlord v1.5.6 codebase is pre-decompiled and organized by category (`E:\Decompiled_Bannerlord\_categories_v1.5.6`; older trees beside it):
 
 | Folder | Contents |
 |--------|----------|
@@ -649,13 +658,13 @@ The entire Bannerlord v1.5.5 codebase is pre-decompiled and organized by categor
 
 ```bash
 # Find a class
-find "E:/Decompiled_Bannerlord/_categories_v1.5.5/" -name "DefaultPartyWageModel.cs"
+find "E:/Decompiled_Bannerlord/_categories_v1.5.6/" -name "DefaultPartyWageModel.cs"
 
 # Search for a method across all decompiled source
-grep -r "GetCharacterWage" "E:/Decompiled_Bannerlord/_categories_v1.5.5/Campaign/"
+grep -r "GetCharacterWage" "E:/Decompiled_Bannerlord/_categories_v1.5.6/Campaign/"
 
 # Browse a namespace
-ls "E:/Decompiled_Bannerlord/_categories_v1.5.5/Campaign/TaleWorlds.CampaignSystem/TaleWorlds.CampaignSystem.GameComponents/"
+ls "E:/Decompiled_Bannerlord/_categories_v1.5.6/Campaign/TaleWorlds.CampaignSystem/TaleWorlds.CampaignSystem.GameComponents/"
 ```
 
 ### When to Look Up TaleWorlds Source

@@ -475,6 +475,7 @@ class InstalledEngineTests(unittest.TestCase):
         # Client addresses and mapped-method counts per engine version; add a row at every engine
         # bump. v1.5.5 dropped MBPeer.debug_refresh_disconnect_timeout and added
         # Util.get_naval_dlc_version_mismatch, so its MountAndBlade and Engine counts differ.
+        # v1.5.6 added IParticleSystem.set_runtime_time_multiplier, so its Engine count is one higher.
         pins = {
             "v1.5.3": {"addresses": (("get_current_action_type", 0x6E19B0), ("set_attack_state", 0x6DF670),
                                      ("set_scripted_target_entity", 0x6E2540)),
@@ -485,6 +486,9 @@ class InstalledEngineTests(unittest.TestCase):
             "v1.5.5": {"addresses": (("get_current_action_type", 0x6E2170), ("set_attack_state", 0x6DFE30),
                                      ("set_scripted_target_entity", 0x6E2D00)),
                        "counts": {"MountAndBlade": 687, "Engine": 1562, "DotNet": 33}},
+            "v1.5.6": {"addresses": (("get_current_action_type", 0x6E28F0), ("set_attack_state", 0x6E05B0),
+                                     ("set_scripted_target_entity", 0x6E3480)),
+                       "counts": {"MountAndBlade": 687, "Engine": 1563, "DotNet": 33}},
         }
         version = nd.engine_version(dll)
         if version not in pins:

@@ -1,16 +1,18 @@
 #!/usr/bin/env python3
 """Audit every module's `project.mbproj` for registrations the engine silently ignores or throws on.
 
-The engine loads a `<file>` row of `project.mbproj` in two independent ways (v1.5.5):
+The engine loads a `<file>` row of `project.mbproj` in two independent ways. The managed side was re-read on v1.5.6
+(2026-10-27); the native side and its FUN_ addresses are the v1.5.5 client's and were not re-derived: UNVERIFIED.
 
   Managed, by `id`. `MBObjectManager.GetMergedXmlForNative(id)` walks `XmlResource.MbprojXmls`
   and keeps the entries whose `Id` matches EXACTLY. It is reached only from the requesters
   listed in `REQUESTED_IDS`. An invented id matches nothing, no file is read and nothing is
   logged: the row looks like registration and is inert.
   Native, by `type`. Native's loader asks for thirteen kinds of file by `type` (`NATIVE_BY_TYPE`,
-  the callers of `FUN_180719810`), reads each matching row's `name` and never its `id`, so a
-  row of one of those types loads whatever its id is (TAOM's own `soln_module_sound` row loads
-  this way). Any other `type` is ignored. In particular `skin`, `item`, `monster`, `action_set`
+  the callers of `FUN_180719810`, v1.5.5 client; v1.5.6 0x719F90 by native_build_match hash),
+  reads each matching row's `name` and never its `id`, so a row of one of those types loads
+  whatever its id is (TAOM's own `soln_module_sound` row loads this way). Any other `type` is
+  ignored. In particular `skin`, `item`, `monster`, `action_set`
   and `action_type` are not among the thirteen: a row of those types is loaded only through its
   id.
 
@@ -21,8 +23,8 @@ in the dict value: the six `Module.CreateProcessed*XMLForNative` ids that someth
 `<module>/Music/soundtrack.xml`) and the five ids native code requests through
 `CreateProcessedModuleDataXMLForNative` (`"soln_" + xmlType`): `soln_movement_sets`,
 `soln_full_movement_sets`, `soln_bone_body_types`, `soln_monster_usage_sets` and
-`soln_item_usage_sets`. Nothing in v1.5.5 calls the Animations or SoundEventData callbacks, so
-`soln_animations` and `soln_sound_event_data` are not in it. Native's own project.mbproj is not
+`soln_item_usage_sets`. Nothing calls the Animations or SoundEventData callbacks (the native slots were read on v1.5.5
+only), so `soln_animations` and `soln_sound_event_data` are not in it. Native's own project.mbproj is not
 read: vanilla also registers ids (`soln_monsters`, `soln_strings`, `soln_particle_systems` ...)
 that nothing requests.
 
@@ -115,7 +117,8 @@ REPO_MODULE_LABEL = "Main/_Module/ModuleData/project.mbproj"
 # Anything else installed is somebody else's module and is only audited under --all.
 TAOM_MODULES = ("TAOM", "TAOM_Map", "LOTRLOME_Armory")
 
-# The ids a project.mbproj `<file id>` row can be read by (v1.5.5), each with its source. A row
+# The ids a project.mbproj `<file id>` row can be read by, each with its source. The managed side was re-read on v1.5.6
+# (2026-10-27); the native side and its FUN_ addresses are the v1.5.5 client's, not re-derived: UNVERIFIED. A row
 # whose id is not here, and whose `type` is not in NATIVE_BY_TYPE, is read by nothing.
 # Managed requesters ask MBObjectManager.GetMergedXmlForNative for the id by exact string; native
 # code asks Module.CreateProcessedModuleDataXMLForNative(xmlType), which prefixes "soln_".
@@ -321,7 +324,7 @@ def audit_module(module_dir: str, game_dir: str, name: str | None = None) -> lis
 def is_official(module_dir: str) -> bool:
     """Whether the module's SubModule.xml says `<ModuleType value="Official">` or `OfficialOptional`
     (Native, SandBox, SandBoxCore, StoryMode, CustomBattle, BirthAndDeath, Multiplayer, NavalDLC on
-    v1.5.5). Read from the install, not a list, so a new official module needs no edit here."""
+    v1.5.5 and v1.5.6). Read from the install, not a list, so a new official module needs no edit here."""
     try:
         node = ET.parse(os.path.join(module_dir, "SubModule.xml")).getroot().find("ModuleType")
     except (OSError, ET.ParseError, ValueError, LookupError):

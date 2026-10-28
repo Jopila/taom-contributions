@@ -172,12 +172,57 @@ extra one; a player may set turbo below extra, and turbo still lights the extra 
 the extra multiplier at the fast-forward one (`ClampExtra`); without it "extra" could be slower than
 "fast" and the lit state unreachable.
 
+### Turbo clicks and v1.5.6 field parley (#1040)
+
+v1.5.6 binds `MapParleyModifier` to Left Ctrl, and `MapScreen.HandleMouse` sends a Ctrl click on a party or
+settlement to the parley handler instead of the move handler. Turbo is Ctrl + Space, so a Left Ctrl turbo click on
+a party or settlement went to the parley handler instead of moving. A friendly or neutral target printed "Cannot
+parley with this party." (or "...settlement."), and an at-war target printed vanilla's refusal or opened a parley.
+
+Patch124 is a postfix on the private `MapScreen.IsParleyClickReleased()`, the only gate (`HandleMouse` is its one
+caller). While the turbo latch is open (`ITimeAccelerationService.IsTurboActive`) it answers false, and
+`HandleMouse` falls into its ordinary click branch, the v1.5.5 path: a click on a party engages it (follows it
+with Alt), a click on a settlement travels there, a click on open ground moves. Without turbo, or when vanilla
+already answered false, nothing changes. Release Space, keep Ctrl, and a click parleys as vanilla intends.
+
+The patch is a [ClientOnly] class in category `Patch124_TurboClick`, declared at ProcessLoad by
+`TimeAccelerationModule`, so it is applied in `OnSubModuleLoad`, before the installed Coop's `PatchAll` patches
+`HandleMouse` on a co-op join or host start and before any later mod does. Harmony marks a patched method as not
+inlinable, which is what lets a caller compiled after the mark call the postfix. Other ClientOnly MapScreen patches
+(Patch89) already apply in `OnSubModuleLoad`.
+
+**Known limitation:** the parley icon on party and settlement nameplates still fades in while Ctrl is held, turbo
+included, because the nameplate views read `MapParleyModifier` directly every frame. It is cosmetic. Hiding it
+would take one postfix on `DefaultEncounterModel.CanMainHeroDoParleyWithParty` that refuses while turbo is latched
+(both nameplate views ask it every frame while Ctrl is held). That would also drop the tooltip's parley hint, and
+the gain is cosmetic, so it is not done.
+
+**Known limitation, frame order:** `MapScreen.HandleMouse` runs inside the game tick (`Module.OnApplicationTick` calls
+`GameManagerBase.Current.OnTick`, which reaches `MapState.OnMapModeTick`, `IMapStateHandler.BeforeTick` and
+`HandleMouse`) before the submodules' `OnApplicationTick`, where TAOM updates the turbo latch. The postfix therefore
+reads the previous frame's latch: a click released on the exact frame Space is pressed still parleys, and one released
+on the exact frame Space is released moves. Codex rated this MEDIUM. It was not fixed because the fix would duplicate
+`OnTick`'s gates in a second predicate for a one-frame window (simplicity criterion).
+
+**Known limitation, gamepad:** while the latch is open the postfix also cancels a `MapParleyClick` (ControllerRUp)
+press. That is reachable only while keyboard Ctrl (either side) and the turbo key are held at the same time.
+
+**In-game check (owed):** hold Left Ctrl + Space (turbo) and click a friendly town, a friendly party and an enemy lord
+party; each must move or act as an ordinary click. Use Left Ctrl: `MapParleyModifier` is LeftControl plus
+ControllerRUp only, while TAOM's latch accepts either Ctrl. Control step: with Right Ctrl + Space a town click moves
+even without the patch, so that run proves nothing about Patch124.
+
+**Co-op:** turbo never latches on a client that defers to the host, so the postfix does nothing there. It is a void
+postfix, so it has no `CoopVetoClassificationTests` row.
+
 ## Key Files
 
 | File | Purpose |
 |------|---------|
 | `Main/Features/TimeAcceleration/ITimeAccelerationService.cs` | Service interface |
 | `Main/Features/TimeAcceleration/TimeAccelerationService.cs` | Core tick logic: input detection, multiplier application, Ctrl+Space save/restore; the two button commands and the lit-state query |
+| `Main/Features/TimeAcceleration/TimeAccelerationModule.cs` | Feature module that declares the `Patch124_TurboClick` category at ProcessLoad (#1040); the services stay in `TimeAccelerationIoC` |
+| `Main/Features/TimeAcceleration/Hooks/MapScreen_IsParleyClickReleased_TurboClick_Patch.cs` | Patch124 postfix: a released click is not a parley click while turbo is latched (#1040) |
 | `Main/Features/TimeAcceleration/TaomTimeControlHotKeyCategory.cs` | `GameKeyContext` publishing the three rebindable keys; static `Register()` called from `SubModule.OnSubModuleLoad` |
 | `Main/Features/TimeAcceleration/IMapInputAdapter.cs` | Input abstraction (no TaleWorlds types), named per ACTION rather than per key |
 | `Main/Features/TimeAcceleration/MapInputAdapter.cs` | Wraps `MapScreen.Instance.Input`; resolves the bound `GameKey`s once, then reads their current binding each frame |
@@ -197,10 +242,11 @@ the extra multiplier at the fast-forward one (`ClampExtra`); without it "extra" 
 - `TaomSettings` (MCM) — Provides the three multiplier values
 - `MapScreen` (SandBox.View.dll) — Per-frame input polling
 - `Campaign.Current` — Speed multiplier and time control mode
+- `MapScreen.IsParleyClickReleased` (SandBox.View.dll, private, v1.5.6): the parley gate Patch124 postfixes; pinned by `TurboClickBindingTests`
 
 ## Tests
 
-- `TAOM.Tests/Features/TimeAcceleration/TimeAccelerationServiceTests.cs` carries 42 tests covering:
+- `TAOM.Tests/Features/TimeAcceleration/TimeAccelerationServiceTests.cs` carries 53 tests covering:
   - Co-op deferral, including a toggle-on mid-turbo that must restore rather than latch
   - Guard conditions (campaign inactive, map inactive, menu open)
   - Menu open + locked bypass
@@ -217,6 +263,15 @@ the extra multiplier at the fast-forward one (`ClampExtra`); without it "extra" 
     unlocked wait menu proceeds, locked wait menu blocks)
   - The lit state: true in modes 2, 4 and 5 above the normal multiplier; false at the normal
     multiplier, in the play and stop modes, and with no campaign
+  - `IsTurboActive` (#1040): false before any tick, true after Ctrl plus the turbo key, false after either is
+    released, false when a non-locked menu opens mid-turbo, and false under co-op deferral
+- `TAOM.Tests/Features/TimeAcceleration/TurboClickPatchTests.cs` carries 4 tests of the Patch124 postfix: turbo
+  turns a parley click into an ordinary one, no turbo keeps it, a false vanilla answer stays false without
+  reading the service, and a faulting service keeps vanilla's answer and logs once. The faulting-getter test also
+  covers the missing-service branch, because both go through the same catch
+- `TAOM.Tests/Features/TimeAcceleration/TurboClickBindingTests.cs` carries 5 `RequiresGame` tests against the
+  installed SandBox.View: the target's shape, its read of `MapParleyModifier`, `HandleMouse` as its only caller,
+  a real Harmony apply plus JIT, and the category, `[ClientOnly]` and module wiring
 - `TAOM.Tests/Features/TimeAcceleration/TimeAccelerationSettingsProviderTests.cs` carries 5 tests: the
   no-MCM fallbacks equal the compiled defaults, the defaults are ordered fast below extra below turbo,
   and `ClampExtra` floors extra at fast without touching a larger value
@@ -259,6 +314,8 @@ take effect.
 
 ## Changelog
 
+- 2026-10-27: a click while turbo is held is an ordinary click again (#1040, Patch124). v1.5.6 made
+  Left Ctrl + click a parley, and turbo is Ctrl + Space. In-game check owed.
 - 2026-09-12: the map bar Extra Fast Forward button applies the extra multiplier (#574). It had
   bound vanilla `ExecuteTimeControlChange(2)` directly, mode only, since the feature landed; #168
   recorded that as a known limitation. Vanilla's fast-forward button is rebound through the mixin to
@@ -274,7 +331,7 @@ take effect.
 
 ## GitHub Issue
 
-- **Issue:** #181 — Time acceleration feature
+- **Issue:** #181 (time acceleration feature); #1040 (turbo clicks against v1.5.6 field parley)
 - **Status:** Closed
 
 ---

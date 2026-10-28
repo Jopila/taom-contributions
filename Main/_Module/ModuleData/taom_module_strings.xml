@@ -4043,4 +4043,9 @@
 	<!-- InnRoundsAdapter -->
 	<string id="taom_round_xp_notice" text="{=taom_round_xp_notice}Standing a round teaches you a little about winning a room (+{XP} {SKILL_NAME} experience)." />
 
+	<!-- Vanilla v1.5.6 HeroHelper.GetLastSeenText ids that no installed module defines. Delete these two rows when vanilla defines
+	     the ids: the GameText merge keeps the later module's attributes, so TAOM's row would replace vanilla's text and key. -->
+	<string id="str_last_seen_encyclopedia_entry_leading_army" text="{=taom_str_last_seen_encyclopedia_entry_leading_army}Last seen leading an army {?IS_IN_SETTLEMENT}at{?}near{\?} {SETTLEMENT}." />
+	<string id="str_last_seen_encyclopedia_entry_at_sea_leading_army" text="{=taom_str_last_seen_encyclopedia_entry_at_sea_leading_army}Last seen leading an army sailing near {SETTLEMENT}." />
+
 </strings>

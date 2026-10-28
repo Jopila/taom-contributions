@@ -252,6 +252,7 @@ until the peak line reports overflows above zero in either pool.
 - 2026-10-15: v1.5.5 row added to `SkeletonBufferInstalledBinaryTests.KnownBuilds`, and both native pin classes
   (this one and `ClipBudgetSignatureInstalledBinaryTests`) now sit in the engine-bump binding gate, checked by
   `NativePinGateTests` (#806).
+- 2026-10-27: v1.5.6 row added (same code sites as v1.5.5; the global moved to 0xD9F160).
 
 ## GitHub Issue
 

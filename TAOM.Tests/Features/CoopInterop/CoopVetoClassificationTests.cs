@@ -88,12 +88,6 @@ public class CoopVetoClassificationTests
             "role is unprobeable, runs vanilla and the host's grant is the only one."),
 
         // --- Reviewed, safe to keep enforcing ------------------------------------------------
-        ["HeroHelper_GetLastSeenText_Patch"] = new(CoopVeto.ReviewedSafe,
-            "Patch123 (crash 9b2a103e): skips HeroHelper.GetLastSeenText, a text helper whose only caller is " +
-            "the local encyclopedia page, only when vanilla would read a missing leader and throw. The one " +
-            "campaign write the skipped body makes (Hero.UpdateLastKnownClosestSettlement) the prefix makes " +
-            "itself with the same arguments, so the hero ends in vanilla's state. The condition reads hero, " +
-            "party and army state the co-op mod replicates, and only the local peer's UI text changes."),
         ["SupplyCaravanEncounterPatch"] = new(CoopVeto.ReviewedSafe,
             "Player-local UI redirect, the caravan sibling of RefugeEncounterPatch: when the LOCAL " +
             "player bumps their own supply caravan, the meeting conversation (which would strike a " +

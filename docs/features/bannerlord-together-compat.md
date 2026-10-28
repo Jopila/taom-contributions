@@ -299,12 +299,23 @@ An override that fully replaces a vanilla body silently deletes any BT patch on 
 | Limitation | Impact | Workaround |
 |------------|--------|------------|
 | **Settings parity is reported, not exchanged** | TAOM's 497 MCM settings live in a per-user file outside the save; **330 are simulation-relevant** (traced per setting to the consuming feature, see [coop-interop.md](coop-interop.md) "What is NOT done"). Two players with different values still simulate differently (battle autocalc, bandit spawn density, AI army targeting, desertion rates) and nothing on the wire corrects it | `SettingsFingerprint` writes one code per MCM group to each peer's log under the co-op gate, so the manual comparison is a few short strings rather than every value. Exchanging them through save metadata and warning on join is the remaining step and needs two machines to verify |
-| **Detection reflects what the player enabled, not what constructed** | `CoopPresence` reads the launcher's active-module list. If the co-op mod's SubModule constructor throws, the module still reads as active (the former `SubModuleConstructionGuard` is deleted, so detection simply follows the launcher's list), so TAOM spends the session in co-op mode (PatchShield withholding its rescue, SaveShield rethrowing save-load faults) for a co-op layer that never came up | Check the log for the co-op mod's own init lines. Closing this needs a check that the co-op assembly actually constructed, mapped back to its module id, plus a suppression set that survives re-probing |
 | **PatchShield still swallows the missing-API trinity everywhere it shields** | The co-op SAVE-LOAD rethrow covers SaveShield's own targets (PatchShield now skips those), but on any other method a `MissingMethod`/`MissingField`/`TypeLoad` exception is still swallowed | Intended: that swallow is what keeps a stale third-party mod from killing the session |
 | **TAOM state that mutates mid-session is join-time-only** | War of the Ring momentum, War Chronicle effects, event rows and rally tiers, culture-conversion progress, messenger fleet, career progression and caravan memory reach the client through the host's save at join and then drift. BT has no schema for these fields, so its replication cannot correct them. Under BannerlordTogether every peer also runs the War Chronicle itself, since `IsAuthority` fails open there. Watchful Holds is the exception beside it: it stands down on every peer there (`ShouldDeferToHost`), like Eye of Sauron. | None yet. Needs an "am I the simulation authority" signal from BT. One exception: the character-creation package (race, culture gold, career, resource seed) is re-applied on **detection** rather than replicated, so a joiner keeps it even though nothing syncs it |
 | Siege defense rewards fire on the host only | Client players don't trigger `SiegeDefenseBehavior` rewards | Host handles siege events; client still fights |
 | Race data is host-save-authoritative | Joining client loads races from the host's save | **Two mechanisms, both needed.** A TAOM-less or one-race host would ship a degenerate race map that force-set every hero on a full client to human — `CaptureHeroRaces` now refuses a table below two races ([hero-race.md](hero-race.md)). Separately the joining player's OWN character-creation race is discarded with the hero at the hand-off, and `PlayerPossession` re-applies it ([player-possession.md](player-possession.md)) |
 | BattleLink battles need the separate MP window | Both players need BT's BattleLinkMPClient enabled | Follow BT's battle-server setup |
+
+**Resolved for a constructor fault; Likely for an OnSubModuleLoad fault:** detection reflects what the player enabled, not what constructed. `CoopPresence` reads the
+launcher's active-module list (the former `SubModuleConstructionGuard` is deleted, so detection simply
+follows that list). From v1.5.5 a throwing SubModule constructor makes the game abort, so a co-op
+SubModule that fails to construct never leaves a session running: `Module.AddSubModule` catches the
+exception and returns `CriticalError` (v1.5.6 `TaleWorlds.MountAndBlade.cs:101628`), and
+`LoadSubModules` collects it, shows a message box (not on a dedicated server), calls
+`MBDebug.AbortGame()` and throws (`:102609`; v1.5.5 `:102595`). That constructor half is verified. An `OnSubModuleLoad` fault
+also rethrows: `InitializeSubModuleBases` catches it, records the message and throws (`:101691` to
+`:101703`), and the throw goes back to the native `Module.Initialize` callback. What native does next
+was not read, so that the game does not reach the main menu in that case is [Likely], not verified. If it
+holds, TAOM never runs in a half-loaded co-op mode from that cause, and no workaround is needed.
 
 ## Diplomacy ordering — TAOM's veto is OFF under co-op
 

@@ -129,7 +129,7 @@ public sealed class PrisonerEscapeAdapter : IPrisonerEscapeAdapter
         if (captor.IsMobile)
         {
             var party = captor.MobileParty;
-            PerkHelper.AddPerkBonusForCharacter(DefaultPerks.Roguery.FleetFooted, BattleEnvironment.Any, hero.CharacterObject, false, ref factor);
+            PerkHelper.AddPerkBonusForCharacter(DefaultPerks.Roguery.FleetFooted, hero.CharacterObject, false, ref factor);
             PerkHelper.AddPerkBonusForParty(DefaultPerks.Riding.MountedPatrols, party, true, ref factor);
             PerkHelper.AddPerkBonusForParty(DefaultPerks.Roguery.RansomBroker, party, false, ref factor);
             PerkHelper.AddPerkBonusForParty(DefaultPerks.Scouting.KeenSight, party, false, ref factor);

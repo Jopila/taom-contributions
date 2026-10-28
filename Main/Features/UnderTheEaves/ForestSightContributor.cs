@@ -33,7 +33,7 @@ internal sealed class ForestSightContributor : IPartySpottingContributor
             return 0f;
         bool inSettlement = party.CurrentSettlement != null;
         bool inForest = !inSettlement && _terrain.IsInForest(party);
-        bool keenSight = inForest && party.HasPerk(DefaultPerks.Scouting.KeenSight, out _);
+        bool keenSight = inForest && party.HasPerk(DefaultPerks.Scouting.KeenSight);
         return UnderTheEavesRule.Factor(inForest, inSettlement, keenSight);
     }
 

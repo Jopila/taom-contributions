@@ -24,4 +24,10 @@ public interface ITimeAccelerationService
     /// frame by the MapBar mixin for the Extra Fast Forward button's lit state.
     /// </summary>
     bool IsExtraFastForwardActive { get; }
+
+    /// <summary>
+    /// True while the turbo latch is open (Ctrl held and the turbo key pressed, until either is released or a
+    /// menu, the map or co-op closes it). Read by Patch124 on the frame a Ctrl click is released (#1040).
+    /// </summary>
+    bool IsTurboActive { get; }
 }

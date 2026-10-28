@@ -26,6 +26,7 @@ public class SkeletonBufferInstalledBinaryTests
         {
             [14209888] = ("v1.5.4", 0x69CE1, 0xD9D160, 0x69D14, 0x69AD5, 0x6AF50),
             [14212960] = ("v1.5.5", 0x6A1A1, 0xD9E160, 0x6A1D4, 0x69F95, 0x6B410),
+            [14215008] = ("v1.5.6", 0x6A1A1, 0xD9F160, 0x6A1D4, 0x69F95, 0x6B410),
         };
 
     private static readonly byte[] OriginalSite =

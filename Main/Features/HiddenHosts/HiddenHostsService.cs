@@ -92,11 +92,23 @@ internal sealed partial class HiddenHostsService
         TryDistanceRatio(in s, out float ratio) && HiddenHostsMath.IsHorizon(ratio, s.SpottingRatio);
 
     /// <summary>
-    /// True when the party has no name on the map: it is at the horizon and no scout named it (#847). The nameplate, the
-    /// encyclopedia hotkey and the tooltip title all follow this one rule; a named host's count still reads "...".
+    /// True when the party has no name on the map: it is at the horizon and no scout named it (#847). The nameplate
+    /// and the encyclopedia hotkey follow this rule; the tooltip title adds a visibility gate, because only a party drawn on the
+    /// map has a horizon (<see cref="MasksParley"/> adds the same gate). A named host's count still reads "...".
     /// </summary>
     internal bool IsNameHidden(in PartyIntelSnapshot s) =>
         IsHorizon(in s) && !_scouting.IsNamedByScout(s.StringId!, s.NowHour);
+
+    /// <summary>
+    /// True when a field parley with this party would undo the mask (#1037): the party is nameless on the map, so the parley
+    /// icon, the hint, the click and the refusal text (which names the party) must not reveal it. It is the name verdict
+    /// (<see cref="IsNameHidden"/>) of a party drawn on the map, as the plate and the tooltip title read it. A tracked at-war lord
+    /// party that is out of sight but still inside the player's seeing range (for example one hidden by forest cover, spotting
+    /// ratio below 1) keeps its parley hint and its name. Past the seeing range vanilla refuses with "You are too far away from
+    /// (name)", which is expected because the tracker already names it. A host the scout named, a party in plain sight and the
+    /// player's own side stay open.
+    /// </summary>
+    internal bool MasksParley(in PartyIntelSnapshot s) => s.IsVisible && IsNameHidden(in s);
 
     /// <summary>
     /// The Scouting skill that decides how far digits reach: 0 while the scout is away on a settlement ride (#847), because

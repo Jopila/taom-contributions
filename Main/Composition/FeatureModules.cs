@@ -91,5 +91,6 @@ internal static class FeatureModules
         new Features.ManyHammers.ManyHammersModule(),
         new Features.BanditVoices.BanditVoicesModule(),
         new Features.InnRounds.InnRoundsModule(),
+        new Features.TimeAcceleration.TimeAccelerationModule(),
     };
 }
