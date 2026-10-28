@@ -10,15 +10,7 @@ using TaleWorlds.Core;
 
 namespace TAOM.Adapters;
 
-/// <summary>
-/// Production <see cref="IPrisonerEscapeAdapter"/>. Every engine member read here was checked against the
-/// v1.5.4 decompile: <c>PrisonerReleaseCampaignBehavior.DailyHeroTick</c> (:201-250: the gate, the three
-/// player-held cases, the mobile-captor factor, and the perk and Valor factors, which
-/// <c>EscapeFactor</c> repeats call for call), <c>CampaignEventDispatcher.CanHeroBeReleased</c>,
-/// <c>EndCaptivityAction.ApplyByEscape</c> (:81), <c>PartyBase.MapEvent</c>, <c>PartyBase.SiegeEvent</c>,
-/// <c>PartyBase.NumberOfHealthyMembers</c>, <c>Kingdom.Clans</c> and <c>Clan.Heroes</c>. The battle-or-siege
-/// and player-clan fields are TAOM's own exclusions, not vanilla inputs.
-/// </summary>
+/// <summary>Production <see cref="IPrisonerEscapeAdapter"/>: <c>EscapeTerms</c> repeats <c>PrisonerReleaseCampaignBehavior.DailyHeroTick</c>'s perk calls (v1.5.6 :223-245) and the battle-or-siege and player-clan fields are TAOM's own exclusions.</summary>
 public sealed class PrisonerEscapeAdapter : IPrisonerEscapeAdapter
 {
     public IReadOnlyList<PrisonerEscapeSnapshot> GetCapturedLords(IReadOnlyCollection<string> kingdomIds)
@@ -43,6 +35,33 @@ public sealed class PrisonerEscapeAdapter : IPrisonerEscapeAdapter
         return result;
     }
 
+    public DungeonReading? ReadDungeon(string settlementId)
+    {
+        if (string.IsNullOrEmpty(settlementId) || Campaign.Current == null)
+            return null;
+
+        var settlement = Settlement.Find(settlementId);
+        var own = settlement?.Party;
+        if (settlement == null || own == null)
+            return null;
+
+        var reading = new DungeonReading { Capacity = own.PrisonerSizeLimit };
+        var playerClan = Clan.PlayerClan;
+        var mainHero = Hero.MainHero;
+
+        // The parties SettlementComponent.GetPrisonerHeroes counts for vanilla's "There are N prisoners here."
+        // (v1.5.6 SettlementComponent.cs:158-185): the settlement's own party and each garrison party in it.
+        ReadRoster(own, reading, playerClan, mainHero);
+        var parties = settlement.Parties;
+        for (var i = 0; i < parties.Count; i++)
+        {
+            if (parties[i] != null && parties[i].IsGarrison)
+                ReadRoster(parties[i].Party, reading, playerClan, mainHero);
+        }
+
+        return reading;
+    }
+
     public float NextRoll() => MBRandom.RandomFloat;
 
     public bool Escape(string heroId)
@@ -58,6 +77,27 @@ public sealed class PrisonerEscapeAdapter : IPrisonerEscapeAdapter
         return true;
     }
 
+    private static void ReadRoster(PartyBase captor, DungeonReading into, Clan playerClan, Hero mainHero)
+    {
+        var roster = captor.PrisonRoster;
+        into.HeldRegulars += roster.TotalRegulars;
+        into.HeldLords += roster.TotalHeroes;
+        for (var i = 0; i < roster.Count; i++)
+        {
+            var hero = roster.GetElementCopyAtIndex(i).Character?.HeroObject;
+            if (hero == null)
+                continue;
+
+            var terms = EscapeTerms(hero, captor, true);
+            into.Lords.Add(new DungeonLord
+            {
+                Name = hero.Name?.ToString() ?? string.Empty,
+                Snapshot = Read(hero, captor, hero.Clan?.Kingdom?.StringId ?? string.Empty, playerClan, mainHero, terms),
+                Terms = TermLines(terms),
+            });
+        }
+    }
+
     private static void ReadClan(Clan clan, string kingdomId, Clan playerClan, Hero mainHero, List<PrisonerEscapeSnapshot> into)
     {
         var heroes = clan?.Heroes;
@@ -70,11 +110,12 @@ public sealed class PrisonerEscapeAdapter : IPrisonerEscapeAdapter
             var captor = hero?.PartyBelongedToAsPrisoner;
             if (hero == null || !hero.IsPrisoner || captor == null)
                 continue;
-            into.Add(Read(hero, captor, kingdomId, playerClan, mainHero));
+            into.Add(Read(hero, captor, kingdomId, playerClan, mainHero, EscapeTerms(hero, captor, false)));
         }
     }
 
-    private static PrisonerEscapeSnapshot Read(Hero hero, PartyBase captor, string kingdomId, Clan playerClan, Hero mainHero)
+    private static PrisonerEscapeSnapshot Read(
+        Hero hero, PartyBase captor, string kingdomId, Clan playerClan, Hero mainHero, ExplainedNumber escapeTerms)
     {
         var mobile = captor.IsMobile;
         var settlement = mobile ? captor.MobileParty.CurrentSettlement : null;
@@ -88,7 +129,7 @@ public sealed class PrisonerEscapeAdapter : IPrisonerEscapeAdapter
             CaptorInSettlement = settlement != null,
             CaptorHealthyMembers = mobile ? captor.NumberOfHealthyMembers : 0,
             PlayerHeld = IsPlayerHeld(captor, settlement, playerClan),
-            EscapeFactor = EscapeFactor(hero, captor),
+            EscapeFactor = escapeTerms.ResultNumber,
             CaptorInMapEventOrSiege = captor.MapEvent != null || captor.SiegeEvent != null,
             CanBeReleased = CanBeReleased(hero),
             IsMainHero = hero == mainHero,
@@ -110,13 +151,12 @@ public sealed class PrisonerEscapeAdapter : IPrisonerEscapeAdapter
         return captor.IsMobile && currentSettlement != null && currentSettlement.OwnerClan == playerClan;
     }
 
-    // Vanilla's relative terms (DailyHeroTick v1.5.4 :223-245), the same calls under the same conditions,
-    // on a base of 1. Every slot used is an AddFactor in v1.5.4 (DefaultPerks.cs:2089, 2152, 2178, 2192,
-    // 2196, 2307; DefaultPersonalityTraitEffects.cs:209), so the result is 1 + the sum of the factors,
-    // which multiplies the base chance exactly as vanilla's ExplainedNumber does.
-    private static float EscapeFactor(Hero hero, PartyBase captor)
+    // Vanilla's relative terms (DailyHeroTick v1.5.6 :223-245), the same calls under the same conditions, on a base of 1. Every
+    // perk slot used is an AddFactor in v1.5.6's DefaultPerks, so the result is 1 + the sum of the factors. The factor is the
+    // ResultNumber and the dungeon menu's lines are TermLines of the same number, built with descriptions, which change no value.
+    private static ExplainedNumber EscapeTerms(Hero hero, PartyBase captor, bool includeDescriptions)
     {
-        var factor = new ExplainedNumber(1f);
+        var factor = new ExplainedNumber(1f, includeDescriptions);
         if (captor.IsSettlement && captor.Settlement.Town != null
             && (captor.Settlement.IsTown || captor.Settlement.IsCastle))
         {
@@ -138,7 +178,20 @@ public sealed class PrisonerEscapeAdapter : IPrisonerEscapeAdapter
                 TraitEffectHelper.ApplyTraitEffect(leader, DefaultPersonalityTraitEffects.ValorPrisonerEscapeEffect, ref factor);
         }
 
-        return factor.ResultNumber;
+        return factor;
+    }
+
+    // ExplainedNumber.GetLines (v1.5.6 ExplainedNumber.cs:180, StatExplainer.GetLines :37) lists the base line first (a
+    // base of 1 is not approximately zero, so the constructor adds it, :160), then each described term. AddFactor (:238)
+    // stores a line as its percent and GetLines hands it back as base x percent x 0.01, which on a base of 1 is the
+    // fraction itself. An empty list for a number built without descriptions. PrisonerEscapeAdapterTests pin this shape.
+    internal static List<EscapeTermLine> TermLines(ExplainedNumber terms)
+    {
+        var lines = new List<EscapeTermLine>();
+        var all = terms.GetLines();
+        for (var i = 1; i < all.Count; i++)
+            lines.Add(new EscapeTermLine(all[i].name, all[i].number));
+        return lines;
     }
 
     // Fail closed: with no dispatcher the veto cannot be asked, so the lord is not released.

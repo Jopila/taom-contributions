@@ -6592,6 +6592,21 @@
     <string id="taom_str_neutral_term_for_culture.eredluin" text="Dwarves of Ered Luin" />
 
     <string id="taom_aso_kingdom.eredluin" text="Ered Luin" />
+    <string id="taom_wt_boost" text="{NAME}: {CHANCE}% a day with the war's escape boost." />
+
+    <string id="taom_wt_veto" text="{NAME} cannot escape." />
+
+    <string id="taom_wt_held_lord" text="Held: {HELD} of {CAPACITY}, 1 of them a lord." />
+
+    <string id="taom_wt_held_lords" text="Held: {HELD} of {CAPACITY}, {LORDS} of them lords." />
+
+    <string id="taom_wt_odds" text="Each lord's daily chance to escape: {CHANCE}%" />
+
+    <string id="taom_wt_base" text="Base chance: {CHANCE}%" />
+
+    <string id="taom_wt_halved" text="Held by your clan: halved" />
+
+    <string id="taom_wt_term" text="{DESCRIPTION}: {CHANGE}% of the base chance" />
 
   </strings>
 

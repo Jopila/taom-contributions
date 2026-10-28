@@ -2743,6 +2743,16 @@ public class TaomSettings : AttributeGlobalSettings<TaomSettings>
     [SettingPropertyBool("Show Prisoner Banners", Order = 0, RequireRestart = false,
         HintText = "On the party screen, a captive lord's row shows the clan's banner at the top left of the portrait, the kingdom's banner at the top right (when the clan belongs to a kingdom), and a gold noble icon at the bottom left when the lord leads the clan. Applies the next time the party screen opens. Default: on.")]
     public bool PrisonerBannersEnabled { get; set; } = TAOM.Features.PrisonerBanners.PrisonerBannersSettingsProvider.DefaultEnabled;
+    // --- Warden's Tally (docs/features/wardens-tally.md, #903) ---
+    //
+    // Read once each time a town or castle dungeon menu opens, through WardensTallySettingsProvider's one cached settings
+    // reference, so it needs no restart. GroupOrder 80 is used by no other group (79 is Inn Rounds; 100 is Map Tools).
+    // A new setting, so the default (on) reaches every install.
+
+    [SettingPropertyGroup("World/Warden's Tally", GroupOrder = 80)]
+    [SettingPropertyBool("Show Warden's Tally", Order = 0, RequireRestart = false,
+        HintText = "In the dungeon menu of a town or castle, adds under the engine's own line how many prisoners the dungeon holds against its capacity, how many of them are lords, each lord's chance to escape each day with the terms behind it (your clan holding him halves it; the governor's perks change it), and a line for a lord whose realm has a War of the Ring escape boost, or whom nothing lets escape. It only shows the odds the game already uses and changes no rule. Applies the next time the menu opens. Default: on.")]
+    public bool WardensTallyEnabled { get; set; } = TAOM.Features.WardensTally.WardensTallySettingsProvider.DefaultEnabled;
     // --- Sworn Anew (docs/features/sworn-anew.md, #869) ---
     //
     // Read at each conversation question (the diplomacy option and the ruler's prisoner line), through

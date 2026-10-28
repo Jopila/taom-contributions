@@ -40,6 +40,7 @@ using TAOM.Features.RealmBorders;
 using TAOM.Features.LoremastersLine;
 using TAOM.Features.HearthRoll;
 using TAOM.Features.PrisonerBanners;
+using TAOM.Features.WardensTally;
 using TAOM.Features.ReevesLedger;
 using TAOM.Features.SeasonedHosts;
 using TAOM.Features.SwornAnew;
@@ -125,6 +126,8 @@ public class CampaignHotPathSettingsProvidersTests
     [DataRow(typeof(HearthRollSettingsProvider))]
     // Not a hot path: read once per party screen row, when the row is built, never per frame. The accessor still takes the settings once.
     [DataRow(typeof(PrisonerBannersSettingsProvider))]
+    // Not a hot path: read once when a town or castle dungeon menu opens, never per frame. The accessor still takes the settings once.
+    [DataRow(typeof(WardensTallySettingsProvider))]
     // #870: the four switches are read on every hourly tick while a raiding host rides.
     [DataRow(typeof(FireAndTributeSettingsProvider))]
     // #887: read per foreign candidate per AI lord think (Patch114) and per notable per party-hour (TaomVolunteerModel).
@@ -202,6 +205,7 @@ public class CampaignHotPathSettingsProvidersTests
     [DataRow(typeof(LoremastersLineSettingsProvider), typeof(LoremastersLineSettingsProvider))]
     [DataRow(typeof(HearthRollSettingsProvider), typeof(HearthRollSettingsProvider))]
     [DataRow(typeof(PrisonerBannersSettingsProvider), typeof(PrisonerBannersSettingsProvider))]
+    [DataRow(typeof(WardensTallySettingsProvider), typeof(WardensTallySettingsProvider))]
     [DataRow(typeof(IFireAndTributeSettings), typeof(FireAndTributeSettingsProvider))]
     [DataRow(typeof(IUnlookedForAidSettingsProvider), typeof(UnlookedForAidSettingsProvider))]
     [DataRow(typeof(ISwornAnewSettingsProvider), typeof(SwornAnewSettingsProvider))]

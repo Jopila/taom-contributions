@@ -92,5 +92,6 @@ internal static class FeatureModules
         new Features.BanditVoices.BanditVoicesModule(),
         new Features.InnRounds.InnRoundsModule(),
         new Features.TimeAcceleration.TimeAccelerationModule(),
+        new Features.WardensTally.WardensTallyModule(),
     };
 }

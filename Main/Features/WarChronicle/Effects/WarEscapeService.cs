@@ -13,7 +13,8 @@ namespace TAOM.Features.WarChronicle.Effects;
 /// boost adds a second roll at <c>p x (multiplier - 1)</c>. The perk factor is vanilla's relative terms
 /// (the captor's anti-escape perks, the captive's Fleet Footed, the captor leader's Valor) as one number
 /// the adapter reads; at or below zero vanilla's chance is zero, and so is the extra one. It mirrors the
-/// <c>CanHeroBeReleased</c> veto too. Pure: the roll is a parameter.
+/// <c>CanHeroBeReleased</c> veto too. Pure: the roll is a parameter. <see cref="VanillaChance"/> is the one copy of those
+/// constants: the extra roll scales it, and the dungeon menu's Warden's Tally (docs/features/wardens-tally.md) shows it.
 /// </summary>
 public sealed class WarEscapeService
 {
@@ -43,9 +44,9 @@ public sealed class WarEscapeService
     {
         if (snapshot == null || !FiniteFloatValidator.IsFinite(multiplier) || !(multiplier > 1f))
             return false;
-        if (!snapshot.IsAlive || !snapshot.IsPrisoner || snapshot.IsMainHero || snapshot.IsPlayerClan)
+        if (!PassesVanillaGate(snapshot) || snapshot.IsPlayerClan)
             return false;
-        return !snapshot.CaptorInMapEventOrSiege && snapshot.CanBeReleased;
+        return !snapshot.CaptorInMapEventOrSiege;
     }
 
     /// <summary>The probability of the extra roll; 0 for an ineligible lord.</summary>
@@ -54,22 +55,52 @@ public sealed class WarEscapeService
         if (!IsEligible(snapshot, multiplier))
             return 0f;
 
+        var extra = VanillaChance(snapshot) * (multiplier - 1f);
+        return FiniteFloatValidator.IsFinite(extra) ? extra : 0f;
+    }
+
+    /// <summary>
+    /// Vanilla's own daily chance that this lord escapes (<c>DailyHeroTick</c>, v1.5.6 :201-250), the number the
+    /// extra roll scales and the dungeon menu shows (docs/features/wardens-tally.md). 0 when vanilla's gate stops
+    /// it (not a living prisoner, the main hero, the <c>CanHeroBeReleased</c> veto) and when the perk factor is not
+    /// positive. TAOM's own exclusions (a player-clan lord, a captor in a battle or siege) do not apply: they limit the
+    /// extra roll, not vanilla's.
+    /// </summary>
+    public float VanillaChance(PrisonerEscapeSnapshot? snapshot)
+    {
+        if (snapshot == null || !PassesVanillaGate(snapshot))
+            return 0f;
+
         // A positive requirement, so NaN fails: anti-escape perks summing to -1 or less zero vanilla's
         // chance (ExplainedNumber has no floor), and an unset factor (0) fails closed.
-        if (!(snapshot!.EscapeFactor > 0f))
+        if (!(snapshot.EscapeFactor > 0f))
             return 0f;
 
         var chance = BaseChance * snapshot.EscapeFactor;
-        if (snapshot.CaptorIsMobile && !snapshot.CaptorInSettlement)
-        {
-            var healthy = Math.Max(0, Math.Min(HealthyCap, snapshot.CaptorHealthyMembers));
-            chance *= MobileBase - (float)Math.Pow(healthy, MobileExponent);
-        }
-
+        chance *= MobileCaptorTerm(snapshot);
         if (snapshot.PlayerHeld)
             chance *= PlayerHeldFactor;
 
-        var extra = chance * (multiplier - 1f);
-        return FiniteFloatValidator.IsFinite(extra) ? extra : 0f;
+        return FiniteFloatValidator.IsFinite(chance) ? chance : 0f;
+    }
+
+    /// <summary>
+    /// The base chance before the player-held halving and the perk factor: 4%, times the captor's field term
+    /// when a mobile captor is out of settlements. 0 for a null snapshot.
+    /// </summary>
+    public float BaseChanceOf(PrisonerEscapeSnapshot? snapshot) =>
+        snapshot == null ? 0f : BaseChance * MobileCaptorTerm(snapshot);
+
+    private static bool PassesVanillaGate(PrisonerEscapeSnapshot snapshot) =>
+        snapshot.IsAlive && snapshot.IsPrisoner && !snapshot.IsMainHero && snapshot.CanBeReleased;
+
+    // 5 - min(81, healthy)^0.25 for a mobile captor in the field, else 1 (:213-216).
+    private static float MobileCaptorTerm(PrisonerEscapeSnapshot snapshot)
+    {
+        if (!snapshot.CaptorIsMobile || snapshot.CaptorInSettlement)
+            return 1f;
+
+        var healthy = Math.Max(0, Math.Min(HealthyCap, snapshot.CaptorHealthyMembers));
+        return MobileBase - (float)Math.Pow(healthy, MobileExponent);
     }
 }

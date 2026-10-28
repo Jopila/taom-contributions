@@ -1315,3 +1315,15 @@ The map profiler's menu probe on `GameMenuVM.OnFrameTick` was excluded from Patc
 - **Why missed:** the exclusion was copied from the earlier profiler-only targets, and its stated reason was never checked against the callers.
 - **Prevent:** when a shield exclusion is justified, trace where an unshielded exception lands, and write that path and the parity reason in the feature doc's per-target table (the 2026-10-02 per-target table rule). A method that stays shielded beside it gets its own row, naming which patches a strip removes.
 - **Source:** #1019; [rca-enlistment-board-render-and-probes-2026-10-26.md](../rca-enlistment-board-render-and-probes-2026-10-26.md).
+### Before patching a menu's private init, use GameMenuOpened (#903, 2026-10-28)
+Warden's Tally first shipped as a Harmony postfix on the private `PlayerTownVisitCampaignBehavior.town_keep_dungeon_on_init`.
+`GameMenu.RunOnInit` (v1.5.6) runs the menu's init, copies its `MenuTitle`, and then raises the public
+`CampaignEvents.GameMenuOpened` on the same `MenuCallbackArgs`, so a listener sees everything the init wrote, with no patch
+on a private method that an engine bump can rename.
+- **Why missed:** the plan copied the patch target from the spec and went straight to rung 4 of the reuse ladder; nobody
+  read `RunOnInit` to see what fires around the init.
+- **Prevent:** before a patch on any menu init or menu consequence, read `GameMenu.RunOnInit` and the option runners for the
+  campaign event they raise; prefer that event, and pin the order with an IL binding test
+  (`WardensTallyBindingTests`). Also: a menu text with no attributes is re-rendered every frame by
+  `GameMenuVM.IsMenuTextChanged`, so set a menu text variable as a rendered string, not a nested `TextObject`.
+- **Source:** [rca-wardens-tally-2026-10-28.md](../rca-wardens-tally-2026-10-28.md).

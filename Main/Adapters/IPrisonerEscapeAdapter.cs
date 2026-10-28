@@ -3,8 +3,8 @@ using System.Collections.Generic;
 namespace TAOM.Adapters;
 
 /// <summary>
-/// The engine side of the War Chronicle's extra prisoner-escape roll: reads the captured lords of some
-/// kingdoms, supplies the random roll and frees a lord, so the services never touch <c>Hero</c>,
+/// The engine side of the War Chronicle's extra prisoner-escape roll and the dungeon menu's escape odds: reads the
+/// captured lords of some kingdoms or of one dungeon, supplies the random roll and frees a lord, so the services never touch <c>Hero</c>,
 /// <c>PartyBase</c> or <c>EndCaptivityAction</c> (ADR-007). Keyed by hero StringId.
 /// </summary>
 public interface IPrisonerEscapeAdapter
@@ -14,6 +14,13 @@ public interface IPrisonerEscapeAdapter
     /// Empty with no campaign or no kingdom ids.
     /// </summary>
     IReadOnlyList<PrisonerEscapeSnapshot> GetCapturedLords(IReadOnlyCollection<string> kingdomIds);
+
+    /// <summary>
+    /// The dungeon of the settlement with this StringId (a town or castle): the prisoners held, the capacity and each
+    /// prisoner lord with his escape snapshot and perk terms, for the dungeon menu's Warden's Tally line. Null with no
+    /// campaign, an empty or unknown id, or a settlement with no party.
+    /// </summary>
+    DungeonReading? ReadDungeon(string settlementId);
 
     /// <summary>The engine's random float in [0, 1) (<c>MBRandom.RandomFloat</c>).</summary>
     float NextRoll();

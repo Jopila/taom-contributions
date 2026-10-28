@@ -69,9 +69,10 @@ Vanilla's value already includes its low-fief boost (see **Why This Exists**), s
 
 `WarEscapeDailyPass` (`Effects/WarEscapeDailyPass.cs`) finds every kingdom whose `PrisonerEscape` multiplier is above 1, asks `IPrisonerEscapeAdapter` (`Main/Adapters/PrisonerEscapeAdapter.cs`) for the captured lords of those kingdoms' clans, and gives each eligible lord one extra roll. `WarEscapeService` (`Effects/WarEscapeService.cs`) decides:
 
-- **Chance:** the extra chance is `p x (multiplier - 1)`. `p` starts at 0.04, is multiplied by `5 - min(81, healthy members)^0.25` when the captor is a mobile party that is not in a settlement, by 0.5 when the player holds the prisoner (the captor is the main party, or a settlement or the current settlement owned by the player clan), and by the perk factor. This mirrors vanilla's private daily roll in `PrisonerReleaseCampaignBehavior` (v1.5.5 :201-250, unchanged from v1.5.4). The perk factor is vanilla's relative terms, which the adapter reads with vanilla's own calls under vanilla's conditions: the governor's Sweet Talker, Dungeon Architect and Mounted Patrols for a town or castle captor; for a mobile captor the captive's Fleet Footed, the party's Mounted Patrols, Ransom Broker and Keen Sight, and the Valor of the party's or its army's leader. It is `1 + the sum of those factors`; at or below 0 vanilla's chance is 0, and so is the extra one, so a captor's anti-escape perks hold for the boost too. Using vanilla's perk and Valor factor for the extra roll was decided by the maintainer 2026-10-14: keep.
+- **Chance:** the extra chance is `p x (multiplier - 1)`. `p` starts at 0.04, is multiplied by `5 - min(81, healthy members)^0.25` when the captor is a mobile party that is not in a settlement, by 0.5 when the player holds the prisoner (the captor is the main party, or a settlement or the current settlement owned by the player clan), and by the perk factor. This mirrors vanilla's private daily roll in `PrisonerReleaseCampaignBehavior` (v1.5.6 :201-250, unchanged from v1.5.4). The perk factor is vanilla's relative terms, which the adapter reads with vanilla's own calls under vanilla's conditions: the governor's Sweet Talker, Dungeon Architect and Mounted Patrols for a town or castle captor; for a mobile captor the captive's Fleet Footed, the party's Mounted Patrols, Ransom Broker and Keen Sight, and the Valor of the party's or its army's leader. It is `1 + the sum of those factors`; at or below 0 vanilla's chance is 0, and so is the extra one, so a captor's anti-escape perks hold for the boost too. Using vanilla's perk and Valor factor for the extra roll was decided by the maintainer 2026-10-14: keep. These constants live once, in `WarEscapeService.VanillaChance` (vanilla's gate, then the base, mobile and player-held terms times the perk factor); `ExtraChance` is that number times `multiplier - 1`, so the dungeon menu's Warden's Tally ([wardens-tally.md](wardens-tally.md)) can show the same chance without a second copy.
 - **Exclusions:** a lord is skipped when not alive, not a prisoner, the main hero, or in the player clan; when the captor is in a map event or a siege (these two are TAOM's own exclusions, stricter than vanilla); when vanilla's `CanHeroBeReleased` veto says no (the adapter fails closed if there is no event dispatcher); when the perk factor is not above 0; and when the multiplier is not finite or not above 1. Eliminated kingdoms are not scanned.
 - **Effect:** `IPrisonerEscapeAdapter.Escape` re-finds the hero and calls `EndCaptivityAction.ApplyByEscape`. A throwing read or escape is logged and skipped.
+- **Shown to the player:** the town and castle dungeon menus add each prisoner lord's daily chance, the terms behind it and, for a lord of a boosted kingdom, his combined chance `1 - (1 - p) x (1 - extra)` ([wardens-tally.md](wardens-tally.md), #903). The boost line follows the pass: it appears only on a peer that runs `WarEscapeDailyPass`, and a co-op client shows none. The perk terms come from the same `ExplainedNumber` that gives `EscapeFactor` (`PrisonerEscapeAdapter.EscapeTerms`), so the lines and the factor cannot differ.
 
 ### The rally
 
@@ -327,7 +328,7 @@ Use the War of the Ring test mode (Phase 1 on day 1, Phase 2 on day 3) on a new 
 | `Main/_Module/ModuleData/war_chronicle/war_chronicle.json`, `Main/_Module/ModuleData/taom_wotr_strings.xml` | Event data and its English text |
 | `Main/Features/WarChronicle/WarChronicleIoC.cs`, `WarChronicleSettingsProvider.cs` | Registrations, MCM provider |
 | `Main/Adapters/KingdomWarSnapshotAdapter.cs`, `KingdomWarSnapshot.cs` | Kingdom read model |
-| `Main/Adapters/PrisonerEscapeAdapter.cs`, `PrisonerEscapeSnapshot.cs` | Captured-lord read model and the escape call |
+| `Main/Adapters/PrisonerEscapeAdapter.cs`, `PrisonerEscapeSnapshot.cs`, `DungeonReading.cs` | Captured-lord read model, the escape call and the per-dungeon read the dungeon menu uses |
 | `Main/Features/TroopProgression/VolunteerProductionService.cs`, `Models/TaomVolunteerModel.cs` | Volunteer consumer, towns and villages |
 | `Main/Features/CastleRecruitment/CastleRecruitmentService.cs`, `Hooks/CastleNotableMaintainer.cs` | Volunteer consumer, castles |
 | `Main/_Module/ModuleData/war_chronicle/rally.json` | Rally data |
@@ -355,7 +356,7 @@ Counts measured by grepping `[TestMethod]` and `[DataTestMethod]` attribute line
 | Class | File | Tests |
 |---|---|---|
 | `WarEffectServiceTests` | `TAOM.Tests/Features/WarChronicle/Effects/` | 33 |
-| `WarEscapeServiceTests` | same | 32 |
+| `WarEscapeServiceTests` | same | 45 |
 | `WarEscapeDailyPassTests` | same | 13 |
 | `RallyServiceTests` | `.../Rally/` | 42 |
 | `RallyConfigProviderTests` | same | 29 |
@@ -390,7 +391,7 @@ Counts measured by grepping `[TestMethod]` and `[DataTestMethod]` attribute line
 | `ArmyTargetFocusScoringTests` | same | 7 |
 | `MomentumAwardServiceTests` | `TAOM.Tests/Features/WarOfTheRingMomentum/` | 9 |
 | `WarOfTheRingPhaseDayTests` | `TAOM.Tests/Features/Diplomacy/` | 5 |
-| `PrisonerEscapeAdapterTests` | `TAOM.Tests/Adapters/` | 4 |
+| `PrisonerEscapeAdapterTests` | `TAOM.Tests/Adapters/` | 9 |
 | `KingdomWarSnapshotAdapterTests` | same | 11 |
 
 `WarChronicleSettingsProvider` is also a row in `CampaignHotPathSettingsProvidersTests`, and `CastleRecruitmentServiceTests` covers the castle consumer. The analyzer has 90 Python tests (`def test_` count) in `tools/tests/test_analyze_war_ledger.py`, the load-marker cases among them (`LoadMarkerTests`).

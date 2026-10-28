@@ -4077,6 +4077,16 @@
 	<!-- harvested by tools/harvest_literal_loc_keys.py -->
 	<!-- InnRoundsAdapter -->
 	<string id="taom_round_xp_notice" text="{=taom_round_xp_notice}Standing a round teaches you a little about winning a room (+{XP} {SKILL_NAME} experience)." />
+	<!-- harvested by tools/harvest_literal_loc_keys.py -->
+	<!-- WardensTally -->
+	<string id="taom_wt_boost" text="{=taom_wt_boost}{NAME}: {CHANCE}% a day with the war's escape boost." />
+	<string id="taom_wt_veto" text="{=taom_wt_veto}{NAME} cannot escape." />
+	<string id="taom_wt_held_lord" text="{=taom_wt_held_lord}Held: {HELD} of {CAPACITY}, 1 of them a lord." />
+	<string id="taom_wt_held_lords" text="{=taom_wt_held_lords}Held: {HELD} of {CAPACITY}, {LORDS} of them lords." />
+	<string id="taom_wt_odds" text="{=taom_wt_odds}Each lord's daily chance to escape: {CHANCE}%" />
+	<string id="taom_wt_base" text="{=taom_wt_base}Base chance: {CHANCE}%" />
+	<string id="taom_wt_halved" text="{=taom_wt_halved}Held by your clan: halved" />
+	<string id="taom_wt_term" text="{=taom_wt_term}{DESCRIPTION}: {CHANGE}% of the base chance" />
 
 	<!-- Vanilla v1.5.6 HeroHelper.GetLastSeenText ids that no installed module defines. Delete these two rows when vanilla defines
 	     the ids: the GameText merge keeps the later module's attributes, so TAOM's row would replace vanilla's text and key. -->

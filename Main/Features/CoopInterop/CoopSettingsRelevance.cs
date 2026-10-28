@@ -220,6 +220,8 @@ public static class CoopSettingsRelevance
         "EnableUnhappyCompanionTint",
         // Prisoner Banners (#902): the clan and kingdom banners and the noble icon on a captive hero's party screen row, drawn on this client only.
         "PrisonerBannersEnabled",
+        // Warden's Tally (#903): the held count, escape odds and boost lines added to a dungeon menu's text, drawn on this client only. It reads the odds the engine already uses and changes no rule.
+        "WardensTallyEnabled",
         // Campaign map performance (Battle Load Diagnostics page, Map Performance): whether hidden settlement
         // nameplates are skipped each frame (Patch104), and whether a covered map releases its render targets and how
         // often (a layer-event handler, no patch). Both change what this client draws and how much graphics memory it holds, never the campaign.
