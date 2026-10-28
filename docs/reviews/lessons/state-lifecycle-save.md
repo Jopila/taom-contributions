@@ -1259,3 +1259,9 @@ Enlistment kept a defender's encounter inside the commander's town after a repul
 - **Why missed:** the plan checked that the object could be reused, not what it still held, and the guard was placed by reading the step list, not by asking which earlier step removes its condition.
 - **Prevent:** before reusing an engine object, list its saved fields and clear or verify each one; before placing a guard, list the steps that run ahead of it and check whether any of them removes the state the guard tests. Test with a merged soldier, not only an unmerged one.
 - **Source:** #1021, `docs/reviews/rca-enlistment-encounter-exits-2026-10-26.md`.
+
+### Before a migration for a renamed saved id, find out whether any save can hold it (Ered Luin careers, 2026-10-28)
+Codex rated the career rename `shieldguard_of_belegost` -> `hewer_of_belegost` HIGH: a save with the old id would load with an empty career. The data-flow lens showed no save could hold it: the career was in no release tag, the only session on the deployed build chose it but logged no `SyncData`, and the newest save predated the build.
+- **Why missed:** the code path was traced (correctly) without asking whether the input can exist.
+- **Prevent:** for a renamed persisted id, check the release tags (`git tag --contains <commit>`), the debug log of each session on a deployed build (a `SyncData` line means a save), and the save folder's timestamps before writing a migration or an alias. A path no save can reach is a known limitation; the general unknown-id handling gets its own issue (#1046).
+- **Source:** [rca-ered-luin-two-handed-career-2026-10-28.md](../rca-ered-luin-two-handed-career-2026-10-28.md) finding 1.

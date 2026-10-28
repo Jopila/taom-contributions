@@ -11,6 +11,7 @@ internal static class CareerEquipmentRosterIds
             CareerArchetype.Infantry => "infantry",
             CareerArchetype.Ranged   => "ranged",
             CareerArchetype.Cavalry  => "cavalry",
+            CareerArchetype.TwoHanded => "twohanded",
             _                        => "infantry",
         };
         return $"player_career_{cultureId}_{archetypeToken}_{(isFemale ? "f" : "m")}";

@@ -333,21 +333,22 @@ A keystone choice can shorten the global cooldown for the next activation via a 
 
 ### Starting Equipment Override (per-archetype)
 
-After the culture-default starting roster is applied at `OnCharacterCreationFinalize`, the player's career archetype drives a second roster application that overwrites the loadout. The archetype is one of three values:
+After the culture-default starting roster is applied at `OnCharacterCreationFinalize`, the player's career archetype drives a second roster application that overwrites the loadout. The archetype is one of four values:
 
 | Archetype | Weapons | Armor |
 |-----------|---------|-------|
 | **Ranged** | bow + arrows + one-handed sidearm (Isengard, Erebor and Ered Luin: crossbow + bolts; Harad, Abanissa and Shaghana: javelins + shield) | the culture's lowest troop body + legs (Isengard and Mordor: their lowest uruk armour) |
 | **Cavalry** | polearm + shield + sidearm + horse + harness (Ered Luin has no cavalry career, so no cavalry kit) | the same |
 | **Infantry** | one-handed weapon + shield + polearm (Dol Guldur: two-handed axe) | the same |
+| **TwoHanded** | two-handed axe + throwing axe, no one-handed weapon, shield or polearm (only Ered Luin's Mattock Hewer uses it so far; Ered Luin's mattock line carries the throwing axe from the Mattock Hewer, level 16, upward) | the same |
 
 Since #629 every weapon and armour item is gear the culture's lowest troops carry, so a career never starts
-better equipped than the troops it recruits, and a culture's three archetypes share their armour. The pick
+better equipped than the troops it recruits, and a culture's archetypes share their armour. The pick
 rule is in [starting-equipment-tuning.md](starting-equipment-tuning.md) "Career kits".
 
-**Single source of truth:** [`CareerSystemIoC.GetCareerArchetypeMap()`](../../Main/Features/CareerSystem/CareerSystemIoC.cs) maps each careerId to a `CareerArchetype`. The same dictionary is consumed by the ability executor registry (Infantry/Ranged/Cavalry executors) and by [`ICareerArchetypeService`](../../Main/Features/CareerSystem/ICareerArchetypeService.cs). Cached in a static field — one allocation per app lifetime.
+**Single source of truth:** [`CareerSystemIoC.GetCareerArchetypeMap()`](../../Main/Features/CareerSystem/CareerSystemIoC.cs) maps each careerId to a `CareerArchetype`. The same dictionary is consumed by the ability executor registry (Infantry/Ranged/Cavalry executors; a TwoHanded career runs the Infantry executor) and by [`ICareerArchetypeService`](../../Main/Features/CareerSystem/ICareerArchetypeService.cs). Cached in a static field, one allocation per app lifetime.
 
-**Roster ID convention:** `player_career_{cultureId}_{infantry|ranged|cavalry}_{f|m}`. Built by [`CareerEquipmentRosterIds.Build`](../../Main/Features/CharacterCreation/CareerEquipmentRosterIds.cs), looked up via `MBObjectManager.GetObject<MBEquipmentRoster>`. Rosters are authored in [`Main/_Module/ModuleData/equipmentsets/taom_career_starting_equipment.xml`](../../Main/_Module/ModuleData/equipmentsets/taom_career_starting_equipment.xml).
+**Roster ID convention:** `player_career_{cultureId}_{infantry|ranged|cavalry|twohanded}_{f|m}`. Built by [`CareerEquipmentRosterIds.Build`](../../Main/Features/CharacterCreation/CareerEquipmentRosterIds.cs), looked up via `MBObjectManager.GetObject<MBEquipmentRoster>`. Rosters are authored in [`Main/_Module/ModuleData/equipmentsets/taom_career_starting_equipment.xml`](../../Main/_Module/ModuleData/equipmentsets/taom_career_starting_equipment.xml).
 
 **Graceful fallback:** When no roster exists for a given (culture, archetype, gender) combination, [`CareerStartingEquipmentService`](../../Main/Features/CharacterCreation/CareerStartingEquipmentService.cs) logs a warning and leaves the already-applied culture default in place. This lets new cultures ship incrementally without code changes.
 
@@ -363,11 +364,11 @@ Same fallback policy as the runtime grant: missing roster → log + leave the yo
 ### How to add a new culture's career rosters
 
 1. Append 6 rosters to [`taom_career_starting_equipment.xml`](../../Main/_Module/ModuleData/equipmentsets/taom_career_starting_equipment.xml),
-   one per (archetype, gender), each with `culture="Culture.<id>"`: `Item0`-`Item2`, `Body`, `Leg` (any
-   existing ids as placeholders), and for cavalry `Horse` + `HorseHarness`, which are hand-kept (a dwarf
+   one per (archetype, gender), each with `culture="Culture.<id>"`: `Item0`-`Item2`, `Body`, `Leg` (a
+   `twohanded` roster has no `Item2`; any existing ids as placeholders), and for cavalry `Horse` + `HorseHarness`, which are hand-kept (a dwarf
    culture only a war ram, and never a Horse without a harness). `Equipment.FillFrom` replaces the whole
    battle set, so ranged and infantry rosters simply omit the mount.
-2. Run `python tools/generate_career_kits.py --apply`: it fills the five slots from the culture's troops by
+2. Run `python tools/generate_career_kits.py --apply`: it fills the kit's slots from the culture's troops by
    the rule in [starting-equipment-tuning.md](starting-equipment-tuning.md) "Career kits" (lowest troop gear,
    non-vanilla preferred up to level 21, bows and crossbows by lowest skill requirement). A culture whose sidearm or
    second weapon is not a sword or a polearm gets a row in the tool's `SIDEARM`/`SECOND` tables first, a ranged
@@ -409,11 +410,11 @@ Same fallback policy as the runtime grant: missing roster → log + leave the yo
 | `Main/Features/CareerSystem/Models/` (3 files) | TaomAgentApplyDamageModel, TaomAgentStatCalculateModel, TaomClanTierModel |
 | `Main/Adapters/ICareerHeroAdapter.cs` | Wraps Hero for service boundary |
 | `Main/Adapters/ICareerHeroAdapterFactory.cs` | Factory for GameModel boundary |
-| `Main/Features/CareerSystem/Domain/CareerArchetype.cs` | `enum CareerArchetype { Infantry, Ranged, Cavalry }` |
+| `Main/Features/CareerSystem/Domain/CareerArchetype.cs` | `enum CareerArchetype { Infantry, Ranged, Cavalry, TwoHanded }` |
 | `Main/Features/CareerSystem/CareerArchetypeService.cs` | careerId → archetype lookup; backed by static map in `CareerSystemIoC` |
 | `Main/Features/CharacterCreation/CareerStartingEquipmentService.cs` | Applies archetype roster at end of CC over the culture default |
 | `Main/Features/CharacterCreation/CareerEquipmentRosterIds.cs` | Roster ID builder: `player_career_{culture}_{archetype}_{f\|m}` |
-| `Main/_Module/ModuleData/equipmentsets/taom_career_starting_equipment.xml` | Per-(culture, archetype, gender) rosters: 154 across 26 cultures, every playable culture (Ered Luin's four cover its ranged and infantry careers only), each culture's lowest troop gear (#629; the last nine on 2026-10-23 with placeholder mounts) |
+| `Main/_Module/ModuleData/equipmentsets/taom_career_starting_equipment.xml` | Per-(culture, archetype, gender) rosters: 156 across 26 cultures, every playable culture (Ered Luin's six cover its ranged, infantry and two-handed careers only), each culture's lowest troop gear (#629; the last nine on 2026-10-23 with placeholder mounts) |
 
 ## Dependencies
 
@@ -623,7 +624,7 @@ caller). Any new code path that assigns a career to a hero who may already have 
 explicitly whether the old choices should survive.
 
 ## Changelog
-- 2026-10-27 ([ered-luin.md](ered-luin.md)): Ered Luin's three careers, cloned by `tools/insert_new_faction_careers.py` from Erebor's foot careers: Warden of Thorin's Halls (`warden_of_thorins_halls`) and Broadbeam Shield-guard (`shieldguard_of_belegost`), both Infantry and both from `ironguard`, and Firebeard Arbalester (`nogrod_arbalester`, Ranged, from `crossbow_master`). `ram_rider` is not cloned, because dwarves do not ride. The tool can now clone one source more than once. The two infantry careers share their numbers and their starting kit.
+- 2026-10-27 ([ered-luin.md](ered-luin.md)): Ered Luin's three careers, cloned by `tools/insert_new_faction_careers.py` from Erebor's foot careers: Warden of Thorin's Halls (`warden_of_thorins_halls`, Infantry) and Mattock Hewer of Belegost (`hewer_of_belegost`, TwoHanded; first called Broadbeam Shield-guard, `shieldguard_of_belegost`, and replaced on 2026-10-28, #1045), both from `ironguard`, and Firebeard Arbalester (`nogrod_arbalester`, Ranged, from `crossbow_master`). `ram_rider` is not cloned, because dwarves do not ride. The tool can now clone one source more than once. The two foot careers share their numbers but not their starting kit.
 - 2026-10-26 (#1005): the `CharacterDeveloper.SkillNameText`/`.DescriptionText` brush cleanup (RCA finding #3) is done.
 - 2026-10-14 (#769, engine steps E4-E7 + E12): Career forks. One take/refund rule (`CareerChoiceRules`) with a `ChoiceLockReason` shown as a tooltip line; `max_picks` makes a fork with lock on leave; `point_levels` and "Next point at level N"; paid retrain and a gold charge for leaving a career that holds a fork pick (the switch now goes through `CareerCreationHandler.OnCareerSelected`); `tree_version` migration on session launch, stamped only by `CareerTreeVersion.Stamp`. `ICareerSwitchService`, the +/- group commands and `ButtonsVisible` are deleted. Inert until a career ships the attributes.
 - 2026-10-08 (#768): The PartySize passive reached every party the owner's clan touched (owner-first), and a pick stayed invisible until an unrelated roster event because `PartyBase.PartySizeLimit` caches on `MemberRoster.VersionNo`. `TaomPartySizeModel` now keys the passive on `party.LeaderHero` only, `CareerPassiveService.RefreshCache` calls `IPartySizeCacheInvalidator.InvalidateLedBy` with the union of the previous and new cache's hero ids (plus their army leader parties), and the call moved after the last `AddFactor` so the AI lord multiplier no longer amplifies the flat count. The Rohan Stangard tier 3 pip reads "Your company swells with volunteers" because it no longer reaches a garrison. `taom.career_perks` also prints the engine-cached limit.

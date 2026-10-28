@@ -2,8 +2,8 @@
 """Derive every career starting kit from the troops that culture actually fields (#629).
 
 A career kit is the gear the culture's LOWEST troops carry, so a career never starts better
-equipped than the regular troops it recruits. For each of the five kit slots (Item0-Item2, Body,
-Leg) of each `player_career_{culture}_{archetype}_{m|f}` roster:
+equipped than the regular troops it recruits. For each kit slot its layout names (Item0-Item2, Body,
+Leg; the twohanded layout has no Item2) of each `player_career_{culture}_{archetype}_{m|f}` roster:
 
 1. candidates are the items of that slot's class that a non-hero troop of the culture carries in
    a battle set (`troops/troops_*.xml`: inline `EquipmentRoster`s that are not `civilian="true"`,
@@ -18,7 +18,7 @@ Leg) of each `player_career_{culture}_{archetype}_{m|f}` roster:
 
 An item is vanilla when its mesh, or any crafting piece's mesh, is one vanilla SandBoxCore,
 Native or SandBox items or pieces use. Horse and HorseHarness are never touched. The file's
-comments, formatting and line endings are kept: only the five slot ids change.
+comments, formatting and line endings are kept: only the kit slot ids change.
 
 USAGE
 -----
@@ -58,12 +58,15 @@ LAYOUT = {
     "ranged": ("LAUNCHER", "AMMO", "SIDEARM"),
     "cavalry": ("TwoHandedPolearm", "Shield", "SIDEARM"),
     "infantry": ("SIDEARM", "Shield", "SECOND"),
+    "twohanded": ("TwoHandedAxe", "THROWN", None),   # None: no third weapon, the roster has no Item2
 }
+ARCH = "|".join(LAYOUT)   # the archetype alternation both roster regexes use
 SIDEARM = {"erebor": "OneHandedAxe",   # dwarves carry axes
            "eredluin": "OneHandedAxe", # so do the Blue Mountains dwarves
            "empire": "OneHandedAxe",   # Dunland has no non-vanilla one-handed sword
            "rhudaur": "OneHandedAxe"}  # the hill-men carry Dunland's axes, no sword (#978)
 SECOND = {"dolguldur": "TwoHandedAxe"}
+THROWN_CLASS = "ThrowingAxe"   # the THROWN token: the throwing weapon class; Ered Luin's Mattock Hewer throws one
 RANGED = {"isengard": ("Crossbow", "Bolts"),   # Uruk Crossbow
           "erebor": ("Crossbow", "Bolts"),     # Crossbow Master
           "eredluin": ("Crossbow", "Bolts"),   # Firebeard Arbalester; no cavalry career (no rams)
@@ -82,7 +85,7 @@ KIT_SOURCE = {"battania": "khuzait",            # Khand fields Rhun's troops
 ARMOUR = ("BodyArmor", "LegArmor")
 LAUNCHERS = ("Bow", "Crossbow")
 
-ROSTER_RE = re.compile(r'(<EquipmentRoster id="player_career_([a-z]+)_(ranged|cavalry|infantry)_[mf]"[^>]*>)(.*?)(</EquipmentRoster>)', re.S)
+ROSTER_RE = re.compile(rf'(<EquipmentRoster id="player_career_([a-z]+)_({ARCH})_[mf]"[^>]*>)(.*?)(</EquipmentRoster>)', re.S)
 EQ_RE = re.compile(r'(<Equipment slot="(Item0|Item1|Item2|Body|Leg)" id="Item\.)([^"]+)(")')
 
 
@@ -113,9 +116,10 @@ def slot_classes(culture: str, archetype: str) -> dict[str, str]:
     culture = KIT_SOURCE.get(culture, culture)
     launcher, ammo = RANGED.get(culture, ("Bow", "Arrows"))
     resolve = {"SIDEARM": SIDEARM.get(culture, "OneHandedSword"), "SECOND": SECOND.get(culture, "TwoHandedPolearm"),
-               "LAUNCHER": launcher, "AMMO": ammo}
+               "LAUNCHER": launcher, "AMMO": ammo, "THROWN": THROWN_CLASS}
     weapons = [resolve.get(k, k) for k in LAYOUT[archetype]]
-    return {"Item0": weapons[0], "Item1": weapons[1], "Item2": weapons[2], "Body": "BodyArmor", "Leg": "LegArmor"}
+    kit = {f"Item{i}": w for i, w in enumerate(weapons) if w}
+    return {**kit, "Body": "BodyArmor", "Leg": "LegArmor"}
 
 
 def _bare(value: str | None) -> str:
@@ -237,8 +241,8 @@ def derive_kits(sources: Sources) -> dict[tuple[str, str], dict[str, str | None]
 
 
 def apply_kits(text: str, kits: dict[tuple[str, str], dict[str, str | None]]) -> tuple[str, int]:
-    """(new text, ids changed). Only the five slot ids move; a roster with no kit, a slot with no
-    pick, or a roster missing one of the five slots is an error."""
+    """(new text, ids changed). Only the kit's slot ids move; a roster with no kit, a slot with no
+    pick, a slot its layout lacks, or a roster missing a slot its kit has is an error."""
     changed = 0
 
     def roster_sub(m: re.Match) -> str:
@@ -252,6 +256,8 @@ def apply_kits(text: str, kits: dict[tuple[str, str], dict[str, str | None]]) ->
         def eq_sub(em: re.Match) -> str:
             nonlocal changed
             slot = em.group(2)
+            if slot not in kit:
+                raise CareerKitError(f"{culture}/{archetype}: roster carries {slot}, which its layout lacks")
             new = kit.get(slot)
             if not new:
                 klass = slot_classes(culture, archetype)[slot]
@@ -263,7 +269,7 @@ def apply_kits(text: str, kits: dict[tuple[str, str], dict[str, str | None]]) ->
             return em.group(1) + new + em.group(4)
 
         body = EQ_RE.sub(eq_sub, m.group(4))
-        missing = set(SLOTS) - seen
+        missing = set(kit) - seen
         if missing:
             raise CareerKitError(f"{culture}/{archetype}: roster lacks slot(s) {sorted(missing)}")
         return m.group(1) + body + m.group(5)
@@ -272,18 +278,27 @@ def apply_kits(text: str, kits: dict[tuple[str, str], dict[str, str | None]]) ->
 
 
 def verify(career_file: Path, kits) -> list[str]:
-    """One line per roster slot whose id differs from the rule's pick."""
+    """One line per roster slot whose id differs from the rule's pick, per slot the kit has and the
+    roster lacks, and per `player_career_` roster id that matches no culture and archetype."""
     drift = []
     root = ET.fromstring(gk.read_xml(career_file)[0].encode("utf-8"))
     for roster in root.iter("EquipmentRoster"):
-        m = re.fullmatch(r"player_career_([a-z]+)_(ranged|cavalry|infantry)_[mf]", roster.get("id") or "")
+        rid = roster.get("id") or ""
+        m = re.fullmatch(rf"player_career_([a-z]+)_({ARCH})_[mf]", rid)
         if not m:
+            if rid.startswith("player_career_"):
+                drift.append(f"{rid}: matches no culture and archetype of LAYOUT ({ARCH}), so no rule checks it")
             continue
         kit = kits.get((m.group(1), m.group(2)), {})
+        present = set()
         for eq in roster.iter("Equipment"):
             slot = eq.get("slot")
-            if slot in SLOTS and _bare(eq.get("id")) != kit.get(slot):
-                drift.append(f"{roster.get('id')} {slot}: file {_bare(eq.get('id'))}, rule {kit.get(slot)}")
+            if slot in SLOTS:
+                present.add(slot)
+                if _bare(eq.get("id")) != kit.get(slot):
+                    drift.append(f"{rid} {slot}: file {_bare(eq.get('id'))}, rule {kit.get(slot)}")
+        for slot in sorted(set(kit) - present):
+            drift.append(f"{rid} {slot}: missing from the file, rule {kit[slot]}")
     return drift
 
 
@@ -300,10 +315,10 @@ def main() -> int:
         kits = derive_kits(sources)
         text, had_bom = gk.read_xml(CAREER_FILE)
         new_text, changed = apply_kits(text, kits)
-    except CareerKitError as exc:
+        drift = verify(CAREER_FILE, kits)
+    except (CareerKitError, ET.ParseError, OSError) as exc:
         print("ERROR:", exc)
         return 2
-    drift = verify(CAREER_FILE, kits)
     for line in drift:
         print(("DRIFT: " if args.verify else "change: ") + line)
     if args.verify:

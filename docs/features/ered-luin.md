@@ -40,7 +40,7 @@ The same recipe and the same generators, extended rather than copied:
 | Melee band | `tools/melee_ladders.json` | `eredluin` offset 0.04, a step under Erebor's 0.05 |
 | Culture, notables, wanderers, villager and caravan templates, education templates, rosters | `tools/promote_borrowed_cultures.py --only eredluin` | A target cut from Erebor (`src_short="er"`: Erebor's notable keys are `aom_er_*`) |
 | Kingdom, clans, lords, heroes | `tools/generate_new_faction_kingdoms.py --only eredluin` | A `dwarf` lord template pair (Erebor's Náin and Dísa) |
-| Narrative menus, careers, starting gear | `insert_new_faction_cc_menus.py`, `insert_new_faction_careers.py`, `generate_char_creation_equipment.py`, `generate_starter_kit.py`, `wire_starter_kit_rosters.py`, `generate_career_kits.py` | Authored dwarf text on Erebor's mechanics; Erebor's Ironguard cloned twice and its Crossbow Master once, no cavalry career; Erebor's gear with no mount ("Careers and character creation") |
+| Narrative menus, careers, starting gear | `insert_new_faction_cc_menus.py`, `insert_new_faction_careers.py`, `generate_char_creation_equipment.py`, `generate_starter_kit.py`, `wire_starter_kit_rosters.py`, `generate_career_kits.py` | Authored dwarf text on Erebor's mechanics; Erebor's Ironguard cloned twice (one-handed and two-handed) and its Crossbow Master once, no cavalry career; Erebor's gear with no mount ("Careers and character creation") |
 | Tables keyed on culture | hand edits to each table and its compiled C# twin | Erebor's row wherever the rule is a dwarf one ("Tables keyed on culture") |
 
 **A middling realm.** The ruling House of Borin is tier 5, the Broadbeams and the Firebeards tier 4
@@ -136,7 +136,9 @@ Using it for Thorin's Halls is an open decision (Known gaps).
 - **Axe line:** Delver (basic, L6) to Axeman, Hearth-guard, Hall Warden, Veteran Hall Warden and
   Warden of Thorin's Halls (L31). Axe and shield.
 - **Mattock line:** Axeman to Mattock Hewer (L16), Mattock Warrior and Veteran Mattock Warrior
-  (L26). Two-handed axes and the Iron Hills mattocks, no shield.
+  (L26). Two-handed axes and the Iron Hills mattocks, no shield; each carries a throwing axe
+  (`southern_throwing_axe_1_t4`, vanilla's Tribesman Throwing Axe, the one Erebor's troops throw) in
+  Item1 of both rosters. No other Ered Luin line throws.
 - **Bowmen:** Delver to Bowman (L11), Veteran Bowman and Blue Mountain Bowman (L21).
 - **Noble** (elite basic, L11) splits into the **Broadbeams** (Broadbeam Guard, Broadbeam
   Shield-guard, Gatewarden of Belegost, Ironbound Warden, then the King's Guard of Thorin's Halls,
@@ -236,8 +238,8 @@ a dwarf rule takes Erebor's row. These keep no row, as none has one for Arthedai
 
 ### Careers
 
-`tools/insert_new_faction_careers.py` clones Erebor's foot careers: Ironguard twice, once per
-infantry career, and the Crossbow Master once. Erebor's Ram Rider is not cloned, because its
+`tools/insert_new_faction_careers.py` clones Erebor's foot careers: Ironguard twice, once for the
+one-handed and shield career and once for the two-handed one, and the Crossbow Master once. Erebor's Ram Rider is not cloned, because its
 passives are `MountChargeDamage` and `MountHealth`. Each career is eligible for `eredluin` alone, its
 archetype is a row in `CareerSystemIoC.BuildCareerArchetypeMap`, and its `career_menu.json` entry
 adds no skill or attribute, as no career's entry does.
@@ -245,18 +247,21 @@ adds no skill or attribute, as no career's entry does.
 | Career (id) | Archetype | Cloned from | Ranks | Ability |
 |-------------|-----------|-------------|-------|---------|
 | Warden of Thorin's Halls (`warden_of_thorins_halls`) | Infantry | Ironguard | Deep Warden, Warden of Thorin's Halls, Shieldwall of the Blue Mountains | Bastion of the Halls |
-| Broadbeam Shield-guard (`shieldguard_of_belegost`) | Infantry | Ironguard | Shield-bearer of Belegost, Broadbeam Shield-guard, Great Shield of Belegost | Broadbeam Wall |
+| Mattock Hewer of Belegost (`hewer_of_belegost`) | TwoHanded | Ironguard | Mattock-bearer, Hewer of Belegost, Stonebreaker of the Blue Mountains | Mattock Storm |
 | Firebeard Arbalester (`nogrod_arbalester`) | Ranged | Crossbow Master | Bolt-Smith of Nogrod, Firebeard Quarreler, Forge-Lord of the Firebeards | Firebeard Volley |
 
-**The two infantry careers share their numbers.** Their ability templates, root choices and six
+**The two foot careers share their numbers.** Their ability templates, root choices and six
 choice groups match value for value; they differ in names, text and the ability's name. A starting
-kit is chosen by culture and archetype, so both start with the same infantry kit (below). Bespoke
-Shield-guard mechanics are a balance follow-up (Known gaps).
+kit is chosen by culture and archetype, so the Warden starts with the infantry kit and the Hewer with
+the two-handed kit (below). The Hewer began as the Broadbeam Shield-guard, a second one-handed and
+shield career with the same kit, and was replaced by the two-handed career on 2026-10-28 (#1045);
+the troop `eredluin_broadbeam_shieldguard` keeps its name. Bespoke Hewer mechanics are a balance
+follow-up (Known gaps).
 
-**Ids and art.** `firebeard_arbalester` and `broadbeam_shieldguard` are parts of the troop ids
-`eredluin_firebeard_arbalester` and `eredluin_broadbeam_shieldguard`, so the careers are
-`nogrod_arbalester` and `shieldguard_of_belegost` while the display names keep the troop names. Art
-and FX ids are the source careers': both infantry careers name `career_ironguard_portrait`, the
+**Ids and art.** `firebeard_arbalester` and `hewer` are parts of the troop ids
+`eredluin_firebeard_arbalester` and `eredluin_hewer`, so the careers are `nogrod_arbalester` and
+`hewer_of_belegost` while both display names echo their troop names. Art
+and FX ids are the source careers': both foot careers name `career_ironguard_portrait`, the
 Arbalester `career_crossbow_master_portrait`, which `TAOMSpriteData.xml` does not register (Known
 gaps). Each career's wording is its own `CAREER_TEXT_REMAP` table in the tool, and the tool's
 contamination gate refuses Erebor's place and people words.
@@ -281,7 +286,7 @@ Erebor's default dwarf body.
 |---------|---------|--------------------|
 | 55 CC rosters (`taom_char_creation_equipment.xml`) | `generate_char_creation_equipment.py --append eredluin`, table `dict(CULTURES["erebor"], no_mount=True)` | Erebor's dwarf gear and no Horse or HorseHarness slot, so `Patch20_NarrativeHorseGuard` skips the horse actor in the narrative stages ([no-mount cultures](no-mount-cultures.md)). The 7 mothers wear `sk_dwarf_dress_normal_a` and the 7 fathers `sk_dwarf_tunic_noble_a` (the new `mother_body` and `father_body` keys, set on Erebor's table to what Erebor's shipped parents wear). The childhood and education rosters wear the dwarf leathers `sk_dwarf_erebor_chest_leather_light_a` and `_b`, where Erebor's shipped ones also carry Harad tunics |
 | Starter kits | `wire_starter_kit_rosters.py --apply` | 142 ids in 16 rosters point at `starter_` twins, the same 11 twins Erebor's rosters use, so `generate_starter_kit.py` had nothing to write and nothing new went into the Armory |
-| Career kits (`taom_career_starting_equipment.xml`) | `generate_career_kits.py` (`eredluin` rows in `SIDEARM` and `RANGED`) on four hand-added rosters | `player_career_eredluin_{infantry,ranged}_{m,f}`, no cavalry pair. Ranged: `ladder_erebor_xbow_t4`, `sm_dwarf_iron_bolt_a` and the axe `sm_dwarf_erebor_1h_axe_c`; the crossbow is the one Ered Luin's first crossbowman, the L21 Firebeard Arbalester, carries. Infantry: that axe, `sm_dwarf_erebor_shield_leather_a` and `sm_dwarf_erebor_spear_a`. Both wear `sk_dwarf_iron_chest_light_a` and `sk_dwarf_iron_boots_light_a` |
+| Career kits (`taom_career_starting_equipment.xml`) | `generate_career_kits.py` (`eredluin` rows in `SIDEARM` and `RANGED`; the `twohanded` layout needs none) on six hand-added rosters | `player_career_eredluin_{infantry,ranged,twohanded}_{m,f}`, no cavalry pair. Ranged: `ladder_erebor_xbow_t4`, `sm_dwarf_iron_bolt_a` and the axe `sm_dwarf_erebor_1h_axe_c`; the crossbow is the one Ered Luin's first crossbowman, the L21 Firebeard Arbalester, carries. Infantry: that axe, `sm_dwarf_erebor_shield_leather_a` and `sm_dwarf_erebor_spear_a`. Two-handed (the `twohanded` layout: a two-handed weapon and a throwing weapon, no one-handed weapon, shield or spear, so its roster has no `Item2`): `sm_dwarf_erebor_axe_2h_a` and `southern_throwing_axe_1_t4`, both carried by the lowest Mattock Hewer (L16; the mattock line throws from the Hewer up). All three wear `sk_dwarf_iron_chest_light_a` and `sk_dwarf_iron_boots_light_a` |
 
 ## Key Files
 
@@ -295,7 +300,7 @@ Erebor's default dwarf body.
 | `Main/_Module/ModuleData/equipmentsets/taom_equipment_sets_eredluin.xml` | the lord template rosters (`rosters_kept`; Erebor's ram rosters are not cloned) |
 | `tools/insert_new_faction_cc_menus.py`, `tools/insert_new_faction_careers.py` | the narrative menus (`AUTHORED["eredluin"]`) and the three careers (`TARGETS["eredluin"]`, `CAREER_TEXT_REMAP`) |
 | `Main/_Module/ModuleData/career_system/taom_careers.xml`, `taom_ability_templates.xml`, `taom_career_choices.xml` | the three careers |
-| `Main/_Module/ModuleData/equipmentsets/taom_char_creation_equipment.xml`, `taom_career_starting_equipment.xml` | the 55 CC rosters and the four career kits |
+| `Main/_Module/ModuleData/equipmentsets/taom_char_creation_equipment.xml`, `taom_career_starting_equipment.xml` | the 55 CC rosters and the six career kits |
 | `Main/_Module/ModuleData/factionmap/factions.json` | the faction card, key `kingdom_of_ered_duin` |
 | `Main/_Module/ModuleData/taom_wanderer_strings.xml` | the 96 wanderer backstory rows, the last block of the file |
 | live `TAOM_Map/ModuleData/settlements.xml` | the realm's 31 settlements (unversioned), the last rows of the file |
@@ -382,10 +387,12 @@ Restart Bannerlord fully, then start a new campaign.
 8. Pick it and go through the narrative stages. Confirm each of the four menus offers six options
    set in the Blue Mountains, no horse appears, the mother wears the dwarf dress and the father the
    noble tunic, and the campaign starts at Thorin's Halls.
-9. On the career screen, confirm three careers (Warden of Thorin's Halls, Broadbeam Shield-guard,
+9. On the career screen, confirm three careers (Warden of Thorin's Halls, Mattock Hewer of Belegost,
    Firebeard Arbalester) and no rider. Take the Firebeard Arbalester and confirm the crossbow, bolts
-   and axe are equipped on the dwarf; on another start take an infantry career and confirm the axe,
-   shield and spear; with no career, confirm the dwarf starter kit.
+   and axe are equipped on the dwarf; on another start take the Warden and confirm the axe,
+   shield and spear, and take the Mattock Hewer and confirm the dwarf starts a battle holding the two-handed axe in both
+   hands, with a stack of throwing axes in the second slot and no shield, spear or one-handed weapon; on
+   the career menu, check how the preview poses the two weapons; with no career, confirm the dwarf starter kit.
 10. Run `taom.audit_settlement_entrances` (cheat mode on). Confirm no `*_EL*` id is listed; older
     ids such as `castle_village_MM1_2` may still be. Correct any listed id as
     [settlements.md](../modding/settlements.md) "Add" step 7 describes (in the map editor, never in
@@ -411,8 +418,8 @@ Restart Bannerlord fully, then start a new campaign.
     alternative.
   - The doctrine row came whole from Erebor, `horseStand` (dismount false) included, so five
     cultures now opt in to it although Ered Luin fields no mounted troop.
-  - The two infantry careers share every number and one starting kit; the Shield-guard has no
-    mechanics of its own.
+  - The Warden and the Hewer share every number; the Hewer has no two-handed mechanics of its own,
+    only its own wording and starting kit.
   - The shared Gems tiers in `special_resources_config.xml` say "Erebor's forges burn bright" and
     "The wealth of Erebor flows", and an Ered Luin player sees them.
   - Erebor's 16 adult CC rosters carry `sumpter_horse` and `light_harness` (pre-existing, recorded

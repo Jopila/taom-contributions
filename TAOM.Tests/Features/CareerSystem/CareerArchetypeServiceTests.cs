@@ -107,6 +107,16 @@ public class CareerArchetypeServiceTests
         Assert.AreEqual(CareerArchetype.Cavalry, map["knight_of_belfalas"]);
     }
 
+    [TestMethod]
+    public void IoCMap_EredLuinHewer_IsTwoHanded_AndTheWardenStaysInfantry()
+    {
+        var map = CareerSystemIoC.GetCareerArchetypeMap();
+
+        Assert.AreEqual(CareerArchetype.TwoHanded, map["hewer_of_belegost"]);
+        Assert.AreEqual(CareerArchetype.Infantry, map["warden_of_thorins_halls"]);
+        Assert.IsFalse(map.ContainsKey("shieldguard_of_belegost"));
+    }
+
     private static List<string> CareerIdsInData() =>
         XDocument.Load(Path.Combine(CultureDataFixture.ModuleDataPath(), "career_system", "taom_careers.xml"))
             .Descendants("Career")

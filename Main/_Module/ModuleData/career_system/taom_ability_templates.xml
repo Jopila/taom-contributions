@@ -714,14 +714,14 @@
                    particle_effect="ironguard_particle"
                    sound_effect="ironguard_activate"
                    tooltip="{=taom_ability_warden_of_thorins_halls_tt}Invoke the strength of the mountain halls: boosts +15% melee damage and +10% damage reduction to allies within 50m for 8s." />
-  <AbilityTemplate id="shieldguard_of_belegost_ability"
-                   display_name="{=taom_ability_shieldguard_of_belegost}Broadbeam Wall"
+  <AbilityTemplate id="hewer_of_belegost_ability"
+                   display_name="{=taom_ability_hewer_of_belegost}Mattock Storm"
                    sprite="ability_ironguard_icon"
                    cooldown="0" duration="8" radius="50"
                    cast_type="Instant" target_type="Self" crosshair_type="Self"
                    particle_effect="ironguard_particle"
                    sound_effect="ironguard_activate"
-                   tooltip="{=taom_ability_shieldguard_of_belegost_tt}Lock tower shields with your kin: boosts +15% melee damage and +10% damage reduction to allies within 50m for 8s." />
+                   tooltip="{=taom_ability_hewer_of_belegost_tt}Swing the great mattock with your kin: boosts +15% melee damage and +10% damage reduction to allies within 50m for 8s." />
   <AbilityTemplate id="nogrod_arbalester_ability"
                    display_name="{=taom_ability_nogrod_arbalester}Firebeard Volley"
                    sprite="ability_crossbow_master_icon"

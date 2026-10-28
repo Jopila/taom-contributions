@@ -1196,8 +1196,6 @@
     <string id="taom_wotg_t3b_p4" text="+8 max health." />
     <string id="taom_ability_nogrod_arbalester" text="Firebeard Volley" />
     <string id="taom_ability_nogrod_arbalester_tt" text="Load bolts forged in Nogrod: boosts +20% ranged damage, +20% draw speed, and +15% movement speed for 8s." />
-    <string id="taom_ability_shieldguard_of_belegost" text="Broadbeam Wall" />
-    <string id="taom_ability_shieldguard_of_belegost_tt" text="Lock tower shields with your kin: boosts +15% melee damage and +10% damage reduction to allies within 50m for 8s." />
     <string id="taom_ability_warden_of_thorins_halls" text="Bastion of the Halls" />
     <string id="taom_ability_warden_of_thorins_halls_tt" text="Invoke the strength of the mountain halls: boosts +15% melee damage and +10% damage reduction to allies within 50m for 8s." />
     <string id="taom_career_grp_nogrod_arbalester_t1_a" text="Nogrod Volley" />
@@ -1206,12 +1204,6 @@
     <string id="taom_career_grp_nogrod_arbalester_t2_b" text="Ballista of the Mountain" />
     <string id="taom_career_grp_nogrod_arbalester_t3_a" text="Storm of Steel" />
     <string id="taom_career_grp_nogrod_arbalester_t3_b" text="Engine of Nogrod" />
-    <string id="taom_career_grp_shieldguard_of_belegost_t1_a" text="Spear of the Deeps" />
-    <string id="taom_career_grp_shieldguard_of_belegost_t1_b" text="Tower-Shield Warden" />
-    <string id="taom_career_grp_shieldguard_of_belegost_t2_a" text="Wrath of the Broadbeams" />
-    <string id="taom_career_grp_shieldguard_of_belegost_t2_b" text="Shieldwall of Belegost" />
-    <string id="taom_career_grp_shieldguard_of_belegost_t3_a" text="Bulwark of Belegost" />
-    <string id="taom_career_grp_shieldguard_of_belegost_t3_b" text="Guard of the Broad Gate" />
     <string id="taom_career_grp_warden_of_thorins_halls_t1_a" text="Hammer of the Deeps" />
     <string id="taom_career_grp_warden_of_thorins_halls_t1_b" text="Gatewall Warden" />
     <string id="taom_career_grp_warden_of_thorins_halls_t2_a" text="Wrath of the Blue Mountains" />
@@ -1221,16 +1213,11 @@
     <string id="taom_career_nogrod_arbalester" text="Firebeard Arbalester" />
     <string id="taom_career_nogrod_arbalester_desc" text="A Firebeard engineer-warrior of Nogrod who wields masterwork crossbows of great stopping power, each bolt forged in the furnaces of the Blue Mountains." />
     <string id="taom_career_rank1_nogrod_arbalester" text="Bolt-Smith of Nogrod" />
-    <string id="taom_career_rank1_shieldguard_of_belegost" text="Shield-bearer of Belegost" />
     <string id="taom_career_rank1_warden_of_thorins_halls" text="Deep Warden" />
     <string id="taom_career_rank2_nogrod_arbalester" text="Firebeard Quarreler" />
-    <string id="taom_career_rank2_shieldguard_of_belegost" text="Broadbeam Shield-guard" />
     <string id="taom_career_rank2_warden_of_thorins_halls" text="Warden of Thorin's Halls" />
     <string id="taom_career_rank3_nogrod_arbalester" text="Forge-Lord of the Firebeards" />
-    <string id="taom_career_rank3_shieldguard_of_belegost" text="Great Shield of Belegost" />
     <string id="taom_career_rank3_warden_of_thorins_halls" text="Shieldwall of the Blue Mountains" />
-    <string id="taom_career_shieldguard_of_belegost" text="Broadbeam Shield-guard" />
-    <string id="taom_career_shieldguard_of_belegost_desc" text="A Broadbeam warrior of Belegost who fights behind a tower shield with a long spear, locking shields with kin until no foe can find a gap in the wall." />
     <string id="taom_career_warden_of_thorins_halls" text="Warden of Thorin's Halls" />
     <string id="taom_career_warden_of_thorins_halls_desc" text="An elite dwarven warrior in heavy mail of Blue Mountain iron who holds the gates of Thorin's Halls against goblin and orc alike." />
     <string id="taom_nga_t1_a_key" text="Firebeard Volley radius increased, covering wider kill zones." />
@@ -1264,37 +1251,6 @@
     <string id="taom_nga_t3_b_p3" text="+9 max health." />
     <string id="taom_nga_t3_b_p4" text="+15% party spotting range." />
     <string id="taom_nogrod_arbalester_root_desc" text="Firebeard Volley grants +5% ranged damage with masterwork bolts." />
-    <string id="taom_sgob_t1_a_key" text="Broadbeam Wall radius increased, empowering more warriors." />
-    <string id="taom_sgob_t1_a_p1" text="+8% melee damage." />
-    <string id="taom_sgob_t1_a_p2" text="+3% troop damage." />
-    <string id="taom_sgob_t1_a_p3" text="+6 max health." />
-    <string id="taom_sgob_t1_a_p4" text="+7% swing speed." />
-    <string id="taom_sgob_t1_b_key" text="Broadbeam Wall duration extended, fortifying the defense." />
-    <string id="taom_sgob_t1_b_p1" text="+8% resistance." />
-    <string id="taom_sgob_t1_b_p2" text="+5% troop morale." />
-    <string id="taom_sgob_t1_b_p3" text="+10% troop resistance." />
-    <string id="taom_sgob_t1_b_p4" text="+5% troop survival." />
-    <string id="taom_sgob_t2_a_key" text="Broadbeam Wall charge reduced, activating more frequently." />
-    <string id="taom_sgob_t2_a_p1" text="+10% troop morale." />
-    <string id="taom_sgob_t2_a_p2" text="+2 party size." />
-    <string id="taom_sgob_t2_a_p3" text="+10% battle renown gain." />
-    <string id="taom_sgob_t2_a_p4" text="-10% troop wages." />
-    <string id="taom_sgob_t2_b_key" text="Broadbeam Wall grants additional defensive buffs while active." />
-    <string id="taom_sgob_t2_b_p1" text="+12% resistance." />
-    <string id="taom_sgob_t2_b_p2" text="+8 max health." />
-    <string id="taom_sgob_t2_b_p3" text="+13% troop resistance." />
-    <string id="taom_sgob_t2_b_p4" text="+5% troop damage." />
-    <string id="taom_sgob_t3_a_key" text="Broadbeam Wall radius greatly expanded, devastating power." />
-    <string id="taom_sgob_t3_a_p1" text="+15% melee damage." />
-    <string id="taom_sgob_t3_a_p2" text="+10 max health." />
-    <string id="taom_sgob_t3_a_p3" text="+7% troop damage." />
-    <string id="taom_sgob_t3_a_p4" text="+4 party size." />
-    <string id="taom_sgob_t3_b_key" text="Broadbeam Wall charge greatly reduced, nearly always available." />
-    <string id="taom_sgob_t3_b_p1" text="+18% resistance." />
-    <string id="taom_sgob_t3_b_p2" text="+15% hero health regeneration." />
-    <string id="taom_sgob_t3_b_p3" text="+20% troop morale." />
-    <string id="taom_sgob_t3_b_p4" text="+15% troop survival." />
-    <string id="taom_shieldguard_of_belegost_root_desc" text="Broadbeam Wall grants +5 health, the tower shield protecting you." />
     <string id="taom_warden_of_thorins_halls_root_desc" text="Bastion of the Halls grants +5 health, dwarven craft protecting you." />
     <string id="taom_woth_t1_a_key" text="Bastion of the Halls radius increased, empowering more warriors." />
     <string id="taom_woth_t1_a_p1" text="+8% melee damage." />
@@ -1326,5 +1282,49 @@
     <string id="taom_woth_t3_b_p2" text="+15% hero health regeneration." />
     <string id="taom_woth_t3_b_p3" text="+20% troop morale." />
     <string id="taom_woth_t3_b_p4" text="+15% troop survival." />
+    <string id="taom_ability_hewer_of_belegost" text="Mattock Storm" />
+    <string id="taom_ability_hewer_of_belegost_tt" text="Swing the great mattock with your kin: boosts +15% melee damage and +10% damage reduction to allies within 50m for 8s." />
+    <string id="taom_career_grp_hewer_of_belegost_t1_a" text="Mattock of the Deeps" />
+    <string id="taom_career_grp_hewer_of_belegost_t1_b" text="Shield-Breaker" />
+    <string id="taom_career_grp_hewer_of_belegost_t2_a" text="Wrath of the Broadbeams" />
+    <string id="taom_career_grp_hewer_of_belegost_t2_b" text="Hewing of Belegost" />
+    <string id="taom_career_grp_hewer_of_belegost_t3_a" text="Stonebreaker's Fury" />
+    <string id="taom_career_grp_hewer_of_belegost_t3_b" text="Breaker of the Broad Gate" />
+    <string id="taom_career_hewer_of_belegost" text="Mattock Hewer of Belegost" />
+    <string id="taom_career_hewer_of_belegost_desc" text="A Broadbeam hewer of Belegost who swings a great mattock in both hands, breaking shields and the orcs behind them." />
+    <string id="taom_career_rank1_hewer_of_belegost" text="Mattock-bearer" />
+    <string id="taom_career_rank2_hewer_of_belegost" text="Hewer of Belegost" />
+    <string id="taom_career_rank3_hewer_of_belegost" text="Stonebreaker of the Blue Mountains" />
+    <string id="taom_hewer_of_belegost_root_desc" text="Mattock Storm grants +5 health, the weight of the mattock behind you." />
+    <string id="taom_hob_t1_a_key" text="Mattock Storm radius increased, empowering more warriors." />
+    <string id="taom_hob_t1_a_p1" text="+8% melee damage." />
+    <string id="taom_hob_t1_a_p2" text="+3% troop damage." />
+    <string id="taom_hob_t1_a_p3" text="+6 max health." />
+    <string id="taom_hob_t1_a_p4" text="+7% swing speed." />
+    <string id="taom_hob_t1_b_key" text="Mattock Storm duration extended, fortifying the defense." />
+    <string id="taom_hob_t1_b_p1" text="+8% resistance." />
+    <string id="taom_hob_t1_b_p2" text="+5% troop morale." />
+    <string id="taom_hob_t1_b_p3" text="+10% troop resistance." />
+    <string id="taom_hob_t1_b_p4" text="+5% troop survival." />
+    <string id="taom_hob_t2_a_key" text="Mattock Storm charge reduced, activating more frequently." />
+    <string id="taom_hob_t2_a_p1" text="+10% troop morale." />
+    <string id="taom_hob_t2_a_p2" text="+2 party size." />
+    <string id="taom_hob_t2_a_p3" text="+10% battle renown gain." />
+    <string id="taom_hob_t2_a_p4" text="-10% troop wages." />
+    <string id="taom_hob_t2_b_key" text="Mattock Storm grants additional defensive buffs while active." />
+    <string id="taom_hob_t2_b_p1" text="+12% resistance." />
+    <string id="taom_hob_t2_b_p2" text="+8 max health." />
+    <string id="taom_hob_t2_b_p3" text="+13% troop resistance." />
+    <string id="taom_hob_t2_b_p4" text="+5% troop damage." />
+    <string id="taom_hob_t3_a_key" text="Mattock Storm radius greatly expanded, devastating power." />
+    <string id="taom_hob_t3_a_p1" text="+15% melee damage." />
+    <string id="taom_hob_t3_a_p2" text="+10 max health." />
+    <string id="taom_hob_t3_a_p3" text="+7% troop damage." />
+    <string id="taom_hob_t3_a_p4" text="+4 party size." />
+    <string id="taom_hob_t3_b_key" text="Mattock Storm charge greatly reduced, nearly always available." />
+    <string id="taom_hob_t3_b_p1" text="+18% resistance." />
+    <string id="taom_hob_t3_b_p2" text="+15% hero health regeneration." />
+    <string id="taom_hob_t3_b_p3" text="+20% troop morale." />
+    <string id="taom_hob_t3_b_p4" text="+15% troop survival." />
   </strings>
 </base>
