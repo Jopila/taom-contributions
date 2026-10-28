@@ -149,6 +149,7 @@ other ten minor clans resolve through their culture; the per-clan table is in
 | `Main/Features/Execution/Hooks/ExecutionCampaignBehavior_BloodFeudRelationPenalty_Patch.cs` | Harmony Postfix on the static `ExecutionCampaignBehavior.GetBloodFeudStartRelationPenaltyToOtherClan(Hero, Clan)`; rewrites the per-clan penalty through the hook |
 | `Main/Features/Execution/ExecutionIoC.cs` | DryIoc registrations (singletons for all 3 services); `InitializeHooks` hands the Honor patch the hook and the relation patch the hook and `IPlayerContextAdapter` (for the player clan id) |
 | `Main/_Module/ModuleData/execution/alignment.json` | Kingdom → alignment data |
+| `Main/_Module/GUI/PreFabs/Party/PartyTroopTuple.xml` | TAOM's copy of the right party tuple; its Execute button matches vanilla v1.5.5, blood-feud mark included (#1031) |
 
 ## Dependencies
 
@@ -169,6 +170,7 @@ No feature-specific adapters: participants are `SideIds` pairs built by `TAOM.Ad
 - `TAOM.Tests/Features/Execution/ShippedMainCultureAlignmentCoverageTests.cs`: **3 tests**, every playable TAOM culture has an alignment entry and resolves to its declared side through the kingdom-less path.
 - `TAOM.Tests/Features/Execution/ShippedClanSideCoverageTests.cs`: **13 tests**, the data gate for the clan rows (every minor clan and kingdom clan, the troops and leader templates); described once in [alignment-aware-execution.md](alignment-aware-execution.md) ("Tests").
 - `TAOM.Tests/Features/Execution/SidePairScanTests.cs`: **3 tests**, the IL gate on `ResolveSide(id, culture)` callers and on where a `SideIds` is built; described once in the same place.
+- `TAOM.Tests/Features/Execution/PartyTupleVanillaParityTests.cs`: **3 tests**, both of TAOM's party tuple copies against the installed vanilla prefabs, element for element apart from TAOM's two edits (LiveInstall, one per tuple), and the blood-feud mark beside the Execute skull, which runs without the game (#1031).
 
 The two Harmony patches bind by attribute and are exercised in the live game; `HarmonyPatchBindingTests` proves both targets resolve on the installed engine, and `docs/reference/taleworlds-api-snapshot/patch-targets.md` records their v1.5.2 signatures.
 
@@ -192,7 +194,7 @@ If a new gameplay rule needs to gate on alignment (e.g., "different relation rul
 
 ## How to Test In Game
 
-1. Gondor character: capture a Mordor lord and execute that lord from the party screen. Expected: no Honor penalty, and the relation preview shows no hit from the Free Peoples' clans.
+1. Gondor character: capture a Mordor lord and execute that lord from the party screen. Expected: no Honor penalty, and the relation preview shows no hit from the Free Peoples' clans. The Execute button shows the small blood-feud mark at its lower right, as in vanilla.
 2. Capture a Rohan lord and execute that lord. Expected: kinslaying, 1.5 times vanilla for the victim's side, and the Honor penalty applies.
 3. Capture a lord of a Neutral realm (Khand), ideally one born into a Free culture, and execute that lord. Expected: no Honor penalty and no relation hit from anyone, as for any Neutral lord (#957: before, such a lord read as Free and the kill counted as kinslaying).
 

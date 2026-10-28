@@ -199,7 +199,8 @@
                             <NavigationAutoScrollWidget TrackedWidget="..\ExecutePrisonerButton" AutoScrollTopOffset="160" AutoScrollBottomOffset="160" />
                             <ButtonWidget Id="ExecutePrisonerButton" DoNotPassEventsToChildren="true" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" Brush="Party.TalkSlot.Background" Command.Click="ExecuteExecuteTroop" IsEnabled="@IsExecutable" GamepadNavigationIndex="2">
                               <Children>
-                                <Widget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="!RecruitIcon.Width" SuggestedHeight="!RecruitIcon.Height" HorizontalAlignment="Center" VerticalAlignment="Center" Sprite="General\Mission\PersonalKillfeed\kill_feed_skull" Color="#FF0000FF" SaturationFactor="60" ValueFactor="20" />
+                                <Widget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="!RecruitIcon.Width" SuggestedHeight="!RecruitIcon.Height" HorizontalAlignment="Center" VerticalAlignment="Center" Sprite="General\Mission\PersonalKillfeed\kill_feed_skull" Color="#FF0000FF" SaturationFactor="60" />
+                                <Widget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="7" SuggestedHeight="10" HorizontalAlignment="Right" VerticalAlignment="Bottom" MarginRight="8" MarginBottom="10" Sprite="SPGeneral\blood_feud_icon" />
                                 <HintWidget DataSource="{ExecutePrisonerHint}" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" Command.HoverBegin="ExecuteBeginHint" Command.HoverEnd="ExecuteEndHint" IsEnabled="false" />
                               </Children>
                             </ButtonWidget>

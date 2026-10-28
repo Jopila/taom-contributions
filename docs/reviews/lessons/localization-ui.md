@@ -1451,3 +1451,14 @@ ids from that table.
   that defines it; delete the rows no settlement reads (and refuse while one still does). Scope a data repair by
   scanning every row for the defect, then name the extra ids in the tool.
 - **Source:** `docs/reviews/rca-map-tool-followups-2026-10-27.md` findings 6 and 7; #1042.
+### Pin a GUI prefab copy to the vanilla file it replaces (#1031, 2026-10-27)
+TAOM's copy of `PartyTroopTuple.xml` replaces vanilla's by file name, so a widget that vanilla adds after TAOM's last re-sync
+never reaches players. The Execute button lost vanilla v1.5.5's blood-feud mark this way, and kept a 1.3-era `ValueFactor`.
+The v1.5.2 changeset listed the file as changed, but that bump re-based only `PartyScreen.xml` and the nameplates, and
+`PrefabCloneWidgetReferenceTests` checks only reference attributes, so a missing decorative widget passed every gate.
+- **Why missed:** no gate compares a whole TAOM copy with the vanilla file it hides, and the engine-bump step re-based only
+  the copies someone remembered.
+- **Prevent:** give every TAOM copy of a vanilla prefab a LiveInstall test that compares it with the installed file element
+  for element, excluding only TAOM's documented edits (`PartyTupleVanillaParityTests` is the model). A copy with no TAOM
+  edit should not exist: delete it and let vanilla load.
+- **Source:** [rca-tuple-blood-feud-2026-10-27.md](../rca-tuple-blood-feud-2026-10-27.md).

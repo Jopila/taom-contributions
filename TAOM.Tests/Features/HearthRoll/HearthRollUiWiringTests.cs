@@ -237,6 +237,19 @@ public class HearthRollUiWiringTests
     }
 
     [TestMethod]
+    public void TheMixin_ResolvesItsServicesInTheConstructor_NotOnEachRefresh()
+    {
+        var source = ReadSource("Client/Features/HearthRoll/UI/ClanLordItemBadgeMixin.cs", stripComments: true);
+        var constructor = Regex.Match(source, @"public \w+\([^)]*\)\s*:\s*base\([^)]*\)\s*\{(?<body>.*?)\n    \}", RegexOptions.Singleline);
+        Assert.IsTrue(constructor.Success);
+        StringAssert.Contains(constructor.Groups["body"].Value, "IoC.Resolve<HearthRollSettingsProvider>()");
+        StringAssert.Contains(constructor.Groups["body"].Value, "IoC.Resolve<IModLogger>()");
+
+        var outside = source.Remove(constructor.Index, constructor.Length);
+        StringAssert.DoesNotMatch(outside, new Regex(@"IoC\.Resolve"));
+    }
+
+    [TestMethod]
     public void TheMixinProperties_ClashWithNeitherTheRowViewModelNorTheFamilyMixin()
     {
         var mine = typeof(ClanLordItemBadgeMixin).GetProperties(Members | BindingFlags.DeclaredOnly)

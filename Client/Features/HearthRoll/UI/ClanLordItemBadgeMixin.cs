@@ -19,12 +19,16 @@ namespace TAOM.Features.HearthRoll.UI;
 [ViewModelMixin("UpdateProperties")]
 internal sealed class ClanLordItemBadgeMixin : BaseViewModelMixin<ClanLordItemVM>
 {
+    private readonly HearthRollSettingsProvider _settings;
+    private readonly IModLogger _logger;
     private bool _logged;
     private bool _isTaomUnhappyCompanion;
     private string _taomAgeText = "";
 
     public ClanLordItemBadgeMixin(ClanLordItemVM viewModel) : base(viewModel)
     {
+        _settings = IoC.Resolve<HearthRollSettingsProvider>();
+        _logger = IoC.Resolve<IModLogger>();
         // No OnRefresh() here: UIExtenderEx replays the view model constructor's UpdateProperties call on the mixin as OnRefresh.
     }
 
@@ -55,7 +59,7 @@ internal sealed class ClanLordItemBadgeMixin : BaseViewModelMixin<ClanLordItemVM
                 return;
             }
 
-            var enabled = IoC.Resolve<HearthRollSettingsProvider>().Enabled;
+            var enabled = _settings.Enabled;
             var companion = enabled && hero.IsPlayerCompanion;
             var relation = companion ? Hero.MainHero?.GetRelation(hero) ?? 0 : 0;
             IsTaomUnhappyCompanion = HearthRollRules.ShowsUnhappyTint(enabled, hero.IsPlayerCompanion, relation);
@@ -74,13 +78,6 @@ internal sealed class ClanLordItemBadgeMixin : BaseViewModelMixin<ClanLordItemVM
         if (_logged)
             return;
         _logged = true;
-        try
-        {
-            IoC.Resolve<IModLogger>().LogError($"[HearthRoll] clan member row refresh threw. Logged once per row; later refreshes still run. Root cause: {ex}");
-        }
-        catch
-        {
-            // The logger itself is unavailable: nothing more to do on a UI refresh.
-        }
+        _logger.LogError($"[HearthRoll] clan member row refresh threw. Logged once per row; later refreshes still run. Root cause: {ex}");
     }
 }
