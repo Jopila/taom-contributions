@@ -112,6 +112,9 @@ public class TimeAccelerationService : ITimeAccelerationService
 
     public void EnterFastForward() => EnterFastForwardAt(_settings.FastForwardMultiplier);
 
+    // #1040: the latch itself, so the v1.5.6 parley click (also Ctrl) can tell a turbo click from a parley.
+    public bool IsTurboActive => _turboActive;
+
     // "Extra" is a fast-forward mode running above the normal multiplier, read off the engine every
     // frame so a key press, a click and a vanilla toggle all agree. Turbo lights it too while Ctrl
     // is held, which is the honest reading.

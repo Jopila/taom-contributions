@@ -2298,3 +2298,18 @@ gives the model an instance whose snapshot nothing writes, and the bug it fixed 
 - **Prevent:** when a module maps one singleton to a second interface, its wiring test resolves both from the real
   registration and asserts `AreSame` (`FireAndTributeWiringTests`, `PlayerSwitcherWiringTests`).
 - **Source:** [rca-fire-and-tribute-own-side-2026-10-27.md](../rca-fire-and-tribute-own-side-2026-10-27.md) finding 1.
+
+### A parity test compares a predicate with each consumer's real decision, never with its own body (#1037, 2026-10-27)
+`HiddenHostsService.MasksParley` delegated to `IsNameHidden`, and its only parity test asserted that the two agree
+for every ratio. They always do, because one calls the other. The tooltip title, the real consumer next to the
+parley hint, masks only a party drawn on the map, so a tracked enemy lord out of sight kept its name in the tooltip
+while the veto removed its parley hint. A second test shape failed the same way in #1040: five tests asserted that
+the turbo latch reads false after a close event without first asserting that it had opened, so all five passed
+against a getter that always returns false.
+- **Why missed:** the test read the method under test instead of the decision or state the player sees, and the
+  predicate's doc comment claimed a parity it did not have.
+- **Prevent:** pin a shared predicate against each consumer's own verdict (here `Evaluate(s).HidesName` from a fresh
+  service and `EvaluateTooltipParty`), for visible and invisible snapshots. A test of a close or reset asserts the
+  open state first, and is shown red once against a constant stub.
+- **Source:** [rca-engine-bump-v1-5-6-2026-10-27.md](../rca-engine-bump-v1-5-6-2026-10-27.md) findings 1 and 8;
+  Codex pre-review F1; #1037, #1040.

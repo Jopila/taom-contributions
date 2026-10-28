@@ -1570,3 +1570,15 @@ despite the flag. An own-side rule written for the other party's decision only w
 - **Prevent:** before relying on `DoNotMakeNewDecisions` to silence a party, read `MobilePartyAi.GetBehaviors`; a rule
   about a pair of parties in `MobilePartyAIModel` checks both directions.
 - **Source:** [rca-fire-and-tribute-own-side-2026-10-27.md](../rca-fire-and-tribute-own-side-2026-10-27.md) finding 4.
+
+### Read the engine path to its effect before an engine claim goes into a decision for Mike (#1040, 2026-10-27)
+A reviewer summarised the v1.5.6 parley modifier as "a Ctrl click on an enemy lord now parleys", and that sentence
+went into the bump record and into a question Mike answered. `MapScreen.HandleMouse` routes a click released over
+any party or settlement to `HandleParleyClick` while `MapParleyModifier` is held and issues no move order, so a
+TAOM turbo click (Ctrl + Space) on a friendly town stopped moving the party. Mike decided again on the corrected
+scope and chose a fix in the same release.
+- **Why missed:** the claim was relayed from a summary without reading the click handler. `evidence-over-claims.md`
+  A4 already requires a spot-check of a subagent's load-bearing claim before relaying it.
+- **Prevent:** before a question to Mike rests on engine behaviour, read the call path from the input to its effect
+  in the installed DLL, and quote the method and line in the question.
+- **Source:** [rca-engine-bump-v1-5-6-2026-10-27.md](../rca-engine-bump-v1-5-6-2026-10-27.md) finding 2; #1040.

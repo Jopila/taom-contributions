@@ -4557,3 +4557,22 @@ reverted `clans.xml` alone. This repeats "Change data a generator owns through t
 - **Why missed:** the baseline step was done once the planned writes ended, and a write requested later was not followed by it.
 - **Prevent:** refresh a ratchet baseline as the last data step before the review, and re-run every gate after any later write.
 - **Source:** `docs/reviews/rca-lindon-expansion-2026-10-27.md` finding 3.
+### An engine-bump gate answers only the question it reads: overrides, a late Kit update and multi-target patches (v1.5.6, 2026-10-27)
+Three gates reported green or nothing on something they do not check. (1) `check_engine_member_refs.ps1` reads
+member and type references only, so the shipped `TaomHowdahMachine` and `TaomMumakilPlatform`, which override an
+abstract `GetDescriptionText` that gained a parameter, passed it; only the source compile of HEAD failed (4 errors).
+(2) The Modding Kit updated at 11:55, 44 minutes after the client, after the scope pass had concluded that the
+wEditor `TaleWorlds.Native.dll` was byte-identical to its archive. `native_archive.py --status` prints saved state and
+never re-checks the installed file, so it kept listing "v1.5.5 wEditor ... map=ok" for a DLL with a different hash.
+(3) The API snapshot records a `TargetMethods()` patch by its first target only, so the Hidden Hosts tooltip patch
+(five builders) had one row in `engine_body_diff.py`; all five bodies changed in v1.5.6.
+- **Why missed:** each gate was trusted for more than it covers: references stood in for overrides, a saved row for
+  the installed file, and a first target for a patch with five.
+- **Prevent:** `/engine-bump` now says to run the archive with no flags and then `--status`, comparing each row's
+  `sha16` with the installed file (Phase 1 item 2); to re-read the Kit's `Version.xml` and hash right before the
+  decompile and again before trusting `_editor_build`; that the ref checker cannot see overrides, so the HEAD compile
+  is the gate (item 5); and to diff the other targets of a `TargetMethods()` patch by hand (Phase 3). The tool fixes
+  are tracked in #1038: an override scan beside the ref checker (the verify pass used a reflection-only loader that
+  checks virtual overrides, abstract members and interface members), a `STALE` mark in `status()`, and every
+  `TargetMethods()` target in `patch-targets.md`.
+- **Source:** v1.5.6 engine bump, [v1.5.6-impact.md](../../migration/v1.5.6-impact.md); #1036, #1038.

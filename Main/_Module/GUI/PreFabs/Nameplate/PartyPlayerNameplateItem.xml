@@ -1,8 +1,9 @@
 <Prefab>
-  <!-- TAOM clone of SandBox/GUI/Prefabs/Nameplate/PartyPlayerNameplateItem.xml, re-based on Bannerlord v1.5.3
-       (2026-09-15; the ship-banner widgets the v1.5.3 PartyPlayerNameplateWidget dereferences unguarded).
+  <!-- TAOM clone of SandBox/GUI/Prefabs/Nameplate/PartyPlayerNameplateItem.xml, re-based on Bannerlord v1.5.6
+       (2026-10-27; v1.5.6 moved ParleyIconWidget into StatusList and the root attribute follows; the v1.5.3 ship-banner widgets PartyPlayerNameplateWidget dereferences unguarded stay).
        TAOM edits: troop-count font 20, padding 4, the player ring icon in place of the hero portrait, the arrow button hidden,
-       the tracker frame collapsed. PrefabCloneWidgetReferenceTests gates the widget references. -->
+       the tracker frame collapsed, the size setter 81x81 (vanilla 120x120). The MainHeroVisual.Padding constant (4) has no consumer
+       since the ring icon replaced the portrait. PrefabCloneWidgetReferenceTests gates the widget references. -->
 	<Constants>
 		<Constant Name="MainHeroVisual.Padding" Value="4" />
 
@@ -16,7 +17,7 @@
 
 	</Constants>
 	<Window>
-    <PartyPlayerNameplateWidget DoNotAcceptEvents="true" WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" Brush="TutorialHighlightBrush" DisorganizedWidget="NameplateLayoutListPanel\NameplateLayoutWidget\StatusList\DisorganizedWidget" HeadPosition="@HeadPosition" IsArmy="@IsArmy" IsBehind="@IsBehind" IsHigh="@IsHigh" IsInArmy="@IsInArmy" IsInSettlement="@IsInSettlement" IsTargetedByTutorial="@IsTargetedByTutorial" IsVisibleOnMap="@IsVisibleOnMap" MainPartyArrowWidget="MainPartyArrowWidget" NameplateExtraInfoTextWidget="NameplateLayoutListPanel\NameplateLayoutWidget\LabelsList\NameplateExtraInfoTextWidget" NameplateFullNameTextWidget="HeadGroupWidget\NameSpeedContainer\NameplateFullNameTextWidget" SpeedTextWidget="HeadGroupWidget\NameSpeedContainer\SpeedTextWidget" SpeedIconWidget="HeadGroupWidget\NameSpeedContainer\SpeedTextWidget\SpeedIconWidget" ParleyIconWidget="HeadGroupWidget\ParleyIconWidget" NameplateLayoutListPanel="NameplateLayoutListPanel" NameplateTextWidget="NameplateLayoutListPanel\NameplateLayoutWidget\LabelsList\NameplateTextWidget" PartyBannerWidget="NameplateLayoutListPanel\NameplateLayoutWidget\PartyBannerWidget" ShipBannerWidget="ShipBannerContainerWidget\ShipBannerWidget" ShipBannerContainerWidget="ShipBannerContainerWidget" ShipBannerFrameWidget="ShipBannerContainerWidget\ShipBannerFrameWidget" ShipBannerPosition="@ShipBannerPosition" IsShipBannerVisible="@IsShipBannerVisible" Position="@Position" ShouldShowFullName="@ShouldShowFullName" CanParley="@CanParley" TrackerFrame="TrackerFrame" IsPrisoner="@IsPrisoner" IsDisorganized="@IsDisorganized" HeadGroupWidget="HeadGroupWidget">
+    <PartyPlayerNameplateWidget DoNotAcceptEvents="true" WidthSizePolicy="CoverChildren" HeightSizePolicy="CoverChildren" Brush="TutorialHighlightBrush" DisorganizedWidget="NameplateLayoutListPanel\NameplateLayoutWidget\StatusList\DisorganizedWidget" HeadPosition="@HeadPosition" IsArmy="@IsArmy" IsBehind="@IsBehind" IsHigh="@IsHigh" IsInArmy="@IsInArmy" IsInSettlement="@IsInSettlement" IsTargetedByTutorial="@IsTargetedByTutorial" IsVisibleOnMap="@IsVisibleOnMap" MainPartyArrowWidget="MainPartyArrowWidget" NameplateExtraInfoTextWidget="NameplateLayoutListPanel\NameplateLayoutWidget\LabelsList\NameplateExtraInfoTextWidget" NameplateFullNameTextWidget="HeadGroupWidget\NameSpeedContainer\NameplateFullNameTextWidget" SpeedTextWidget="HeadGroupWidget\NameSpeedContainer\SpeedTextWidget" SpeedIconWidget="HeadGroupWidget\NameSpeedContainer\SpeedTextWidget\SpeedIconWidget" ParleyIconWidget="NameplateLayoutListPanel\NameplateLayoutWidget\StatusList\ParleyIconWidget" NameplateLayoutListPanel="NameplateLayoutListPanel" NameplateTextWidget="NameplateLayoutListPanel\NameplateLayoutWidget\LabelsList\NameplateTextWidget" PartyBannerWidget="NameplateLayoutListPanel\NameplateLayoutWidget\PartyBannerWidget" ShipBannerWidget="ShipBannerContainerWidget\ShipBannerWidget" ShipBannerContainerWidget="ShipBannerContainerWidget" ShipBannerFrameWidget="ShipBannerContainerWidget\ShipBannerFrameWidget" ShipBannerPosition="@ShipBannerPosition" IsShipBannerVisible="@IsShipBannerVisible" Position="@Position" ShouldShowFullName="@ShouldShowFullName" CanParley="@CanParley" TrackerFrame="TrackerFrame" IsPrisoner="@IsPrisoner" IsDisorganized="@IsDisorganized" HeadGroupWidget="HeadGroupWidget">
 			<Children>
 
         <Widget Id="ShipBannerContainerWidget" DoNotAcceptEvents="true" DoNotPassEventsToChildren="true" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="!Ship.Banner.Size" SuggestedHeight="!Ship.Banner.Size">
@@ -42,6 +43,8 @@
 										</ListPanel>
 
 										<Widget Id="DisorganizedWidget" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="35" SuggestedHeight="35" HorizontalAlignment="Left" VerticalAlignment="Center" Sprite="SPGeneral\Nameplates\party_disorganized" Color="#E81313FF" />
+
+										<Widget Id="ParleyIconWidget" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="45" SuggestedHeight="30" HorizontalAlignment="Left" VerticalAlignment="Center" Sprite="General\Icons\parley_icon" AlphaFactor="0" />
 
 									</Children>
 								</ListPanel>
@@ -80,8 +83,6 @@
               </Children>
             </ListPanel>
 
-            <Widget Id="ParleyIconWidget" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="30" SuggestedHeight="30" VerticalAlignment="Center" PositionXOffset="-36" Sprite="General\Icons\parley_icon" AlphaFactor="0"/>
-            
           </Children>
         </Widget>
 

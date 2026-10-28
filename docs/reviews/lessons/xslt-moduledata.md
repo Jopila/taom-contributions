@@ -527,3 +527,17 @@ data with every gate green.
   generator gains a passing `--check`, add it to `OWNERS`; `promote_borrowed_cultures.py` joins once its block position
   and the Arthedain start point are fixed.
 - **Source:** `docs/reviews/rca-wotr-war-rule-2026-10-18.md` findings 2 and 3.
+
+### Module precedence for a duplicate id is decided in the XML merge, before any object exists (v1.5.6, 2026-10-27)
+TAOM defines two GameText ids that v1.5.6 looks up and no vanilla module defines. Three readers concluded that a
+later TaleWorlds definition would win because `GameText.DefaultText` returns the first variation. That lookup runs
+on an already merged document: `GameTextManager.LoadGameTexts` builds it with
+`MBObjectManager.GetMergedXmlForManaged("GameText", ...)`, `GameText.xsd` declares `string/@id` unique, and
+`MergeElementAttributes` copies the later module's attributes over the earlier element. TAOM loads after Native, so
+its row would replace vanilla's text and translation key.
+- **Why missed:** each reader started at the object API and never traced the file through the merge.
+- **Prevent:** to answer "which module wins" for any ModuleData id, read the schema's unique key and the merge path
+  (`GetMergedXmlForManaged`, `MergeElements`) first. A TAOM row that defines a vanilla id must be deleted once
+  vanilla defines it; `/engine-bump` Phase 4 now says so for the `str_last_seen` block.
+- **Source:** [rca-engine-bump-v1-5-6-2026-10-27.md](../rca-engine-bump-v1-5-6-2026-10-27.md) finding 7; Codex
+  pre-review F2; #1036.

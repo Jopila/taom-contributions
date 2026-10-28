@@ -146,7 +146,8 @@ of plain numbers) in `HiddenHostsTooltipScope`, and restores the previous frame 
 
 ### Targets
 
-All are in category `Patch105_HiddenHosts`, none is a bool prefix (`CoopVetoClassificationTests` needs no row), and each
+All are in category `Patch105_HiddenHosts`; none of these phase 2 targets is a bool prefix, so
+`CoopVetoClassificationTests` needs no row for them (the phase 1 encyclopedia prefix has one), and each
 obeys the phase 1 fault budget and the one toggle.
 
 | # | Target (v1.5.5) | Trigger | Hook |
@@ -239,6 +240,14 @@ while its remembered count is the army's total, so it carries no memory (the arm
 row is a row of the tooltip: its function reads the frame that is current at each two-second refresh, so the age moves on and
 the row goes blank once the player is close enough to read the count again. The age text is vanilla's hours-and-days text
 (`CampaignUIHelper.GetHoursAndDaysTextFromHourValue`, v1.5.5: "5 hours", "1 day and 3 hours"), at least one hour (decision Q4).
+
+From v1.5.6 the five subject builders end with vanilla's `AddTooltipHintProperties` (a spacer and the extend-key hint, each
+only when a hint applies, and a parley hint when `CanMainHeroDoParleyWithParty` is true) in place of the
+inline hint rows. The parley hint appears only on party and settlement tooltips: the army, map-event
+and siege builders pass no parley party to `AddTooltipHintProperties`. The reason row is still appended
+by the postfix after the original returns, so it stays the last row; on a party tooltip it can now follow the parley hint,
+so a masked party whose name is visible shows that hint just above "Counted ... ago". The title, defenders and troop rows
+the patches rewrite sit before the hint tail and are unchanged.
 
 ### Rules
 
@@ -393,6 +402,7 @@ healthy troops (a count of 0 is one digit). Six or more digits use the five-digi
 | `Main/Features/HiddenHosts/Hooks/PartyBaseHelper_GetPartySizeText_HiddenHosts_Patch.cs` | T10: the count text |
 | `Main/Features/HiddenHosts/Hooks/CampaignUIHelper_GetPartyNameplateText_HiddenHosts_Patch.cs` | T11: a settlement tooltip's party rows |
 | `Main/Features/HiddenHosts/Hooks/MobileParty_GetBehaviorText_HiddenHosts_Patch.cs` | T19 (#848): "Orders unknown." in a masked or horizon party or army tooltip |
+| `Main/Features/HiddenHosts/Hooks/DefaultEncounterModel_CanMainHeroDoParleyWithParty_HiddenHosts_Patch.cs` | #1037: postfix, a masked host's field parley is refused and vanilla's nameless fallback line applies |
 | `Main/Adapters/SettlementIntelSnapshot.cs`, `EventIntelSnapshot.cs` | Phase 2: raw facts about a settlement, a battle or a siege |
 | `Main/Features/HiddenHosts/HiddenHostsService.Memory.cs` | Phase 3: record, stamps, fade, pending XP, save text, reset |
 | `Main/Features/HiddenHosts/HiddenHostsMemory.cs`, `MemoryRow.cs` | Phase 3: the rows and the record, visibility, fade and cap rules |
@@ -512,6 +522,54 @@ In the Harmony pair of Patch105 the only change is that `VanillaBinds.LayMask` s
 `IsHorizon`; the pair still goes through `__state` and the finalizer, and `HiddenHostsHarmonyPairTests` runs the named-horizon
 case through real Harmony.
 
+## Field parley (v1.5.6)
+
+Bannerlord v1.5.6 lets the player parley with an at-war lord party on the map, not only with a settlement. The range is
+the main party's seeing range, measured in a straight line, so a host at the horizon can be inside it. That undid the
+mask: hovering a nameless "Unknown party" showed the "Press {MODIFIER_KEY} + {CLICK_KEY} to parley." hint (vanilla's text, Native `module_strings.xml`) (the hint row is added on any hover;
+only the plate's parley icon needs Ctrl held), and the icon and the hint both mark it as an at-war lord party; the click
+opened a conversation with the lord or a meeting menu listing every hero by name; and the refusal text ("You are too far
+away from {PARTY} to start parley.") printed the party's name.
+
+**What it does.** One postfix, `DefaultEncounterModel_CanMainHeroDoParleyWithParty_HiddenHosts_Patch`, on
+`DefaultEncounterModel.CanMainHeroDoParleyWithParty(PartyBase, out TextObject)`. All four v1.5.6 callers ask that one
+method through `Campaign.Current.Models.EncounterModel`: `TooltipRefresherCollection.AddTooltipHintProperties` (the hint
+row), the party and settlement nameplate `CanParley` flags (`SandBox.GauntletUI`) and `MapScreen.TryParleyWith` (the click).
+So one seam covers the icon, the hint and the click. When Hidden Hosts is on and the party is a mobile party for which
+`HiddenHostsService.MasksParley` is true, the answer becomes false and the explanation is set to null. The click then prints
+vanilla's own fallback, "Cannot parley with this party." (`str_cannot_parley_with_party`, which `MapScreen.TryParleyWith` uses when
+the explanation is null); the tooltip hint row and the nameplate icon drop out, and the text names nobody. Mike chose vanilla's
+line over a TAOM text, so the feature adds no localization key.
+
+**Same verdict as the plate and the tooltip title.** `MasksParley` is `IsVisible && IsNameHidden`: the party is drawn on the
+map, is past nine tenths of its spotting reach and no scout named it. The visibility gate matches the tooltip title rule: only a
+party drawn on the map has a horizon. A tracked at-war lord party that is out of sight but still inside your seeing range
+(for example one hidden by forest cover, spotting ratio below 1) keeps its parley hint and its name. Vanilla refuses a mobile
+party beyond `PlayerParleyDistance`, which is `MobileParty.MainParty.SeeingRange`, and a party leaves sight at the seeing
+range times its spotting ratio. Past your seeing range vanilla refuses with "You are too far away from (name)", which is
+expected because the tracker already names it. A host the scout named (#847) keeps its name, so its parley stays open; a
+party in plain sight, the player's own side, an engine-hidden party and true sight are exempt, as on the plate. Close in
+until the plate names the lord and the parley comes back.
+
+**What it leaves alone.** A settlement (Hidden Hosts does not mask settlements), the toggle off, an unmasked host, a refusal
+that carried no text (vanilla's fallback line names no party), any error and the shared fault budget all keep vanilla's
+answer. The postfix returns early only when vanilla refused with no text; every other answer for a masked host loses its
+text. That covers the refusals that name the party (too far away, or one side at sea) and the one that
+names none ("You can't start parley with Rebels."), which is dropped too; at the horizon vanilla usually answers yes, since the parley distance is the seeing range
+itself (`PlayerParleyDistance` returns `MobileParty.MainParty.SeeingRange`, `E:\Decompiled_Bannerlord\_shipping_build\TaleWorlds.CampaignSystem.cs:61069`),
+and the postfix turns that yes into a refusal.
+
+**Cost.** The nameplate view asks once per party plate per frame while Ctrl is held. The postfix returns before any read
+when vanilla refused without a text, when Hidden Hosts is off or when the party is not mobile; otherwise it makes the same
+cached `IPartyIntelAdapter.Read` the plate hook makes. The service and adapter are reached through `HiddenHostsCalls`,
+handed over once at module start.
+
+**Co-op.** A postfix, not a veto, so `CoopVetoClassificationTests` has no row for it (a row would fail
+`Registry_HasNoStaleEntries`). It changes only whether this client's own UI offers a parley; every vanilla caller is UI.
+
+**Tests.** `HiddenHostsParleyTests` (the service verdict) and `HiddenHostsParleyHookTests` (the postfix against bare
+engine objects and the installed `DefaultEncounterModel`).
+
 ## Hidden party orders (#848)
 
 A party or army tooltip prints what the host is doing ("Besieging X.", "Holding.", "Following Y.") on one row under its title.
@@ -612,6 +670,7 @@ re-masks at the next two-second refresh, until the tooltip is rebuilt. Vanilla's
 
 ## Changelog
 
+- 2026-10-27: field parley (#1037): a masked host's parley is refused with vanilla's nameless "Cannot parley with this party."; one postfix, no key. The veto needs the party drawn on the map.
 - 2026-10-20: hidden party orders (#848): a masked or horizon party or army tooltip shows "Orders unknown." in place of the host's orders (T19); one new key, no setting.
 - 2026-10-20: Far Watch (#847): the scout-away rule (`FogSkill`), hosts named by a scout keep their name past the horizon (`IsNameHidden`), `RaiseByScout` and `RecordScoutedSettlement`; the service takes an `IScoutIntelQuery`.
 - 2026-10-19: deep-review fixes: exact stamps also on every game menu (the tick never fires while a menu stops time), a live view that contradicts a memory replaces it, own side and plain sight judged by one predicate, the player's own siege on both sides, battle totals leave hidden parties out, the Scouting XP is also granted before a save, a masked total row is always wrapped, a thread-local frame slot, the reason row and the drawn flag follow what reached the screen.
@@ -626,6 +685,21 @@ Left Alt held, so the name and extra text show: counts sharpen with distance; st
 for a tenth of the threshold; past nine tenths of the party's spotting reach the plate reads `...` and "Unknown party" and
 the encyclopedia key does nothing, while a left click still engages; turn the toggle off mid-chase and the exact numbers
 return on the next frame; the popup appears once per campaign.
+
+### Field parley checks (#1037)
+
+With Hidden Hosts on and an enemy at war with you, hold Ctrl over an at-war lord party in the horizon band (plate reads
+"Unknown party"): no parley icon, no "Press {MODIFIER_KEY} + {CLICK_KEY} to parley." hint, and a click prints "Cannot parley with this
+party." with no name in it. Close in until the plate names the lord: the icon and the hint return and a click within the
+parley distance parleys. Name a host past the horizon with a scout's report: its parley is offered once it is in parley
+range. Hold Ctrl over a settlement you are at war with: its parley is unchanged. Toggle Hidden Hosts off: vanilla icon and
+text at any distance. No `[HiddenHosts] ... fell back to vanilla` line in the log.
+
+Track an at-war lord party that is out of sight but still inside your seeing range (for example one hidden by forest cover,
+spotting ratio below 1): it keeps its parley hint and its name. Past your seeing range vanilla refuses with "You are too far
+away from (name)", which is expected because the tracker already names it.
+Parley a far host whose count is masked, then check its plate: a parley conversation party counts as in plain sight
+(`PartyIntelAdapter.cs` near :229-230), so it may stamp an exact count (UNVERIFIED).
 
 ### Hidden party orders checks (#848)
 

@@ -21,6 +21,8 @@ misattributed crashes) or we migrate deliberately. The session-start hook warns 
 2. **The wEditor build — run this every time; it is the step that got skipped on 1.4.7 → 1.4.8.**
    The Modding Kit build (`bin/Win64_Shipping_wEditor`) updates on its OWN Steam schedule, so read
    its `Version.xml` and its `TaleWorlds.Native.dll` `LastWriteTime` separately from the client's.
+   It can land well after the client (44 minutes on v1.5.6; whole versions before 2026-08-10), so re-read its `Version.xml` and the DLL hash right before the
+   Phase 2 decompile and again before trusting `_editor_build`.
    It does not merely "stay a version behind": on 2026-08-10 it jumped **three versions at once**,
    `v1.4.5.114928` → `v1.4.8.119303` (`public const string GameVersion`, `_editor_build_v1.4.5/`
    vs `_editor_build/TaleWorlds.Library.cs`), while the client moved 1.4.7 → 1.4.8.
@@ -30,10 +32,18 @@ misattributed crashes) or we migrate deliberately. The session-start hook warns 
    Steam overwrites in place, so since 2026-10-26 (#1004) the session-start hook archives each new
    client and wEditor `TaleWorlds.Native.dll` the first session it appears, with its engine-method
    map and matcher index, into `E:\Decompiled_Bannerlord\_native\TaleWorlds.Native.v<ver>.{client,wEditor}.dll`.
-   **Check it ran:** `python tools/native_archive.py --status` must list the OLD build with `map=ok`;
-   if it does not, copy both `bin/Win64_Shipping_{Client,wEditor}/TaleWorlds.Native.dll` aside by hand
+   **Check it ran:** run `python tools/native_archive.py` with no flags (it archives any installed build
+   whose size or mtime differs from its saved row), then `--status`. `--status` shows saved state only,
+   one row per install path, and does not re-check the installed DLL, so confirm each row's `sha16`
+   (the first 16 hex digits of the SHA-256) against the installed file (#1038):
+   `python -c "import hashlib,sys;print(hashlib.sha256(open(sys.argv[1],'rb').read()).hexdigest()[:16])" <dll>`.
+   A mismatch or no row means the installed build is not archived (a silent run can mean the lock is
+   held): copy it to `_native\TaleWorlds.Native.v<ver>.{client,wEditor}.dll` with `<ver>` from that
+   folder's `Version.xml`. `E:\Decompiled_Bannerlord\_native\` must hold the OLD
+   `TaleWorlds.Native.v<old>.{client,wEditor}.dll` pair; if it does not, copy both `bin/Win64_Shipping_{Client,wEditor}/TaleWorlds.Native.dll` aside by hand
    now:
-   that copy is the only baseline the NEXT bump will have, and `native_build_match.py` reads it. The cost of not having one
+   that copy is the only baseline the NEXT bump will have, and `native_build_match.py` reads it. If the OLD pair
+   is already missing it is gone: record that and expect `oracle=unscored`. The cost of not having one
    is already booked: the open player report (untracked; read it with
    `git show b2e387db:crashz/report.json`; `BannerlordVersion v1.4.7.117484`) can no longer be
    triaged against a local binary.
@@ -65,7 +75,13 @@ misattributed crashes) or we migrate deliberately. The session-start hook warns 
    they keep non-public members, so they also serve as the old-engine baseline after Steam overwrites
    the install). Shipped DLLs live under `E:\LOTRAOM_Releases\<channel>\Modules\`. Negative control:
    a fresh build of HEAD must report 0 misses. A NEW miss means that channel needs a rebuilt release
-   before players take the engine update; a miss the baseline also has is pre-existing.
+   before players take the engine update; a miss the baseline also has is pre-existing. The checker
+   reads member and type references only, so it cannot see an override of a changed abstract member
+   (a shipped `TaomHowdahMachine` overriding the old one-argument `GetDescriptionText` passed it); the
+   source compile of HEAD catches those (#1038). It also cannot see an engine enum or const whose
+   value moved, which the compiler bakes into the caller (v1.5.6 `BattleEnvironment` lost `None`; only a
+   type diff shows it, and a rebuild fixes it). Either kind in HEAD means every channel built before the
+   fix needs a rebuild, even with 0 checker misses.
 6. **Early signature-level API diff.** No committed tool does this yet. The committed signature-level
    check is `tools/check_engine_member_refs.ps1` (item 5) against the old BUTR reference assemblies,
    which covers what TAOM calls but not what changed elsewhere.
@@ -148,7 +164,10 @@ then TAOM on top) inherits a body change for free, a replacement inherits nothin
 indistinguishable to a signature gate. v1.5.2 calibration: 51 changed bodies, one drift
 (`TaomPartyWageModel.GetTroopRecruitmentCost`, a replacement still carrying the v1.4.8 perk
 shape), one abstract-new patch target that `HarmonyPatchBindingTests` had passed because an
-abstract method resolves by name. A row it cannot resolve is a failure, not a pass. Record the verdicts in `docs/migration/v<ver>-diff-ranked.md`.
+abstract method resolves by name. A row it cannot resolve is a failure, not a pass. Until #1038 item 4 lands, two rows fail every
+run: `CoopRecruitAttributionPatch` (UNPARSED) and `MissionScreen.IMissionSystemHandler.UpdateCamera`
+(UNRESOLVED). Diff both by hand; any other UNPARSED or UNRESOLVED row is a failure. A `TargetMethods()` patch appears in the snapshot by its
+first target only, so diff its other targets by hand (#1038): `grep -rlE 'IEnumerable<MethodBase>\s+TargetMethods' Main Client Dependencies` lists them. Record the verdicts in `docs/migration/v<ver>-diff-ranked.md`.
 
 ## Phase 4 — Re-verify TAOM against the new engine
 
@@ -199,7 +218,8 @@ abstract method resolves by name. A row it cannot resolve is a failure, not a pa
      female-conversation overrides that belong nested inside each.
 4. Vanilla data rescan per `.claude/rules/vanilla-data-comparison.md` (scene renames/removals,
    XML re-schemas) + check which vanilla `ModuleData` XMLs the update actually touched
-   (timestamp filter).
+   (timestamp filter). TAOM rows that define vanilla GameText ids (the `str_last_seen` block in
+   `taom_module_strings.xml`) override Native's on merge, so delete them once vanilla defines those ids.
 5. Update the pin: write the new version into `.claude/pinned-game-version.txt` (the file
    `session-start.sh` reads; note it's `.claude/`, NOT `.claude/state/`).
 6. The `Target:` line in AGENTS.md (`lint_docs.py` checks it against the pin), plus the

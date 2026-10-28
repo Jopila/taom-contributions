@@ -71,7 +71,7 @@ public class ForestSightContributorTests
             "{ if (!_settings.Enabled) return 0f; if (party == null || !party.IsMainParty) return 0f; "
             + "bool inSettlement = party.CurrentSettlement != null; "
             + "bool inForest = !inSettlement && _terrain.IsInForest(party); "
-            + "bool keenSight = inForest && party.HasPerk(DefaultPerks.Scouting.KeenSight, out _); "
+            + "bool keenSight = inForest && party.HasPerk(DefaultPerks.Scouting.KeenSight); "
             + "return UnderTheEavesRule.Factor(inForest, inSettlement, keenSight); }");
         Assert.IsFalse(body.Contains("IoC.Resolve") || body.Contains(".Select(") || body.Contains(".Where(") || body.Contains("new "),
             "no service locator, LINQ or allocation on the per-query path");

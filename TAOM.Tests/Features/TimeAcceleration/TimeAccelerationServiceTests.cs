@@ -685,4 +685,67 @@ public class TimeAccelerationServiceTests
         _timeControl.Received(1).SpeedUpMultiplier = 4;
         _timeControl.Received(1).SetTimeSpeed(2);
     }
+
+    // --- IsTurboActive (#1040): the latch, read by Patch124 on a parley click release ---------
+
+    private void OpenTurbo()
+    {
+        _input.IsControlDown.Returns(true);
+        PressSharedDefaultKey();
+        _sut.OnTick();
+    }
+
+    [TestMethod]
+    public void IsTurboActive_FalseBeforeAnyTick() => Assert.IsFalse(_sut.IsTurboActive);
+
+    [TestMethod]
+    public void IsTurboActive_TrueAfterCtrlPlusTurboPress()
+    {
+        OpenTurbo();
+        Assert.IsTrue(_sut.IsTurboActive);
+    }
+
+    [TestMethod]
+    public void IsTurboActive_FalseAfterTurboKeyRelease()
+    {
+        OpenTurbo();
+        Assert.IsTrue(_sut.IsTurboActive);
+        _input.IsFastForwardPressed.Returns(false);
+        _input.IsTurboPressed.Returns(false);
+        _input.IsTurboReleased.Returns(true);
+        _sut.OnTick();
+        Assert.IsFalse(_sut.IsTurboActive);
+    }
+
+    [TestMethod]
+    public void IsTurboActive_FalseAfterCtrlRelease()
+    {
+        OpenTurbo();
+        Assert.IsTrue(_sut.IsTurboActive);
+        _input.IsControlDown.Returns(false);
+        _input.IsFastForwardPressed.Returns(false);
+        _input.IsTurboPressed.Returns(false);
+        _sut.OnTick();
+        Assert.IsFalse(_sut.IsTurboActive);
+    }
+
+    [TestMethod]
+    public void IsTurboActive_FalseWhenANonLockedMenuOpensMidTurbo()
+    {
+        OpenTurbo();
+        Assert.IsTrue(_sut.IsTurboActive);
+        _timeControl.IsMenuOpen.Returns(true);
+        _sut.OnTick();
+        Assert.IsFalse(_sut.IsTurboActive);
+    }
+
+    [TestMethod]
+    public void IsTurboActive_FalseUnderCoopDeferral()
+    {
+        OpenTurbo();
+        Assert.IsTrue(_sut.IsTurboActive);
+        _coop.ShouldDeferToHost.Returns(true);
+        _sut.OnTick();
+        Assert.IsFalse(_sut.IsTurboActive);
+    }
 }

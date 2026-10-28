@@ -246,6 +246,7 @@ public class HiddenHostsWiringTests
         "PartyBaseHelper_GetPartySizeText_HiddenHosts_Patch",
         "CampaignUIHelper_GetPartyNameplateText_HiddenHosts_Patch",
         "MobileParty_GetBehaviorText_HiddenHosts_Patch",
+        "DefaultEncounterModel_CanMainHeroDoParleyWithParty_HiddenHosts_Patch",
     };
 
     [TestMethod]
