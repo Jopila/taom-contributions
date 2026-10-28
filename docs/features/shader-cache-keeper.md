@@ -49,12 +49,12 @@ for every launcher. On load (`DllMain`), only in processes whose name starts wit
 XInput calls go to Windows' own `xinput9_1_0.dll`, loaded from `GetSystemDirectoryW` on the first call (`InitOnce`,
 never under the loader lock); without it every call answers `ERROR_DEVICE_NOT_CONNECTED`.
 
-### `shader_mapping.bin` header (v1.5.4, read 2026-10-06)
+### `shader_mapping.bin` header (read 2026-10-06 on v1.5.4, re-read 2026-10-27 on v1.5.6)
 
 | Offset | Content |
 |---|---|
-| 0 | u32 format, `0x0783` |
-| 4 | u32 length, then the game build as text (`123627`) |
+| 0 | u32 format: `0x0783` on v1.5.4 and v1.5.5, `0x0784` on v1.5.6. The keeper does not read it |
+| 4 | u32 length, then the game build as text (`123627` on v1.5.4, `125053` on v1.5.6) |
 | 8 + n | u32 length, then the module ids sorted by character code, joined with `;` (`SandBoxCore` before `Sandbox`) |
 | after | the shader records, untouched |
 
@@ -85,8 +85,11 @@ When the engine does rebuild, [shader-compile-notice.md](shader-compile-notice.m
 
 - **TAOM, TAOM_Map and LOTRLOME_Armory all have a `Shaders` folder**, so switching between vanilla and TAOM, or
   updating any of the three, still recompiles. That is correct, not a gap.
-- **A changed game build** (a game update, or the Modding Kit, which shares the cache folder and has its own build)
-  still drops the cache: only the list text is rewritten, never the build text.
+- **A changed game build** (a game update) still drops the cache: only the list text is rewritten, never the
+  build text. The first v1.5.6 start rebuilds every cache, because the format word also moved (`0x0783` to
+  `0x0784`). The Modding Kit shares the cache folder **and the game's build number** (125053 on v1.5.6, read from
+  the cache a v1.5.6 Kit session wrote, 2026-10-27; 124170 on v1.5.5), so a Kit cache whose module list matches a
+  later game start is kept, as the engine itself keeps any cache whose lists match.
 - **The first start with the keeper** has no noted signature, so it trusts today's files for the cached list.
 
 ## Key Files
