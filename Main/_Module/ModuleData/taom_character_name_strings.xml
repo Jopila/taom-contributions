@@ -437,6 +437,78 @@
 	<string id="aom_dn_weaponsmith" text="{=aom_dn_weaponsmith}Weaponsmith" />
 	<string id="aom_dolguldur_lord_1" text="{=aom_dolguldur_lord_1}Bold Dol Guldur captain" />
 	<string id="aom_dolguldur_lord_2" text="{=aom_dolguldur_lord_2}Cautious Dol Guldur captain" />
+	<string id="aom_elu_arena" text="{=aom_elu_arena}Arena Master" />
+	<string id="aom_elu_armed_trader" text="{=aom_elu_armed_trader}Ered Luin Armed Trader" />
+	<string id="aom_elu_armorer" text="{=aom_elu_armorer}Armorer" />
+	<string id="aom_elu_barber" text="{=aom_elu_barber}Barber" />
+	<string id="aom_elu_beggar" text="{=aom_elu_beggar}Beggar" />
+	<string id="aom_elu_blacksmith" text="{=aom_elu_blacksmith}Blacksmith" />
+	<string id="aom_elu_caravan_guard" text="{=aom_elu_caravan_guard}Ered Luin Caravan Guard" />
+	<string id="aom_elu_caravan_master" text="{=aom_elu_caravan_master}Ered Luin Caravan Master" />
+	<string id="aom_elu_dancer" text="{=aom_elu_dancer}Dancer" />
+	<string id="aom_elu_female_beggar" text="{=aom_elu_female_beggar}Beggar" />
+	<string id="aom_elu_gamehost" text="{=aom_elu_gamehost}Game Host" />
+	<string id="aom_elu_gang_bodyguard" text="{=aom_elu_gang_bodyguard}Gang Bodyguard" />
+	<string id="aom_elu_gear_dummy" text="{=aom_elu_gear_dummy}Gear Dummy" />
+	<string id="aom_elu_guard" text="{=aom_elu_guard}Guard" />
+	<string id="aom_elu_headman_1" text="{=aom_elu_headman_1}Rebellious dwarven headman" />
+	<string id="aom_elu_headman_2" text="{=aom_elu_headman_2}Conservative dwarven headman" />
+	<string id="aom_elu_headman_3" text="{=aom_elu_headman_3}Devious dwarven headman" />
+	<string id="aom_elu_horse_merchant" text="{=aom_elu_horse_merchant}Horse Merchant" />
+	<string id="aom_elu_merchant" text="{=aom_elu_merchant}Trader" />
+	<string id="aom_elu_musician" text="{=aom_elu_musician}Musician" />
+	<string id="aom_elu_notable_0" text="{=aom_elu_notable_0}Cautious dwarven merchant" />
+	<string id="aom_elu_notable_0b" text="{=aom_elu_notable_0b}Dwarven vintner" />
+	<string id="aom_elu_notable_1" text="{=aom_elu_notable_1}Ruthless dwarven trader" />
+	<string id="aom_elu_notable_10" text="{=aom_elu_notable_10}Ironic dwarven gang leader" />
+	<string id="aom_elu_notable_11" text="{=aom_elu_notable_11}Intimidating dwarven enforcer" />
+	<string id="aom_elu_notable_12" text="{=aom_elu_notable_12}Cunning dwarven smuggler" />
+	<string id="aom_elu_notable_13" text="{=aom_elu_notable_13}Menacing dwarven gang leader" />
+	<string id="aom_elu_notable_1b" text="{=aom_elu_notable_1b}Cold dwarven merchant" />
+	<string id="aom_elu_notable_2" text="{=aom_elu_notable_2}Dwarven gem dealer" />
+	<string id="aom_elu_notable_21" text="{=aom_elu_notable_21}Gruff dwarven landowner" />
+	<string id="aom_elu_notable_22" text="{=aom_elu_notable_22}Agreeable dwarven elder" />
+	<string id="aom_elu_notable_2b" text="{=aom_elu_notable_2b}Cautious dwarven ore trader" />
+	<string id="aom_elu_notable_3" text="{=aom_elu_notable_3}Self-made dwarven merchant" />
+	<string id="aom_elu_notable_3b" text="{=aom_elu_notable_3b}Jocular dwarven merchant" />
+	<string id="aom_elu_notable_4" text="{=aom_elu_notable_4}Shrewd dwarven merchant" />
+	<string id="aom_elu_notable_4b" text="{=aom_elu_notable_4b}Devious dwarven merchant" />
+	<string id="aom_elu_notable_5" text="{=aom_elu_notable_5}Zealous dwarven loremaster" />
+	<string id="aom_elu_notable_6" text="{=aom_elu_notable_6}Stern dwarven elder" />
+	<string id="aom_elu_notable_7" text="{=aom_elu_notable_7}Dwarven keeper of traditions" />
+	<string id="aom_elu_notable_8" text="{=aom_elu_notable_8}Gruff dwarven smith" />
+	<string id="aom_elu_notable_9" text="{=aom_elu_notable_9}Outgoing dwarven craftsman" />
+	<string id="aom_elu_notable_gl1" text="{=aom_elu_notable_gl1}Protective dwarven ringleader" />
+	<string id="aom_elu_notable_gl4" text="{=aom_elu_notable_gl4}Bestial dwarven thug" />
+	<string id="aom_elu_practice_1" text="{=aom_elu_practice_1}Practice Fighter" />
+	<string id="aom_elu_practice_2" text="{=aom_elu_practice_2}Practice Fighter" />
+	<string id="aom_elu_practice_3" text="{=aom_elu_practice_3}Practice Fighter" />
+	<string id="aom_elu_practice_dummy" text="{=aom_elu_practice_dummy}Practice Dummy" />
+	<string id="aom_elu_prison_guard" text="{=aom_elu_prison_guard}Prison Guard" />
+	<string id="aom_elu_ransom_broker" text="{=aom_elu_ransom_broker}Ransom Broker" />
+	<string id="aom_elu_shop_worker" text="{=aom_elu_shop_worker}Shop Worker" />
+	<string id="aom_elu_tavern_wench" text="{=aom_elu_tavern_wench}Tavern Wench" />
+	<string id="aom_elu_tavernkeeper" text="{=aom_elu_tavernkeeper}Tavern Keeper" />
+	<string id="aom_elu_town_child" text="{=aom_elu_town_child}Town Child" />
+	<string id="aom_elu_town_teen" text="{=aom_elu_town_teen}Town Teenager" />
+	<string id="aom_elu_townsman" text="{=aom_elu_townsman}Townsman" />
+	<string id="aom_elu_townsman_child" text="{=aom_elu_townsman_child}Townsman" />
+	<string id="aom_elu_townsman_infant" text="{=aom_elu_townsman_infant}Townsman" />
+	<string id="aom_elu_townsman_teen" text="{=aom_elu_townsman_teen}Townsman" />
+	<string id="aom_elu_townswoman" text="{=aom_elu_townswoman}Townswoman" />
+	<string id="aom_elu_townswoman_child" text="{=aom_elu_townswoman_child}Townswoman" />
+	<string id="aom_elu_townswoman_infant" text="{=aom_elu_townswoman_infant}Townswoman" />
+	<string id="aom_elu_townswoman_teen" text="{=aom_elu_townswoman_teen}Townswoman" />
+	<string id="aom_elu_vet_caravan_guard" text="{=aom_elu_vet_caravan_guard}Ered Luin Veteran Caravan Guard" />
+	<string id="aom_elu_village_child" text="{=aom_elu_village_child}Village Child" />
+	<string id="aom_elu_village_teen" text="{=aom_elu_village_teen}Village Teenager" />
+	<string id="aom_elu_village_woman" text="{=aom_elu_village_woman}Village Woman" />
+	<string id="aom_elu_village_woman_child" text="{=aom_elu_village_woman_child}Village Child" />
+	<string id="aom_elu_village_woman_teen" text="{=aom_elu_village_woman_teen}Village Teenager" />
+	<string id="aom_elu_villager" text="{=aom_elu_villager}Villager" />
+	<string id="aom_elu_villager_child" text="{=aom_elu_villager_child}Village Child" />
+	<string id="aom_elu_villager_teen" text="{=aom_elu_villager_teen}Village Teenager" />
+	<string id="aom_elu_weaponsmith" text="{=aom_elu_weaponsmith}Weaponsmith" />
 	<string id="aom_er_arena" text="{=aom_er_arena}Arena Master" />
 	<string id="aom_er_armed_trader" text="{=aom_er_armed_trader}Erebor Armed Trader" />
 	<string id="aom_er_armorer" text="{=aom_er_armorer}Armorer" />
@@ -511,6 +583,8 @@
 	<string id="aom_er_weaponsmith" text="{=aom_er_weaponsmith}Weaponsmith" />
 	<string id="aom_erebor_lord_1" text="{=aom_erebor_lord_1}Bold dwarven lord" />
 	<string id="aom_erebor_lord_2" text="{=aom_erebor_lord_2}Cautious dwarven lord" />
+	<string id="aom_eredluin_lord_1" text="{=aom_eredluin_lord_1}Bold dwarven lord" />
+	<string id="aom_eredluin_lord_2" text="{=aom_eredluin_lord_2}Cautious dwarven lord" />
 	<string id="aom_gb_arena" text="{=aom_gb_arena}Arena Master" />
 	<string id="aom_gb_armed_trader" text="{=aom_gb_armed_trader}Gundabad Armed Trader" />
 	<string id="aom_gb_armorer" text="{=aom_gb_armorer}Armorer" />
@@ -1567,6 +1641,18 @@
 	<string id="aom_spc_wanderer_erebor_7_name" text="{=aom_spc_wanderer_erebor_7_name}{FIRSTNAME} Bit Gór" />
 	<string id="aom_spc_wanderer_erebor_8_name" text="{=aom_spc_wanderer_erebor_8_name}{FIRSTNAME} Bit Lóin" />
 	<string id="aom_spc_wanderer_erebor_9_name" text="{=aom_spc_wanderer_erebor_9_name}{FIRSTNAME} Bit Garin" />
+	<string id="aom_spc_wanderer_eredluin_0_name" text="{=aom_spc_wanderer_eredluin_0_name}{FIRSTNAME} Bit Barukkhaz" />
+	<string id="aom_spc_wanderer_eredluin_10_name" text="{=aom_spc_wanderer_eredluin_10_name}{FIRSTNAME} Bit Norin" />
+	<string id="aom_spc_wanderer_eredluin_11_name" text="{=aom_spc_wanderer_eredluin_11_name}{FIRSTNAME} Bit Kár" />
+	<string id="aom_spc_wanderer_eredluin_1_name" text="{=aom_spc_wanderer_eredluin_1_name}{FIRSTNAME} Bit Durakûn" />
+	<string id="aom_spc_wanderer_eredluin_2_name" text="{=aom_spc_wanderer_eredluin_2_name}{FIRSTNAME} Bit Gamilzar" />
+	<string id="aom_spc_wanderer_eredluin_3_name" text="{=aom_spc_wanderer_eredluin_3_name}{FIRSTNAME} Bit Buzrûn" />
+	<string id="aom_spc_wanderer_eredluin_4_name" text="{=aom_spc_wanderer_eredluin_4_name}{FIRSTNAME} Bit Tharin" />
+	<string id="aom_spc_wanderer_eredluin_5_name" text="{=aom_spc_wanderer_eredluin_5_name}{FIRSTNAME} Bit Barin" />
+	<string id="aom_spc_wanderer_eredluin_6_name" text="{=aom_spc_wanderer_eredluin_6_name}{FIRSTNAME} Bit Argan" />
+	<string id="aom_spc_wanderer_eredluin_7_name" text="{=aom_spc_wanderer_eredluin_7_name}{FIRSTNAME} Bit Gór" />
+	<string id="aom_spc_wanderer_eredluin_8_name" text="{=aom_spc_wanderer_eredluin_8_name}{FIRSTNAME} Bit Lóin" />
+	<string id="aom_spc_wanderer_eredluin_9_name" text="{=aom_spc_wanderer_eredluin_9_name}{FIRSTNAME} Bit Garin" />
 	<string id="aom_spc_wanderer_goblin_0_name" text="{=aom_spc_wanderer_goblin_0_name}{FIRSTNAME} Bonechewer" />
 	<string id="aom_spc_wanderer_goblin_1_name" text="{=aom_spc_wanderer_goblin_1_name}{FIRSTNAME} Skullsplitter" />
 	<string id="aom_spc_wanderer_goblin_2_name" text="{=aom_spc_wanderer_goblin_2_name}{FIRSTNAME} Bloodfang" />

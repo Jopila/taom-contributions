@@ -6485,4 +6485,304 @@
 	</NPCCharacter>
 
   <!-- TAOM-NEWCULTURE:rhudaur:END -->
+  <!-- TAOM-NEWCULTURE:eredluin:BEGIN -->
+	<NPCCharacter
+		id="spc_wanderer_eredluin_0"
+		race="dwarf"
+		name="{=aom_spc_wanderer_eredluin_0_name}{FIRSTNAME} Bit Barukkhaz"
+		voice="softspoken"
+		age="28"
+		is_template="true"
+		default_group="Infantry"
+		is_hero="false"
+		culture="Culture.eredluin"
+		occupation="Wanderer"
+		skill_template="SkillSet.spc_wanderer_erebor_0_skills">
+		<face>
+			<face_key_template value="BodyProperty.fighter_erebor" />
+		</face>
+		<Traits>
+			<Trait id="Calculating" value="1" />
+			<Trait id="Mercy" value="-1" />
+		</Traits>
+		<Equipments>
+			<EquipmentSet id="npc_companion_equipment_template_eredluin" equipmentType="Civilian" />
+			<EquipmentSet id="npc_companion_equipment_template_eredluin" />
+		</Equipments>
+	</NPCCharacter>
+	<NPCCharacter
+		id="spc_wanderer_eredluin_1"
+		race="dwarf"
+		name="{=aom_spc_wanderer_eredluin_1_name}{FIRSTNAME} Bit Durakûn"
+		voice="earnest"
+		age="27"
+		is_template="true"
+		default_group="Infantry"
+		is_hero="false"
+		culture="Culture.eredluin"
+		occupation="Wanderer"
+		skill_template="SkillSet.spc_wanderer_erebor_1_skills">
+		<face>
+			<face_key_template value="BodyProperty.fighter_erebor" />
+		</face>
+		<Traits>
+			<Trait id="Valor" value="1" />
+			<Trait id="Calculating" value="-1" />
+			<Trait id="Mercy" value="-1" />
+		</Traits>
+		<Equipments>
+			<EquipmentSet id="npc_companion_equipment_template_eredluin" equipmentType="Civilian" />
+			<EquipmentSet id="npc_companion_equipment_template_eredluin" />
+		</Equipments>
+	</NPCCharacter>
+	<NPCCharacter
+		id="spc_wanderer_eredluin_2"
+		race="dwarf"
+		name="{=aom_spc_wanderer_eredluin_2_name}{FIRSTNAME} Bit Gamilzar"
+		voice="earnest"
+		age="21"
+		is_template="true"
+		default_group="Infantry"
+		is_hero="false"
+		culture="Culture.eredluin"
+		occupation="Wanderer"
+		skill_template="SkillSet.spc_wanderer_erebor_2_skills">
+		<face>
+			<face_key_template value="BodyProperty.fighter_erebor" />
+		</face>
+		<Traits>
+			<Trait id="Valor" value="1" />
+			<Trait id="Generosity" value="-1" />
+		</Traits>
+		<Equipments>
+			<EquipmentSet id="npc_companion_equipment_template_eredluin" equipmentType="Civilian" />
+			<EquipmentSet id="npc_companion_equipment_template_eredluin" />
+		</Equipments>
+	</NPCCharacter>
+	<NPCCharacter
+		id="spc_wanderer_eredluin_3"
+		race="dwarf"
+		name="{=aom_spc_wanderer_eredluin_3_name}{FIRSTNAME} Bit Buzrûn"
+		voice="curt"
+		age="35"
+		is_template="true"
+		default_group="Infantry"
+		is_hero="false"
+		culture="Culture.eredluin"
+		occupation="Wanderer"
+		skill_template="SkillSet.spc_wanderer_erebor_3_skills">
+		<face>
+			<face_key_template value="BodyProperty.fighter_erebor" />
+		</face>
+		<Traits>
+			<Trait id="Honor" value="-1" />
+			<Trait id="Calculating" value="1" />
+		</Traits>
+		<Equipments>
+			<EquipmentSet id="npc_companion_equipment_template_eredluin" equipmentType="Civilian" />
+			<EquipmentSet id="npc_companion_equipment_template_eredluin" />
+		</Equipments>
+	</NPCCharacter>
+	<NPCCharacter
+		id="spc_wanderer_eredluin_4"
+		race="dwarf"
+		name="{=aom_spc_wanderer_eredluin_4_name}{FIRSTNAME} Bit Tharin"
+		voice="softspoken"
+		age="23"
+		is_template="true"
+		default_group="Infantry"
+		is_hero="false"
+		culture="Culture.eredluin"
+		occupation="Wanderer"
+		skill_template="SkillSet.spc_wanderer_erebor_4_skills">
+		<face>
+			<face_key_template value="BodyProperty.fighter_erebor" />
+		</face>
+		<Traits>
+			<Trait id="Generosity" value="-1" />
+			<Trait id="Honor" value="-2" />
+		</Traits>
+		<Equipments>
+			<EquipmentSet id="npc_companion_equipment_template_eredluin" equipmentType="Civilian" />
+			<EquipmentSet id="npc_companion_equipment_template_eredluin" />
+		</Equipments>
+	</NPCCharacter>
+	<NPCCharacter
+		id="spc_wanderer_eredluin_5"
+		race="dwarf"
+		name="{=aom_spc_wanderer_eredluin_5_name}{FIRSTNAME} Bit Barin"
+		voice="curt"
+		age="30"
+		is_template="true"
+		default_group="Infantry"
+		is_hero="false"
+		culture="Culture.eredluin"
+		occupation="Wanderer"
+		skill_template="SkillSet.spc_wanderer_erebor_5_skills">
+		<face>
+			<face_key_template value="BodyProperty.fighter_erebor" />
+		</face>
+		<Traits>
+			<Trait id="Valor" value="1" />
+			<Trait id="Generosity" value="-1" />
+			<Trait id="Mercy" value="-2" />
+			<Trait id="Calculating" value="-1" />
+		</Traits>
+		<Equipments>
+			<EquipmentSet id="npc_companion_equipment_template_eredluin" equipmentType="Civilian" />
+			<EquipmentSet id="npc_companion_equipment_template_eredluin" />
+		</Equipments>
+	</NPCCharacter>
+	<NPCCharacter
+		id="spc_wanderer_eredluin_6"
+		race="dwarf"
+		name="{=aom_spc_wanderer_eredluin_6_name}{FIRSTNAME} Bit Argan"
+		voice="curt"
+		age="24"
+		is_template="true"
+		default_group="Infantry"
+		is_hero="false"
+		culture="Culture.eredluin"
+		occupation="Wanderer"
+		skill_template="SkillSet.spc_wanderer_erebor_6_skills">
+		<face>
+			<face_key_template value="BodyProperty.fighter_erebor" />
+		</face>
+		<Traits>
+			<Trait id="Valor" value="1" />
+			<Trait id="Generosity" value="-1" />
+			<Trait id="Mercy" value="-1" />
+			<Trait id="Calculating" value="-1" />
+		</Traits>
+		<Equipments>
+			<EquipmentSet id="npc_companion_equipment_template_eredluin" equipmentType="Civilian" />
+			<EquipmentSet id="npc_companion_equipment_template_eredluin" />
+		</Equipments>
+	</NPCCharacter>
+	<NPCCharacter
+		id="spc_wanderer_eredluin_7"
+		race="dwarf"
+		name="{=aom_spc_wanderer_eredluin_7_name}{FIRSTNAME} Bit Gór"
+		voice="ironic"
+		age="24"
+		is_template="true"
+		default_group="Infantry"
+		is_hero="false"
+		culture="Culture.eredluin"
+		occupation="Wanderer"
+		skill_template="SkillSet.spc_wanderer_erebor_7_skills">
+		<face>
+			<face_key_template value="BodyProperty.fighter_erebor" />
+		</face>
+		<Traits>
+			<Trait id="Valor" value="1" />
+			<Trait id="Honor" value="-1" />
+			<Trait id="Mercy" value="-1" />
+			<Trait id="Generosity" value="-1" />
+		</Traits>
+		<Equipments>
+			<EquipmentSet id="npc_companion_equipment_template_eredluin" equipmentType="Civilian" />
+			<EquipmentSet id="npc_companion_equipment_template_eredluin" />
+		</Equipments>
+	</NPCCharacter>
+	<NPCCharacter
+		id="spc_wanderer_eredluin_8"
+		race="dwarf"
+		name="{=aom_spc_wanderer_eredluin_8_name}{FIRSTNAME} Bit Lóin"
+		voice="curt"
+		age="29"
+		is_template="true"
+		default_group="Infantry"
+		is_hero="false"
+		culture="Culture.eredluin"
+		occupation="Wanderer"
+		skill_template="SkillSet.spc_wanderer_erebor_8_skills">
+		<face>
+			<face_key_template value="BodyProperty.fighter_erebor" />
+		</face>
+		<Traits>
+			<Trait id="Valor" value="1" />
+			<Trait id="Honor" value="-1" />
+			<Trait id="Mercy" value="-2" />
+		</Traits>
+		<Equipments>
+			<EquipmentSet id="npc_companion_equipment_template_eredluin" equipmentType="Civilian" />
+			<EquipmentSet id="npc_companion_equipment_template_eredluin" />
+		</Equipments>
+	</NPCCharacter>
+	<NPCCharacter
+		id="spc_wanderer_eredluin_9"
+		race="dwarf"
+		name="{=aom_spc_wanderer_eredluin_9_name}{FIRSTNAME} Bit Garin"
+		voice="ironic"
+		age="26"
+		is_template="true"
+		default_group="Infantry"
+		is_hero="false"
+		culture="Culture.eredluin"
+		occupation="Wanderer"
+		skill_template="SkillSet.spc_wanderer_erebor_9_skills">
+		<face>
+			<face_key_template value="BodyProperty.fighter_erebor" />
+		</face>
+		<Traits>
+			<Trait id="Honor" value="-2" />
+			<Trait id="Calculating" value="1" />
+			<Trait id="Generosity" value="-1" />
+		</Traits>
+		<Equipments>
+			<EquipmentSet id="npc_companion_equipment_template_eredluin" equipmentType="Civilian" />
+			<EquipmentSet id="npc_companion_equipment_template_eredluin" />
+		</Equipments>
+	</NPCCharacter>
+	<NPCCharacter
+		id="spc_wanderer_eredluin_10"
+		race="dwarf"
+		name="{=aom_spc_wanderer_eredluin_10_name}{FIRSTNAME} Bit Norin"
+		voice="earnest"
+		age="32"
+		is_template="true"
+		default_group="Infantry"
+		is_hero="false"
+		culture="Culture.eredluin"
+		occupation="Wanderer"
+		skill_template="SkillSet.spc_wanderer_erebor_10_skills">
+		<face>
+			<face_key_template value="BodyProperty.fighter_erebor" />
+		</face>
+		<Traits>
+			<Trait id="Valor" value="1" />
+			<Trait id="Honor" value="1" />
+		</Traits>
+		<Equipments>
+			<EquipmentSet id="npc_companion_equipment_template_eredluin" equipmentType="Civilian" />
+			<EquipmentSet id="npc_companion_equipment_template_eredluin" />
+		</Equipments>
+	</NPCCharacter>
+	<NPCCharacter
+		id="spc_wanderer_eredluin_11"
+		race="dwarf"
+		name="{=aom_spc_wanderer_eredluin_11_name}{FIRSTNAME} Bit Kár"
+		voice="softspoken"
+		age="28"
+		is_template="true"
+		default_group="Infantry"
+		is_hero="false"
+		culture="Culture.eredluin"
+		occupation="Wanderer"
+		skill_template="SkillSet.spc_wanderer_erebor_11_skills">
+		<face>
+			<face_key_template value="BodyProperty.fighter_erebor" />
+		</face>
+		<Traits>
+			<Trait id="Honor" value="1" />
+			<Trait id="Generosity" value="1" />
+		</Traits>
+		<Equipments>
+			<EquipmentSet id="npc_companion_equipment_template_eredluin" equipmentType="Civilian" />
+			<EquipmentSet id="npc_companion_equipment_template_eredluin" />
+		</Equipments>
+	</NPCCharacter>
+
+  <!-- TAOM-NEWCULTURE:eredluin:END -->
 </NPCCharacters>

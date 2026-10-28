@@ -27,11 +27,13 @@ each file's own line-ending convention survives. Idempotent: a culture already p
 
 Run:  python tools/insert_new_faction_careers.py            # dry run
       python tools/insert_new_faction_careers.py --apply
+      python tools/insert_new_faction_careers.py --check    # exit 1 when --apply would write or refuse
 """
 import argparse
 import json
 import re
 import sys
+import xml.etree.ElementTree as ET
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -79,6 +81,10 @@ SOURCES_FOR = {
                  ("knight_of_belfalas", "kob")],
     "rhudaur": [("ranger_of_ithilien", "roi"), ("captain_of_osgiliath", "cop"),
                 ("knight_of_belfalas", "kob")],
+    # Ered Luin takes Erebor's foot careers. Dwarves never ride, so Erebor's Ram Rider is not
+    # cloned (its passives are mount charge and mount health); Ironguard is cloned twice instead,
+    # once per infantry career, through the list in TARGETS below.
+    "eredluin": [("ironguard", "ig"), ("crossbow_master", "cbm")],
 }
 
 TARGETS = {
@@ -131,7 +137,23 @@ TARGETS = {
         "captain_of_osgiliath": ("captain_of_cameth_brin", "cocb", "Captain of Cameth Brin"),
         "knight_of_belfalas": ("rider_of_the_fells", "rotf", "Rider of the Fells"),
     },
+    # A LIST clones that source once per entry. The ids avoid the troop ids
+    # eredluin_firebeard_arbalester and eredluin_broadbeam_shieldguard, which the display names echo.
+    "eredluin": {
+        "ironguard": [("warden_of_thorins_halls", "woth", "Warden of Thorin's Halls"),
+                      ("shieldguard_of_belegost", "sgob", "Broadbeam Shield-guard")],
+        "crossbow_master": ("nogrod_arbalester", "nga", "Firebeard Arbalester"),
+    },
 }
+
+
+def targets_for(culture):
+    """Yield (src_id, src_abbr, new_id, new_abbr, display) for every career a culture clones, in
+    SOURCES_FOR order. A TARGETS value that is a list clones its source once per entry."""
+    for src_id, src_abbr in SOURCES_FOR.get(culture, SOURCES):
+        target = TARGETS[culture][src_id]
+        for new_id, new_abbr, display in (target if isinstance(target, list) else [target]):
+            yield src_id, src_abbr, new_id, new_abbr, display
 
 # Extra source-culture rows to remove from a cloned <Career>'s eligibility. Gondor's careers list
 # both its culture (gondor) and its kingdom id (empire_w); swapping only the first would leave an
@@ -146,6 +168,7 @@ ELIGIBILITY_SRC = {
     "shaghana": "aserai", "abanissa": "aserai",
     "arthedain": "gondor",
     "cardolan": "gondor", "rhudaur": "gondor",
+    "eredluin": "erebor",
 }
 
 # Player-facing wording. Longest phrase FIRST so a substring never double-substitutes — the same
@@ -360,6 +383,57 @@ TEXT_REMAP = {
         ("Gondorian", "Rhudaur"),
         ("Gondor", "Rhudaur"),
     ],
+    # Ered Luin clones Ironguard twice, so its wording lives per career in CAREER_TEXT_REMAP.
+    "eredluin": [],
+}
+
+# Per CLONED career, applied before the culture's TEXT_REMAP: a culture that clones one source twice
+# needs two different rewrites of the same words. Each Ered Luin table replaces the whole source
+# tooltip opening, which also drops the source's dash. Longest phrase first, as above.
+CAREER_TEXT_REMAP = {
+    # The gate-keepers of Thorin's Halls, King Farin's seat in the Blue Mountains.
+    "warden_of_thorins_halls": [
+        ("Invoke the strength of dwarven craft — boosts", "Invoke the strength of the mountain halls: boosts"),
+        ("An elite dwarven warrior clad in mithril-forged plate who holds the deeps of Erebor against orc and dragon alike.",
+         "An elite dwarven warrior in heavy mail of Blue Mountain iron who holds the gates of Thorin's Halls against goblin and orc alike."),
+        ("Ironguard of Erebor", "Warden of Thorin's Halls"),
+        ("Shieldwall of Durin", "Shieldwall of the Blue Mountains"),
+        ("Wrath of Durin's Folk", "Wrath of the Blue Mountains"),
+        ("Shieldwall of Erebor", "Shieldwall of Thorin's Halls"),
+        ("Guard of the Arkenstone", "Guard of the King's Hall"),
+        ("Mithril Bulwark", "Iron Bulwark"),
+        ("Mithril Bastion", "Bastion of the Halls"),
+    ],
+    # The Broadbeams of Belegost: long spear and tower shield, the shieldwall of the Blue Mountains.
+    "shieldguard_of_belegost": [
+        ("Invoke the strength of dwarven craft — boosts", "Lock tower shields with your kin: boosts"),
+        ("An elite dwarven warrior clad in mithril-forged plate who holds the deeps of Erebor against orc and dragon alike.",
+         "A Broadbeam warrior of Belegost who fights behind a tower shield with a long spear, locking shields with kin until no foe can find a gap in the wall."),
+        ("dwarven craft protecting you", "the tower shield protecting you"),
+        ("Ironguard of Erebor", "Broadbeam Shield-guard"),
+        ("Shieldwall of Durin", "Great Shield of Belegost"),
+        ("Wrath of Durin's Folk", "Wrath of the Broadbeams"),
+        ("Shieldwall of Erebor", "Shieldwall of Belegost"),
+        ("Guard of the Arkenstone", "Guard of the Broad Gate"),
+        ("Hammer of the Deeps", "Spear of the Deeps"),
+        ("Gatewall Warden", "Tower-Shield Warden"),
+        ("Mithril Bulwark", "Bulwark of Belegost"),
+        ("Mithril Bastion", "Broadbeam Wall"),
+        ("Deep Warden", "Shield-bearer of Belegost"),
+    ],
+    # The Firebeards of Nogrod, crossbow-smiths of the southern halls.
+    "nogrod_arbalester": [
+        ("Load masterwork dwarven bolts — boosts", "Load bolts forged in Nogrod: boosts"),
+        ("A dwarven engineer-warrior who wields masterwork crossbows of incredible stopping power, each bolt precision-crafted.",
+         "A Firebeard engineer-warrior of Nogrod who wields masterwork crossbows of great stopping power, each bolt forged in the furnaces of the Blue Mountains."),
+        ("Engine-Lord of the Iron Hills", "Forge-Lord of the Firebeards"),
+        ("Master Quarreler", "Firebeard Quarreler"),
+        ("Iron Hills Volley", "Nogrod Volley"),
+        ("Watcher of Dale", "Watcher of the Dwarf-road"),
+        ("Engine of Erebor", "Engine of Nogrod"),
+        ("Precision Barrage", "Firebeard Volley"),
+        ("Bolt-Smith", "Bolt-Smith of Nogrod"),
+    ],
 }
 
 
@@ -400,10 +474,21 @@ def rename(block, src_id, src_abbr, new_id, new_abbr):
     return re.sub(rf'({"|".join(ASSET_ATTRS)})="([^"]*)"', restore, block)
 
 
-def retext(block, culture):
-    for old, new in TEXT_REMAP[culture]:
+def retext(block, culture, new_id=None):
+    for old, new in CAREER_TEXT_REMAP.get(new_id, []) + TEXT_REMAP[culture]:
         block = block.replace(old, new)
     return block
+
+
+def splice(name, text, anchor, block):
+    """Insert `block` before the file's one closing `anchor`. A str.replace on a missing anchor
+    returns the text unchanged, which still parses, and a second anchor would take the block twice,
+    so anything but exactly one is refused before a file is written."""
+    found = text.count(anchor)
+    if found != 1:
+        raise SystemExit(f"{name}: expected one {anchor.strip()!r} at the start of a line to insert "
+                         f"before, found {found}; nothing written")
+    return text.replace(anchor, block + anchor)
 
 
 def extract(text, pattern, what):
@@ -424,7 +509,7 @@ def build(culture, src_id, src_abbr, new_id, new_abbr, display, careers, abiliti
         raise SystemExit(f"{src_id}: expected 6 ChoiceGroups, found {len(groups)}")
 
     def fix(block):
-        return retext(rename(block, src_id, src_abbr, new_id, new_abbr), culture)
+        return retext(rename(block, src_id, src_abbr, new_id, new_abbr), culture, new_id)
 
     career = fix(career)
     # Repoint eligibility at the target culture. The source is single-culture, so a plain replace is
@@ -448,10 +533,16 @@ def build(culture, src_id, src_abbr, new_id, new_abbr, display, careers, abiliti
     return career, fix(ability), fix(root) + "\n\n" + "\n\n".join(fix(g) for g in groups)
 
 
-def main():
+def main(argv=None):
     ap = argparse.ArgumentParser()
-    ap.add_argument("--apply", action="store_true", help="write the files (default: dry run)")
-    args = ap.parse_args()
+    mode = ap.add_mutually_exclusive_group()
+    mode.add_argument("--apply", action="store_true", help="write the files (default: dry run)")
+    mode.add_argument("--check", action="store_true",
+                      help="write nothing; exit 1 when --apply would write or refuse. --apply writes "
+                           "for a culture in TARGETS with no <Culture> row in taom_careers.xml; the "
+                           "four files are checked against each other by the C# tests "
+                           "CareerChoiceIntegrityTests and CareerCultureCoverageTests, not here")
+    args = ap.parse_args(argv)
 
     careers, careers_nl = read(CAREERS_XML)
     abilities, abilities_nl = read(ABILITIES_XML)
@@ -460,25 +551,24 @@ def main():
 
     new_careers, new_abilities, new_choices, new_menu, planned = [], [], [], [], []
 
-    for culture, mapping in TARGETS.items():
+    for culture in TARGETS:
         if f'<Culture id="{culture}" />' in careers:
             print(f"skip {culture}: already has careers")
             continue
-        for src_id, src_abbr in SOURCES_FOR.get(culture, SOURCES):
-            new_id, new_abbr, display = mapping[src_id]
+        for src_id, src_abbr, new_id, new_abbr, display in targets_for(culture):
             c, a, ch = build(culture, src_id, src_abbr, new_id, new_abbr, display,
                              careers, abilities, choices)
             new_careers.append(c)
             new_abilities.append(a)
             new_choices.append(
-                f"  <!-- ═══ {display} ({culture}) — cloned from {src_id} ═══ -->\n" + ch)
+                f"  <!-- ═══ {display} ({culture}), cloned from {src_id} ═══ -->\n" + ch)
             new_menu.append({"career_string_id": new_id, "skills": [], "attribute": "",
                              "focus_to_add": 0, "skill_level_to_add": 0, "attribute_level_to_add": 0})
             planned.append((culture, new_id, display))
 
     if not planned:
         print("nothing to do")
-        return
+        return 0
 
     # Clone-contamination gate. An id-rename is case-sensitive and leaves player-facing strings
     # naming the source faction — the exact defect the new-factions RCA recorded, caught there only
@@ -494,8 +584,8 @@ def main():
     # contamination flags a correct rename as a failure. Longest first so nested names clear cleanly.
     for _, new_id, _ in planned:
         payload = payload.replace(new_id, "")
-    for _, new_abbr in sorted({(t, a) for t in TARGETS
-                               for _, a, _ in TARGETS[t].values()}, key=lambda x: -len(x[1])):
+    for _, new_abbr in sorted({(t, row[3]) for t in TARGETS for row in targets_for(t)},
+                              key=lambda x: -len(x[1])):
         payload = payload.replace(f"_{new_abbr}_", "_")
     # Display words the id/abbr scan below cannot see. Every source faction whose careers get cloned
     # needs its own people- and place-words listed here, or a TEXT_REMAP entry missed by the author
@@ -503,7 +593,10 @@ def main():
     # Goblin-town one. Longest first so a nested word is reported at its most specific form.
     SOURCE_DISPLAY_WORDS = ["Gundabad", "Pezarsani", "Pezarsan", "Mahûd", "Jelut",
                             "Gondor", "Ithilien", "Osgiliath", "Belfalas", "Dol Amroth", "Faramir",
-                            "Imrahil", "Henneth", "Emyn Arnen", "Rammas", "Anduin", "Swan"]
+                            "Imrahil", "Henneth", "Emyn Arnen", "Rammas", "Anduin", "Swan",
+                            # Erebor's (Ered Luin): no other clone source's careers use these.
+                            "Lonely Mountain", "Iron Hills", "Arkenstone", "Erebor", "Mithril",
+                            "mithril", "of Dale", "Dáin"]
     source_words = SOURCE_DISPLAY_WORDS + [s for s, _ in SOURCES] + [f"_{a}_" for _, a in SOURCES]
     for tgt in TARGETS:
         for s, a in SOURCES_FOR.get(tgt, []):
@@ -523,25 +616,33 @@ def main():
         print(f"  {culture:20s} {new_id:24s} {display}")
     print(f"  -> {len(ids)} new elements total")
 
-    if not args.apply:
-        print("DRY RUN — re-run with --apply to write")
-        return
-
-    careers = careers.replace("\n</Careers>", "\n" + "\n\n".join(new_careers) + "\n\n</Careers>")
-    abilities = abilities.replace("\n</AbilityTemplates>",
-                                  "\n" + "\n".join(new_abilities) + "\n\n</AbilityTemplates>")
-    choices = choices.replace("\n</CareerChoices>",
-                              "\n" + "\n\n".join(new_choices) + "\n\n</CareerChoices>")
+    # Every output is spliced and parsed in every mode before anything is written (tools/README.md
+    # "XML I/O convention"), so a dry run and --check refuse exactly what --apply would.
+    careers = splice(CAREERS_XML.name, careers, "\n</Careers>",
+                     "\n" + "\n\n".join(new_careers) + "\n")
+    abilities = splice(ABILITIES_XML.name, abilities, "\n</AbilityTemplates>",
+                       "\n" + "\n".join(new_abilities) + "\n")
+    choices = splice(CHOICES_XML.name, choices, "\n</CareerChoices>",
+                     "\n" + "\n\n".join(new_choices) + "\n")
+    for text in (careers, abilities, choices):
+        ET.fromstring(text.encode("utf-8"))
 
     menu = json.loads(menu_text)
     menu.extend(new_menu)
     menu_out = json.dumps(menu, indent=4, ensure_ascii=False) + "\n"
+
+    if args.check:
+        return 1
+    if not args.apply:
+        print("DRY RUN — re-run with --apply to write")
+        return 0
 
     write(CAREERS_XML, careers, careers_nl)
     write(ABILITIES_XML, abilities, abilities_nl)
     write(CHOICES_XML, choices, choices_nl)
     write(MENU_JSON, menu_out, menu_nl)
     print(f"applied -> {CAREERS_XML.name}, {ABILITIES_XML.name}, {CHOICES_XML.name}, {MENU_JSON.name}")
+    return 0
 
 
 if __name__ == "__main__":

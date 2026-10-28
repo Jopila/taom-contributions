@@ -172,6 +172,61 @@ class PickNext(unittest.TestCase):
         ]
         self.assertIsNone(gac.pick_next(pieces[0], pieces))
 
+    def test_a_successor_no_better_on_any_armour_value_and_worse_on_one_is_never_offered(self):
+        # The Iron Hills cape shape the Ered Luin review found: the elite piece of the same line
+        # carries body 42 and arm 34 against the heavy one's 42 and 45, so the paid upgrade would
+        # only make the wearer easier to hit. The armoury offers no upgrade rather than that.
+        # Values are (head, body, arm, leg).
+        heavy = gac.Piece('sk_dwarf_iron_pauldron_heavy_cape_c', 'heavy', 'iron_hills', 'cape', armour=(0, 42, 45, 0))
+        worse = gac.Piece('sk_dwarf_iron_pauldron_elite_cape_c', 'elite', 'iron_hills', 'cape', armour=(0, 42, 34, 0))
+        self.assertIsNone(gac.pick_next(heavy, [heavy, worse]))
+
+    def test_a_dominated_medium_successor_of_a_light_piece_is_never_offered(self):
+        # Light to medium is a paid upgrade too (armour_acquisition_config.xml), so the rule covers
+        # every class below lord, not only heavy and elite.
+        light = gac.Piece('sk_j_chest_light_a', 'light', 'gondor', 'body', armour=(0, 20, 6, 4))
+        worse = gac.Piece('sk_j_chest_med_a', 'medium', 'gondor', 'body', armour=(0, 20, 5, 4))
+        self.assertIsNone(gac.pick_next(light, [light, worse]))
+
+    def test_a_dominated_in_line_successor_gives_way_to_a_same_kit_piece(self):
+        heavy = gac.Piece('sk_e_pauld_heavy_c', 'heavy', 'erebor', 'cape', armour=(0, 42, 34, 0))
+        in_line_worse = gac.Piece('sk_e_pauld_elite_a', 'elite', 'erebor', 'cape', armour=(0, 42, 33, 0))
+        kit_better = gac.Piece('sk_e_pauldron_cape_elite_b', 'elite', 'erebor', 'cape', armour=(0, 42, 38, 0))
+        self.assertEqual(gac.pick_next(heavy, [heavy, in_line_worse, kit_better]), 'sk_e_pauldron_cape_elite_b')
+
+    def test_a_successor_better_on_one_value_and_worse_on_another_is_still_offered(self):
+        # A trade (more body, less arm) is a design choice the rule leaves alone: only a successor
+        # that gains nothing anywhere is dropped.
+        heavy = gac.Piece('sk_f_chest_heavy_a', 'heavy', 'gondor', 'body', armour=(0, 40, 10, 5))
+        trade = gac.Piece('sk_f_chest_elite_a', 'elite', 'gondor', 'body', armour=(0, 48, 6, 5))
+        self.assertEqual(gac.pick_next(heavy, [heavy, trade]), 'sk_f_chest_elite_a')
+
+    def test_a_successor_worse_on_the_first_value_but_better_on_a_later_one_is_still_offered(self):
+        # Pins value-by-value comparison: an ordered tuple compare would reject this trade.
+        heavy = gac.Piece('sk_h_chest_heavy_a', 'heavy', 'gondor', 'body', armour=(0, 40, 10, 5))
+        trade = gac.Piece('sk_h_chest_elite_a', 'elite', 'gondor', 'body', armour=(0, 39, 20, 5))
+        self.assertEqual(gac.pick_next(heavy, [heavy, trade]), 'sk_h_chest_elite_a')
+
+    def test_the_elite_to_lord_forge_path_ignores_the_values(self):
+        # Lord kit is forged from an elite piece for its look, and the restat leaves many lord
+        # pieces a few arm points under their elite source (Rhun's Loke line, Rivendell, Gondor):
+        # the rule guards every upgrade below lord, not that forge path.
+        elite = gac.Piece('sk_rh_loke_chest_elite_a', 'elite', 'rhun', 'body', armour=(0, 57, 21, 29))
+        lord = gac.Piece('sk_rh_loke_chest_lord_a', 'lord', 'rhun', 'body', armour=(0, 57, 20, 29))
+        self.assertEqual(gac.pick_next(elite, [elite, lord]), 'sk_rh_loke_chest_lord_a')
+
+    def test_an_equal_successor_is_still_offered(self):
+        heavy = gac.Piece('sk_g_chest_heavy_a', 'heavy', 'gondor', 'body', armour=(0, 40, 10, 5))
+        same = gac.Piece('sk_g_chest_elite_a', 'elite', 'gondor', 'body', armour=(0, 40, 10, 5))
+        self.assertEqual(gac.pick_next(heavy, [heavy, same]), 'sk_g_chest_elite_a')
+
+    def test_a_piece_with_unknown_armour_keeps_the_class_and_id_rule(self):
+        pieces = [
+            piece('sk_gd_fount_chest_med_a', 'medium'),
+            gac.Piece('sk_gd_fount_chest_heavy_a', 'heavy', 'gondor', 'body', armour=(0, 1, 0, 0)),
+        ]
+        self.assertEqual(gac.pick_next(pieces[0], pieces), 'sk_gd_fount_chest_heavy_a')
+
 
 class RenderAndDiff(unittest.TestCase):
     ROWS = {

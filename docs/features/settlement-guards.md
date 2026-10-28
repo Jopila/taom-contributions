@@ -78,13 +78,21 @@ Optional `<PrisonGuard troop="..."/>` overrides the culture's default prison gua
 
 ### Current Values (Gondor pilot)
 
-14 settlements configured with region-specific troops:
+18 settlements configured with region-specific troops, 16 of them Gondor's and two realm capitals:
 - Minas Tirith (town_EW1): Fountain Guards, Captains, Sergeants, Veterans
 - Osgiliath (town_EW2): Dome Guards, Guards, Infantry, Archers
 - Pelargir (town_EW4): Anchor Guards, Sea Guards
 - Dol Amroth (town_EW5): Swan Guards, Foot Knights, Veterans, Infantry
 - Linhir (town_EW7): Haven Guards, Pavise Guards
-- 9 castles with region-specific guards (Cair Andros, Ithilien, Lossarnach, Harondor, etc.)
+- 11 Gondor castles with region-specific guards (Cair Andros, Ithilien, Lossarnach, Harondor, etc.)
+- Fornost Erain (town_AN2), Arthedain's capital: `arthedain_kings_guard` (weight 2), `arthedain_warden` (3),
+  `arthedain_fornost_guard` (3)
+- Thorin's Halls (town_EL3), Ered Luin's capital: the King's Guard of Thorin's Halls (`eredluin_kings_guard`,
+  weight 2), the Warden of Thorin's Halls (`eredluin_halls_warden`, 3) and the Veteran Hall Warden
+  (`eredluin_veteran_hall_warden`, 3)
+
+The `<Spears>` section maps 17 cultures; Ered Luin takes Erebor's `western_spear_3_t3`. Cardolan, Rhudaur and
+the other cultures without a row get vanilla's `western_spear_3_t3` fallback.
 
 ## Guard-Duty Race Exclusions (#346)
 

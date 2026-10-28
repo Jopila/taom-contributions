@@ -1876,5 +1876,71 @@
         "focus_to_add": 1,
         "skill_level_to_add": 10,
         "attribute_level_to_add": 1
+    },
+    {
+        "string_id": "taom_adulthood_eredluin_1",
+        "culture_id": "eredluin",
+        "text": "You fought off a goblin raid from Blue Craig alone.",
+        "description": "Returning from an outer patrol, you came upon a band of Blue Craig goblins that had slipped past the watch. There was no time to get help. You held the narrow path with your axe until the alarm reached the gate. Three goblins did not reach it.",
+        "skills": ["TwoHanded", "Leadership"],
+        "attribute": "Cunning",
+        "focus_to_add": 1,
+        "skill_level_to_add": 10,
+        "attribute_level_to_add": 1
+    },
+    {
+        "string_id": "taom_adulthood_eredluin_2",
+        "culture_id": "eredluin",
+        "text": "You struck the best trade agreement with Lindon in a generation.",
+        "description": "The price of Dwarvish iron at the Grey Havens had not been revised in a lifetime of Men. You assembled the facts and put the case to the Elves of Lindon with such clarity that the agreement was rewritten within the month, and King Farin's treasurer learned your name.",
+        "skills": ["Crafting", "Trade"],
+        "attribute": "Endurance",
+        "focus_to_add": 1,
+        "skill_level_to_add": 10,
+        "attribute_level_to_add": 1
+    },
+    {
+        "string_id": "taom_adulthood_eredluin_3",
+        "culture_id": "eredluin",
+        "text": "You opened a new seam of iron beneath the Blue Mountains.",
+        "description": "The old maps showed a collapse, but you followed the sound of water in the deep stone and found the gallery intact behind the rubble. The seam within was rich, and the engineers who mapped it added your name to the survey record of Thorin's Halls.",
+        "skills": ["Engineering", "Trade"],
+        "attribute": "Endurance",
+        "focus_to_add": 1,
+        "skill_level_to_add": 10,
+        "attribute_level_to_add": 1
+    },
+    {
+        "string_id": "taom_adulthood_eredluin_4",
+        "culture_id": "eredluin",
+        "text": "You held the shieldwall at the gates of Belegost.",
+        "description": "When a goblin host from Blue Craig pushed into the lower gates, you anchored your section of the shieldwall while others buckled, buying the counterattack time to form. The captain of the Broadbeams noted your name in the battle record, which is the closest a Dwarf gets to poetry.",
+        "skills": ["OneHanded", "Athletics"],
+        "attribute": "Vigor",
+        "focus_to_add": 1,
+        "skill_level_to_add": 10,
+        "attribute_level_to_add": 1
+    },
+    {
+        "string_id": "taom_adulthood_eredluin_5",
+        "culture_id": "eredluin",
+        "text": "You balanced the hoard-reckoning after years of discrepancy.",
+        "description": "The ledgers of Thorin's Halls had been misaligned for years, with losses no one could explain. You spent three months cross-referencing records and found the error: a simple conversion mistake compounded across twenty years of entries. The King's treasurer shook your hand.",
+        "skills": ["Steward", "Tactics"],
+        "attribute": "Intelligence",
+        "focus_to_add": 1,
+        "skill_level_to_add": 10,
+        "attribute_level_to_add": 1
+    },
+    {
+        "string_id": "taom_adulthood_eredluin_6",
+        "culture_id": "eredluin",
+        "text": "You tracked a band of orcs on the Dwarf-road back to its lair.",
+        "description": "The band had struck three caravans on the Dwarf-road east of the mountains and slipped away before anyone could follow. You went alone into the hills, found the camp, counted them, sketched the approach, and brought the report back in time for the wardens to act on it.",
+        "skills": ["Scouting", "Bow"],
+        "attribute": "Control",
+        "focus_to_add": 1,
+        "skill_level_to_add": 10,
+        "attribute_level_to_add": 1
     }
 ]

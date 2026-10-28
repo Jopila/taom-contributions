@@ -127,7 +127,7 @@ These are starting values; the look is the in-game check. The Lines of Descent b
 A hero of age shows "Lvl: {LEVEL}, Skills:" as the skills heading instead of vanilla's text. The rule (`HeroLevelHeader.ShouldShowLevel`): the information is not hidden and the hero's age is at or above `Campaign.Current.Models.AgeModel.HeroComesOfAge`; otherwise vanilla's text stays. The key is `taom_ency_hero_level_skills`. `EncyclopediaHeroLevelHeaderMixin` (a UIExtenderEx mixin hooked on `Refresh` of `EncyclopediaHeroPageVM`, the third mixin on that view model) writes `SkillsText` after the engine sets it. The heading line shows only when the hero has a skill of 50 or more (vanilla binds its visibility to `HasAnySkills`); the mixin sets the text either way. No Harmony and no reflection.
 
 ### What was dropped, and why
-- **Removing cultures from the culture filter:** nothing qualifies. All 25 main cultures own live settlements (Lindon 5 to Gondor 97), so no culture is empty and a removal rule would hide none.
+- **Removing cultures from the culture filter:** nothing qualifies. All 26 main cultures own live settlements (Goblin-town 7 to Gondor 97; Ered Luin 31, counted in the live `settlements.xml` on 2026-10-27), so no culture is empty and a removal rule would hide none.
 - **Showing the civilian outfit:** vanilla already shows it for notables and for noncombatant heroes who lead no party; combatant heroes keep their battle gear. Forcing it for the rest risked showing the wrong gear. Not built.
 
 ### Co-op

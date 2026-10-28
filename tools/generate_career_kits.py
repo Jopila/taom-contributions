@@ -60,11 +60,13 @@ LAYOUT = {
     "infantry": ("SIDEARM", "Shield", "SECOND"),
 }
 SIDEARM = {"erebor": "OneHandedAxe",   # dwarves carry axes
+           "eredluin": "OneHandedAxe", # so do the Blue Mountains dwarves
            "empire": "OneHandedAxe",   # Dunland has no non-vanilla one-handed sword
            "rhudaur": "OneHandedAxe"}  # the hill-men carry Dunland's axes, no sword (#978)
 SECOND = {"dolguldur": "TwoHandedAxe"}
 RANGED = {"isengard": ("Crossbow", "Bolts"),   # Uruk Crossbow
           "erebor": ("Crossbow", "Bolts"),     # Crossbow Master
+          "eredluin": ("Crossbow", "Bolts"),   # Firebeard Arbalester; no cavalry career (no rams)
           "aserai": ("Javelin", "Shield"),     # Pezarsani Javelineer (Harad)
           "shaghana": ("Javelin", "Shield")}   # Chatak Javelineer: every Shaghana bow needs skill 100
 ARMOUR_LINE = {"isengard": "sk_uruk_hai_", "mordor": "sk_uruk_mordor_"}   # docstring step 1

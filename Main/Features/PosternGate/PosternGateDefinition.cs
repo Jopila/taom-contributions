@@ -36,7 +36,7 @@ internal static class PosternGateDefinition
             new TaomBuildingVariant("building_taom_postern_gate_dwarf",
                 "{=taom_postern_dwarf_name}Hidden Door",
                 "{=taom_postern_dwarf_desc}A door cut into the living stone, its seam hidden from any eye that does not know the rune. In a siege, parties slip into or out of this fief with fewer losses.",
-                new[] { "erebor" }),
+                new[] { "erebor", "eredluin" }),
             new TaomBuildingVariant("building_taom_postern_gate_rohan",
                 "{=taom_postern_rohan_name}Culvert",
                 "{=taom_postern_rohan_desc}A drain under the earthen wall, wide enough for a rider who leads his horse. In a siege, parties slip into or out of this fief with fewer losses.",

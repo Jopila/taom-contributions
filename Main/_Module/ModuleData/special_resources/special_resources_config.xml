@@ -24,7 +24,9 @@
     per_battle_victory_base="5" per_raid="3" per_siege_victory="10"
     per_prisoner="0" per_tournament_win="8" per_hideout_clear="4">
     <Kingdom id="erebor" />
+    <Kingdom id="eredluin" />
     <Culture id="erebor" />
+    <Culture id="eredluin" />
     <Tiers>
       <Tier level="1" name="Apprentice Miner" threshold="100"
             description="Dwarven mining efficiency improves. -5% troop upgrade cost." />

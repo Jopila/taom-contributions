@@ -1146,9 +1146,9 @@ Known and accepted: a save made mid-duty under the old model may leave its spawn
 the map with nothing to destroy it. They are ordinary bandit parties the engine already manages.
 
 **Equipment.** `enlist_{runtimeCultureId}_{assignment}_{rank}` rosters in
-`equipmentsets/taom_enlistment_equipment.xml` (315: 299 culture cells out of a possible 368, over
-23 cultures × 4 assignments × 4 kit tiers, plus 16 culture-neutral defaults, counts from
-`tools/audit_enlistment_roster_coverage.py` on 2026-10-19), seeded from each
+`equipmentsets/taom_enlistment_equipment.xml` (359: 343 culture cells out of a possible 416, over
+26 cultures × 4 assignments × 4 kit tiers, Cardolan, Rhudaur and Ered Luin among them, plus 16
+culture-neutral defaults, counts from `tools/audit_enlistment_roster_coverage.py` on 2026-10-27), seeded from each
 culture's own troop tree by `tools/generate_enlistment_rosters.py`, so kit is race-correct by
 construction. Drawn from the quartermaster once per kit tier into party inventory (not
 auto-equipped). The quartermaster's reply is chosen by `QuartermasterAnswerPolicy` (#829), except

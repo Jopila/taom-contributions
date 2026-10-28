@@ -66,6 +66,15 @@ public sealed class TaomEreborCultureTag : ConversationTag
     public override bool IsApplicableTo(CharacterObject character) => character?.Culture?.StringId == CultureId;
 }
 
+public sealed class TaomEredLuinCultureTag : ConversationTag
+{
+    public const string CultureId = "eredluin";
+
+    public override string StringId => "taom_culture_" + CultureId;
+
+    public override bool IsApplicableTo(CharacterObject character) => character?.Culture?.StringId == CultureId;
+}
+
 public sealed class TaomGondorCultureTag : ConversationTag
 {
     public const string CultureId = "gondor";

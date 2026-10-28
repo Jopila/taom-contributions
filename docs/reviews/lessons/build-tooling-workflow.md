@@ -4591,3 +4591,27 @@ to the renamer, the third writer of settlement names.
   `--rerun-retired` from its first commit, with a test that it refuses before reading anything; before adding a
   check to one writer, grep every writer of that field and add it to each.
 - **Source:** `docs/reviews/rca-map-tool-followups-2026-10-27.md` findings 1 to 4; #1042.
+
+### A derived table's drift after a roster edit is the review, not a chore (Ered Luin, 2026-10-27)
+`ARMOUR_CLASS_TABLE_DRIFT` fired after Ered Luin's troops were added, and `generate_armour_classes.py --apply` was run twice, once by hand and once by an integration step whose brief said to re-run on drift. It moved 82 rows because of the new roster: 50 Erebor and Iron Hills pieces fell a class, and 32 more changed only their upgrade target.
+- **Why missed:** the warning's own repair line reads like the fix, and the brief encoded it.
+- **Prevent:** before regenerating a derived table after a data change, diff the new table against the base commit and explain every moved row by the change; a row that belongs to another culture is a finding. Never put "re-run on drift" in a brief without "read the diff first".
+- **Source:** [rca-ered-luin-2026-10-27.md](../rca-ered-luin-2026-10-27.md) finding 1.
+
+### Prepare and parse every output before the first write, and grep the docs when a tool's command line changes (Ered Luin, 2026-10-27)
+`insert_new_faction_cc_menus.py` parsed each menu but wrote it inside the loop, before the strings file was built; and when its bare run became a dry run, two runbooks still ran it bare.
+- **Why missed:** "parse before write" was applied per file, not across the run; the command-line change was documented in the tool's README row only.
+- **Prevent:** build every output in memory, parse all of them, then write (a test patches the last preparation step to fail and asserts every file unchanged). After changing a tool's flags or default, grep `docs/` for every invocation of it.
+- **Source:** [rca-ered-luin-2026-10-27.md](../rca-ered-luin-2026-10-27.md) findings 4 and 10.
+
+### A gate test calls the reader its rule uses, never a copy of it (Ered Luin, 2026-10-28)
+`BorrowedArmourAnchorTests` guards the class table's anchor rule, but it read the troop files with its own loop. The loop left out two of `derive_armor_tiers.parse_rosters`' rules (the noble anchor and the exempt (troop, item) pairs). A Gondor cape whose level 26 wearer is an exempt pair is banded elite by the table, from level 31, so a level 21 troop in it passed the test and would still have re-banded the cape.
+- **Why missed:** the copy was written beside the rule's reader instead of calling it, and the test was proven on the Ered Luin kit only, where neither rule changes an anchor.
+- **Prevent:** a test that guards a derived table builds its input with the table's own reader (`dat.parse_rosters()`), then proves itself on a case the reader adjusts (here the exempt pair, `test_the_anchor_is_read_as_the_class_table_reads_it`), not only on the plain case.
+- **Source:** [rca-ered-luin-2026-10-27.md](../rca-ered-luin-2026-10-27.md) "Process notes".
+
+### Edit prose by exact text, never by offsets computed before another edit (Ered Luin, 2026-10-28)
+A script rewrote a section of `ered-luin.md` at offsets it computed before an earlier replace in the same run had changed the text length. Two sentences were cut and a fragment was left, and only the convergence review saw it.
+- **Why missed:** the script parsed nothing it could fail on: markdown has no parser to refuse a cut sentence.
+- **Prevent:** replace by an exact old string that must match once (the Edit tool, or a script that asserts the count is 1), and re-read the section after the edit. This is the same rule as restoring masked XML by token (`.claude/rules/moduledata-validation.md`).
+- **Source:** [rca-ered-luin-2026-10-27.md](../rca-ered-luin-2026-10-27.md) "Process notes".

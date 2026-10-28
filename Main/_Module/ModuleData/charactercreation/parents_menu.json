@@ -2014,5 +2014,77 @@
         "skill_level_to_add": 10,
         "attribute_level_to_add": 1,
         "occupation_type": "vagabond_urban"
+    },
+    {
+        "string_id": "taom_parent_eredluin_1",
+        "culture_id": "eredluin",
+        "text": "Noble of Thorin's Halls",
+        "description": "Your family belonged to the House of Borin, kin to King Farin, wielding great axes and leading the warriors who keep the honour of Thorin's Halls in the Blue Mountains.",
+        "skills": ["TwoHanded", "Leadership"],
+        "attribute": "Cunning",
+        "focus_to_add": 1,
+        "skill_level_to_add": 10,
+        "attribute_level_to_add": 1,
+        "occupation_type": "retainer"
+    },
+    {
+        "string_id": "taom_parent_eredluin_2",
+        "culture_id": "eredluin",
+        "text": "Master Smith of Nogrod",
+        "description": "Your family kept a forge in Nogrod, where the Firebeards have worked iron since the Elder Days. Their blades and mail went west to the Elves of Lindon and east along the Dwarf-road, and every piece fetched its price.",
+        "skills": ["Crafting", "Trade"],
+        "attribute": "Endurance",
+        "focus_to_add": 1,
+        "skill_level_to_add": 10,
+        "attribute_level_to_add": 1,
+        "occupation_type": "merchant_urban"
+    },
+    {
+        "string_id": "taom_parent_eredluin_3",
+        "culture_id": "eredluin",
+        "text": "Miner of Mount Dolmed",
+        "description": "Your family worked the iron mines beneath Mount Dolmed, following the ore into the roots of the Blue Mountains, shoring the galleries against collapse and selling the ore by the cartload in Thorin's Halls.",
+        "skills": ["Engineering", "Trade"],
+        "attribute": "Endurance",
+        "focus_to_add": 1,
+        "skill_level_to_add": 10,
+        "attribute_level_to_add": 1,
+        "occupation_type": "farmer"
+    },
+    {
+        "string_id": "taom_parent_eredluin_4",
+        "culture_id": "eredluin",
+        "text": "Broadbeam Warrior",
+        "description": "Your family fought among the Broadbeams of Belegost, mastering axe and shield and holding the mountain gates when the goblins of Blue Craig came down from the north.",
+        "skills": ["OneHanded", "Athletics"],
+        "attribute": "Vigor",
+        "focus_to_add": 1,
+        "skill_level_to_add": 10,
+        "attribute_level_to_add": 1,
+        "occupation_type": "artisan_urban"
+    },
+    {
+        "string_id": "taom_parent_eredluin_5",
+        "culture_id": "eredluin",
+        "text": "Hoard-Keeper of the Halls",
+        "description": "Your family kept the hoards and storehouses of Thorin's Halls, reckoning the kingdom's wealth and planning how a mountain hold is supplied and defended through a hard winter.",
+        "skills": ["Steward", "Tactics"],
+        "attribute": "Intelligence",
+        "focus_to_add": 1,
+        "skill_level_to_add": 10,
+        "attribute_level_to_add": 1,
+        "occupation_type": "hunter"
+    },
+    {
+        "string_id": "taom_parent_eredluin_6",
+        "culture_id": "eredluin",
+        "text": "Warden of the Dwarf-road",
+        "description": "Your family walked the Dwarf-road east through the Shire to Bree, tracking orcs and wolves with the bow and guarding the caravans that keep the Blue Mountains in trade.",
+        "skills": ["Scouting", "Bow"],
+        "attribute": "Control",
+        "focus_to_add": 1,
+        "skill_level_to_add": 10,
+        "attribute_level_to_add": 1,
+        "occupation_type": "vagabond_urban"
     }
 ]

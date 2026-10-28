@@ -71,7 +71,7 @@ TaomMilitaryPowerModel       TaomCombatSimulationModel       TaomPartyHealingMod
     "EnableCulturalSurvivalBonuses": true,
     "CulturalSurvivalBonuses": {
       "gondor": 0.3, "vlandia": 0.2, "lothlorien": 0.5,
-      "erebor": 0.3, "rivendell": 0.4, "lindon": 0.4, "arthedain": 0.3,
+      "erebor": 0.3, "eredluin": 0.3, "rivendell": 0.4, "lindon": 0.4, "arthedain": 0.3,
       "cardolan": 0.3, "rhudaur": 0.2,
       "mordor": -0.2, "gundabad": -0.1, "dolguldur": -0.1
     }

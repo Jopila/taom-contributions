@@ -11,21 +11,24 @@ each).
 Inline text/description are plain English, remapped from the source culture's wording (or written
 outright in AUTHORED). NarrativeMenuBuilder (NarrativeMenuBuilder.cs:74-75) builds a `taom_cc_<id>_text`
 / `_desc` key per entry and looks it up in the language files, so every entry of a culture in NEW is
-registered in taom_cc_strings.xml (register_cc_strings, which skips rows already present).
+registered in taom_cc_strings.xml (prepare_cc_strings, which skips rows already present).
 
 TEXTUAL append (not json.dump) so the existing entries stay byte-for-byte identical (clean diff) and
 the file's CRLF / inline-array style is preserved. Idempotent: skips a file that already contains the
 new-culture entries (revert + re-run to regenerate).
 
-Run: python tools/insert_new_faction_cc_menus.py
+Run: python tools/insert_new_faction_cc_menus.py            # dry run: what would be added
+     python tools/insert_new_faction_cc_menus.py --apply    # write the menus and the strings
+     python tools/insert_new_faction_cc_menus.py --check    # exit 1 if anything is still to add
 """
-import json, os, re
+import argparse, json, os, re
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CC = os.path.join(ROOT, "Main", "_Module", "ModuleData", "charactercreation")
 MENUS = ["parents", "youth", "adulthood", "education"]
 SRC = "gundabad"
-NEW = ["goblin", "mistymountainorcs", "bluecraig", "lindon", "arthedain", "cardolan", "rhudaur"]
+NEW = ["goblin", "mistymountainorcs", "bluecraig", "lindon", "arthedain", "cardolan", "rhudaur",
+       "eredluin"]
 
 # Which culture each new one clones its narrative options from. The first two were carved out of
 # Gundabad; Blue Craig is carved out of Goblin-town and Lindon out of Rivendell, so they clone the
@@ -43,6 +46,9 @@ SRC_FOR = {
     # Cardolan and Rhudaur (#978) the same way: Gondor's mechanics, their own AUTHORED text.
     "cardolan": "gondor",
     "rhudaur": "gondor",
+    # Ered Luin, the Dwarves of the Blue Mountains, takes Erebor's mechanics (the other Dwarf
+    # kingdom) with AUTHORED text: Erebor's is the Lonely Mountain, Dale and Dain throughout.
+    "eredluin": "erebor",
 }
 
 # Per culture, per menu: (text, description) in the SOURCE culture's entry order. A culture listed
@@ -216,6 +222,67 @@ AUTHORED = {
              "For months gold from the old troll-hoards had been turning up in the back rooms of the Last Bridge. You traced the trade, found the men behind it and handed them to the King's wardens, keeping a little of the gold for your trouble."),
         ],
     },
+    # Ered Luin: Thorin's Halls under King Farin, the Broadbeams of Belegost, the Firebeards of
+    # Nogrod, the iron of Mount Dolmed, the Dwarf-road east through the Shire to Bree, trade with
+    # Lindon to the west and the goblins of Blue Craig to the north.
+    "eredluin": {
+        "parents": [
+            ("Noble of Thorin's Halls",
+             "Your family belonged to the House of Borin, kin to King Farin, wielding great axes and leading the warriors who keep the honour of Thorin's Halls in the Blue Mountains."),
+            ("Master Smith of Nogrod",
+             "Your family kept a forge in Nogrod, where the Firebeards have worked iron since the Elder Days. Their blades and mail went west to the Elves of Lindon and east along the Dwarf-road, and every piece fetched its price."),
+            ("Miner of Mount Dolmed",
+             "Your family worked the iron mines beneath Mount Dolmed, following the ore into the roots of the Blue Mountains, shoring the galleries against collapse and selling the ore by the cartload in Thorin's Halls."),
+            ("Broadbeam Warrior",
+             "Your family fought among the Broadbeams of Belegost, mastering axe and shield and holding the mountain gates when the goblins of Blue Craig came down from the north."),
+            ("Hoard-Keeper of the Halls",
+             "Your family kept the hoards and storehouses of Thorin's Halls, reckoning the kingdom's wealth and planning how a mountain hold is supplied and defended through a hard winter."),
+            ("Warden of the Dwarf-road",
+             "Your family walked the Dwarf-road east through the Shire to Bree, tracking orcs and wolves with the bow and guarding the caravans that keep the Blue Mountains in trade."),
+        ],
+        "youth": [
+            ("Served in the King's Guard of Thorin's Halls.",
+             "You pledged your loyalty to King Farin, serving in the guard of Thorin's Halls and learning to wield axe and long-hafted mattock in defence of the mountain halls."),
+            ("Defended the gates of Belegost.",
+             "As part of the garrison of Belegost, you manned the crossbows on the gate-towers and held the passes against all comers, learning the craft of dwarven siege defence."),
+            ("Trained with the Firebeard hewers.",
+             "You joined the hewers of the Firebeards, the shock troops of Nogrod, learning to hurl throwing axes and fight in the narrow corridors of the mountain halls."),
+            ("Scouted the slopes below Blue Craig.",
+             "You ranged the northern slopes of the Blue Mountains, where the goblins of Blue Craig hold their caves, tracking raiders and wolves and keeping watch on the passes."),
+            ("Stood in the vanguard of the Broadbeams.",
+             "You trained in the vanguard of the Broadbeams, mastering the long spear and the two-handed axe in the close formations of the dwarven host."),
+            ("Marched with the caravan guards on the Dwarf-road.",
+             "You marched with the trading caravans along the Dwarf-road through the Shire to Bree, learning the ways of commerce and the art of defending valuable cargo."),
+        ],
+        "education": [
+            ("Trained in the great hall with the King's axe-brothers.",
+             "You practised combat alongside the young warriors of King Farin's household, learning to swing the two-handed axe in the echoing training halls deep in the Blue Mountains. Every scar was a lesson; every lesson was a point of pride."),
+            ("Apprenticed at the forges of Nogrod.",
+             "You spent your youth at the smith's bench in Nogrod, learning to work the iron of the Blue Mountains in forges older than any kingdom of Men. When the work was done you carried finished blades to the Elves of Lindon, who paid in silver and in patience."),
+            ("Worked the iron mines of Mount Dolmed.",
+             "You swung a pick in the deep galleries under Mount Dolmed before your beard had grown, learning the hidden passages of the mountain and the engineering of tunnels and supports. The deep stone became as familiar to you as open sky."),
+            ("Drilled with the Broadbeam shieldwall.",
+             "You trained in the close-quarters style of the Broadbeams of Belegost, learning to brace a shield and swing an axe in tight tunnel formations. Your short stride was an advantage in the corridors where taller folk stumbled."),
+            ("Counted the stores of Thorin's Halls.",
+             "You helped tally the iron, grain and coin of Thorin's Halls from an early age, learning to keep ledgers and to supply a mountain hold through the long winters. The work made you methodical and gave you a strategist's eye for resources."),
+            ("Patrolled the foothills and the Dwarf-road.",
+             "You ranged the eastern foothills of the Blue Mountains with the outer watch, learning to track orc raiders and shoot from cover among the pines along the Dwarf-road. The mountain air sharpened your senses and distance became your ally."),
+        ],
+        "adulthood": [
+            ("You fought off a goblin raid from Blue Craig alone.",
+             "Returning from an outer patrol, you came upon a band of Blue Craig goblins that had slipped past the watch. There was no time to get help. You held the narrow path with your axe until the alarm reached the gate. Three goblins did not reach it."),
+            ("You struck the best trade agreement with Lindon in a generation.",
+             "The price of Dwarvish iron at the Grey Havens had not been revised in a lifetime of Men. You assembled the facts and put the case to the Elves of Lindon with such clarity that the agreement was rewritten within the month, and King Farin's treasurer learned your name."),
+            ("You opened a new seam of iron beneath the Blue Mountains.",
+             "The old maps showed a collapse, but you followed the sound of water in the deep stone and found the gallery intact behind the rubble. The seam within was rich, and the engineers who mapped it added your name to the survey record of Thorin's Halls."),
+            ("You held the shieldwall at the gates of Belegost.",
+             "When a goblin host from Blue Craig pushed into the lower gates, you anchored your section of the shieldwall while others buckled, buying the counterattack time to form. The captain of the Broadbeams noted your name in the battle record, which is the closest a Dwarf gets to poetry."),
+            ("You balanced the hoard-reckoning after years of discrepancy.",
+             "The ledgers of Thorin's Halls had been misaligned for years, with losses no one could explain. You spent three months cross-referencing records and found the error: a simple conversion mistake compounded across twenty years of entries. The King's treasurer shook your hand."),
+            ("You tracked a band of orcs on the Dwarf-road back to its lair.",
+             "The band had struck three caravans on the Dwarf-road east of the mountains and slipped away before anyone could follow. You went alone into the hills, found the camp, counted them, sketched the approach, and brought the report back in time for the wardens to act on it."),
+        ],
+    },
 }
 
 # Words that must not survive the remap, per clone source. A leftover here is the defect the
@@ -228,6 +295,10 @@ FORBIDDEN_FOR = {
     # The same Gondor identity words ClonedCultureFlavorTests holds Arthedain to.
     "gondor": ("Gondor", "Minas Tirith", "White City", "Osgiliath", "Steward", "Pelennor", "Ithilien",
                "Dol Amroth", "Swan Knight", "Faramir", "Anduin", "Pelargir", "Ephel Duath", "Tower Guard"),
+    # The Lonely Mountain's places and people. Ered Luin is the other Dwarf kingdom, so its text
+    # must not borrow Erebor's halls, its King under the Mountain or its neighbours in Dale.
+    "erebor": ("Erebor", "Lonely Mountain", "Dale", "Esgaroth", "Lake-town", "Smaug", "Iron Hills",
+               "Dain", "Dáin", "Ironfoot", "Ravenhill", "Arkenstone", "Under the Mountain"),
 }
 
 # Per-culture display-text remap of the gundabad flavor (longest phrase FIRST so substrings don't
@@ -287,13 +358,17 @@ SUBS = {
     "arthedain": [],  # AUTHORED text replaces the remap entirely
     "cardolan": [],  # AUTHORED (#978)
     "rhudaur": [],  # AUTHORED (#978)
+    "eredluin": [],  # AUTHORED
 }
 
 CC_STRINGS = os.path.join(os.path.dirname(CC), "taom_cc_strings.xml")
 
 
-def register_cc_strings(entries):
-    """Register `taom_cc_<string_id>_text` / `_desc` for the entries this run minted.
+def prepare_cc_strings(entries):
+    """(the new taom_cc_strings.xml bytes, or None when no row is missing; how many rows were
+    missing) for the `taom_cc_<string_id>_text` / `_desc` rows of `entries` (main() passes every
+    entry of the cultures in NEW, not only those this run minted). The text is parsed before it is
+    returned, and nothing is written: main() writes every output only after all of them are ready.
 
     NarrativeMenuBuilder composes those keys at runtime from each entry's string_id, so
     tools/harvest_literal_loc_keys.py cannot see them and a run that skips this leaves every new
@@ -312,7 +387,7 @@ def register_cc_strings(entries):
                 continue
             rows.append(f'\t<string id="{key}" text="{{={key}}}{escape(value, {chr(34): "&quot;"})}" />')
     if not rows:
-        return 0
+        return None, 0
     close = text.rfind("</strings>")
     line_start = text.rfind("\n", 0, close) + 1
     m = re.search(r"(\r*\n)$", text[:line_start])
@@ -320,8 +395,7 @@ def register_cc_strings(entries):
     text = text[:line_start] + "".join(r + nl for r in rows) + text[line_start:]
     import xml.etree.ElementTree as ET
     ET.fromstring(text.encode("utf-8"))
-    open(CC_STRINGS, "wb").write((b"\xef\xbb\xbf" if bom else b"") + text.encode("utf-8"))
-    return len(rows)
+    return (b"\xef\xbb\xbf" if bom else b"") + text.encode("utf-8"), len(rows)
 
 
 def remap(s, culture):
@@ -358,7 +432,19 @@ def fmt_entry(d, nl):
     return nl.join(lines)
 
 
-def main():
+def main(argv=None):
+    ap = argparse.ArgumentParser(description=__doc__,
+                                 formatter_class=argparse.RawDescriptionHelpFormatter)
+    mode = ap.add_mutually_exclusive_group()
+    mode.add_argument("--apply", action="store_true",
+                      help="write the menus and taom_cc_strings.xml (default: dry run)")
+    mode.add_argument("--check", action="store_true",
+                      help="write nothing; exit 1 if a culture in NEW still lacks entries or rows")
+    args = ap.parse_args(argv)
+
+    pending = []  # every entry this run adds (or, in a dry run, would add)
+    menu_writes = []  # (path, new text): written only once every output is prepared and parsed
+    final_entries = []  # each menu's NEW-culture entries as this run leaves it, for the strings
     for menu in MENUS:
         path = os.path.join(CC, menu + "_menu.json")
         raw = open(path, encoding="utf-8", newline="").read()
@@ -376,20 +462,17 @@ def main():
             src_culture = SRC_FOR[c]
             src = [e for e in data if e.get("culture_id") == src_culture]
             if not src:
-                # A source that is ITSELF new this run is a different failure from a source that
-                # does not exist, and it must not be a warning. Blue Craig clones Goblin-town, which
-                # this same run may be minting: the generated entries live in `blocks` until the
-                # splice at the end, so a naive read of `data` finds nothing, prints a warning,
-                # exits 0, and reports success — leaving Blue Craig with zero narrative options and
-                # therefore blank CC stages, which is the exact bug this script exists to prevent.
-                # `data.extend(cloned)` below closes that hole; this is the backstop if the ordering
-                # in NEW is ever changed so a source comes after its dependent.
+                # Nothing to clone leaves this culture with zero options, so its CC stage renders
+                # blank (the bug this script exists to prevent): a failure in every mode, raised
+                # before anything is written. A source that is itself new this run means NEW is out
+                # of order, since `data.extend(cloned)` below shows a chained source (gundabad ->
+                # goblin -> bluecraig) only to the cultures after it.
                 if src_culture in NEW:
                     raise SystemExit(
                         f"{menu}/{c}: clone source '{src_culture}' is also new this run and has not "
                         f"been generated yet — order NEW so a source precedes its dependents")
-                print(f"  WARNING {menu}: no '{src_culture}' entries to clone for {c}")
-                continue
+                raise SystemExit(f"{menu}/{c}: clone source '{src_culture}' has no entries to clone; "
+                                 f"fix SRC_FOR or restore the source's entries")
             if c in AUTHORED:
                 texts = AUTHORED[c][menu]
                 if len(texts) != len(src):
@@ -407,11 +490,13 @@ def main():
                 raise RuntimeError(
                     f"{menu}/{c}: source-culture leftover survived remap in {len(bad)} entrie(s)")
             blocks += made
+            pending += cloned
             # Make this culture's entries visible to later cultures in the same run, so a chained
             # source (gundabad -> goblin -> bluecraig) resolves in ONE invocation instead of
             # silently requiring two.
             data.extend(cloned)
 
+        final_entries += [e for e in data if e.get("culture_id") in NEW]
         if not blocks:
             continue
         # textual splice: insert before the closing ']' (comma after the existing last entry)
@@ -419,20 +504,32 @@ def main():
         before = raw[:idx].rstrip()          # ends at the last entry's '}'
         after = raw[idx:]                     # ']' + trailing newline
         new_text = before + "," + nl + (("," + nl).join(blocks)) + nl + after
-        with open(path, "w", encoding="utf-8", newline="") as f:
-            f.write(new_text)
-        json.loads(open(path, encoding="utf-8").read())  # validate still parses
-        print(f"  {menu}_menu.json: +{len(blocks)} entries; valid JSON, no leftovers")
+        json.loads(new_text)  # parse before write: a splice that breaks the file is never written
+        menu_writes.append((path, new_text))
+        verb = "+" if args.apply else "would add "
+        print(f"  {menu}_menu.json: {verb}{len(blocks)} entries; valid JSON, no leftovers")
     # Register every narrative entry of these cultures that lacks its rows, not only this run's: a
     # run that added the JSON but not the strings (or a reverted strings file) is repaired by a plain
-    # re-run instead of being reported as nothing to do.
-    present = []
-    for menu in MENUS:
-        data = json.load(open(os.path.join(CC, menu + "_menu.json"), encoding="utf-8"))
-        present += [e for e in data if e.get("culture_id") in NEW]
-    print(f"  taom_cc_strings.xml: +{register_cc_strings(present)} row(s)")
-    print("CC menus done.")
+    # re-run instead of being reported as nothing to do. `final_entries` is each menu as this run
+    # leaves it, so a dry run counts the rows it would add.
+    strings_data, rows = prepare_cc_strings(final_entries)
+    if args.apply:
+        # Every output is prepared and parsed by now (tools/README.md "XML I/O convention"), so a
+        # failure above leaves all five files as they were.
+        for path, new_text in menu_writes:
+            with open(path, "w", encoding="utf-8", newline="") as f:
+                f.write(new_text)
+        if strings_data is not None:
+            open(CC_STRINGS, "wb").write(strings_data)
+        print(f"  taom_cc_strings.xml: +{rows} row(s)")
+        print("CC menus done.")
+        return 0
+    print(f"  taom_cc_strings.xml: {rows} row(s) to add")
+    if args.check:
+        return 1 if pending or rows else 0
+    print("DRY RUN: re-run with --apply to write" if pending or rows else "nothing to do")
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

@@ -137,8 +137,9 @@ without a lower rank's T7 dropping under its T6, so accuracy steps 1 per rank at
 high-tier gap comes from damage and skill.
 
 The ranking, position 1 best: Mirkwood 1; Rivendell and Lindon 2; Ithilien 3 (`gondor_ith_*`,
-`gondor_ithilien_*`); Blackroot Vale 4 (`gondor_brv_*`); Black Numenoreans 5; Harad and Dale 6; Gondor,
-Rhun, Isengard and Umbar 7; Erebor and the Black Uruks 8; Gundabad, Dol Guldur, Mordor's orcs and the
+`gondor_ithilien_*`); Blackroot Vale (`gondor_brv_*`), Arthedain and Rhudaur 4; Black Numenoreans 5; Harad, Dale and Cardolan 6; Gondor,
+Rhun, Isengard and Umbar 7; Erebor (whose line also claims `troops_eredluin.xml`, so Ered Luin carries
+Erebor's ladder bows and crossbows) and the Black Uruks 8; Gundabad, Dol Guldur, Mordor's orcs and the
 goblins 9; Rohan 10; Dunland 11. Harad ranks 3rd on accuracy (after the elves). Erebor's bows and
 crossbows rank 2nd on damage (crafting) and 8th on everything else. Crossbows rank among crossbows.
 Khand has no troop file, so no archers.
@@ -330,10 +331,13 @@ one; `donor_stats` / `ammo_stats` / `hero_ceiling` values that are not positive 
 | rivendell | 2, 2, 2 | Bow | T2 85/49/87/105; T3 87/55/90/135; T5 91/66/93/220; T6 93/71/94/255; T7 96/81/95/320; T8 99/94/96/355; T9 102/108/97/375 |
 | ithilien | 3, 3, 4 | Bow | T7 93/78/93/305; T8 96/89/94/340; T9 99/102/95/360; T10 102/119/96/380 |
 | blackroot | 4, 4, 5 | Bow | T3 81/52/87/115; T4 83/57/89/160; T5 85/62/90/200; T6 87/66/91/235; T7 90/75/92/290; T8 93/85/93/325 |
+| arthedain | 4, 5, 4 | Bow | T2 79/44/85/85; T3 81/50/88/115; T4 83/55/90/160; T5 85/59/91/200; T6 87/64/92/235 |
+| rhudaur | 4, 5, 4 | Bow | T2 79/44/85/85; T3 81/50/88/115; T4 83/55/90/160; T5 85/59/91/200; T6 87/64/92/235 |
 | mordor_num | 5, 5, 6 | Bow | T6 84/64/90/225; T7 87/72/91/275; T8 90/81/92/310; T9 93/91/93/330 |
 | harad | 6, 6, 3 | Bow | T2 73/43/86/65; T3 75/48/89/95; T4 77/53/91/140; T5 79/57/92/180; T6 81/61/93/215 |
 | dale | 6, 6, 7 | Bow | T1 71/38/79/40; T3 75/48/85/95; T4 77/53/87/140; T5 79/57/88/180; T6 81/61/89/215 |
 | dale | 6, 6, 7 | Crossbow | T3 75/79/94/95; T4 77/83/96/140; T5 79/88/97/180; T6 81/94/98/215 |
+| cardolan | 6, 6, 7 | Bow | T2 73/43/82/65; T3 75/48/85/95; T4 77/53/87/140; T5 79/57/88/180 |
 | gondor | 7, 7, 8 | Bow | T2 70/41/81/55; T3 72/46/84/85; T4 74/51/86/130; T5 76/55/87/170; T6 78/59/88/205; T7 81/65/89/245; T8 84/72/90/280 |
 | gondor | 7, 7, 8 | Crossbow | T3 72/76/93/85; T4 74/80/95/130; T5 76/85/96/170; T6 78/90/97/205; T7 81/107/98/245; T8 84/126/99/280 |
 | rhun_new | 7, 7, 8 | Bow | T2 70/41/81/55; T3 72/46/84/85; T4 74/51/86/130; T5 76/55/87/170; T6 78/59/88/205; T7 81/65/89/245; T8 84/72/90/280; T9 87/80/91/300 |

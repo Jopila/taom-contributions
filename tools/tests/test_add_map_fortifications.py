@@ -11,7 +11,7 @@ Pure stdlib over synthetic text; no game install needed. Each test pins one part
   - a rendered town and castle parse and carry each culture's own scenes, menus and gate rotation
   - an unknown culture raises before anything is written
   - --check names a missing row, a missing loc row, a missing entity, a drifted position and a
-    drifted gate
+    drifted gate, and a castle heading the batch that RELEASED leaves unreleased
 """
 import math
 import os
@@ -214,6 +214,22 @@ class SaveOrderTests(unittest.TestCase):
                     amf.amv.Village("village_O1_1", "w", "castle_O1", "trapper", "arthedain", "s"),
                     amf.amv.Village("village_A1_1", "x", "town_A1", "trapper", "arthedain", "s")]
         self.assertEqual(amf.batch_ids(forts, villages, released={"castle_O1"}), {"town_N1", "village_N1_1"})
+
+    def test_check_names_a_castle_heading_the_unreleased_batch(self):
+        # A released town, then the new batch with its castle ahead of its town: a save made before
+        # the batch would load the castle without its owner. Only RELEASED says where the batch starts.
+        forts = [amf.Fort("town_R1", "Old", "clan_x_1", "arthedain", "town", "empire_town_c", 3000, "a"),
+                 amf.Fort("town_N1", "New", "clan_x_1", "arthedain", "town", "empire_town_c", 3000, "a"),
+                 amf.Fort("castle_N2", "Keep", "clan_x_1", "arthedain", "castle", "s", 800, "a")]
+        scene = "".join(entity(f.id, f"{i}, 0, 0", children=GATE("1, 0, 0")) for i, f in enumerate(forts))
+        rows = {f.id: amf.fort_block(f, (str(i), "0"), (i + 1.0, 0.0), "\n") for i, f in enumerate(forts)}
+        loc = {"DE": "".join(f'<string id="Settlements.Settlement.name.{f.id}" />' for f in forts)}
+        text = master(rows["town_R1"], rows["castle_N2"], rows["town_N1"])
+        found = amf.check(forts, text, scene, loc, released={"town_R1"})
+        self.assertEqual(len(found), 1, found)
+        self.assertTrue(found[0].startswith("castle_N2: heads the new rows"), found[0])
+        # With nothing released the old town heads the batch and the misorder goes unseen.
+        self.assertEqual(amf.check(forts, text, scene, loc, released=set()), [])
 
     def test_towns_are_appended_first_then_table_order(self):
         forts = [amf.Fort(i, i, "c", "arthedain", k, "s", 1, "a")

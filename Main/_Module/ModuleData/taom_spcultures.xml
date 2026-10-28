@@ -6549,4 +6549,298 @@
   </Culture>
 
   <!-- TAOM-NEWCULTURE:rhudaur:END -->
+  <!-- TAOM-NEWCULTURE:eredluin:BEGIN -->
+  <Culture
+    id="eredluin"
+    name="{=aom_eredluin_name}Dwarves of Ered Luin"
+    is_main_culture="true"
+    color="0xFF3E5A7A"
+    color2="0xFFB8C4CC"
+    elite_basic_troop="NPCCharacter.eredluin_noble"
+    executioner="NPCCharacter.eredluin_noble"
+    basic_troop="NPCCharacter.eredluin_delver"
+    melee_militia_troop="NPCCharacter.eredluin_militia_spearman"
+    ranged_militia_troop="NPCCharacter.eredluin_militia_archer"
+    melee_elite_militia_troop="NPCCharacter.eredluin_militia_veteran_spearman"
+    ranged_elite_militia_troop="NPCCharacter.eredluin_militia_veteran_archer"
+    can_have_settlement="true"
+    villager_party_template="PartyTemplate.villager_eredluin_template"
+    default_party_template="PartyTemplate.kingdom_hero_party_eredluin_template"
+    settlement_patrol_template_level_1="PartyTemplate.patrol_party_eredluin_template_level_1"
+    settlement_patrol_template_level_2="PartyTemplate.patrol_party_eredluin_template_level_2"
+    settlement_patrol_template_level_3="PartyTemplate.patrol_party_eredluin_template_level_3"
+    militia_party_template="PartyTemplate.militia_eredluin_template"
+    rebels_party_template="PartyTemplate.rebels_eredluin_template"
+    vassal_reward_party_template="PartyTemplate.vassal_reward_troops_eredluin"
+    prosperity_bonus="1"
+    encounter_background_mesh="encounter_sturgia"
+    faction_banner_key="11.12.12.4345.4345.764.764.1.0.0.462.13.13.512.512.764.764.1.0.0"
+    text="{=aom_eredluin_desc}The dwarves of Ered Luin dwell in the Blue Mountains at the western edge of Middle-earth. Durin's Folk came there in exile and made Thorin's Halls, and in this age the Broadbeams and the Firebeards keep Belegost and Nogrod again, the oldest dwarf-cities of the West. They are miners and smiths, poorer than their kin in the east, and they trade iron with the Elves of Lindon and the Men of Eriador while the goblins of Blue Craig gnaw at their roads."
+    tournament_master="NPCCharacter.tournament_master_eredluin"
+    villager="NPCCharacter.villager_eredluin"
+    caravan_master="NPCCharacter.caravan_master_eredluin"
+    caravan_guard="NPCCharacter.caravan_guard_eredluin"
+    veteran_caravan_guard="NPCCharacter.veteran_caravan_guard_eredluin"
+    prison_guard="NPCCharacter.prison_guard_eredluin"
+    guard="NPCCharacter.guard_eredluin"
+    blacksmith="NPCCharacter.blacksmith_eredluin"
+    weaponsmith="NPCCharacter.weaponsmith_eredluin"
+    townswoman="NPCCharacter.townswoman_eredluin"
+    townswoman_infant="NPCCharacter.townswoman_infant_eredluin"
+    townswoman_child="NPCCharacter.townswoman_child_eredluin"
+    townswoman_teenager="NPCCharacter.townswoman_teenager_eredluin"
+    townsman="NPCCharacter.townsman_eredluin"
+    townsman_infant="NPCCharacter.townsman_infant_eredluin"
+    townsman_child="NPCCharacter.townsman_child_eredluin"
+    village_woman="NPCCharacter.village_woman_eredluin"
+    villager_male_child="NPCCharacter.villager_child_eredluin"
+    villager_male_teenager="NPCCharacter.villager_teenager_eredluin"
+    villager_female_child="NPCCharacter.village_woman_child_eredluin"
+    villager_female_teenager="NPCCharacter.village_woman_teenager_eredluin"
+    townsman_teenager="NPCCharacter.townsman_teenager_eredluin"
+    ransom_broker="NPCCharacter.ransom_broker_eredluin"
+    gangleader_bodyguard="NPCCharacter.gangleader_bodyguard_eredluin"
+    merchant_notary="NPCCharacter.spc_notable_eredluin_0"
+    artisan_notary="NPCCharacter.spc_notable_eredluin_8"
+    preacher_notary="NPCCharacter.spc_notable_eredluin_5"
+    rural_notable_notary="NPCCharacter.spc_notable_eredluin_21"
+    shop_worker="NPCCharacter.shop_worker_eredluin"
+    tavernkeeper="NPCCharacter.tavernkeeper_eredluin"
+    taverngamehost="NPCCharacter.taverngamehost_eredluin"
+    musician="NPCCharacter.musician_eredluin"
+    tavern_wench="NPCCharacter.tavern_wench_eredluin"
+    armorer="NPCCharacter.armorer_eredluin"
+    horseMerchant="NPCCharacter.horseMerchant_eredluin"
+    barber="NPCCharacter.barber_eredluin"
+    merchant="NPCCharacter.merchant_eredluin"
+    beggar="NPCCharacter.beggar_eredluin"
+    female_beggar="NPCCharacter.female_beggar_eredluin"
+    female_dancer="NPCCharacter.female_dancer_eredluin"
+    default_battle_equipment_roster="EquipmentRoster.eredluin_bat_template_medium_a"
+    default_civilian_equipment_roster="EquipmentRoster.eredluin_civ_template_default_a"
+    default_stealth_equipment_roster="EquipmentRoster.default_stealth_equipment_roster"
+    duel_preset_equipment_roster="EquipmentRoster.stu_duel_preset_template"
+    marriage_bride_equipment_roster="EquipmentRoster.marriage_female_emp_cutscene_template"
+    board_game_type="Konane"
+    default_character_creation_body_property="BodyProperty.fighter_erebor"
+    start_point_position_x="296.160"
+    start_point_position_y="1043.401">
+    <caravan_party_templates>
+      <caravan_party_template id="PartyTemplate.caravan_template_eredluin" />
+    </caravan_party_templates>
+    <elite_caravan_party_templates>
+      <caravan_party_template id="PartyTemplate.elite_caravan_template_eredluin" />
+    </elite_caravan_party_templates>
+    <available_ship_hulls></available_ship_hulls>
+    <vassal_reward_items>
+      <item id="Item.sm_dwarf_erebor_1h_axe_a" />
+    </vassal_reward_items>
+    <banner_bearer_replacement_weapons>
+      <item id="Item.sm_dwarf_erebor_1h_axe_a" />
+      <item id="Item.sm_dwarf_erebor_1h_axe_b" />
+      <item id="Item.sm_dwarf_erebor_1h_axe_c" />
+      <item id="Item.sm_dwarf_erebor_1h_axe_d" />
+    </banner_bearer_replacement_weapons>
+    <default_policies>
+      <policy id="policy_senate" />
+    </default_policies>
+    <male_names>
+      <name name="{=aom_eredluin_male_name_1}Andvari" />
+      <name name="{=aom_eredluin_male_name_2}Fjalar" />
+      <name name="{=aom_eredluin_male_name_3}Frosti" />
+      <name name="{=aom_eredluin_male_name_4}Ginnar" />
+      <name name="{=aom_eredluin_male_name_5}Hepti" />
+      <name name="{=aom_eredluin_male_name_6}Skirfir" />
+      <name name="{=aom_eredluin_male_name_7}Virfir" />
+      <name name="{=aom_eredluin_male_name_8}Aurvang" />
+      <name name="{=aom_eredluin_male_name_9}Jari" />
+      <name name="{=aom_eredluin_male_name_10}Hár" />
+      <name name="{=aom_eredluin_male_name_11}Alf" />
+      <name name="{=aom_eredluin_male_name_12}Yngvi" />
+      <name name="{=aom_eredluin_male_name_13}Finnar" />
+      <name name="{=aom_eredluin_male_name_14}Hlévang" />
+      <name name="{=aom_eredluin_male_name_15}Dolgthrasir" />
+      <name name="{=aom_eredluin_male_name_16}Haugspori" />
+      <name name="{=aom_eredluin_male_name_17}Svíur" />
+      <name name="{=aom_eredluin_male_name_18}Nýrád" />
+      <name name="{=aom_eredluin_male_name_19}Reginn" />
+      <name name="{=aom_eredluin_male_name_20}Vitr" />
+      <name name="{=aom_eredluin_male_name_21}Litr" />
+      <name name="{=aom_eredluin_male_name_22}Veggr" />
+      <name name="{=aom_eredluin_male_name_23}Ánarr" />
+      <name name="{=aom_eredluin_male_name_24}Hornbori" />
+      <name name="{=aom_eredluin_male_name_25}Fræg" />
+      <name name="{=aom_eredluin_male_name_26}Lóin" />
+      <name name="{=aom_eredluin_male_name_27}Bárin" />
+      <name name="{=aom_eredluin_male_name_28}Dúri" />
+      <name name="{=aom_eredluin_male_name_29}Thekk" />
+      <name name="{=aom_eredluin_male_name_30}Glór" />
+      <name name="{=aom_eredluin_male_name_31}Narvi" />
+      <name name="{=aom_eredluin_male_name_32}Borin" />
+      <name name="{=aom_eredluin_male_name_33}Farin" />
+      <name name="{=aom_eredluin_male_name_34}Grór" />
+      <name name="{=aom_eredluin_male_name_35}Thrár" />
+      <name name="{=aom_eredluin_male_name_36}Durlin" />
+      <name name="{=aom_eredluin_male_name_37}Hanar" />
+      <name name="{=aom_eredluin_male_name_38}Bruni" />
+      <name name="{=aom_eredluin_male_name_39}Skáfid" />
+      <name name="{=aom_eredluin_male_name_40}Eikin" />
+    </male_names>
+    <female_names>
+      <name name="{=aom_eredluin_female_name_1}Bryndís" />
+      <name name="{=aom_eredluin_female_name_2}Gerda" />
+      <name name="{=aom_eredluin_female_name_3}Hlíf" />
+      <name name="{=aom_eredluin_female_name_4}Sigrún" />
+      <name name="{=aom_eredluin_female_name_5}Ásta" />
+      <name name="{=aom_eredluin_female_name_6}Védís" />
+      <name name="{=aom_eredluin_female_name_7}Ragna" />
+      <name name="{=aom_eredluin_female_name_8}Herdís" />
+      <name name="{=aom_eredluin_female_name_9}Una" />
+      <name name="{=aom_eredluin_female_name_10}Eydís" />
+      <name name="{=aom_eredluin_female_name_11}Hildis" />
+      <name name="{=aom_eredluin_female_name_12}Thórdís" />
+      <name name="{=aom_eredluin_female_name_13}Arndís" />
+      <name name="{=aom_eredluin_female_name_14}Valdís" />
+      <name name="{=aom_eredluin_female_name_15}Jódís" />
+      <name name="{=aom_eredluin_female_name_16}Ingdís" />
+      <name name="{=aom_eredluin_female_name_17}Steindís" />
+      <name name="{=aom_eredluin_female_name_18}Ölrún" />
+      <name name="{=aom_eredluin_female_name_19}Gudrún" />
+      <name name="{=aom_eredluin_female_name_20}Hervör" />
+      <name name="{=aom_eredluin_female_name_21}Thóra" />
+      <name name="{=aom_eredluin_female_name_22}Járnsaxa" />
+      <name name="{=aom_eredluin_female_name_23}Brynja" />
+      <name name="{=aom_eredluin_female_name_24}Svanhild" />
+    </female_names>
+    <clan_names>
+      <name name="{=aom_eredluin_clan_1}House of Borin" />
+      <name name="{=aom_eredluin_clan_2}Broadbeams" />
+      <name name="{=aom_eredluin_clan_3}Firebeards" />
+      <name name="{=aom_eredluin_clan_4}Wardens of Dolmed" />
+      <name name="{=aom_eredluin_clan_5}House of Frerin" />
+      <name name="{=aom_eredluin_clan_6}House of Narvi" />
+      <name name="{=aom_eredluin_clan_7}Stonehands of Belegost" />
+      <name name="{=aom_eredluin_clan_8}Hammerers of Nogrod" />
+      <name name="{=aom_eredluin_clan_9}House of Telchar" />
+      <name name="{=aom_eredluin_clan_10}House of Azaghâl" />
+      <name name="{=aom_eredluin_clan_11}Keepers of the Dwarf-road" />
+      <name name="{=aom_eredluin_clan_12}House of Gamil" />
+    </clan_names>
+        <cultural_feats>
+            <feat id="taom_erebor_production" />
+            <feat id="taom_erebor_construction_speed" />
+            <feat id="taom_erebor_loyalty" />
+            <feat id="taom_erebor_morale" />
+            <feat id="taom_erebor_smithing" />
+            <feat id="taom_erebor_snow_speed" />
+        </cultural_feats>
+    <possible_clan_banner_icon_ids>
+      <icon id="100" />
+      <icon id="101" />
+      <icon id="102" />
+      <icon id="103" />
+      <icon id="104" />
+      <icon id="105" />
+      <icon id="106" />
+      <icon id="107" />
+      <icon id="108" />
+      <icon id="109" />
+      <icon id="110" />
+      <icon id="119" />
+      <icon id="147" />
+      <icon id="148" />
+      <icon id="152" />
+      <icon id="200" />
+      <icon id="201" />
+      <icon id="202" />
+      <icon id="203" />
+      <icon id="204" />
+      <icon id="205" />
+      <icon id="206" />
+      <icon id="207" />
+      <icon id="208" />
+      <icon id="209" />
+      <icon id="210" />
+      <icon id="211" />
+      <icon id="212" />
+      <icon id="213" />
+      <icon id="214" />
+      <icon id="215" />
+      <icon id="216" />
+      <icon id="217" />
+      <icon id="218" />
+      <icon id="219" />
+      <icon id="220" />
+      <icon id="221" />
+      <icon id="222" />
+      <icon id="223" />
+      <icon id="400" />
+    </possible_clan_banner_icon_ids>
+    <notable_templates>
+      <template name="NPCCharacter.spc_wanderer_eredluin_0" />
+      <template name="NPCCharacter.spc_wanderer_eredluin_1" />
+      <template name="NPCCharacter.spc_wanderer_eredluin_2" />
+      <template name="NPCCharacter.spc_wanderer_eredluin_3" />
+      <template name="NPCCharacter.spc_wanderer_eredluin_4" />
+      <template name="NPCCharacter.spc_wanderer_eredluin_5" />
+      <template name="NPCCharacter.spc_wanderer_eredluin_6" />
+      <template name="NPCCharacter.spc_wanderer_eredluin_7" />
+      <template name="NPCCharacter.spc_wanderer_eredluin_8" />
+      <template name="NPCCharacter.spc_wanderer_eredluin_9" />
+      <template name="NPCCharacter.spc_wanderer_eredluin_10" />
+      <template name="NPCCharacter.spc_wanderer_eredluin_11" />
+      <template name="NPCCharacter.spc_notable_eredluin_0" />
+      <template name="NPCCharacter.spc_notable_eredluin_0b" />
+      <template name="NPCCharacter.spc_notable_eredluin_1" />
+      <template name="NPCCharacter.spc_notable_eredluin_1b" />
+      <template name="NPCCharacter.spc_notable_eredluin_2" />
+      <template name="NPCCharacter.spc_notable_eredluin_2b" />
+      <template name="NPCCharacter.spc_notable_eredluin_3" />
+      <template name="NPCCharacter.spc_notable_eredluin_3b" />
+      <template name="NPCCharacter.spc_notable_eredluin_4" />
+      <template name="NPCCharacter.spc_notable_eredluin_4b" />
+      <template name="NPCCharacter.spc_notable_eredluin_5" />
+      <template name="NPCCharacter.spc_notable_eredluin_6" />
+      <template name="NPCCharacter.spc_notable_eredluin_7" />
+      <template name="NPCCharacter.spc_notable_eredluin_8" />
+      <template name="NPCCharacter.spc_notable_eredluin_9" />
+      <template name="NPCCharacter.spc_notable_eredluin_gl1" />
+      <template name="NPCCharacter.spc_notable_eredluin_10" />
+      <template name="NPCCharacter.spc_notable_eredluin_11" />
+      <template name="NPCCharacter.spc_notable_eredluin_gl4" />
+      <template name="NPCCharacter.spc_notable_eredluin_12" />
+      <template name="NPCCharacter.spc_notable_eredluin_13" />
+      <template name="NPCCharacter.spc_notable_eredluin_21" />
+      <template name="NPCCharacter.spc_notable_eredluin_22" />
+      <template name="NPCCharacter.spc_eredluin_headman_1" />
+      <template name="NPCCharacter.spc_eredluin_headman_2" />
+      <template name="NPCCharacter.spc_eredluin_headman_3" />
+    </notable_templates>
+    <lord_templates>
+      <template name="NPCCharacter.spc_eredluin_lord_1" />
+      <template name="NPCCharacter.spc_eredluin_lord_2" />
+    </lord_templates>
+    <rebellion_hero_templates>
+      <template name="NPCCharacter.spc_eredluin_lord_1" />
+      <template name="NPCCharacter.spc_eredluin_lord_2" />
+    </rebellion_hero_templates>
+    <tournament_team_templates_one_participant>
+      <template name="NPCCharacter.tournament_template_empire_one_participant_set_v1" />
+    </tournament_team_templates_one_participant>
+    <tournament_team_templates_two_participant>
+      <template name="NPCCharacter.tournament_template_empire_two_participant_set_v1" />
+      <template name="NPCCharacter.tournament_template_empire_two_participant_set_v2" />
+      <template name="NPCCharacter.tournament_template_empire_two_participant_set_v3" />
+    </tournament_team_templates_two_participant>
+    <tournament_team_templates_four_participant>
+      <template name="NPCCharacter.tournament_template_empire_four_participant_set_v1" />
+      <template name="NPCCharacter.tournament_template_empire_four_participant_set_v2" />
+      <template name="NPCCharacter.tournament_template_empire_four_participant_set_v3" />
+    </tournament_team_templates_four_participant>
+    <basic_mercenary_troops>
+      <template name="NPCCharacter.eredluin_noble_merc" />
+    </basic_mercenary_troops>
+  </Culture>
+
+  <!-- TAOM-NEWCULTURE:eredluin:END -->
 </SPCultures>

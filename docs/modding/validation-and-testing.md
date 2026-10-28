@@ -196,18 +196,21 @@ settlement drops below the floor in `tools/settlement_economy_floor.json`, which
 map reinstall causes. Re-apply with
 `python tools/rebalance_settlement_prosperity.py --culture-floor-file tools/settlement_economy_floor.json --apply`.
 
-## Ten scripts with no dry run
+## Seven scripts with no dry run
 
 These write unconditionally. None of them has an `--apply` or a `--dry-run` flag at all, so there is
 no preview and no confirmation step. Commit or copy the target files first.
 
-<!-- measured: grep -cE '\-\-apply|\-\-dry-run' on each of the ten files, all returned 0 2026-09-05 -->
+<!-- measured: grep -cE '\-\-apply|\-\-dry-run' on each of the ten files listed on 2026-09-05; seven still return 0 on 2026-10-27 -->
 
 `tools/generate_batch2_wanderers.py` · `tools/extract_wanderers.py` ·
 `tools/harvest_factionmap_strings.py` · `tools/generate_new_factions.py` ·
-`tools/generate_new_faction_kingdoms.py` · `tools/insert_new_factions.py` ·
-`tools/insert_new_faction_cc_menus.py` · `tools/oneoff/generate_tavern_mercenaries.py` ·
-`tools/oneoff/apply_hero_bios.py` · `tools/oneoff/_harvest_lotr_issue_strings.py`
+`tools/insert_new_factions.py` · `tools/oneoff/apply_hero_bios.py` ·
+`tools/oneoff/_harvest_lotr_issue_strings.py`
+
+Three of the 2026-09-05 list now dry-run by default and write only with `--apply`:
+`tools/generate_new_faction_kingdoms.py` (the #978 review), `tools/oneoff/generate_tavern_mercenaries.py`
+and `tools/insert_new_faction_cc_menus.py` (Ered Luin, 2026-10-27, which also added `--check`).
 
 Two more are stdout-only and just as destructive in practice: `tools/generate_gondor_troops.py` and
 `tools/generate_rhun_troops.py` have no write mode, so the documented usage is a shell redirect
@@ -419,7 +422,7 @@ All measured 2026-09-05 from the repo root.
 | 21 Armory `<XmlName id="Items">` rows | `rg -c 'XmlName id="Items"' <install>/Modules/LOTRLOME_Armory/SubModule.xml` |
 | 286 deployed XML against 284 in the repo, 2 orphans | `diff` of `find . -name '*.xml' \| sort` under both trees |
 | 165 `tools/*.py`, 18 `tools/*.ps1`, 64 `tools/oneoff/*.py` | `ls tools/*.py \| wc -l` and the two siblings |
-| 10 scripts with no dry run | `grep -cE '\-\-apply\|\-\-dry-run'` on each of the ten, all 0 |
+| 7 scripts with no dry run, of the 10 measured on 2026-09-05 | `grep -cE '\-\-apply\|\-\-dry-run'` on each of the ten: seven 0, three 3 (2026-10-27) |
 
 The six unswept troop files are `dunland`, `goblin`, `harad`, `mirkwood`, `rivendell` and `rohan`.
 The tool says so itself at `tools/validate_all_troop_refs.py:90-92`: a new culture must be appended to

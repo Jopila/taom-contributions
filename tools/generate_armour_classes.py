@@ -27,11 +27,15 @@ Class precedence:
 
 `next` is the piece the armoury upgrades it into: the nearest class above it that has a
 candidate, looked for first in the piece's own tokened line (same stem and slot file, the same
-suffix preferred) and then among same-kit, same-slot pieces sharing the longest id prefix. A kit
-is rebalance_armor.kingdom_key's kingdom, or the Armory folder for a culture with no kingdom cap:
-several kits share one folder at different caps (mordor: orc/uruk/Black Numenorean; rhun: Dol
-Guldur's Khamul line), so the fallback must not link across them. Lord is a target only from an
-elite piece, and named or civilian kit is never one.
+suffix preferred) and then among same-kit, same-slot pieces sharing the longest id prefix. A
+candidate below lord that is no better than the piece on any armour value (head, body, arm, leg)
+and worse on one is never one, so a paid upgrade cannot only make the wearer easier to hit; with
+no other candidate the piece has no `next`. The elite-to-lord forge path is exempt: it buys the
+lord look, even where the lord piece has less armour. A kit is rebalance_armor.kingdom_key's
+kingdom, or the Armory folder for a culture with no kingdom cap: several kits share one folder at
+different caps (mordor: orc/uruk/Black Numenorean; rhun: Dol Guldur's Khamul line), so the fallback
+must not link across them. Lord is a target only from an elite piece, and named or civilian kit is
+never one.
 
 The table is sorted and carries no timestamp, so an unchanged Armory regenerates byte-identically
 and the drift check compares text.
@@ -75,6 +79,7 @@ class Piece:
     cls: str
     folder: str
     slot: str
+    armour: Optional[Tuple[int, int, int, int]] = None  # (head, body, arm, leg); None when unknown
 
 
 def classify(item_id: str, name: str, derived_tier: Optional[str], stat_band_tier: Optional[str]) -> str:
@@ -141,12 +146,28 @@ def _kit(p: Piece) -> str:
     return ra.kingdom_key(p.item_id, p.folder) or p.folder
 
 
+def _dominated(candidate, source) -> bool:
+    """True when `candidate` is no better than `source` on any armour value and worse on one,
+    compared value by value (an ordered tuple compare would reject a real trade)."""
+    if candidate is None or source is None:
+        return False
+    return all(c <= s for c, s in zip(candidate, source)) and any(c < s for c, s in zip(candidate, source))
+
+
 def pick_next(source: Piece, pieces: Iterable[Piece]) -> Optional[str]:
     """The id `source` upgrades into, or None (see the module docstring for the rule)."""
     targets = _allowed_targets(source.cls)
     if not targets:
         return None
-    pool = [p for p in pieces if p.item_id != source.item_id and p.slot == source.slot and p.cls in targets]
+    # A paid upgrade never only lowers protection: a candidate no better on any armour value and worse
+    # on one is skipped (Codex F1 in the Ered Luin review: its first troop tree had classed two Iron
+    # Hills and Erebor capes heavy). A trade, more on one value and less on another, stays the artist's
+    # design. The elite-to-lord forge path is exempt because it buys the lord look, even where the lord
+    # piece has less armour than its elite source (some lose more than 20 points; an open decision in
+    # docs/features/ered-luin.md "Known gaps"). With either side's values unknown, the class and id
+    # rule alone decides, as before.
+    pool = [p for p in pieces if p.item_id != source.item_id and p.slot == source.slot and p.cls in targets
+            and (p.cls == 'lord' or not _dominated(p.armour, source.armour))]
     if not pool:
         return None
     line = _line_key(source.item_id)
@@ -190,7 +211,8 @@ def build_rows(records: Dict[str, dict], targets: TargetsFn = stat_targets) -> D
         if derived is None and ra.mesh_tier_of(item_id) is None:
             band = stat_band(rec.get('current'), targets(item_id, rec.get('slot'), rec.get('culture')))
         cls = classify(item_id, rec.get('name', ''), derived, band)
-        pieces.append(Piece(item_id=item_id, cls=cls, folder=rec.get('culture'), slot=rec.get('slot')))
+        pieces.append(Piece(item_id=item_id, cls=cls, folder=rec.get('culture'), slot=rec.get('slot'),
+                            armour=rec.get('armour')))
     # pick_next only ever matches within one slot; grouping first means each piece scans its own
     # slot's candidates instead of every piece in the Armory (about 2,860 for one run).
     by_slot: Dict[str, list] = {}

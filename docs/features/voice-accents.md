@@ -105,7 +105,7 @@ last value without a warning, and `ShippedConfig_EqualsTheBuiltInDefault` guards
 
 | Accent | Cultures |
 |--------|----------|
-| `imperial` | gondor, gondor_soldiers, arthedain, neutral_culture, rivendell, lothlorien, mirkwood, lindon, erebor, erebor_warriors, umbar, abanissa, shaghana, darshi |
+| `imperial` | gondor, gondor_soldiers, arthedain, cardolan, rhudaur, neutral_culture, rivendell, lothlorien, mirkwood, lindon, erebor, erebor_warriors, eredluin, umbar, abanissa, shaghana, darshi |
 | `khuzait` | battania (Khand) |
 | `sturgian` | nord, vakken |
 | `looters` | dunland_raiders, mirkwood_stalkers |

@@ -275,16 +275,18 @@ User clicks filtered position N
 - Adding a new race: add the race ID to the `races` array of every culture that should permit it. Position determines whether it becomes the new default.
 - Adding a new culture: add a culture entry with `culture_id` and `races` array. If `races` is empty or the culture is unknown, the filter falls back to showing all races (with a one-time warning per culture in the log).
 
-### Current allow-lists (as of 2026-05-06)
+### Current allow-lists (as of 2026-10-27)
 | Culture | Allowed races |
 |---------|---------------|
-| `erebor` | `dwarf` |
+| `erebor` / `eredluin` | `dwarf` |
 | `mordor` | `uruk`, `orc`, `human` |
 | `gundabad` | `pale_uruk`, `goblin`, `orc`, `human` |
 | `dolguldur` | `dg_uruk`, `goblin`, `orc`, `human` |
-| `mirkwood` / `lothlorien` / `rivendell` | `elf`, `human` |
-| `isengard` | `uruk_hai`, `berserker`, `human` |
-| `gondor` / `umbar` / `shaghana` / `abanissa` | `human` |
+| `goblin` / `bluecraig` | `goblin`, `orc`, `human` |
+| `mistymountainorcs` | `orc`, `goblin`, `human` |
+| `mirkwood` / `lothlorien` / `rivendell` / `lindon` | `elf`, `human` |
+| `isengard` | `uruk_hai`, `berserker`, `orc`, `human`, `saruman` |
+| `gondor` / `umbar` / `shaghana` / `abanissa` / `arthedain` / `cardolan` / `rhudaur` | `human` |
 | `empire` / `vlandia` / `sturgia` / `aserai` / `battania` / `khuzait` | `human` |
 
 ### Race finalization (review-driven hardening)

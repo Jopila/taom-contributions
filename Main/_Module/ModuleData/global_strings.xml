@@ -75,6 +75,7 @@
 	<string id="str_campaign_starting_options_item_name.arthedain" text="{=taom_aso_kingdom.arthedain}Arthedain" />
 	<string id="str_campaign_starting_options_item_name.cardolan" text="{=taom_aso_kingdom.cardolan}Cardolan" />
 	<string id="str_campaign_starting_options_item_name.rhudaur" text="{=taom_aso_kingdom.rhudaur}Rhudaur" />
+	<string id="str_campaign_starting_options_item_name.eredluin" text="{=taom_aso_kingdom.eredluin}Ered Luin" />
 
 	<!-- Scenario text that names Calradia directly. The United Empire scenario itself is
 	     removed by TaomStartOptionsProvider, so only the surviving scenarios are retitled. -->

@@ -1140,4 +1140,73 @@
 	</EquipmentRoster>
 
   <!-- TAOM-NEWCULTURE:rhudaur:END -->
+  <!-- TAOM-NEWCULTURE:eredluin:BEGIN -->
+	<EquipmentRoster id="child_template_eredluin_noble_male" culture="Culture.eredluin">
+		<EquipmentSet equipmentType="Civilian">
+			<Equipment slot="Body" id="Item.sk_dwarf_tunic_noble_a" />
+			<Equipment slot="Leg" id="Item.sk_dwarf_erebor_boots_light_a" />
+		</EquipmentSet>
+		<EquipmentSet equipmentType="Civilian">
+			<Equipment slot="Body" id="Item.sk_dwarf_tunic_noble_b" />
+			<Equipment slot="Leg" id="Item.sk_dwarf_erebor_boots_light_b" />
+		</EquipmentSet>
+		<Flags IsChildEquipmentTemplate="true" IsFemaleTemplate="false" IsLordTemplate="true" />
+	</EquipmentRoster>
+	<EquipmentRoster id="child_template_eredluin_noble_female" culture="Culture.eredluin">
+		<EquipmentSet equipmentType="Civilian">
+			<Equipment slot="Body" id="Item.sk_dwarf_dress_normal_b" />
+			<Equipment slot="Leg" id="Item.sk_dwarf_erebor_boots_light_a" />
+		</EquipmentSet>
+		<EquipmentSet equipmentType="Civilian">
+			<Equipment slot="Body" id="Item.sk_dwarf_dress_normal_a" />
+			<Equipment slot="Leg" id="Item.sk_dwarf_erebor_boots_light_b" />
+		</EquipmentSet>
+		<Flags IsChildEquipmentTemplate="true" IsFemaleTemplate="true" IsLordTemplate="true" />
+	</EquipmentRoster>
+	<EquipmentRoster id="child_template_eredluin_townsman_male" culture="Culture.eredluin">
+		<EquipmentSet equipmentType="Civilian">
+			<Equipment slot="Body" id="Item.sk_dwarf_tunic_normal_a" />
+			<Equipment slot="Leg" id="Item.sk_dwarf_erebor_boots_light_a" />
+		</EquipmentSet>
+		<EquipmentSet equipmentType="Civilian">
+			<Equipment slot="Body" id="Item.sk_dwarf_tunic_normal_b" />
+			<Equipment slot="Leg" id="Item.sk_dwarf_erebor_boots_light_b" />
+		</EquipmentSet>
+		<Flags IsChildEquipmentTemplate="true" IsFemaleTemplate="false" IsLordTemplate="true" />
+	</EquipmentRoster>
+	<EquipmentRoster id="child_template_eredluin_townsman_female" culture="Culture.eredluin">
+		<EquipmentSet equipmentType="Civilian">
+			<Equipment slot="Body" id="Item.sk_dwarf_dress_normal_b" />
+			<Equipment slot="Leg" id="Item.sk_dwarf_erebor_boots_light_a" />
+		</EquipmentSet>
+		<EquipmentSet equipmentType="Civilian">
+			<Equipment slot="Body" id="Item.sk_dwarf_dress_normal_a" />
+			<Equipment slot="Leg" id="Item.sk_dwarf_erebor_boots_light_b" />
+		</EquipmentSet>
+		<Flags IsChildEquipmentTemplate="true" IsFemaleTemplate="true" IsLordTemplate="true" />
+	</EquipmentRoster>
+	<EquipmentRoster id="child_template_eredluin_villager_male" culture="Culture.eredluin">
+		<EquipmentSet equipmentType="Civilian">
+			<Equipment slot="Body" id="Item.sk_dwarf_tunic_normal_a" />
+			<Equipment slot="Leg" id="Item.sk_dwarf_erebor_boots_light_a" />
+		</EquipmentSet>
+		<EquipmentSet equipmentType="Civilian">
+			<Equipment slot="Body" id="Item.sk_dwarf_tunic_normal_b" />
+			<Equipment slot="Leg" id="Item.sk_dwarf_erebor_boots_light_b" />
+		</EquipmentSet>
+		<Flags IsChildEquipmentTemplate="true" IsFemaleTemplate="false" IsLordTemplate="true" />
+	</EquipmentRoster>
+	<EquipmentRoster id="child_template_eredluin_villager_female" culture="Culture.eredluin">
+		<EquipmentSet equipmentType="Civilian">
+			<Equipment slot="Body" id="Item.sk_dwarf_dress_normal_b" />
+			<Equipment slot="Leg" id="Item.sk_dwarf_erebor_boots_light_a" />
+		</EquipmentSet>
+		<EquipmentSet equipmentType="Civilian">
+			<Equipment slot="Body" id="Item.sk_dwarf_dress_normal_a" />
+			<Equipment slot="Leg" id="Item.sk_dwarf_erebor_boots_light_b" />
+		</EquipmentSet>
+		<Flags IsChildEquipmentTemplate="true" IsFemaleTemplate="true" IsLordTemplate="true" />
+	</EquipmentRoster>
+
+  <!-- TAOM-NEWCULTURE:eredluin:END -->
 </EquipmentRosters>

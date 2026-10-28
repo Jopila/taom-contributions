@@ -73,14 +73,15 @@ Two stacked rosters build the player's kit at CC finalize (`Main/Features/Charac
 `CharacterCreationContentService.GrantPlayerStartupResources`):
 
 1. **Culture-default**: `player_char_creation_{culture}_{title}_{m|f}` in
-   `Main/_Module/ModuleData/equipmentsets/taom_char_creation_equipment.xml`. 288 rosters (18 cultures x 8
+   `Main/_Module/ModuleData/equipmentsets/taom_char_creation_equipment.xml`. 336 rosters (21 cultures x 8
    titles x 2), each with a battle set and a civilian set. Since 2026-10-23 every playable culture has career kits, so its battle
    sets show only in the previews before the career menu; it stays the civilian kit
    for everyone, because the career layer carries no civilian set and `PlayerEquipmentAdapter` applies the
    two independently. The same file also holds the childhood, education and show-stage rosters and the
    parents' rosters, which share the id prefix and are not the player's kit.
 2. **Career override**: `player_career_{culture}_{ranged|cavalry|infantry}_{m|f}` in
-   `taom_career_starting_equipment.xml`, 150 rosters, applied via `Equipment.FillFrom`: a complete 12-slot
+   `taom_career_starting_equipment.xml`, 154 rosters (25 cultures x 3 archetypes x 2, plus Ered Luin's
+   four: it has no cavalry career), applied via `Equipment.FillFrom`: a complete 12-slot
    replacement of the battle set (`Equipment.cs:184-194` copies every slot), so Head, Cape and Gloves are
    empty for a careered player by design. Real troop items, not twins (#629); see "Career kits" below.
 3. **Vanilla override**: `taom_player_start_vanilla_override.xml`, 58 rosters with the same ids as vanilla
@@ -119,13 +120,18 @@ equip on any of them; how they look on an orc or a human player is owed in game.
 the Uruk-hai recruit (L6), Mordor's at the uruk grunt (L11), so Mordor's career armour comes from
 engine tier 2, two tiers above its level-1 orcs; the weapons still come from the lowest troops.
 
-Class exceptions, in the tool's `SIDEARM`/`SECOND`/`RANGED` tables: Erebor, Dunland and Rhudaur carry a
-one-handed axe as the sidearm (no non-vanilla Dunland sword exists; Rhudaur's troops carry none), Dol Guldur infantry a two-handed axe, and four
-ranged careers carry their own weapon: Isengard's Uruk Crossbow and Erebor's Crossbow Master a crossbow
-and bolts, Harad's Pezarsani Javelineer (and Abanissa's Jiret Javelineer, through `KIT_SOURCE`) and
+Class exceptions, in the tool's `SIDEARM`/`SECOND`/`RANGED` tables: Erebor, Ered Luin, Dunland and Rhudaur carry a
+one-handed axe as the sidearm (no non-vanilla Dunland sword exists; Rhudaur's troops carry none), Dol Guldur infantry a two-handed axe, and five
+ranged careers carry their own weapon: Isengard's Uruk Crossbow, Erebor's Crossbow Master and Ered Luin's
+Firebeard Arbalester a crossbow and bolts, Harad's Pezarsani Javelineer (and Abanissa's Jiret Javelineer, through `KIT_SOURCE`) and
 Shaghana's Chatak Javelineer javelins and a shield (every Shaghana bow needs skill 100). Umbar's Corsair
 Crossbow starts with a bow: Umbar's only crossbow is first carried at L26, above the cap. Erebor fields no crossbow below L21, so its
-start is `ladder_erebor_xbow_t4`. The level cap keeps a Rhun tier-7 bow (first carried at L36) out of a
+start is `ladder_erebor_xbow_t4`. Ered Luin's first crossbow is the same one, carried by its L21 Firebeard
+Arbalester, so its ranged kit is `ladder_erebor_xbow_t4`, `sm_dwarf_iron_bolt_a` and the axe
+`sm_dwarf_erebor_1h_axe_c`. Ered Luin offers no cavalry career (dwarves do not ride, and it fields no war
+ram), so it has no cavalry kit; its two infantry careers, Warden of Thorin's Halls and Broadbeam
+Shield-guard, share one infantry kit (`sm_dwarf_erebor_1h_axe_c`, `sm_dwarf_erebor_shield_leather_a`,
+`sm_dwarf_erebor_spear_a`), because a kit is chosen by culture and archetype. The level cap keeps a Rhun tier-7 bow (first carried at L36) out of a
 starting kit. The full per-culture table is in issue #629, amended by #743. Vanilla left by rule 3: arrows
 for every bow career but the elven ones (Rivendell, Mirkwood, Lothlorien, Lindon); the Rohan, Dunland and Rhun bows, and Gundabad's (its only
 bow a new character can re-equip); Harad's sword, lance, javelin and shield (Harad troops carry no culture
@@ -175,9 +181,9 @@ folder's `starter_armors.xml`, anchors Ranged 5, Cavalry 7, Infantry 9, from `ge
 
 | Tool | Purpose |
 |---|---|
-| `tools/generate_career_kits.py` | Derive the 150 career kits from the troops (#629, rule above; `KIT_SOURCE` points Khand, Lothlorien, Abanissa, the Misty Mountain orcs and Blue Craig at the troops they recruit, which carry another culture's id): dry run by default, `--apply` rewrites only the five slot ids per roster (byte-faithful), `--verify` exits 1 when the career file drifts from the rule, for instance after a troop rebalance moves a culture's floor. Needs the install; stops rather than guesses without it. Follow an `--apply` with the wiring tool. |
+| `tools/generate_career_kits.py` | Derive the 154 career kits from the troops (#629, rule above; `KIT_SOURCE` points Khand, Lothlorien, Abanissa, the Misty Mountain orcs and Blue Craig at the troops they recruit, which carry another culture's id): dry run by default, `--apply` rewrites only the five slot ids per roster (byte-faithful), `--verify` exits 1 when the career file drifts from the rule, for instance after a troop rebalance moves a culture's floor. Needs the install; stops rather than guesses without it. Follow an `--apply` with the wiring tool. |
 | `tools/generate_starter_kit.py` | Author the twins. Reads the culture-default roster file (not the career file since #629, whose troop items it would otherwise twin) and plans every donor in `RETIRED_DONORS` as well, a committed list of the 18 twins only the old career kits named, so a reinstall that wiped them restores them and a retired donor that stops resolving fails the run. A twin already on disk keeps its folder when its donor's culture later changes (the run prints a note). Indexes the Armory plus vanilla item and piece files, floors per class, writes the per-folder item files and the three marker blocks in the live Armory (the mirror only with `--asset-repo`). Dry run by default; `--apply`; `--verify` (exit 1 on any missing item, piece or registration: the reversion gate for the unversioned install); `--revert`; `--crafted-value` (0 lets the engine price crafted twins). Prints per clone the ratio, the class percentile and the resulting weapon tier. Aborts on a donor with no definition, a class with no anchor, a blade registered nowhere, a folder the Armory does not register. It also refuses to rewrite or revert a marker block holding another author's rows in any of the three files (the two stylesheets and the pieces file), computing and parsing every new text before any write, and `--verify` exits 2 when a gate checked nothing (a missing Armory). |
-| `tools/wire_starter_kit_rosters.py` | Point the culture-default rosters at the twins: in-place `id=` substitution over the 288 rosters of `REWIRE_FILES` (both sets, Horse and HorseHarness untouched; the career file is excluded since #629), then write the vanilla override from the career kit exactly as the career file names it, refusing any override id that both vanilla SandBox and SandBoxCore lack (the engine would merge such a roster into the first vanilla roster instead of adding it). Shares the id rule and the roster filter with the generator. It also gives `_replaceWhileMerging="true"` to every roster of the culture-default file whose id vanilla SandBox or SandBoxCore also defines (37 today, all aserai: the 16 youth rosters plus the parent, childhood, education and show rosters), refuses that flag on any roster whose id vanilla lacks (the engine would merge it into the first roster of the document), and leaves out of the vanilla override every roster the culture-default file defines; without the flag the engine appends the roster's sets after vanilla's and the player keeps vanilla's first set. Re-run it after any career roster change. |
+| `tools/wire_starter_kit_rosters.py` | Point the culture-default rosters at the twins: in-place `id=` substitution over the 336 rosters of `REWIRE_FILES` (both sets, Horse and HorseHarness untouched; the career file is excluded since #629), then write the vanilla override from the career kit exactly as the career file names it, refusing any override id that both vanilla SandBox and SandBoxCore lack (the engine would merge such a roster into the first vanilla roster instead of adding it). Shares the id rule and the roster filter with the generator. It also gives `_replaceWhileMerging="true"` to every roster of the culture-default file whose id vanilla SandBox or SandBoxCore also defines (37 today, all aserai: the 16 youth rosters plus the parent, childhood, education and show rosters), refuses that flag on any roster whose id vanilla lacks (the engine would merge it into the first roster of the document), and leaves out of the vanilla override every roster the culture-default file defines; without the flag the engine appends the roster's sets after vanilla's and the player keeps vanilla's first set. Re-run it after any career roster change. |
 | `tools/generate_starter_armor.py` | The older career-layer armour pass (see above); its items stay on disk for old saves. Its wiring script, `wire_career_starter_armor.py`, was deleted in #629. |
 
 Re-run the generator whenever a culture-default roster gains a new donor, then the wiring tool. `--verify` after any
@@ -247,7 +253,7 @@ an item folder loads as a duplicate item id.
   Harad, Abanissa and Shaghana with `aseran_village_harness`, Rhun and Khand with `steppe_harness`,
   the other seven, Dunland among them, with `light_harness`), a warg to seven, the war ram to Erebor (#515) and the
   Animalia elk to Mirkwood (#646; the great elk, #636, until 2026-09-23, when Mike put the career start on the
-  lower cavalry's mount). The Armory has no riding horse of its own: every Armory `Horse` is a creature
+  lower cavalry's mount). Ered Luin has no cavalry kit and so no mount. The Armory has no riding horse of its own: every Armory `Horse` is a creature
   (wargs, rams, spiders, mumakil, elephant, chariot, the great elk, the Animalia elk and moose).
 - Lothlorien's, Lindon's and Rivendell's archers start with an elven ladder bow that needs Bow 100,
   so a new character cannot put it back on once it is taken off. Elf troops carry no javelin, so the
@@ -336,6 +342,12 @@ an item folder loads as a duplicate item id.
   `2952ccc54` ([RCA](../reviews/rca-orc-goblin-locomotion-2026-10-14.md)).
 - 2026-10-15: the aserai career kits wear `sk_hr_st_tunic_a` as Body, the generator rule (the lowest Harad troop, `harad_reg_levy` at level 6, wears it). The cavalry and infantry careers' lance became `khuzait_lance_1_t3`, the lance the level-11 Harad militia spearmen carry, once `harad_noble_merc` (the only low troop with `aserai_lance_1_t5`) was deleted ([RCA](../reviews/rca-harad-repair-2026-10-15.md)).
 - 2026-10-15, later (#805): KEYforce's Harad regular weapons put non-vanilla gear on Harad troops at or below the rule's level cap (21; the shield first at level 11, the spear at 16, the sword at 21), and the rule prefers non-vanilla items there, so all six aserai careers now carry his `sm_hr_st_shield_cav_light_b` and `hr_st_sword_a`, and the cavalry and infantry careers his `hr_st_spear_light_a` in place of the militia lance (16 slots).
+- 2026-10-27 ([ered-luin.md](ered-luin.md)): Ered Luin's 55 rosters in `taom_char_creation_equipment.xml`
+  (16 of them the culture-default player starts), generated with
+  `generate_char_creation_equipment.py --append eredluin` and `no_mount=True`, so none carries a Horse or
+  HorseHarness slot, and its four career kits (ranged and infantry, no cavalry). `generate_career_kits.py`
+  gained `eredluin` rows in `SIDEARM` and `RANGED`; `CareerKitCoverageTests` now asks each culture for a
+  kit per archetype among the careers it offers, not all six.
 
 ## Related docs
 

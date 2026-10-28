@@ -201,6 +201,12 @@ fight it. The lord template shipped with a max sum of 83, a midpoint spawn of ab
 target above, with the mins unchanged, after a 200-day balance simulation had Arthedain losing 66 % of
 its men. `python tools/generate_arthedain_troops.py --check` confirms the XML matches.
 
+**Cardolan, Rhudaur and Ered Luin are not in it either.** Each realm's generator
+(`generate_cardolan_troops.py`, `generate_rhudaur_troops.py`, `generate_eredluin_troops.py`, all on
+`tools/realm_troops.py`, as Arthedain's is) writes its templates inside its own `TAOM-<REALM>-PT` marker
+region. Their lord templates ship at Arthedain's shape: a max sum of 200 and a min sum of 8, over 14
+stacks for Cardolan and Rhudaur and 16 for Ered Luin. Each generator's `--check` confirms the XML matches.
+
 `khand` is present in `CULTURE_TARGETS` and matches nothing: no `kingdom_hero_party_khand_*`
 template exists. Leaving the key costs nothing and documents the intent if one is ever authored.
 

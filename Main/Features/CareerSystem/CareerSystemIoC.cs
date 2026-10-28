@@ -150,6 +150,12 @@ public static class CareerSystemIoC
         ["crossbow_master"]        = CareerArchetype.Ranged,
         ["ram_rider"]              = CareerArchetype.Cavalry,
 
+        // ═══ ERED LUIN ═══ (Erebor's foot careers, re-themed by tools/insert_new_faction_careers.py;
+        // dwarves never ride, so two Infantry careers stand where Erebor has the Ram Rider)
+        ["warden_of_thorins_halls"] = CareerArchetype.Infantry,
+        ["shieldguard_of_belegost"] = CareerArchetype.Infantry,
+        ["nogrod_arbalester"]       = CareerArchetype.Ranged,
+
         // ═══ RIVENDELL ═══
         ["blade_dancer"]           = CareerArchetype.Infantry,
         ["elven_archer"]           = CareerArchetype.Ranged,

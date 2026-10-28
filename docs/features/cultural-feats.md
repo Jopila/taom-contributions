@@ -4,7 +4,7 @@
 
 Each of TAOM's 10 custom cultures now has 3 unique cultural feats (2 bonuses + 1 penalty) that provide gameplay differentiation. This replaces the placeholder Empire feats that all cultures previously shared. Additionally, Dunland (XSLT culture) was reassigned from Empire feats to Battanian feats for better lore fit.
 
-On top of the base feats, **terrain movement-speed feats** give 18 cultures a flat party-speed bonus on their "home" terrain (forest / snow / steppe / desert / plain / swamp) plus a night bonus for Mordor (see the [Terrain Movement-Speed Feats](#terrain-movement-speed-feats) section). **Village volunteer respawn-rate feats** (4 cultures) and **per-settlement notable-count feats** layer on top (see [Village Volunteer Respawn-Rate Feats](#village-volunteer-respawn-rate-feats) and [Per-Settlement Notable-Count Feats](#per-settlement-notable-count-feats)). The feat total is now **130**: 97 (the original 59 base + 18 terrain + 3 party-size + 4 volunteer-respawn + 4 village notable + 9 per-occupation town notable) **+ 8 new-culture feats** (Goblin ×4 + Misty Mountain Orcs ×4, both playable cultures added 2026-05/06) **+ 24 Wave 1 expansion feats** (2026-06-07: economy/raid/morale/loyalty/smithing/food breadth for thinly-covered cultures, namely Dale, Khand, Harad, Rhûn, Umbar, Mordor, Erebor, Lothlorien, Mirkwood, Goblin and Misty Mountain Orcs; all plug into existing `CulturalFeatsService.Apply*` methods, no new GameModels) **+ 1 Blue Craig party-size feat** (2026-08-14: `taom_bluecraig_party_size`, split off Goblin-town's shared feat at the identical 40%, so the split moved nothing in play).
+On top of the base feats, **terrain movement-speed feats** give 25 cultures a flat party-speed bonus on their "home" terrain (forest / snow / steppe / desert / plain / swamp) plus a night bonus for Mordor (see the [Terrain Movement-Speed Feats](#terrain-movement-speed-feats) section). **Village volunteer respawn-rate feats** (4 cultures) and **per-settlement notable-count feats** layer on top (see [Village Volunteer Respawn-Rate Feats](#village-volunteer-respawn-rate-feats) and [Per-Settlement Notable-Count Feats](#per-settlement-notable-count-feats)). The feat total is now **130**: 97 (the original 59 base + 18 terrain + 3 party-size + 4 volunteer-respawn + 4 village notable + 9 per-occupation town notable) **+ 8 new-culture feats** (Goblin ×4 + Misty Mountain Orcs ×4, both playable cultures added 2026-05/06) **+ 24 Wave 1 expansion feats** (2026-06-07: economy/raid/morale/loyalty/smithing/food breadth for thinly-covered cultures, namely Dale, Khand, Harad, Rhûn, Umbar, Mordor, Erebor, Lothlorien, Mirkwood, Goblin and Misty Mountain Orcs; all plug into existing `CulturalFeatsService.Apply*` methods, no new GameModels) **+ 1 Blue Craig party-size feat** (2026-08-14: `taom_bluecraig_party_size`, split off Goblin-town's shared feat at the identical 40%, so the split moved nothing in play).
 
 ## Why This Exists
 
@@ -134,17 +134,22 @@ Each culture has a `<cultural_feats>` block with 3 feat IDs:
 | Rohan | `taom_rohan_loyalty` | +0.5 settlement loyalty/day | 0.5 | Yes |
 | Rohan | `taom_rohan_morale` | +5 party morale | 5.0 | Yes |
 
+A culture cloned from another carries its donor's feat ids rather than new ones. Ered Luin (2026-10-27) carries
+six of Erebor's: production, construction speed, loyalty, morale, smithing and snow speed, and not
+`taom_erebor_garrison_wage` or `taom_erebor_tariff_income`. Arthedain, Cardolan and Rhudaur carry Gondor's
+garrison wage, hearth growth, loyalty, morale and plain speed feats.
+
 ### Terrain Movement-Speed Feats
 
-18 cultures gain a flat party movement-speed `AddFactor` bonus while on their "home" terrain. The bonus **stacks on top of** vanilla's terrain modifiers (e.g. vanilla forest is -20% since v1.5.2, -30% before; desert -10%; night -25%). Terrain is read each speed recalc in `TaomPartySpeedModel`, mapped from the sealed `TerrainType` to the TAOM-owned `TerrainKind` enum at the boundary (`TerrainType.Dune` folds into `Desert`); the Mordor night bonus keys off `Campaign.Current.IsNight` and is terrain-independent.
+25 cultures gain a flat party movement-speed `AddFactor` bonus while on their "home" terrain. The bonus **stacks on top of** vanilla's terrain modifiers (e.g. vanilla forest is -20% since v1.5.2, -30% before; desert -10%; night -25%). Terrain is read each speed recalc in `TaomPartySpeedModel`, mapped from the sealed `TerrainType` to the TAOM-owned `TerrainKind` enum at the boundary (`TerrainType.Dune` folds into `Desert`); the Mordor night bonus keys off `Campaign.Current.IsNight` and is terrain-independent.
 
 | Terrain | Cultures (culture StringId) | Feat IDs | Bonus |
 |---------|------------------------------|----------|-------|
-| Forest | Mirkwood, Lothlorien, Rivendell | `taom_mirkwood_forest_speed`, `taom_lothlorien_forest_speed`, `taom_rivendell_forest_speed` | +10% |
-| Snow | Erebor (Dwarves), Gundabad | `taom_erebor_snow_speed`, `taom_gundabad_snow_speed` | +10% |
+| Forest | Mirkwood, Lothlorien, Rivendell, Lindon (Rivendell's feat) | `taom_mirkwood_forest_speed`, `taom_lothlorien_forest_speed`, `taom_rivendell_forest_speed` | +10% |
+| Snow | Erebor (Dwarves), Ered Luin (Erebor's feat), Gundabad, Goblin-town, Blue Craig (Goblin-town's feat), Misty Mountain Orcs | `taom_erebor_snow_speed`, `taom_gundabad_snow_speed`, `taom_goblin_snow_speed`, `taom_mistymountainorcs_snow_speed` | +10% |
 | Steppe | Khand (battania), Rhûn (khuzait) | `taom_khand_steppe_speed`, `taom_rhun_steppe_speed` | +10% |
 | Desert | Umbar, Harad (aserai), Shaghâna, Âbanissa | `taom_umbar_desert_speed`, `taom_harad_desert_speed`, `taom_shaghana_desert_speed`, `taom_abanissa_desert_speed` | +10% |
-| Plain | Gondor, Rohan (vlandia), Dale (sturgia), Dunland (empire), Isengard | `taom_gondor_plain_speed`, `taom_rohan_plain_speed`, `taom_dale_plain_speed`, `taom_dunland_plain_speed`, `taom_isengard_plain_speed` | +10% |
+| Plain | Gondor, Arthedain, Cardolan and Rhudaur (Gondor's feat), Rohan (vlandia), Dale (sturgia), Dunland (empire), Isengard | `taom_gondor_plain_speed`, `taom_rohan_plain_speed`, `taom_dale_plain_speed`, `taom_dunland_plain_speed`, `taom_isengard_plain_speed` | +10% |
 | Plain | Mordor | `taom_mordor_plain_speed` | **+5%** |
 | Swamp | Isengard | `taom_isengard_swamp_speed` | +10% |
 | Swamp | Mordor | `taom_mordor_swamp_speed` | **+5%** |

@@ -183,7 +183,7 @@ block, so the pairing is refused rather than left to chance.
 
 - In-game (owed again after #604): open the ASO screen, pick Last Stand, and confirm the Last Standing
   Faction list reads Dunland / Gondor / Mordor / Dale / Harad / Rohan / Khand / Rhun then Erebor through
-  Goblins of Blue Craig with no ERROR row, the description names the chosen kingdom, the Invasion and
+  Goblins of Blue Craig, then Arthedain, Cardolan, Rhudaur and Ered Luin, with no ERROR row, the description names the chosen kingdom, the Invasion and
   Randomized texts say Middle-earth, and United Empire is absent. With the War of the Ring on, Last Stand,
   2 Faction War, Invasion and the alternative Calradia scenario are absent too, so pick Last Stand only
   with the War of the Ring switched off. Then start that campaign and open the

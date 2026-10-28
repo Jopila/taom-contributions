@@ -285,7 +285,7 @@
     {
       "id": "erebor",
       "folder": "erebor",
-      "files": ["erebor"],
+      "files": ["erebor", "eredluin"],
       "ranks": {"overall": 8, "damage": 2, "accuracy": 9},
       "tiers": {
         "Bow": [2, 3, 4, 5, 6],

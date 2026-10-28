@@ -1,13 +1,16 @@
 #!/usr/bin/env python3
-"""Design tests for the Cardolan and Rhudaur troop generators (#978), which share tools/realm_troops.py
-with Arthedain's (tools/tests/test_generate_arthedain_troops.py covers that one).
+"""Design tests for the Cardolan and Rhudaur troop generators (#978) and Ered Luin's, which share
+tools/realm_troops.py with Arthedain's (tools/tests/test_generate_arthedain_troops.py covers that one).
 
 Run:  python -m unittest tools.tests.test_realm_troops
 
 Pure stdlib; each generator builds its tree in memory. The same invariants the validator would
 otherwise report only after a write: the self-check passes, no upgrade lowers a skill, the militia
-follow the TAOM rule, the tavern mercenary is a leaf copy, every bow troop carries its ranged-ladder
-cell, the party templates name only defined troops and the lord template sits at the men's target.
+follow the TAOM rule, the tavern mercenary is a leaf copy, every bow or crossbow troop carries its
+ranged-ladder cell, the party templates name only defined troops and the lord template sits at the men's
+target. Ered Luin adds the dwarf options (race, body, a borrowed ladder line, crossbows, no mounted
+dwarf) and the rule that a realm never becomes a borrowed armour piece's new lowest wearer below the
+band another kingdom wears it at (deep review XML-1).
 """
 import dataclasses
 import os
@@ -17,12 +20,17 @@ import xml.etree.ElementTree as ET
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+import derive_armor_tiers as dat  # noqa: E402
 import generate_cardolan_troops as gct  # noqa: E402
+import generate_eredluin_troops as gelt  # noqa: E402
 import generate_rhudaur_troops as grt  # noqa: E402
 import ranged_ladder as rl  # noqa: E402
 import realm_troops as rt  # noqa: E402
+import rebalance_armor as ra  # noqa: E402
 
-GENERATORS = (gct, grt)
+GENERATORS = (gct, grt, gelt)
+LAUNCHER = {"ranged": "Bow", "crossbow": "Crossbow"}
+BANDS = ("light", "medium", "heavy", "elite")
 
 
 def built(gen):
@@ -84,13 +92,16 @@ class RealmDesignTests(unittest.TestCase):
     def test_every_ranged_troop_carries_its_ladder_cell(self):
         spec = rl.load_spec()
         for gen in GENERATORS:
+            # The realm's line, not its culture: Ered Luin shoots Erebor's ladder (REALM.line).
+            self.assertIn(gen.REALM.line, {line["id"] for line in spec["lines"]}, gen.CULTURE)
             for t in built(gen):
-                if t.role != "ranged":
+                cls = LAUNCHER.get(t.role)
+                if cls is None:
                     continue
                 tier = rl.engine_tier(t.level)
-                self.assertEqual(t.sk["Bow"], rl.skill_cell(gen.CULTURE, tier, spec), t.id)
+                self.assertEqual(t.sk[cls], rl.skill_cell(gen.REALM.line, tier, spec), t.id)
                 for roster in t.weapons:
-                    self.assertEqual(roster[0], rl.ladder_id(gen.CULTURE, "Bow", tier), t.id)
+                    self.assertEqual(roster[0], rl.ladder_id(gen.REALM.line, cls, tier), t.id)
 
     def test_every_party_template_names_only_defined_troops(self):
         for gen in GENERATORS:
@@ -115,6 +126,103 @@ class RealmDesignTests(unittest.TestCase):
                 self.assertTrue(npc.get("id").startswith(gen.CULTURE + "_"), npc.get("id"))
                 self.assertIn(gen.REALM.label, npc.get("name"))
                 self.assertEqual(npc.get("culture"), f"Culture.{gen.CULTURE}")
+
+
+class BorrowedArmourAnchorTests(unittest.TestCase):
+    """The class table and the restat band an armour piece by its lowest battle wearer. A realm that
+    borrows another kingdom's kit must not become that lowest wearer at a lower band, or the other
+    kingdom's piece drops a class (Ered Luin's first tree moved 50 Erebor and Iron Hills pieces)."""
+
+    def other_kingdoms_lowest_wearer(self, own_culture):
+        """item -> its lowest anchor level among the other troop files, read as the class table reads
+        them (derive_armor_tiers.parse_rosters: battle sets, noble anchors, exempt pairs)."""
+        levels = {item: [w["level"] for w in ws if w["culture"] != own_culture]
+                  for item, ws in dat.parse_rosters().items()}
+        return {item: min(found) for item, found in levels.items() if found}
+
+    @staticmethod
+    def re_banded(troops, lowest):
+        bad = []
+        for t in troops:
+            band = BANDS.index(ra.level_to_band(t.level))
+            for gear in t.gear:
+                for slot, item in gear.items():
+                    if item in lowest and band < BANDS.index(ra.level_to_band(lowest[item])):
+                        bad.append(f"{t.id} L{t.level} {slot} {item} (worn from L{lowest[item]} elsewhere)")
+        return bad
+
+    def test_ered_luin_never_re_bands_a_piece_another_kingdom_wears(self):
+        lowest = self.other_kingdoms_lowest_wearer(gelt.REALM.culture)
+        self.assertTrue(lowest, "read no other troop file: the gate would check nothing")
+        troops = built(gelt)
+        shared = {item for t in troops for gear in t.gear for item in gear.values()} & set(lowest)
+        self.assertTrue(shared, "no Ered Luin piece is worn elsewhere: the ids no longer match, so the gate checks nothing")
+        self.assertEqual(self.re_banded(troops, lowest), [])
+
+    @staticmethod
+    def dressed(troop_id, slot, item):
+        t = next(t for t in built(gelt) if t.id == troop_id)
+        return dataclasses.replace(t, gear=[dict(g, **{slot: item}) for g in t.gear])
+
+    def test_a_low_level_troop_in_a_piece_worn_higher_elsewhere_is_caught(self):
+        item = "sk_dwarf_erebor_chest_chain_a"
+        lowest = self.other_kingdoms_lowest_wearer(gelt.REALM.culture)
+        probe = self.dressed("eredluin_noble", "Body", item)
+        self.assertEqual(ra.level_to_band(probe.level), "light")
+        self.assertEqual(ra.level_to_band(lowest[item]), "medium")
+        self.assertTrue(any(item in b for b in self.re_banded([probe], lowest)))
+
+    def test_the_anchor_is_read_as_the_class_table_reads_it(self):
+        # gondor_anf_vet_cavalry wears this cape at level 26 under an exempt (troop, item) pair, which
+        # the class table skips, so the table bands the cape elite from level 31. A reader that keeps
+        # the exempt pair sees level 26 (heavy) and passes a level 21 wearer that re-bands it.
+        item = "sk_gd_ano_pauld_cape_inf_elite_a"
+        lowest = self.other_kingdoms_lowest_wearer(gelt.REALM.culture)
+        self.assertEqual(ra.level_to_band(lowest[item]), "elite")
+        probe = self.dressed("eredluin_hall_warden", "Cape", item)
+        self.assertTrue(any(item in b for b in self.re_banded([probe], lowest)))
+
+
+class DwarfRealmOptionTests(unittest.TestCase):
+    """Realm.race, Realm.body, Realm.ladder_line, the crossbow role and the mounted-dwarf check."""
+
+    def test_a_dwarf_realm_writes_race_and_its_face_template_on_every_troop(self):
+        root = ET.fromstring(gelt.troops_xml(built(gelt), "\r\n").encode("utf-8"))
+        for npc in root.findall("NPCCharacter"):
+            self.assertEqual(npc.get("race"), "dwarf", npc.get("id"))
+            self.assertEqual(npc.find("face/face_key_template").get("value"), "BodyProperty.fighter_erebor")
+
+    def test_a_realm_of_men_writes_no_race_attribute(self):
+        root = ET.fromstring(gct.troops_xml(built(gct), "\r\n").encode("utf-8"))
+        for npc in root.findall("NPCCharacter"):
+            self.assertIsNone(npc.get("race"), npc.get("id"))
+            self.assertEqual(npc.find("face/face_key_template").get("value"), f"BodyProperty.{rt.BODY}")
+
+    def test_the_ladder_line_defaults_to_the_culture(self):
+        self.assertEqual(gct.REALM.line, "cardolan")
+        self.assertEqual(gelt.REALM.line, "erebor")
+
+    def test_a_crossbow_troop_carries_a_ladder_crossbow_and_the_crossbow_skill(self):
+        troops = [t for t in built(gelt) if t.role == "crossbow"]
+        self.assertTrue(troops)
+        for t in troops:
+            self.assertTrue(all(r[0].startswith("ladder_erebor_xbow_t") for r in t.weapons), t.id)
+            self.assertGreater(t.sk["Crossbow"], t.sk["Bow"], t.id)
+
+    def _probe(self, gen, **change):
+        return dataclasses.replace(built(gen)[0], upgrades=[], **change)
+
+    def test_a_mounted_dwarf_fails_the_self_check(self):
+        probe = self._probe(gelt, horse=("t2_empire_horse", "gondor_horse_armor_4"))
+        self.assertTrue(any("MOUNTED_DWARF" in e for e in rt.self_check(lambda: [], [probe])))
+
+    def test_a_dwarf_in_a_cavalry_group_fails_the_self_check(self):
+        probe = self._probe(gelt, group="Cavalry")
+        self.assertTrue(any("MOUNTED_DWARF" in e for e in rt.self_check(lambda: [], [probe])))
+
+    def test_a_mounted_man_passes_that_rule(self):
+        probe = self._probe(gct, horse=("t2_empire_horse", "gondor_horse_armor_4"), group="Cavalry")
+        self.assertFalse(any("MOUNTED_DWARF" in e for e in rt.self_check(lambda: [], [probe])))
 
 
 class SharedModuleTests(unittest.TestCase):

@@ -146,7 +146,7 @@ TAOM re-skins the six vanilla cultures through `spcultures.xslt`, which override
 | Easterlings (Rhûn) | **`khuzait`** | `spcultures.xslt` |
 | Barding (Dale) | **`sturgia`** | `spcultures.xslt` |
 | Variag (Khand) | **`battania`** | `spcultures.xslt` |
-| Gondor, Erebor, Mordor, … (22 more) | own id | `taom_spcultures.xml` |
+| Gondor, Erebor, Mordor, … (27 more, Ered Luin's `eredluin` the newest) | own id | `taom_spcultures.xml` |
 
 There is **no** culture with id `rohan`, `dunland`, `harad`, `rhun`, `dale` or `khand`. Keying on those names is silent at every layer — no type error, no parse error, no engine warning; the lookup simply misses and the faction flies `DefaultBannerItemId`. The first cut of this feature shipped exactly that bug for all six; `ShippedBannerBearerConfigTests` now pins every key against the real culture set. See [rca-banner-bearers-2026-07-16.md](../reviews/rca-banner-bearers-2026-07-16.md).
 

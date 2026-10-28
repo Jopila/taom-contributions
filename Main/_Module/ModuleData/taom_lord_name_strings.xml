@@ -435,6 +435,22 @@
 	<string id="aom_lord_E6_4_name" text="{=aom_lord_E6_4_name}Idrún" />
 	<string id="aom_lord_E7_11_name" text="{=aom_lord_E7_11_name}Thália" />
 	<string id="aom_lord_E7_1_name" text="{=aom_lord_E7_1_name}Náran" />
+	<string id="aom_lord_EL1_1_name" text="{=aom_lord_EL1_1_name}Farin II" />
+	<string id="aom_lord_EL1_2_name" text="{=aom_lord_EL1_2_name}Andvari" />
+	<string id="aom_lord_EL1_3_name" text="{=aom_lord_EL1_3_name}Bryndís" />
+	<string id="aom_lord_EL1_4_name" text="{=aom_lord_EL1_4_name}Gerda" />
+	<string id="aom_lord_EL2_1_name" text="{=aom_lord_EL2_1_name}Fjalar" />
+	<string id="aom_lord_EL2_2_name" text="{=aom_lord_EL2_2_name}Frosti" />
+	<string id="aom_lord_EL2_3_name" text="{=aom_lord_EL2_3_name}Hlíf" />
+	<string id="aom_lord_EL2_4_name" text="{=aom_lord_EL2_4_name}Sigrún" />
+	<string id="aom_lord_EL3_1_name" text="{=aom_lord_EL3_1_name}Ginnar" />
+	<string id="aom_lord_EL3_2_name" text="{=aom_lord_EL3_2_name}Hepti" />
+	<string id="aom_lord_EL3_3_name" text="{=aom_lord_EL3_3_name}Ásta" />
+	<string id="aom_lord_EL3_4_name" text="{=aom_lord_EL3_4_name}Védís" />
+	<string id="aom_lord_EL4_1_name" text="{=aom_lord_EL4_1_name}Skirfir" />
+	<string id="aom_lord_EL4_2_name" text="{=aom_lord_EL4_2_name}Virfir" />
+	<string id="aom_lord_EL4_3_name" text="{=aom_lord_EL4_3_name}Ragna" />
+	<string id="aom_lord_EL4_4_name" text="{=aom_lord_EL4_4_name}Herdís" />
 	<string id="aom_lord_EW_10_name" text="{=aom_lord_EW_10_name}Uinilme" />
 	<string id="aom_lord_EW_11_name" text="{=aom_lord_EW_11_name}Eldacar" />
 	<string id="aom_lord_EW_12_name" text="{=aom_lord_EW_12_name}Melyanna" />

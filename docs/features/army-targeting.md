@@ -174,7 +174,7 @@ pair's gap is inside the march radius, because anything past it is governed by g
 
 | Theater | Kingdoms (primary in **bold**) |
 |---|---|
-| `north` | **gundabad**, **mirkwood**, **rivendell**, **goblin**, **mistymountainorcs**, **dolguldur**, **lothlorien**, **erebor**, **sturgia** (Dale), **arthedain**, empire (Dunland), isengard |
+| `north` | **gundabad**, **mirkwood**, **rivendell**, **goblin**, **mistymountainorcs**, **dolguldur**, **lothlorien**, **erebor**, **sturgia** (Dale), **arthedain**, **cardolan**, **rhudaur**, **eredluin** (Ered Luin), empire (Dunland), isengard |
 | `central` | **vlandia** (Rohan), **isengard**, **empire** (Dunland), empire_w (Gondor), empire_s (Mordor), khuzait (Rhûn), goblin, mistymountainorcs, dolguldur, lothlorien |
 | `south` | **empire_w** (Gondor), **empire_s** (Mordor), **aserai** (Harad), **umbar**, **shaghana**, **abanissa**, battania (Khand) |
 | `east` | **khuzait** (Rhûn), **battania** (Khand), erebor, sturgia (Dale), empire_s (Mordor) |
@@ -185,6 +185,11 @@ pair's gap is inside the march radius, because anything past it is governed by g
 a closed land-navigation component, so Bluecraig's nearest hostile kingdom is
 5.13 town gaps away and it can reach nothing. That is a pre-existing map defect, not something this
 feature caused, and it has its own issue.
+
+`cardolan`, `rhudaur` (#978) and `eredluin` (2026-10-27) carry `north` as their only theater. Ered Luin's
+settlements were placed on 2026-10-27 and no Map Tools rebuild has included them yet
+([ered-luin.md](ered-luin.md), "How to verify in game"), so the analyzer has no positions for them and its
+membership is unmeasured.
 
 ### Current priority lists
 
@@ -219,8 +224,8 @@ says where a faction wants to go in order, and the reach falloff decides how muc
 today. Do not delete an entry because it is currently far.
 
 **No priority list (vanilla logic):** Rohan (`vlandia`), Harad (`aserai`), Shaghâna, Âbanissa, Khand
-(`battania`), Umbar, Mirkwood, Lothlórien, Rivendell, Lindon, Blue Craig, Arthedain. These either defend, or
-have no scripted axis of advance.
+(`battania`), Umbar, Mirkwood, Lothlórien, Rivendell, Lindon, Blue Craig, Arthedain, Cardolan, Rhudaur, Ered Luin.
+These either defend, or have no scripted axis of advance. No other kingdom's list names an Ered Luin town.
 
 **Kingdom ID notes (keys are kingdom StringIds, not culture StringIds).** `WarTheaterConfigInvariantsTests`
 fails the build if any key here stops resolving, and rejects the six lore names by name, because this

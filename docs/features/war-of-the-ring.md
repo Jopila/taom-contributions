@@ -28,7 +28,7 @@ At the configured day (default: 30), the system declares war:
 - **Isengard** → **Rohan** (vlandia)
 - **Dunland** (empire) → **Rohan** (vlandia)
 
-This mirrors the lore: Saruman's assault on Rohan is the opening salvo of the War of the Ring. Gundabad and Arthedain are not scripted here: they go to war on day 44 through their `Hostile` row, like every other Hostile pair.
+This mirrors the lore: Saruman's assault on Rohan is the opening salvo of the War of the Ring. Gundabad and Arthedain are not scripted here: they go to war on day 44 through their `Hostile` row, like every other Hostile pair. Ered Luin is not scripted either; its 9 Hostile rows (the realms Arthedain is Hostile to, Blue Craig among them) bring it in on day 44.
 
 ### Phase 2: The Full War
 
@@ -321,6 +321,7 @@ Later War of the Ring beats belong in their own state, keyed off the phases rath
 | lothlorien | Lothlorien | Free |
 | mirkwood | Mirkwood | Free |
 | arthedain | Arthedain | Free |
+| eredluin | Ered Luin | Free |
 | empire_s | Mordor | Dark Power |
 | isengard | Isengard | Dark Power |
 | gundabad | Gundabad | Dark Power |
@@ -330,6 +331,8 @@ Later War of the Ring beats belong in their own state, keyed off the phases rath
 | aserai | Harad | Southern |
 | umbar | Umbar | Southern |
 | battania | Khand | Neutral |
+| cardolan | Cardolan | Neutral |
+| rhudaur | Rhudaur | Neutral |
 
 ---
 

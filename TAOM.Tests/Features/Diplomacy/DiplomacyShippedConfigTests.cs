@@ -37,8 +37,11 @@ public class DiplomacyShippedConfigTests
         new(rows.Where(r => r.Tier == AllianceTier.Hostile && (r.KingdomA == kingdom || r.KingdomB == kingdom))
                 .Select(r => r.KingdomA == kingdom ? r.KingdomB : r.KingdomA));
 
-    [TestMethod]
-    public void ShippedConfig_Arthedain_IsHostileToEveryRealmTheFreePeoplesAllFight()
+    // Arthedain and Ered Luin, the free realms added after the core seven, carry the same Hostile rows.
+    [DataTestMethod]
+    [DataRow("arthedain")]
+    [DataRow("eredluin")]
+    public void ShippedConfig_NewFreeRealm_IsHostileToEveryRealmTheFreePeoplesAllFight(string kingdom)
     {
         var rows = ShippedRelationships();
         var evil = new HashSet<string>(HostileTo(rows, CoreFreeRealms[0]));
@@ -46,8 +49,8 @@ public class DiplomacyShippedConfigTests
             evil.IntersectWith(HostileTo(rows, free));
         Assert.IsTrue(evil.Count >= 6, $"only {evil.Count} realms are hostile to every core free realm");
 
-        var missing = evil.Except(HostileTo(rows, "arthedain")).OrderBy(k => k).ToList();
+        var missing = evil.Except(HostileTo(rows, kingdom)).OrderBy(k => k).ToList();
 
-        Assert.AreEqual(0, missing.Count, $"Arthedain is not Hostile to: {string.Join(", ", missing)}");
+        Assert.AreEqual(0, missing.Count, $"{kingdom} is not Hostile to: {string.Join(", ", missing)}");
     }
 }

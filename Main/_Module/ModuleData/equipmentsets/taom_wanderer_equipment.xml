@@ -2135,4 +2135,76 @@
 	</EquipmentRoster>
 
   <!-- TAOM-NEWCULTURE:rhudaur:END -->
+  <!-- TAOM-NEWCULTURE:eredluin:BEGIN -->
+	<EquipmentRoster id="npc_companion_equipment_template_eredluin" culture="Culture.eredluin">
+		<EquipmentSet>
+			<Equipment slot="Item0" id="Item.sm_dwarf_erebor_1h_axe_a" />
+			<Equipment slot="Item1" id="Item.sm_dwarf_erebor_shield_leather_a" />
+			<Equipment slot="Head" id="Item.sk_dwarf_erebor_helmet_leather_light_a" />
+			<Equipment slot="Body" id="Item.sk_dwarf_erebor_chest_leather_light_a" />
+			<Equipment slot="Cape" id="Item.sk_dwarf_iron_pauldron_light_a" />
+			<Equipment slot="Gloves" id="Item.sk_dwarf_erebor_gloves_a" />
+			<Equipment slot="Leg" id="Item.sk_dwarf_erebor_boots_light_a" />
+		</EquipmentSet>
+		<EquipmentSet>
+			<Equipment slot="Item0" id="Item.sm_dwarf_erebor_spear_a" />
+			<Equipment slot="Item1" id="Item.sm_dwarf_erebor_shield_leather_b" />
+			<Equipment slot="Head" id="Item.sk_dwarf_erebor_helmet_leather_light_b" />
+			<Equipment slot="Body" id="Item.sk_dwarf_erebor_chest_leather_light_b" />
+			<Equipment slot="Cape" id="Item.sk_dwarf_iron_pauldron_light_b" />
+			<Equipment slot="Gloves" id="Item.sk_dwarf_erebor_gloves_a" />
+			<Equipment slot="Leg" id="Item.sk_dwarf_erebor_boots_light_b" />
+		</EquipmentSet>
+		<EquipmentSet>
+			<Equipment slot="Item0" id="Item.sm_dwarf_erebor_1h_axe_b" />
+			<Equipment slot="Item1" id="Item.sm_dwarf_erebor_shield_leather_c" />
+			<Equipment slot="Head" id="Item.sk_dwarf_erebor_helmet_leather_light_a" />
+			<Equipment slot="Body" id="Item.sk_dwarf_erebor_chest_leather_light_c" />
+			<Equipment slot="Gloves" id="Item.sk_dwarf_erebor_gloves_a" />
+			<Equipment slot="Leg" id="Item.sk_dwarf_iron_boots_light_a" />
+		</EquipmentSet>
+		<EquipmentSet>
+			<Equipment slot="Item0" id="Item.sm_dwarf_erebor_1h_axe_a" />
+			<Equipment slot="Item1" id="Item.sm_dwarf_erebor_shield_leather_a" />
+			<Equipment slot="Head" id="Item.sk_dwarf_erebor_helmet_leather_light_b" />
+			<Equipment slot="Body" id="Item.sk_dwarf_erebor_chest_leather_light_a" />
+			<Equipment slot="Cape" id="Item.sk_dwarf_iron_pauldron_light_a" />
+			<Equipment slot="Gloves" id="Item.sk_dwarf_erebor_gloves_a" />
+			<Equipment slot="Leg" id="Item.sk_dwarf_erebor_boots_light_b" />
+		</EquipmentSet>
+		<EquipmentSet>
+			<Equipment slot="Item0" id="Item.sm_dwarf_erebor_spear_a" />
+			<Equipment slot="Item1" id="Item.sm_dwarf_erebor_shield_leather_c" />
+			<Equipment slot="Head" id="Item.sk_dwarf_erebor_helmet_leather_light_a" />
+			<Equipment slot="Body" id="Item.sk_dwarf_erebor_chest_leather_light_b" />
+			<Equipment slot="Cape" id="Item.sk_dwarf_iron_pauldron_light_b" />
+			<Equipment slot="Gloves" id="Item.sk_dwarf_erebor_gloves_a" />
+			<Equipment slot="Leg" id="Item.sk_dwarf_erebor_boots_light_a" />
+		</EquipmentSet>
+		<EquipmentSet>
+			<Equipment slot="Item0" id="Item.sm_dwarf_erebor_1h_axe_b" />
+			<Equipment slot="Item1" id="Item.sm_dwarf_erebor_shield_leather_b" />
+			<Equipment slot="Head" id="Item.sk_dwarf_erebor_helmet_leather_light_b" />
+			<Equipment slot="Body" id="Item.sk_dwarf_erebor_chest_leather_light_c" />
+			<Equipment slot="Gloves" id="Item.sk_dwarf_erebor_gloves_a" />
+			<Equipment slot="Leg" id="Item.sk_dwarf_iron_boots_light_a" />
+		</EquipmentSet>
+		<EquipmentSet equipmentType="Civilian">
+			<Equipment slot="Item0" id="Item.sm_dwarf_erebor_1h_axe_a" />
+			<Equipment slot="Body" id="Item.sk_dwarf_tunic_normal_a" />
+			<Equipment slot="Leg" id="Item.sk_dwarf_erebor_boots_light_a" />
+		</EquipmentSet>
+		<EquipmentSet equipmentType="Civilian">
+			<Equipment slot="Item0" id="Item.sm_dwarf_erebor_1h_axe_a" />
+			<Equipment slot="Body" id="Item.sk_dwarf_tunic_normal_b" />
+			<Equipment slot="Leg" id="Item.sk_dwarf_erebor_boots_light_b" />
+		</EquipmentSet>
+		<EquipmentSet equipmentType="Civilian">
+			<Equipment slot="Item0" id="Item.sm_dwarf_erebor_1h_axe_b" />
+			<Equipment slot="Body" id="Item.sk_dwarf_tunic_noble_a" />
+			<Equipment slot="Leg" id="Item.sk_dwarf_iron_boots_light_a" />
+		</EquipmentSet>
+	</EquipmentRoster>
+
+  <!-- TAOM-NEWCULTURE:eredluin:END -->
 </EquipmentRosters>

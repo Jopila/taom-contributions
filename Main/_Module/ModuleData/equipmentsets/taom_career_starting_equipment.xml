@@ -9,7 +9,7 @@
   The civilian set still comes from the culture-default roster for the youth title.
 
   Archetypes (CareerArchetype.cs):
-    ranged   - bow + arrows + one-handed sidearm (Isengard and Erebor: crossbow + bolts;
+    ranged   - bow + arrows + one-handed sidearm (Isengard, Erebor and Ered Luin: crossbow + bolts;
                Harad, Abanissa and Shaghana: javelins + shield)
     cavalry  - polearm + shield + sidearm + horse + harness
     infantry - one-handed weapon + shield + polearm (Dol Guldur: two-handed axe)
@@ -21,7 +21,7 @@
   lowest troop's own item even when vanilla; a bow or crossbow first takes the lowest skill
   requirement, so a new character can re-equip it. Isengard's and Mordor's Body and Leg come
   only from their uruk line (sk_uruk_hai_, sk_uruk_mordor_), never their orcs' armour. Erebor,
-  Dunland and Rhudaur carry a one-handed axe as the sidearm. Arthedain, Cardolan and Rhudaur
+  Ered Luin, Dunland and Rhudaur carry a one-handed axe as the sidearm. Arthedain, Cardolan and Rhudaur
   ride Gondor's saddle horse and starter harness (#978).
   The non-vanilla preference lifts a few picks above the culture's very lowest troop (issue #629
   lists them). StarterKitCoverageTests pins that a troop of the culture carries every item.
@@ -29,7 +29,9 @@
 
   taom_player_start_vanilla_override.xml is GENERATED from this file by
   tools/wire_starter_kit_rosters.py; re-run it after any change here.
-  Every playable culture has its career rosters (CareerKitCoverageTests). Khand (battania),
+  Every playable culture has its career rosters (CareerKitCoverageTests); Ered Luin has no
+  cavalry pair, since it offers no cavalry career (dwarves do not ride, and it fields no war
+  ram), so its four rosters carry no mount. Khand (battania),
   Lothlorien, Abanissa, the Misty Mountain orcs and Blue Craig take the gear of the troops they
   recruit, which carry another culture's id (KIT_SOURCE in the generator). The nine kits added
   on 2026-10-23 (those five, Lindon, Umbar, Shaghana and the goblins) ride the saddle horse
@@ -1771,6 +1773,53 @@
             <Equipment slot="Item2" id="Item.wm_gundabad_spear_a01" />
             <Equipment slot="Body" id="Item.sk_md_orc_inf_chest_med_a" />
             <Equipment slot="Leg" id="Item.sk_md_orc_boots_light_b" />
+        </EquipmentSet>
+    </EquipmentRoster>
+
+    <!-- Ered Luin offers infantry and ranged careers only, so it has no cavalry kit: dwarves do
+         not ride a horse and Ered Luin fields no war ram. No roster here carries a Horse slot. -->
+
+    <!-- ═══ ERED LUIN: RANGED (Firebeard Arbalester); crossbow and bolts ═══ -->
+
+    <EquipmentRoster id="player_career_eredluin_ranged_m" culture="Culture.eredluin">
+        <EquipmentSet>
+            <Equipment slot="Item0" id="Item.ladder_erebor_xbow_t4" />
+            <Equipment slot="Item1" id="Item.sm_dwarf_iron_bolt_a" />
+            <Equipment slot="Item2" id="Item.sm_dwarf_erebor_1h_axe_c" />
+            <Equipment slot="Body" id="Item.sk_dwarf_iron_chest_light_a" />
+            <Equipment slot="Leg" id="Item.sk_dwarf_iron_boots_light_a" />
+        </EquipmentSet>
+    </EquipmentRoster>
+
+    <EquipmentRoster id="player_career_eredluin_ranged_f" culture="Culture.eredluin">
+        <EquipmentSet>
+            <Equipment slot="Item0" id="Item.ladder_erebor_xbow_t4" />
+            <Equipment slot="Item1" id="Item.sm_dwarf_iron_bolt_a" />
+            <Equipment slot="Item2" id="Item.sm_dwarf_erebor_1h_axe_c" />
+            <Equipment slot="Body" id="Item.sk_dwarf_iron_chest_light_a" />
+            <Equipment slot="Leg" id="Item.sk_dwarf_iron_boots_light_a" />
+        </EquipmentSet>
+    </EquipmentRoster>
+
+    <!-- ═══ ERED LUIN: INFANTRY ═══ -->
+
+    <EquipmentRoster id="player_career_eredluin_infantry_m" culture="Culture.eredluin">
+        <EquipmentSet>
+            <Equipment slot="Item0" id="Item.sm_dwarf_erebor_1h_axe_c" />
+            <Equipment slot="Item1" id="Item.sm_dwarf_erebor_shield_leather_a" />
+            <Equipment slot="Item2" id="Item.sm_dwarf_erebor_spear_a" />
+            <Equipment slot="Body" id="Item.sk_dwarf_iron_chest_light_a" />
+            <Equipment slot="Leg" id="Item.sk_dwarf_iron_boots_light_a" />
+        </EquipmentSet>
+    </EquipmentRoster>
+
+    <EquipmentRoster id="player_career_eredluin_infantry_f" culture="Culture.eredluin">
+        <EquipmentSet>
+            <Equipment slot="Item0" id="Item.sm_dwarf_erebor_1h_axe_c" />
+            <Equipment slot="Item1" id="Item.sm_dwarf_erebor_shield_leather_a" />
+            <Equipment slot="Item2" id="Item.sm_dwarf_erebor_spear_a" />
+            <Equipment slot="Body" id="Item.sk_dwarf_iron_chest_light_a" />
+            <Equipment slot="Leg" id="Item.sk_dwarf_iron_boots_light_a" />
         </EquipmentSet>
     </EquipmentRoster>
 

@@ -147,5 +147,9 @@
     <string id="aom_clan_lindon_4_name" text="{.NS}Nos Brithombar" />
     <string id="aom_clan_lindon_5_name" text="Wardens of Ered Luin" />
     <string id="aom_clan_lindon_6_name" text="{.NS}Nos Eglarest" />
+    <string id="aom_clan_eredluin_1_name" text="House of Borin" />
+    <string id="aom_clan_eredluin_2_name" text="{.NS}Broadbeams" />
+    <string id="aom_clan_eredluin_3_name" text="{.NS}Firebeards" />
+    <string id="aom_clan_eredluin_4_name" text="Wardens of Dolmed" />
   </strings>
 </base>

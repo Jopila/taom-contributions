@@ -43,6 +43,8 @@
 	<string id="taom_ability_misty_troll_goad_tt" text="{=taom_ability_misty_troll_goad_tt}Whip your trolls into a frenzy — boosts +15% melee damage and +10% damage reduction to allies within 50m for 8s." />
 	<string id="taom_ability_misty_warg_chieftain" text="{=taom_ability_misty_warg_chieftain}Alpha Howl" />
 	<string id="taom_ability_misty_warg_chieftain_tt" text="{=taom_ability_misty_warg_chieftain_tt}Assert dominance with a thundering pack-howl — boosts +25% charge damage, +20% mount speed, and +10% melee damage for 8s." />
+	<string id="taom_ability_nogrod_arbalester" text="{=taom_ability_nogrod_arbalester}Firebeard Volley" />
+	<string id="taom_ability_nogrod_arbalester_tt" text="{=taom_ability_nogrod_arbalester_tt}Load bolts forged in Nogrod: boosts +20% ranged damage, +20% draw speed, and +15% movement speed for 8s." />
 	<string id="taom_ability_ranger_of_the_angle" text="{=taom_ability_ranger_of_the_angle}Ambush" />
 	<string id="taom_ability_ranger_of_the_angle_tt" text="{=taom_ability_ranger_of_the_angle_tt}Spring a deadly ambush — boosts +20% ranged damage, +20% draw speed, and +15% movement speed for 8s." />
 	<string id="taom_ability_ranger_of_the_north" text="{=taom_ability_ranger_of_the_north}Ambush" />
@@ -55,8 +57,12 @@
 	<string id="taom_ability_shaghana_chatak_javelineer_tt" text="{=taom_ability_shaghana_chatak_javelineer_tt}Unleash a blazing javelin barrage — boosts +20% ranged damage, +20% draw speed, and +15% movement speed for 8s." />
 	<string id="taom_ability_shaghana_zajana_tribesman" text="{=taom_ability_shaghana_zajana_tribesman}Serpent-Venom Blades" />
 	<string id="taom_ability_shaghana_zajana_tribesman_tt" text="{=taom_ability_shaghana_zajana_tribesman_tt}Coat your weapons in desert toxins — boosts +15% melee damage and +10% damage reduction to allies within 50m for 8s." />
+	<string id="taom_ability_shieldguard_of_belegost" text="{=taom_ability_shieldguard_of_belegost}Broadbeam Wall" />
+	<string id="taom_ability_shieldguard_of_belegost_tt" text="{=taom_ability_shieldguard_of_belegost_tt}Lock tower shields with your kin: boosts +15% melee damage and +10% damage reduction to allies within 50m for 8s." />
 	<string id="taom_ability_warden_of_fornost" text="{=taom_ability_warden_of_fornost}Hold the Line" />
 	<string id="taom_ability_warden_of_fornost_tt" text="{=taom_ability_warden_of_fornost_tt}Rally your soldiers with iron discipline — boosts +15% melee damage and +10% damage reduction to allies within 50m for 8s." />
+	<string id="taom_ability_warden_of_thorins_halls" text="{=taom_ability_warden_of_thorins_halls}Bastion of the Halls" />
+	<string id="taom_ability_warden_of_thorins_halls_tt" text="{=taom_ability_warden_of_thorins_halls_tt}Invoke the strength of the mountain halls: boosts +15% melee damage and +10% damage reduction to allies within 50m for 8s." />
 	<string id="taom_ability_warden_of_tyrn_gorthad" text="{=taom_ability_warden_of_tyrn_gorthad}Hold the Line" />
 	<string id="taom_ability_warden_of_tyrn_gorthad_tt" text="{=taom_ability_warden_of_tyrn_gorthad_tt}Rally your soldiers with iron discipline — boosts +15% melee damage and +10% damage reduction to allies within 50m for 8s." />
 	<string id="taom_ahg_t1a_key" text="{=taom_ahg_t1a_key}Ivory-Ward Blades radius increased, the toxin spreads wider." />
@@ -322,6 +328,12 @@
 	<string id="taom_career_grp_misty_warg_chieftain_t2_b" text="{=taom_career_grp_misty_warg_chieftain_t2_b}Fell Wolf-Master" />
 	<string id="taom_career_grp_misty_warg_chieftain_t3_a" text="{=taom_career_grp_misty_warg_chieftain_t3_a}Alpha of Moria" />
 	<string id="taom_career_grp_misty_warg_chieftain_t3_b" text="{=taom_career_grp_misty_warg_chieftain_t3_b}Bolg's Wolf-Captain" />
+	<string id="taom_career_grp_nogrod_arbalester_t1_a" text="{=taom_career_grp_nogrod_arbalester_t1_a}Nogrod Volley" />
+	<string id="taom_career_grp_nogrod_arbalester_t1_b" text="{=taom_career_grp_nogrod_arbalester_t1_b}Watcher of the Dwarf-road" />
+	<string id="taom_career_grp_nogrod_arbalester_t2_a" text="{=taom_career_grp_nogrod_arbalester_t2_a}Relentless Bolt" />
+	<string id="taom_career_grp_nogrod_arbalester_t2_b" text="{=taom_career_grp_nogrod_arbalester_t2_b}Ballista of the Mountain" />
+	<string id="taom_career_grp_nogrod_arbalester_t3_a" text="{=taom_career_grp_nogrod_arbalester_t3_a}Storm of Steel" />
+	<string id="taom_career_grp_nogrod_arbalester_t3_b" text="{=taom_career_grp_nogrod_arbalester_t3_b}Engine of Nogrod" />
 	<string id="taom_career_grp_ranger_of_the_angle_t1_a" text="{=taom_career_grp_ranger_of_the_angle_t1_a}Hunter of the East Road" />
 	<string id="taom_career_grp_ranger_of_the_angle_t1_b" text="{=taom_career_grp_ranger_of_the_angle_t1_b}Watcher of the Last Bridge" />
 	<string id="taom_career_grp_ranger_of_the_angle_t2_a" text="{=taom_career_grp_ranger_of_the_angle_t2_a}Scout of the Ettenmoors" />
@@ -358,12 +370,24 @@
 	<string id="taom_career_grp_shaghana_zajana_tribesman_t2_b" text="{=taom_career_grp_shaghana_zajana_tribesman_t2_b}Wearer of the Sands" />
 	<string id="taom_career_grp_shaghana_zajana_tribesman_t3_a" text="{=taom_career_grp_shaghana_zajana_tribesman_t3_a}Venom of Haradwaith" />
 	<string id="taom_career_grp_shaghana_zajana_tribesman_t3_b" text="{=taom_career_grp_shaghana_zajana_tribesman_t3_b}Scourge of the Southrons" />
+	<string id="taom_career_grp_shieldguard_of_belegost_t1_a" text="{=taom_career_grp_shieldguard_of_belegost_t1_a}Spear of the Deeps" />
+	<string id="taom_career_grp_shieldguard_of_belegost_t1_b" text="{=taom_career_grp_shieldguard_of_belegost_t1_b}Tower-Shield Warden" />
+	<string id="taom_career_grp_shieldguard_of_belegost_t2_a" text="{=taom_career_grp_shieldguard_of_belegost_t2_a}Wrath of the Broadbeams" />
+	<string id="taom_career_grp_shieldguard_of_belegost_t2_b" text="{=taom_career_grp_shieldguard_of_belegost_t2_b}Shieldwall of Belegost" />
+	<string id="taom_career_grp_shieldguard_of_belegost_t3_a" text="{=taom_career_grp_shieldguard_of_belegost_t3_a}Bulwark of Belegost" />
+	<string id="taom_career_grp_shieldguard_of_belegost_t3_b" text="{=taom_career_grp_shieldguard_of_belegost_t3_b}Guard of the Broad Gate" />
 	<string id="taom_career_grp_warden_of_fornost_t1_a" text="{=taom_career_grp_warden_of_fornost_t1_a}Warden of the Dike" />
 	<string id="taom_career_grp_warden_of_fornost_t1_b" text="{=taom_career_grp_warden_of_fornost_t1_b}Keeper of the Baranduin Crossing" />
 	<string id="taom_career_grp_warden_of_fornost_t2_a" text="{=taom_career_grp_warden_of_fornost_t2_a}Vanguard of the North Downs" />
 	<string id="taom_career_grp_warden_of_fornost_t2_b" text="{=taom_career_grp_warden_of_fornost_t2_b}Sword of the North Downs" />
 	<string id="taom_career_grp_warden_of_fornost_t3_a" text="{=taom_career_grp_warden_of_fornost_t3_a}Host of Arvedui" />
 	<string id="taom_career_grp_warden_of_fornost_t3_b" text="{=taom_career_grp_warden_of_fornost_t3_b}Keeper of Amon Sûl" />
+	<string id="taom_career_grp_warden_of_thorins_halls_t1_a" text="{=taom_career_grp_warden_of_thorins_halls_t1_a}Hammer of the Deeps" />
+	<string id="taom_career_grp_warden_of_thorins_halls_t1_b" text="{=taom_career_grp_warden_of_thorins_halls_t1_b}Gatewall Warden" />
+	<string id="taom_career_grp_warden_of_thorins_halls_t2_a" text="{=taom_career_grp_warden_of_thorins_halls_t2_a}Wrath of the Blue Mountains" />
+	<string id="taom_career_grp_warden_of_thorins_halls_t2_b" text="{=taom_career_grp_warden_of_thorins_halls_t2_b}Shieldwall of Thorin's Halls" />
+	<string id="taom_career_grp_warden_of_thorins_halls_t3_a" text="{=taom_career_grp_warden_of_thorins_halls_t3_a}Iron Bulwark" />
+	<string id="taom_career_grp_warden_of_thorins_halls_t3_b" text="{=taom_career_grp_warden_of_thorins_halls_t3_b}Guard of the King's Hall" />
 	<string id="taom_career_grp_warden_of_tyrn_gorthad_t1_a" text="{=taom_career_grp_warden_of_tyrn_gorthad_t1_a}Warden of the Downs" />
 	<string id="taom_career_grp_warden_of_tyrn_gorthad_t1_b" text="{=taom_career_grp_warden_of_tyrn_gorthad_t1_b}Keeper of the Greyflood Crossing" />
 	<string id="taom_career_grp_warden_of_tyrn_gorthad_t2_a" text="{=taom_career_grp_warden_of_tyrn_gorthad_t2_a}Vanguard of the South Downs" />
@@ -380,6 +404,8 @@
 	<string id="taom_career_misty_troll_goad_desc" text="{=taom_career_misty_troll_goad_desc}A brutal orc chieftain of Moria who commands cave trolls in battle, driving them forward with whip and cunning." />
 	<string id="taom_career_misty_warg_chieftain" text="{=taom_career_misty_warg_chieftain}Misty Mountain Warg Chieftain" />
 	<string id="taom_career_misty_warg_chieftain_desc" text="{=taom_career_misty_warg_chieftain_desc}A feared orc alpha who rides the largest warg of the pack, leading savage hunts through the Misty Mountains." />
+	<string id="taom_career_nogrod_arbalester" text="{=taom_career_nogrod_arbalester}Firebeard Arbalester" />
+	<string id="taom_career_nogrod_arbalester_desc" text="{=taom_career_nogrod_arbalester_desc}A Firebeard engineer-warrior of Nogrod who wields masterwork crossbows of great stopping power, each bolt forged in the furnaces of the Blue Mountains." />
 	<string id="taom_career_ranger_of_the_angle" text="{=taom_career_ranger_of_the_angle}Ranger of the Angle" />
 	<string id="taom_career_ranger_of_the_angle_desc" text="{=taom_career_ranger_of_the_angle_desc}An elite scout who strikes from the fells of the Angle, ambushing orcs and trolls from the mountains with deadly precision." />
 	<string id="taom_career_ranger_of_the_north" text="{=taom_career_ranger_of_the_north}Ranger of the North" />
@@ -403,13 +429,16 @@
 	<string id="taom_career_rank1_misty_deep_marksman" text="{=taom_career_rank1_misty_deep_marksman}Crag-Lurker" />
 	<string id="taom_career_rank1_misty_troll_goad" text="{=taom_career_rank1_misty_troll_goad}Pit-Driver" />
 	<string id="taom_career_rank1_misty_warg_chieftain" text="{=taom_career_rank1_misty_warg_chieftain}Warg-Rider of the Pack" />
+	<string id="taom_career_rank1_nogrod_arbalester" text="{=taom_career_rank1_nogrod_arbalester}Bolt-Smith of Nogrod" />
 	<string id="taom_career_rank1_ranger_of_the_angle" text="{=taom_career_rank1_ranger_of_the_angle}Scout of the Angle" />
 	<string id="taom_career_rank1_ranger_of_the_north" text="{=taom_career_rank1_ranger_of_the_north}Scout of Eriador" />
 	<string id="taom_career_rank1_rider_of_the_fells" text="{=taom_career_rank1_rider_of_the_fells}Squire of the Angle" />
 	<string id="taom_career_rank1_shaghana_beast_rider" text="{=taom_career_rank1_shaghana_beast_rider}Sormedân Beast-Tamer" />
 	<string id="taom_career_rank1_shaghana_chatak_javelineer" text="{=taom_career_rank1_shaghana_chatak_javelineer}Chatâk Javelineer" />
 	<string id="taom_career_rank1_shaghana_zajana_tribesman" text="{=taom_career_rank1_shaghana_zajana_tribesman}Zajâna Tribesman" />
+	<string id="taom_career_rank1_shieldguard_of_belegost" text="{=taom_career_rank1_shieldguard_of_belegost}Shield-bearer of Belegost" />
 	<string id="taom_career_rank1_warden_of_fornost" text="{=taom_career_rank1_warden_of_fornost}Ohtar of the North Downs" />
+	<string id="taom_career_rank1_warden_of_thorins_halls" text="{=taom_career_rank1_warden_of_thorins_halls}Deep Warden" />
 	<string id="taom_career_rank1_warden_of_tyrn_gorthad" text="{=taom_career_rank1_warden_of_tyrn_gorthad}Ohtar of Sarn Ford" />
 	<string id="taom_career_rank2_abanissa_house_guard" text="{=taom_career_rank2_abanissa_house_guard}Caravan Outrider" />
 	<string id="taom_career_rank2_abanissa_ivory_rider" text="{=taom_career_rank2_abanissa_ivory_rider}Mûmak Driver" />
@@ -430,13 +459,16 @@
 	<string id="taom_career_rank2_misty_deep_marksman" text="{=taom_career_rank2_misty_deep_marksman}High Pass Stalker" />
 	<string id="taom_career_rank2_misty_troll_goad" text="{=taom_career_rank2_misty_troll_goad}Troll-Goad of Moria" />
 	<string id="taom_career_rank2_misty_warg_chieftain" text="{=taom_career_rank2_misty_warg_chieftain}Fell Wolf-Captain" />
+	<string id="taom_career_rank2_nogrod_arbalester" text="{=taom_career_rank2_nogrod_arbalester}Firebeard Quarreler" />
 	<string id="taom_career_rank2_ranger_of_the_angle" text="{=taom_career_rank2_ranger_of_the_angle}Ranger of the Angle" />
 	<string id="taom_career_rank2_ranger_of_the_north" text="{=taom_career_rank2_ranger_of_the_north}Ranger of the North" />
 	<string id="taom_career_rank2_rider_of_the_fells" text="{=taom_career_rank2_rider_of_the_fells}Fell-Knight" />
 	<string id="taom_career_rank2_shaghana_beast_rider" text="{=taom_career_rank2_shaghana_beast_rider}Mûmak Driver" />
 	<string id="taom_career_rank2_shaghana_chatak_javelineer" text="{=taom_career_rank2_shaghana_chatak_javelineer}Throwing-Spear Skirmisher" />
 	<string id="taom_career_rank2_shaghana_zajana_tribesman" text="{=taom_career_rank2_shaghana_zajana_tribesman}Sandstorm Raider" />
+	<string id="taom_career_rank2_shieldguard_of_belegost" text="{=taom_career_rank2_shieldguard_of_belegost}Broadbeam Shield-guard" />
 	<string id="taom_career_rank2_warden_of_fornost" text="{=taom_career_rank2_warden_of_fornost}Warden of the Walls" />
+	<string id="taom_career_rank2_warden_of_thorins_halls" text="{=taom_career_rank2_warden_of_thorins_halls}Warden of Thorin's Halls" />
 	<string id="taom_career_rank2_warden_of_tyrn_gorthad" text="{=taom_career_rank2_warden_of_tyrn_gorthad}Warden of the Barrows" />
 	<string id="taom_career_rank3_abanissa_house_guard" text="{=taom_career_rank3_abanissa_house_guard}Ivory-Throne Chieftain" />
 	<string id="taom_career_rank3_abanissa_ivory_rider" text="{=taom_career_rank3_abanissa_ivory_rider}Mûmak War-Leader" />
@@ -457,13 +489,16 @@
 	<string id="taom_career_rank3_misty_deep_marksman" text="{=taom_career_rank3_misty_deep_marksman}Eye of Moria" />
 	<string id="taom_career_rank3_misty_troll_goad" text="{=taom_career_rank3_misty_troll_goad}Maker of Broken Trolls" />
 	<string id="taom_career_rank3_misty_warg_chieftain" text="{=taom_career_rank3_misty_warg_chieftain}Wolf-Lord of the Wild Hunt" />
+	<string id="taom_career_rank3_nogrod_arbalester" text="{=taom_career_rank3_nogrod_arbalester}Forge-Lord of the Firebeards" />
 	<string id="taom_career_rank3_ranger_of_the_angle" text="{=taom_career_rank3_ranger_of_the_angle}Captain of the Angle Rangers" />
 	<string id="taom_career_rank3_ranger_of_the_north" text="{=taom_career_rank3_ranger_of_the_north}Chieftain of the Rangers" />
 	<string id="taom_career_rank3_rider_of_the_fells" text="{=taom_career_rank3_rider_of_the_fells}Knight of the Fells" />
 	<string id="taom_career_rank3_shaghana_beast_rider" text="{=taom_career_rank3_shaghana_beast_rider}Mûmak War-Leader" />
 	<string id="taom_career_rank3_shaghana_chatak_javelineer" text="{=taom_career_rank3_shaghana_chatak_javelineer}Scarlet Spear-Master" />
 	<string id="taom_career_rank3_shaghana_zajana_tribesman" text="{=taom_career_rank3_shaghana_zajana_tribesman}Serpent-Banner Chieftain" />
+	<string id="taom_career_rank3_shieldguard_of_belegost" text="{=taom_career_rank3_shieldguard_of_belegost}Great Shield of Belegost" />
 	<string id="taom_career_rank3_warden_of_fornost" text="{=taom_career_rank3_warden_of_fornost}Warden of Fornost" />
+	<string id="taom_career_rank3_warden_of_thorins_halls" text="{=taom_career_rank3_warden_of_thorins_halls}Shieldwall of the Blue Mountains" />
 	<string id="taom_career_rank3_warden_of_tyrn_gorthad" text="{=taom_career_rank3_warden_of_tyrn_gorthad}Warden of Tyrn Gorthad" />
 	<string id="taom_career_rider_of_the_fells" text="{=taom_career_rider_of_the_fells}Rider of the Fells" />
 	<string id="taom_career_rider_of_the_fells_desc" text="{=taom_career_rider_of_the_fells_desc}An armored champion of the hill kingdom, whose thundering charge has broken countless enemy formations. The Rider of the Fells combines Rhudaur discipline with Cameth Brin's proud cavalry tradition, becoming an immovable wall of steel." />
@@ -473,8 +508,12 @@
 	<string id="taom_career_shaghana_chatak_javelineer_desc" text="{=taom_career_shaghana_chatak_javelineer_desc}A fast-moving skirmisher of Chatâk who screens cavalry with a hail of javelins before withdrawing beyond reach of retaliation." />
 	<string id="taom_career_shaghana_zajana_tribesman" text="{=taom_career_shaghana_zajana_tribesman}Tribesman of Zajâna" />
 	<string id="taom_career_shaghana_zajana_tribesman_desc" text="{=taom_career_shaghana_zajana_tribesman_desc}A warrior of the Zajâna desert tribes whose attrition-warfare tactics grind enemies down with relentless pressure and poisoned blades." />
+	<string id="taom_career_shieldguard_of_belegost" text="{=taom_career_shieldguard_of_belegost}Broadbeam Shield-guard" />
+	<string id="taom_career_shieldguard_of_belegost_desc" text="{=taom_career_shieldguard_of_belegost_desc}A Broadbeam warrior of Belegost who fights behind a tower shield with a long spear, locking shields with kin until no foe can find a gap in the wall." />
 	<string id="taom_career_warden_of_fornost" text="{=taom_career_warden_of_fornost}Warden of Fornost" />
 	<string id="taom_career_warden_of_fornost_desc" text="{=taom_career_warden_of_fornost_desc}A battle-hardened infantry officer who holds the walls of Fornost against the hosts of Angmar, forging order from chaos when the North Downs burn. The Warden holds the line where others would break, rallying soldiers through sheer force of will." />
+	<string id="taom_career_warden_of_thorins_halls" text="{=taom_career_warden_of_thorins_halls}Warden of Thorin's Halls" />
+	<string id="taom_career_warden_of_thorins_halls_desc" text="{=taom_career_warden_of_thorins_halls_desc}An elite dwarven warrior in heavy mail of Blue Mountain iron who holds the gates of Thorin's Halls against goblin and orc alike." />
 	<string id="taom_career_warden_of_tyrn_gorthad" text="{=taom_career_warden_of_tyrn_gorthad}Warden of Tyrn Gorthad" />
 	<string id="taom_career_warden_of_tyrn_gorthad_desc" text="{=taom_career_warden_of_tyrn_gorthad_desc}A battle-hardened infantry officer who keeps the barrows of Tyrn Gorthad and the walls of Caras Gorthad, forging order from chaos when the downs burn. The Warden holds the line where others would break, rallying soldiers through sheer force of will." />
 	<string id="taom_ccs_t1_a_key" text="{=taom_ccs_t1_a_key}Poison Dart radius increased, covering wider kill zones." />
@@ -942,6 +981,37 @@
 	<string id="taom_mwc_t3_b_p2" text="{=taom_mwc_t3_b_p2}-15% troop wages." />
 	<string id="taom_mwc_t3_b_p3" text="{=taom_mwc_t3_b_p3}+15% party movement speed." />
 	<string id="taom_mwc_t3_b_p4" text="{=taom_mwc_t3_b_p4}+9 max health." />
+	<string id="taom_nga_t1_a_key" text="{=taom_nga_t1_a_key}Firebeard Volley radius increased, covering wider kill zones." />
+	<string id="taom_nga_t1_a_p1" text="{=taom_nga_t1_a_p1}+8% ranged damage." />
+	<string id="taom_nga_t1_a_p2" text="{=taom_nga_t1_a_p2}+5% armor penetration." />
+	<string id="taom_nga_t1_a_p3" text="{=taom_nga_t1_a_p3}+7% movement speed." />
+	<string id="taom_nga_t1_a_p4" text="{=taom_nga_t1_a_p4}+5% battle renown gain." />
+	<string id="taom_nga_t1_b_key" text="{=taom_nga_t1_b_key}Firebeard Volley duration extended, sustained barrage." />
+	<string id="taom_nga_t1_b_p1" text="{=taom_nga_t1_b_p1}+5% resistance." />
+	<string id="taom_nga_t1_b_p2" text="{=taom_nga_t1_b_p2}+5 max health." />
+	<string id="taom_nga_t1_b_p3" text="{=taom_nga_t1_b_p3}+5% party spotting range." />
+	<string id="taom_nga_t1_b_p4" text="{=taom_nga_t1_b_p4}+10% stealth bonus." />
+	<string id="taom_nga_t2_a_key" text="{=taom_nga_t2_a_key}Firebeard Volley charge reduced, maintaining constant pressure." />
+	<string id="taom_nga_t2_a_p1" text="{=taom_nga_t2_a_p1}+10% party spotting range." />
+	<string id="taom_nga_t2_a_p2" text="{=taom_nga_t2_a_p2}+10% movement speed." />
+	<string id="taom_nga_t2_a_p3" text="{=taom_nga_t2_a_p3}+13% stealth bonus." />
+	<string id="taom_nga_t2_a_p4" text="{=taom_nga_t2_a_p4}+10% battle renown gain." />
+	<string id="taom_nga_t2_b_key" text="{=taom_nga_t2_b_key}Firebeard Volley gains additional penetration while active." />
+	<string id="taom_nga_t2_b_p1" text="{=taom_nga_t2_b_p1}+12% ranged damage." />
+	<string id="taom_nga_t2_b_p2" text="{=taom_nga_t2_b_p2}+10% armor penetration." />
+	<string id="taom_nga_t2_b_p3" text="{=taom_nga_t2_b_p3}+8 max health." />
+	<string id="taom_nga_t2_b_p4" text="{=taom_nga_t2_b_p4}+3% troop damage." />
+	<string id="taom_nga_t3_a_key" text="{=taom_nga_t3_a_key}Firebeard Volley radius greatly expanded, inescapable volleys." />
+	<string id="taom_nga_t3_a_p1" text="{=taom_nga_t3_a_p1}+18% ranged damage." />
+	<string id="taom_nga_t3_a_p2" text="{=taom_nga_t3_a_p2}+15% armor penetration." />
+	<string id="taom_nga_t3_a_p3" text="{=taom_nga_t3_a_p3}+15% battle renown gain." />
+	<string id="taom_nga_t3_a_p4" text="{=taom_nga_t3_a_p4}+5% troop damage." />
+	<string id="taom_nga_t3_b_key" text="{=taom_nga_t3_b_key}Firebeard Volley charge greatly reduced, relentless fire." />
+	<string id="taom_nga_t3_b_p1" text="{=taom_nga_t3_b_p1}+15% stealth bonus." />
+	<string id="taom_nga_t3_b_p2" text="{=taom_nga_t3_b_p2}+15% movement speed." />
+	<string id="taom_nga_t3_b_p3" text="{=taom_nga_t3_b_p3}+9 max health." />
+	<string id="taom_nga_t3_b_p4" text="{=taom_nga_t3_b_p4}+15% party spotting range." />
+	<string id="taom_nogrod_arbalester_root_desc" text="{=taom_nogrod_arbalester_root_desc}Firebeard Volley grants +5% ranged damage with masterwork bolts." />
 	<string id="taom_ranger_of_the_angle_root_desc" text="{=taom_ranger_of_the_angle_root_desc}Ambush grants +5% ranged damage and scales duration with Bow skill." />
 	<string id="taom_ranger_of_the_north_root_desc" text="{=taom_ranger_of_the_north_root_desc}Ambush grants +5% ranged damage and scales duration with Bow skill." />
 	<string id="taom_rider_of_the_fells_root_desc" text="{=taom_rider_of_the_fells_root_desc}Stampede grants +5% melee damage and scales with the force of a mounted charge." />
@@ -1095,9 +1165,40 @@
 	<string id="taom_scj_t3b_p2" text="{=taom_scj_t3b_p2}+9 max health." />
 	<string id="taom_scj_t3b_p3" text="{=taom_scj_t3b_p3}+7% troop damage." />
 	<string id="taom_scj_t3b_p4" text="{=taom_scj_t3b_p4}+15% party spotting range." />
+	<string id="taom_sgob_t1_a_key" text="{=taom_sgob_t1_a_key}Broadbeam Wall radius increased, empowering more warriors." />
+	<string id="taom_sgob_t1_a_p1" text="{=taom_sgob_t1_a_p1}+8% melee damage." />
+	<string id="taom_sgob_t1_a_p2" text="{=taom_sgob_t1_a_p2}+3% troop damage." />
+	<string id="taom_sgob_t1_a_p3" text="{=taom_sgob_t1_a_p3}+6 max health." />
+	<string id="taom_sgob_t1_a_p4" text="{=taom_sgob_t1_a_p4}+7% swing speed." />
+	<string id="taom_sgob_t1_b_key" text="{=taom_sgob_t1_b_key}Broadbeam Wall duration extended, fortifying the defense." />
+	<string id="taom_sgob_t1_b_p1" text="{=taom_sgob_t1_b_p1}+8% resistance." />
+	<string id="taom_sgob_t1_b_p2" text="{=taom_sgob_t1_b_p2}+5% troop morale." />
+	<string id="taom_sgob_t1_b_p3" text="{=taom_sgob_t1_b_p3}+10% troop resistance." />
+	<string id="taom_sgob_t1_b_p4" text="{=taom_sgob_t1_b_p4}+5% troop survival." />
+	<string id="taom_sgob_t2_a_key" text="{=taom_sgob_t2_a_key}Broadbeam Wall charge reduced, activating more frequently." />
+	<string id="taom_sgob_t2_a_p1" text="{=taom_sgob_t2_a_p1}+10% troop morale." />
+	<string id="taom_sgob_t2_a_p2" text="{=taom_sgob_t2_a_p2}+2 party size." />
+	<string id="taom_sgob_t2_a_p3" text="{=taom_sgob_t2_a_p3}+10% battle renown gain." />
+	<string id="taom_sgob_t2_a_p4" text="{=taom_sgob_t2_a_p4}-10% troop wages." />
+	<string id="taom_sgob_t2_b_key" text="{=taom_sgob_t2_b_key}Broadbeam Wall grants additional defensive buffs while active." />
+	<string id="taom_sgob_t2_b_p1" text="{=taom_sgob_t2_b_p1}+12% resistance." />
+	<string id="taom_sgob_t2_b_p2" text="{=taom_sgob_t2_b_p2}+8 max health." />
+	<string id="taom_sgob_t2_b_p3" text="{=taom_sgob_t2_b_p3}+13% troop resistance." />
+	<string id="taom_sgob_t2_b_p4" text="{=taom_sgob_t2_b_p4}+5% troop damage." />
+	<string id="taom_sgob_t3_a_key" text="{=taom_sgob_t3_a_key}Broadbeam Wall radius greatly expanded, devastating power." />
+	<string id="taom_sgob_t3_a_p1" text="{=taom_sgob_t3_a_p1}+15% melee damage." />
+	<string id="taom_sgob_t3_a_p2" text="{=taom_sgob_t3_a_p2}+10 max health." />
+	<string id="taom_sgob_t3_a_p3" text="{=taom_sgob_t3_a_p3}+7% troop damage." />
+	<string id="taom_sgob_t3_a_p4" text="{=taom_sgob_t3_a_p4}+4 party size." />
+	<string id="taom_sgob_t3_b_key" text="{=taom_sgob_t3_b_key}Broadbeam Wall charge greatly reduced, nearly always available." />
+	<string id="taom_sgob_t3_b_p1" text="{=taom_sgob_t3_b_p1}+18% resistance." />
+	<string id="taom_sgob_t3_b_p2" text="{=taom_sgob_t3_b_p2}+15% hero health regeneration." />
+	<string id="taom_sgob_t3_b_p3" text="{=taom_sgob_t3_b_p3}+20% troop morale." />
+	<string id="taom_sgob_t3_b_p4" text="{=taom_sgob_t3_b_p4}+15% troop survival." />
 	<string id="taom_shaghana_beast_rider_root_desc" text="{=taom_shaghana_beast_rider_root_desc}Horns of Mûmakan grants +10% horse charge damage and spreads fear." />
 	<string id="taom_shaghana_chatak_javelineer_root_desc" text="{=taom_shaghana_chatak_javelineer_root_desc}Chatâk Volley grants +5% ranged damage and quickens javelin throws." />
 	<string id="taom_shaghana_zajana_tribesman_root_desc" text="{=taom_shaghana_zajana_tribesman_root_desc}Serpent-Venom Blades grants +5% melee damage and applies attrition effects." />
+	<string id="taom_shieldguard_of_belegost_root_desc" text="{=taom_shieldguard_of_belegost_root_desc}Broadbeam Wall grants +5 health, the tower shield protecting you." />
 	<string id="taom_szt_t1a_key" text="{=taom_szt_t1a_key}Serpent-Venom Blades radius increased, the toxin spreads wider." />
 	<string id="taom_szt_t1a_p1" text="{=taom_szt_t1a_p1}+8% melee damage." />
 	<string id="taom_szt_t1a_p2" text="{=taom_szt_t1a_p2}+3% troop damage." />
@@ -1128,6 +1229,7 @@
 	<string id="taom_szt_t3b_p2" text="{=taom_szt_t3b_p2}+20% troop morale." />
 	<string id="taom_szt_t3b_p3" text="{=taom_szt_t3b_p3}+8% troop damage." />
 	<string id="taom_szt_t3b_p4" text="{=taom_szt_t3b_p4}+5 party size." />
+	<string id="taom_warden_of_thorins_halls_root_desc" text="{=taom_warden_of_thorins_halls_root_desc}Bastion of the Halls grants +5 health, dwarven craft protecting you." />
 	<string id="taom_wof_root_desc" text="{=taom_wof_root_desc}Career Ability grants +5% melee damage and improves troop morale near rivers and coasts." />
 	<string id="taom_wof_t1a_key" text="{=taom_wof_t1a_key}Career Ability radius increased, commanding wider river approaches." />
 	<string id="taom_wof_t1a_p1" text="{=taom_wof_t1a_p1}+8% melee damage." />
@@ -1190,5 +1292,35 @@
 	<string id="taom_wotg_t3b_p2" text="{=taom_wotg_t3b_p2}+10% resistance." />
 	<string id="taom_wotg_t3b_p3" text="{=taom_wotg_t3b_p3}+15% armor penetration." />
 	<string id="taom_wotg_t3b_p4" text="{=taom_wotg_t3b_p4}+8 max health." />
+	<string id="taom_woth_t1_a_key" text="{=taom_woth_t1_a_key}Bastion of the Halls radius increased, empowering more warriors." />
+	<string id="taom_woth_t1_a_p1" text="{=taom_woth_t1_a_p1}+8% melee damage." />
+	<string id="taom_woth_t1_a_p2" text="{=taom_woth_t1_a_p2}+3% troop damage." />
+	<string id="taom_woth_t1_a_p3" text="{=taom_woth_t1_a_p3}+6 max health." />
+	<string id="taom_woth_t1_a_p4" text="{=taom_woth_t1_a_p4}+7% swing speed." />
+	<string id="taom_woth_t1_b_key" text="{=taom_woth_t1_b_key}Bastion of the Halls duration extended, fortifying the defense." />
+	<string id="taom_woth_t1_b_p1" text="{=taom_woth_t1_b_p1}+8% resistance." />
+	<string id="taom_woth_t1_b_p2" text="{=taom_woth_t1_b_p2}+5% troop morale." />
+	<string id="taom_woth_t1_b_p3" text="{=taom_woth_t1_b_p3}+10% troop resistance." />
+	<string id="taom_woth_t1_b_p4" text="{=taom_woth_t1_b_p4}+5% troop survival." />
+	<string id="taom_woth_t2_a_key" text="{=taom_woth_t2_a_key}Bastion of the Halls charge reduced, activating more frequently." />
+	<string id="taom_woth_t2_a_p1" text="{=taom_woth_t2_a_p1}+10% troop morale." />
+	<string id="taom_woth_t2_a_p2" text="{=taom_woth_t2_a_p2}+2 party size." />
+	<string id="taom_woth_t2_a_p3" text="{=taom_woth_t2_a_p3}+10% battle renown gain." />
+	<string id="taom_woth_t2_a_p4" text="{=taom_woth_t2_a_p4}-10% troop wages." />
+	<string id="taom_woth_t2_b_key" text="{=taom_woth_t2_b_key}Bastion of the Halls grants additional defensive buffs while active." />
+	<string id="taom_woth_t2_b_p1" text="{=taom_woth_t2_b_p1}+12% resistance." />
+	<string id="taom_woth_t2_b_p2" text="{=taom_woth_t2_b_p2}+8 max health." />
+	<string id="taom_woth_t2_b_p3" text="{=taom_woth_t2_b_p3}+13% troop resistance." />
+	<string id="taom_woth_t2_b_p4" text="{=taom_woth_t2_b_p4}+5% troop damage." />
+	<string id="taom_woth_t3_a_key" text="{=taom_woth_t3_a_key}Bastion of the Halls radius greatly expanded, devastating power." />
+	<string id="taom_woth_t3_a_p1" text="{=taom_woth_t3_a_p1}+15% melee damage." />
+	<string id="taom_woth_t3_a_p2" text="{=taom_woth_t3_a_p2}+10 max health." />
+	<string id="taom_woth_t3_a_p3" text="{=taom_woth_t3_a_p3}+7% troop damage." />
+	<string id="taom_woth_t3_a_p4" text="{=taom_woth_t3_a_p4}+4 party size." />
+	<string id="taom_woth_t3_b_key" text="{=taom_woth_t3_b_key}Bastion of the Halls charge greatly reduced, nearly always available." />
+	<string id="taom_woth_t3_b_p1" text="{=taom_woth_t3_b_p1}+18% resistance." />
+	<string id="taom_woth_t3_b_p2" text="{=taom_woth_t3_b_p2}+15% hero health regeneration." />
+	<string id="taom_woth_t3_b_p3" text="{=taom_woth_t3_b_p3}+20% troop morale." />
+	<string id="taom_woth_t3_b_p4" text="{=taom_woth_t3_b_p4}+15% troop survival." />
 
 </strings>

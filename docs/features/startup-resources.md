@@ -56,17 +56,18 @@ Each `<Culture>` element maps a culture ID to gold (per Lord hero) and influence
 
 ### Current Values
 
-NPC-lord `gold` and clan `influence` are derived, not hand-set: see "Deriving the gold values" below. They briefly went flat on 2026-08-14 (250,000 for every culture, 500,000 for the elves) and were re-derived the same day. They remain tuning knobs and may drift, so consult `startup_resources_config.xml` for the live numbers. `playerGold` was not part of either pass. The three tiers below account for all 22 culture rows, but they were not all set at once: the tier structure comes from the 2026-06-30 downward rebalance, which ran against the 18 rows the config had then, and the four rows added on 2026-08-11 (`goblin`, `mistymountainorcs`, `bluecraig`, `lindon`) were seeded into the tiers that already existed.
+NPC-lord `gold` and clan `influence` are derived, not hand-set: see "Deriving the gold values" below. They briefly went flat on 2026-08-14 (250,000 for every culture, 500,000 for the elves) and were re-derived the same day. They remain tuning knobs and may drift, so consult `startup_resources_config.xml` for the live numbers. `playerGold` was not part of either pass. The four tiers below account for all 26 culture rows, but they were not all set at once: the tier structure comes from the 2026-06-30 downward rebalance, which ran against the 18 rows the config had then. The four rows added on 2026-08-11 (`goblin`, `mistymountainorcs`, `bluecraig`, `lindon`) and the three Arnor realms (`arthedain`, then `cardolan` and `rhudaur`) were seeded into the tiers that already existed; Ered Luin (2026-10-27) opened a new one between Erebor and the baseline.
 
 | Culture | playerGold | Rationale |
 |---------|-----------|-----------|
 | rivendell, lothlorien, mirkwood, lindon | 4,000 | Elven wealth, the highest player start |
 | erebor | 3,500 | Dwarven hoard culture, just below the elves |
-| the other 17: gondor, vlandia (Rohan), sturgia (Dale), empire (Dunland), battania (Khand), aserai (Harad), khuzait (Rhun), shaghana, abanissa, mordor, isengard, gundabad, dolguldur, umbar, goblin, mistymountainorcs, bluecraig | 2,000 | Flat baseline for every human + orc culture |
+| eredluin (Ered Luin) | 3,000 | The poorer Blue Mountains dwarves, a step under Erebor; Mike may prefer the 2,000 baseline |
+| the other 20: gondor, arthedain, cardolan, rhudaur, vlandia (Rohan), sturgia (Dale), empire (Dunland), battania (Khand), aserai (Harad), khuzait (Rhun), shaghana, abanissa, mordor, isengard, gundabad, dolguldur, umbar, goblin, mistymountainorcs, bluecraig | 2,000 | Flat baseline for every human + orc culture |
 
 `shaghana` (eastern Harad reach) and `abanissa` (deep south Harad) are independent Harad-region kingdoms, full peers of Aserai with their own NPC clans, lords, and ruler titles (Taskral / Châjaphân) rather than sub-cultures, and are now selectable in character creation, so their `playerGold` is live.
 
-`goblin`, `mistymountainorcs`, `bluecraig`, and `lindon` are selectable too, so every one of the config's 22 rows is live. What puts a culture in the character-creation picker is `is_main_culture="true"`: 16 of the 22 carry it in `taom_spcultures.xml` and the other six inherit it from vanilla, which `spcultures.xslt` never touches. `Main/_Module/ModuleData/charactercreation/cultures.json` is read *after* the pick, for the race filter and the body/settlement defaults, and it too has an entry for all 22. The narrative menus are the one surface that does not cover everything: 20 cultures have their own youth, parents, education, and adulthood options, while `shaghana` and `abanissa` have none in any of the four. Blue Craig and Lindon were promoted out of borrowed cultures on 2026-08-10 (Blue Craig off goblin, Lindon off rivendell) and needed rows of their own, because these values key on culture and before the split their kingdoms had none.
+`goblin`, `mistymountainorcs`, `bluecraig`, `lindon`, the three Arnor realms and `eredluin` are selectable too, so every one of the config's 26 rows is live. What puts a culture in the character-creation picker is `is_main_culture="true"`: 20 of the 26 carry it in `taom_spcultures.xml` and the other six inherit it from vanilla, which `spcultures.xslt` never touches. `Main/_Module/ModuleData/charactercreation/cultures.json` is read *after* the pick, for the race filter and the body/settlement defaults, and it too has an entry for all 26. The narrative menus are the one surface that does not cover everything: 24 cultures have their own youth, parents, education, and adulthood options, while `shaghana` and `abanissa` have none in any of the four. Blue Craig and Lindon were promoted out of borrowed cultures on 2026-08-10 (Blue Craig off goblin, Lindon off rivendell) and needed rows of their own, because these values key on culture and before the split their kingdoms had none.
 
 ## Deriving the gold values
 
@@ -124,8 +125,11 @@ lords far outnumber tier-4 clan leaders, so 100 is probably still biased high. A
 is owed.
 
 `runwayDays` is the only judgement call: **270** for the mythic treasuries (the four elven realms
-and Erebor), **150** for the great realms (Gondor, Rhûn, Umbar, Mordor, Moria), **100** for the
-regional powers, **70** for Goblin-town and Blue Craig. `K` scales the whole table to a target pool.
+and Erebor), **150** for the great realms (Gondor, Rhûn, Umbar, Mordor, Moria) and Ered Luin, one tier
+under Erebor, **100** for the regional powers, **70** for Goblin-town and Blue Craig. Ered Luin's rate,
+4.86 denars a head measured from `kingdom_hero_party_eredluin_template`, gives 72,900, shipped as 75,000.
+Arthedain (90,000), Cardolan (90,000) and Rhudaur (80,000) carry no derivation in the config, only a
+comment that they are poor remnants well under Gondor's 150,000. `K` scales the whole table to a target pool.
 Two knobs move everything; re-derive rather than nudging a single row, or the rate stops meaning
 anything. Influence uses three flat tiers (600 / 400 / 200) keyed on how centrally a realm acts,
 replacing a 25x per-clan spread that left Rohan's 22 clans sharing less influence than one Rhûn clan

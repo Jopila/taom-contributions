@@ -1691,4 +1691,67 @@
     </ChoiceGroups>
   </Career>
 
+  <Career id="warden_of_thorins_halls" rank1_name="{=taom_career_rank1_warden_of_thorins_halls}Deep Warden" rank2_name="{=taom_career_rank2_warden_of_thorins_halls}Warden of Thorin's Halls" rank3_name="{=taom_career_rank3_warden_of_thorins_halls}Shieldwall of the Blue Mountains"
+          display_name="{=taom_career_warden_of_thorins_halls}Warden of Thorin's Halls"
+          description="{=taom_career_warden_of_thorins_halls_desc}An elite dwarven warrior in heavy mail of Blue Mountain iron who holds the gates of Thorin's Halls against goblin and orc alike."
+          portrait_sprite="career_ironguard_portrait"
+          ability_template_id="warden_of_thorins_halls_ability"
+          min_clan_tier="0"
+          root_choice_id="warden_of_thorins_halls_root"
+          keystone_icon="24019">
+    <EligibleCultures>
+      <Culture id="eredluin" />
+    </EligibleCultures>
+    <ChoiceGroups>
+      <Group id="warden_of_thorins_halls_t1_a" />
+      <Group id="warden_of_thorins_halls_t1_b" />
+      <Group id="warden_of_thorins_halls_t2_a" />
+      <Group id="warden_of_thorins_halls_t2_b" />
+      <Group id="warden_of_thorins_halls_t3_a" />
+      <Group id="warden_of_thorins_halls_t3_b" />
+    </ChoiceGroups>
+  </Career>
+
+  <Career id="shieldguard_of_belegost" rank1_name="{=taom_career_rank1_shieldguard_of_belegost}Shield-bearer of Belegost" rank2_name="{=taom_career_rank2_shieldguard_of_belegost}Broadbeam Shield-guard" rank3_name="{=taom_career_rank3_shieldguard_of_belegost}Great Shield of Belegost"
+          display_name="{=taom_career_shieldguard_of_belegost}Broadbeam Shield-guard"
+          description="{=taom_career_shieldguard_of_belegost_desc}A Broadbeam warrior of Belegost who fights behind a tower shield with a long spear, locking shields with kin until no foe can find a gap in the wall."
+          portrait_sprite="career_ironguard_portrait"
+          ability_template_id="shieldguard_of_belegost_ability"
+          min_clan_tier="0"
+          root_choice_id="shieldguard_of_belegost_root"
+          keystone_icon="24019">
+    <EligibleCultures>
+      <Culture id="eredluin" />
+    </EligibleCultures>
+    <ChoiceGroups>
+      <Group id="shieldguard_of_belegost_t1_a" />
+      <Group id="shieldguard_of_belegost_t1_b" />
+      <Group id="shieldguard_of_belegost_t2_a" />
+      <Group id="shieldguard_of_belegost_t2_b" />
+      <Group id="shieldguard_of_belegost_t3_a" />
+      <Group id="shieldguard_of_belegost_t3_b" />
+    </ChoiceGroups>
+  </Career>
+
+  <Career id="nogrod_arbalester" rank1_name="{=taom_career_rank1_nogrod_arbalester}Bolt-Smith of Nogrod" rank2_name="{=taom_career_rank2_nogrod_arbalester}Firebeard Quarreler" rank3_name="{=taom_career_rank3_nogrod_arbalester}Forge-Lord of the Firebeards"
+          display_name="{=taom_career_nogrod_arbalester}Firebeard Arbalester"
+          description="{=taom_career_nogrod_arbalester_desc}A Firebeard engineer-warrior of Nogrod who wields masterwork crossbows of great stopping power, each bolt forged in the furnaces of the Blue Mountains."
+          portrait_sprite="career_crossbow_master_portrait"
+          ability_template_id="nogrod_arbalester_ability"
+          min_clan_tier="0"
+          root_choice_id="nogrod_arbalester_root"
+          keystone_icon="24020">
+    <EligibleCultures>
+      <Culture id="eredluin" />
+    </EligibleCultures>
+    <ChoiceGroups>
+      <Group id="nogrod_arbalester_t1_a" />
+      <Group id="nogrod_arbalester_t1_b" />
+      <Group id="nogrod_arbalester_t2_a" />
+      <Group id="nogrod_arbalester_t2_b" />
+      <Group id="nogrod_arbalester_t3_a" />
+      <Group id="nogrod_arbalester_t3_b" />
+    </ChoiceGroups>
+  </Career>
+
 </Careers>

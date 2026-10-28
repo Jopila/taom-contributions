@@ -2,14 +2,16 @@
 
 ## Overview
 
-Certain TAOM cultures (currently Erebor/dwarves) intentionally omit horses from character creation equipment. This requires four Harmony patches to prevent vanilla's CC narrative stage from crashing when no horse is present in a culture's battle equipment roster.
+Certain TAOM cultures intentionally omit horses from character creation equipment. This requires four Harmony patches to prevent vanilla's CC narrative stage from crashing when no horse is present in a culture's battle equipment roster.
 
-> **Updated 2026-08-28 (issue #515): "no-mount" now means "no HORSE".** Erebor fields a rideable war ram, so `troops_erebor.xml` carries Horse-slot entries for the first time and dwarves are no longer `CanRide="false"`. Nothing in this document's crash analysis changes: the patches key on whether a *character-creation* roster has a Horse slot, and the Erebor CC rosters still do not. The `MOUNTED_DWARF` validator rule likewise still fires for a dwarf on a horse; it allowlists only the two war-ram item ids. See [war-ram.md](war-ram.md).
+**Shipped no-mount cultures:** Ered Luin (the Blue Mountains dwarves, [ered-luin.md](ered-luin.md)), Goblin-town, the Misty Mountain orcs and Blue Craig: none of their `player_char_creation_{culture}_{title}_{m|f}` rosters has a Horse slot, and `tools/generate_char_creation_equipment.py` marks each `no_mount: True`. **Erebor is no longer one:** commit `440d65342` (2026-03-31) took the horse out of its rosters and `d80cd7645` (2026-04-07) put `sumpter_horse` and `light_harness` back into all 16, where they still are. Removing them again is open for Mike's decision.
+
+> **Updated 2026-08-28 (issue #515): "no-mount" now means "no HORSE".** Erebor fields a rideable war ram, so `troops_erebor.xml` carries Horse-slot entries for the first time and dwarves are no longer `CanRide="false"`. Nothing in this document's crash analysis changes: the patches key on whether a *character-creation* roster has a Horse slot (Erebor's have had one since `d80cd7645`; see above). The `MOUNTED_DWARF` validator rule likewise still fires for a dwarf on a horse; it allowlists only the two war-ram item ids. See [war-ram.md](war-ram.md).
 
 ## Why This Exists
 
 - **Vanilla behavior:** Six `Get*NarrativeMenuCharacterArgs` private methods in `CharacterCreationCampaignBehavior` drive each CC stage. Three of them (youth, adult, age selection) unconditionally read `DefaultEquipment[Horse].Item.StringId` and spawn a horse actor. All vanilla culture CC rosters include horse + harness slots.
-- **TAOM requirement:** Dwarves don't ride horses (lore). Their CC equipment rosters have no horse slots. (They do ride war rams as of #515, but that is a battle-roster mount and never appears in a CC roster, so this patch family is unaffected.)
+- **TAOM requirement:** Dwarves don't ride horses (lore). Ered Luin's, Goblin-town's, the Misty Mountain orcs' and Blue Craig's CC equipment rosters have no horse slots. (They do ride war rams as of #515, but that is a battle-roster mount and never appears in a CC roster, so this patch family is unaffected.)
 - **Without this fix:** Two cascading crashes per horse-reading CC stage:
   1. `NullReferenceException` in `Get{Youth|Adult|AgeSelection}MenuNarrativeMenuCharacterArgs` — `DefaultEquipment[Horse].Item` is null.
   2. `ArgumentNullException("key")` in `SpawnNonHumanNarrativeMenuCharacter` — horse scene character has uninitialized (null) item ID because `ModifyMenuCharacters` never set it.
@@ -36,7 +38,7 @@ Four thin Harmony patches in `Patch20_NarrativeHorseGuard`:
 
 ```
 taom_char_creation_equipment.xml
-  └── Erebor rosters: no Horse/HorseHarness slots
+  └── Ered Luin, Goblin-town, Misty Mountain orc and Blue Craig rosters: no Horse/HorseHarness slots
 
 Patch20_NarrativeHorseGuard
   ├── CharacterCreationCampaignBehavior_GetYouthMenuArgs_Patch [Prefix]
@@ -103,7 +105,8 @@ The patches detect horse absence at runtime — no code change needed to make a 
 |------|---------|
 | `Main/Features/CharacterCreation/Hooks/CharacterCreationCampaignBehavior_GetYouthMenuArgs_Patch.cs` | All four patch classes (three Prefixes + Finalizer) |
 | `Main/SubModule.cs` | `PatchCategory("Patch20_NarrativeHorseGuard")` registration |
-| `Main/_Module/ModuleData/equipmentsets/taom_char_creation_equipment.xml` | CC equipment rosters — Erebor has no Horse slots |
+| `Main/_Module/ModuleData/equipmentsets/taom_char_creation_equipment.xml` | CC equipment rosters; the no-mount cultures' have no Horse slots |
+| `tools/generate_char_creation_equipment.py` | Writes a culture's CC rosters (`--append <culture>`); a `CULTURES` row with `no_mount: True` gets no Horse or HorseHarness |
 
 ## Dependencies
 
@@ -119,12 +122,13 @@ No unit tests — all patches are thin Harmony entry points with no extractable 
 
 ## How to Add a No-Mount Culture
 
-1. Remove `<Equipment slot="Horse" ...>` and `<Equipment slot="HorseHarness" ...>` from all non-civilian `<EquipmentSet>` blocks in `taom_char_creation_equipment.xml` for the culture.
+1. For a new culture, set `no_mount: True` on its `CULTURES` row in `tools/generate_char_creation_equipment.py` before `--append <culture> --apply` (Ered Luin: `dict(CULTURES["erebor"], no_mount=True)`). For a culture already in the file, remove `<Equipment slot="Horse" ...>` and `<Equipment slot="HorseHarness" ...>` from all non-civilian `<EquipmentSet>` blocks in `taom_char_creation_equipment.xml` for the culture.
 2. No C# changes needed — the patches detect horse absence from `DefaultEquipment[Horse].Item` at runtime.
 3. Verify: `grep -c 'slot="Horse"' taom_char_creation_equipment.xml` — confirm only horse-enabled cultures have the slot.
 
 ## Changelog
 
+- 2026-10-27: Ered Luin joins as a no-mount culture (`no_mount=True`, 0 Horse slots in its 55 CC rosters). Recorded that Erebor's 16 adult CC rosters have carried `sumpter_horse` and `light_harness` since `d80cd7645` (2026-04-07), so Erebor is no longer a no-mount culture here.
 - 2026-03-31 — Completed `Patch20_NarrativeHorseGuard` to 4 patches (3 Prefixes + 1 Finalizer) covering the youth, adult, and age-selection CC stages plus the shared `SpawnNonHumanNarrativeMenuCharacter` spawn; removed Horse/HorseHarness slots from Erebor CC rosters so dwarves no longer crash during character creation.
 
 ## GitHub Issues
@@ -139,6 +143,7 @@ No unit tests — all patches are thin Harmony entry points with no extractable 
 ## Referenced by
 
 - [docs/features/culture-playability-wiring.md](./culture-playability-wiring.md)
+- [docs/features/ered-luin.md](./ered-luin.md)
 - [docs/INDEX.md](../INDEX.md)
 - [docs/modding/equipment-rosters.md](../modding/equipment-rosters.md)
 

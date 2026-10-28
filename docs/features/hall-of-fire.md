@@ -77,9 +77,9 @@ feature off, set `"cultures": {}`; a missing or empty file loads the built-in ro
 
 | Set | Cultures | Why |
 |---|---|---|
-| empire | gondor, arthedain, rivendell, lindon | Stone towns and halls of the Men of the West and the Elves |
+| empire | gondor, arthedain, cardolan, rhudaur, rivendell, lindon | Stone towns and halls of the Men of the West and the Elves |
 | battania | mirkwood, lothlorien, dolguldur, empire (Dunland) | Forest settings; Dunland's marble Calradian default does not fit |
-| sturgia | erebor, gundabad, mistymountainorcs, goblin, bluecraig | Cold, heavy halls for the mountain peoples |
+| sturgia | erebor, eredluin, gundabad, mistymountainorcs, goblin, bluecraig | Cold, heavy halls for the mountain peoples |
 | aserai | umbar, shaghana, abanissa | Southern desert towns |
 | khuzait | mordor, battania (Khand) | Bare, hard country; Khand's Celtic forest default does not fit |
 | vlandia | isengard | Fortified keep look |

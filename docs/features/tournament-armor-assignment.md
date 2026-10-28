@@ -44,11 +44,12 @@ No configuration. Purely data-driven via the `gear_practice_dummy_*` NPCCharacte
 
 ### gear_practice_dummy_* coverage
 
-Every TAOM culture has a `gear_practice_dummy_<culture>` entry. Counting `id="gear_practice_dummy_` across `npcs_*.xml` (2026-09-06) finds **19**, one per culture (coverage filled in session 2026-03-31). Eighteen of those cultures also carry the rest of the arena set (`weapon_practice_stage_1/2/3_*` and `gear_dummy_*`); Lothlórien has only the gear dummy. Representative sample below (`rohan`, `mistymountainorcs`, and `goblin` also have entries but are not tabulated here):
+Counting `id="gear_practice_dummy_` across `npcs_*.xml` (2026-10-27) finds **23**, one per culture file (coverage filled in session 2026-03-31, then one with each new culture); `npcs_umbar.xml`, `npcs_shaghana.xml` and `npcs_abanissa.xml` have none. Twenty-two of those cultures also carry the rest of the arena set (`weapon_practice_stage_1/2/3_*` and `gear_dummy_*`); Lothlórien has only the gear dummy. Representative sample below (`rohan`, `mistymountainorcs`, `goblin`, `bluecraig`, `lindon`, `arthedain`, `cardolan` and `rhudaur` also have entries but are not tabulated here):
 
 | Culture | File | Body item |
 |---------|------|-----------|
 | erebor | `npcs_erebor.xml` | `sk_dwarf_erebor_chest_chain_a` |
+| eredluin | `npcs_eredluin.xml` | `sk_dwarf_erebor_chest_chain_a` |
 | gondor | `npcs_gondor.xml` | `ithilien_jerkin_short` |
 | isengard | `npcs_isengard.xml` | `sk_uruk_hai_chainmail_a2` |
 | mordor | `npcs_mordor.xml` | `sk_uruk_mordor_chainmail_light_b` |

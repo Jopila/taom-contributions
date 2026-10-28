@@ -96,6 +96,7 @@ below are taken from that XSLT, not from the id.
 | `mirkwood` | Mirkwood | free | |
 | `lindon` | Lindon | free | |
 | `arthedain` | Arthedain | free | |
+| `eredluin` | Ered Luin | free | |
 | `empire` | Dunland | evil | sided with Saruman in the books. Counter-intuitive id, see memory entry `kingdom-culture-mapping` |
 | `empire_s` | Mordor | evil | |
 | `aserai` | Harad | evil | |
@@ -110,6 +111,8 @@ below are taken from that XSLT, not from the id.
 | `umbar` | Umbar | neutral | corsair and mercenary, so both sides can target it |
 | `shaghana` | Shaghana | neutral | tribal, so both sides can target it |
 | `abanissa` | Abanissa | neutral | tribal, so both sides can target it |
+| `cardolan` | Cardolan | neutral | an Arnor remnant that stands apart from the War of the Ring (#978) |
+| `rhudaur` | Rhudaur | neutral | an Arnor remnant that stands apart from the War of the Ring (#978) |
 
 Two further keys are **culture** ids, not kingdom ids. Every other playable culture shares its id
 with its kingdom, but Gondor and Mordor do not, so they need their own entries for the culture
@@ -122,7 +125,7 @@ fallback to place a kingdom-less hero:
 
 Four further keys are **minor clan** ids, for the clans whose own culture is unlisted or on the wrong side:
 `ghilman` (Serpent Guard, evil), `skolderbrotva` (Axemen of Erebor, free), `forest_people` (Druedain, free) and
-`eleftheroi` (Beornings, free). The file holds 29 keys in all (23 kingdoms, `gondor`, `mordor`, the 4 clans). The
+`eleftheroi` (Beornings, free). The file holds 32 keys in all (26 kingdoms, `gondor`, `mordor`, the 4 clans). The
 other ten minor clans resolve through their culture; the per-clan table is in
 [alignment-aware-execution.md](alignment-aware-execution.md) ("Minor Clan ID Reference").
 

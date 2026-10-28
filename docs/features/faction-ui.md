@@ -208,6 +208,11 @@ entry is skipped with a `[FactionUI]` warning, then one summary warning, while t
 | `faction_map_pos.json` | faction key to its minimap pin, `[x, y]` in 0 to 1 (Kysaro placed all 20 in game) |
 | `faction_viewport.json` | faction key to a viewport offset, or an object of `offset`, `hide_weapons` and `race` |
 
+The four realms made playable after Kysaro's pass (`kingdom_of_arthedain`, `kingdom_of_cardolan`,
+`kingdom_of_rhudaur` and Ered Luin's `kingdom_of_ered_duin`, a key kept from the old placeholder card) have a
+`faction_kingdoms.json` row only: their viewport shows the elite infantry troop, and their pin falls back to the
+region's `capital_pos` in `regions.json` (`FactionScreenCatalog`).
+
 A key naming no playable faction is reported once. `FactionUIConfigIdsTests` pins every faction key and
 character id in these files against the shipped data.
 

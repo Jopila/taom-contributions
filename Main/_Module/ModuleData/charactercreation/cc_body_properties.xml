@@ -164,4 +164,8 @@
   <Culture id="rhudaur">
     <BodyProperties version="4" age="30.16" weight="0" build="0.7222" key="0015000D800013420F800A1A098007985FFD8660BE886A0167895C1885BB9A60009B06030909B70500000000000000000000000000000000000000003F3C2002" />
   </Culture>
+  <!-- Ered Luin: Erebor's default dwarf body; the Blue Mountains dwarves are the same people. -->
+  <Culture id="eredluin">
+    <BodyProperties version="4" age="22.25" weight="0.5278" build="0.7754"  key="00003C0780000141F8700FF70F781778FF7088778FF77FFF888878888D301084009C860309FFF0AE0000000000000000000000000000000000000000432C0140"  />
+  </Culture>
 </CCBodyProperties>

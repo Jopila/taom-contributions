@@ -95,7 +95,7 @@ Optional. If absent or empty, the engine auto-derives all pools from `MBObjectMa
 | `Main/Adapters/IItemPoolAdapter.cs` + `ItemPoolAdapter.cs` | Wraps `MBObjectManager.GetObjectTypeList<ItemObject>()`; ID-prefix table for culture fallback; flags character armour and weapons (`HasWeaponComponent`). |
 | `Main/Adapters/ITownRosterAdapter.cs` + `TownRosterAdapter.cs` | Wraps `Settlement.OwnerClan.Culture` + `Settlement.ItemRoster` operations per ADR-007. Exposes `AddItem`, `GetItemCounts`, `RemoveItem` (via `AddToCounts(-N)`), `EnumerateRoster` (returning `RosterItemSnapshot` DTOs that keep `ItemObject` out of the service layer). |
 | `Main/Adapters/RosterItemSnapshot.cs` | TAOM-owned DTO carrying `ItemId + CultureStringId + Count` for one roster entry. |
-| `Main/_Module/ModuleData/culture_marketplace/culture_marketplace_config.xml` | Optional XML override: `armour_from` donors, Arthedain's and Lindon's `<Stock>` rows, the crown blacklist, routing. |
+| `Main/_Module/ModuleData/culture_marketplace/culture_marketplace_config.xml` | Optional XML override: `armour_from` donors, the `<Stock>` rows of Arthedain, Lindon, Cardolan, Rhudaur and Ered Luin, the crown blacklist, routing. |
 
 ## Dependencies
 
@@ -125,6 +125,9 @@ not exist or a `match` that does not compile or finds no item.
 |---|---|---|
 | `arthedain` | `^sk_ar_art_` and `^numenorean_` at weight 3, then `gondor` `not_armour` at 0.5; the King's Crown blacklisted here and in `gondor` | the Arnor kit (tagged `Culture.gondor`) and the untagged Numenorean blades as the majority (about 89% of the draw weight), Gondor's goods only where the Arnor kit has no slot (swords, axes, spears, lances, bows, shields, harness); the crown is earned on the lord's ladder, never sold (Mike, 2026-10-08) |
 | `lindon` | `rivendell` armour matching `silver`, `rivendell` plain cloth and leather armour (an anchored id list), every `rivendell` weapon | silver and silver-gold Rivendell armour, never the gold, the capes, leather and light pieces Lindon's troops wear, and all weapons (Mike, 2026-10-08) |
+| `cardolan` | `gondor`, every kind | Cardolan's troops wear Gondor's armour, so its markets sell Gondor's goods; the crown stays out through Gondor's own blacklist (#978) |
+| `rhudaur` | Arthedain's three rows, and the King's Crown blacklisted | Rhudaur wears the Arnor kit, so the Arnor kit and Numenorean blades come first and Gondor's other goods are a supplement (#978) |
+| `eredluin` | `erebor` armour, `erebor` weapons | Ered Luin's troops wear Erebor's armour and carry its weapons; Erebor's war rams and their barding are neither, so they stay out, and Ered Luin fields no rams (2026-10-27) |
 
 ## Tests
 

@@ -1,15 +1,17 @@
 #!/usr/bin/env python3
-"""Shared machinery for the per-realm troop generators of the Arnor successor kingdoms.
+"""Shared machinery for the per-realm troop generators of TAOM's newer kingdoms.
 
-tools/generate_arthedain_troops.py, generate_cardolan_troops.py and generate_rhudaur_troops.py each
-hold one realm's DESIGN (its troops, party templates, militia and tavern mercenary) and bind the
-functions here to a Realm. Everything that is the same for all three lives here: the skill curves,
-the Troop record and its XML, the upgrade skill clamp, the TAOM-wide militia rule, the tavern
-mercenary copy, the self-check, and the byte-faithful write of troops_<culture>.xml plus the
-realm's marker region in taom_partyTemplates.xml.
+tools/generate_arthedain_troops.py, generate_cardolan_troops.py, generate_rhudaur_troops.py and
+generate_eredluin_troops.py each hold one realm's DESIGN (its troops, party templates, militia and
+tavern mercenary) and bind the functions here to a Realm. Everything that is the same for all of
+them lives here: the skill curves, the Troop record and its XML, the upgrade skill clamp, the
+TAOM-wide militia rule, the tavern mercenary copy, the self-check, and the byte-faithful write of
+troops_<culture>.xml plus the realm's marker region in taom_partyTemplates.xml.
 
 Moved out of generate_arthedain_troops.py on 2026-10-23 when Cardolan and Rhudaur were added; the
-Arthedain output is byte-identical (its --check proves it).
+Arthedain output is byte-identical (its --check proves it). Ered Luin (2026-10-27) added the
+opt-in Realm fields `race`, `body` and `ladder_line` and the `crossbow` role for a dwarf realm;
+their defaults keep the three Arnor files byte-identical.
 """
 import argparse
 import functools
@@ -57,20 +59,28 @@ class Realm:
     merc_source: str             # the rarest recruitment-pool entry, copied for the tavern
     merc_name: str
     armour_prefix: str = "sk_ar_art_"
+    race: str = None             # the race= attribute every troop carries; None for men (no attribute)
+    body: str = BODY             # the face_key_template BodyProperty
+    ladder_line: str = None      # the ranged-ladder line its bows come from; None means the culture's own
 
     @property
     def troops_file(self) -> Path:
         return MD / "troops" / f"troops_{self.culture}.xml"
 
+    @property
+    def line(self) -> str:
+        return self.ladder_line or self.culture
+
 
 @functools.lru_cache(maxsize=None)
-def bow_skill(culture, level):
-    """The ladder cell for this level's engine tier: what rebalance_ranged_ladders.py writes too."""
-    return rl.skill_cell(culture, rl.engine_tier(level), rl.load_spec())
+def bow_skill(line, level):
+    """The ladder cell for this level's engine tier: what rebalance_ranged_ladders.py writes too.
+    One cell per line and tier, whichever launcher class the troop carries."""
+    return rl.skill_cell(line, rl.engine_tier(level), rl.load_spec())
 
 
 def skills(realm, level, role):
-    """One skill block per role. Roles: spear, sword, twohand, ranged, cavalry."""
+    """One skill block per role. Roles: spear, sword, twohand, ranged, crossbow, cavalry."""
     s = dict.fromkeys(SKILLS, 0)
     s["Athletics"] = ATH[level]
     s["Throwing"] = LOW[level]
@@ -85,8 +95,11 @@ def skills(realm, level, role):
         s.update(TwoHanded=PRIMARY[level], Polearm=SECONDARY[level], OneHanded=SECONDARY[level],
                  Bow=LOW[level])
     elif role == "ranged":
-        s.update(Bow=bow_skill(realm.culture, level), OneHanded=SECONDARY[level], Polearm=LOW[level] * 2,
+        s.update(Bow=bow_skill(realm.line, level), OneHanded=SECONDARY[level], Polearm=LOW[level] * 2,
                  TwoHanded=LOW[level] * 2)
+    elif role == "crossbow":
+        s.update(Crossbow=bow_skill(realm.line, level), OneHanded=SECONDARY[level], Polearm=LOW[level] * 2,
+                 TwoHanded=LOW[level] * 2, Bow=LOW[level])
     elif role == "cavalry":
         s.update(Riding=RIDING[level], Polearm=PRIMARY[level], OneHanded=SECONDARY[level],
                  TwoHanded=LOW[level] * 2, Bow=LOW[level], Athletics=ATH[level] - 10)
@@ -139,7 +152,11 @@ def paired(*pairs):
 
 
 def bow(realm, level):
-    return rl.ladder_id(realm.culture, "Bow", rl.engine_tier(level))
+    return rl.ladder_id(realm.line, "Bow", rl.engine_tier(level))
+
+
+def crossbow(realm, level):
+    return rl.ladder_id(realm.line, "Crossbow", rl.engine_tier(level))
 
 
 @dataclass
@@ -163,6 +180,10 @@ class Troop:
         lines = [
             "  <NPCCharacter",
             f'      id="{self.id}"',
+        ]
+        if self.realm.race:
+            lines.append(f'      race="{self.realm.race}"')
+        lines += [
             f'      default_group="{self.group}"',
             f'      level="{self.level}"',
             f'      name="{{=aom_{self.id}_name}}{self.realm.label} {self.name}"',
@@ -171,7 +192,7 @@ class Troop:
         ]
         if self.basic:
             lines.append('      is_basic_troop="true">')
-        lines += ["    <face>", f'      <face_key_template value="BodyProperty.{BODY}" />', "    </face>",
+        lines += ["    <face>", f'      <face_key_template value="BodyProperty.{self.realm.body}" />', "    </face>",
                   "    <skills>"]
         lines += [f'      <skill id="{k}" value="{sk[k]}" />' for k in SKILLS]
         lines.append("    </skills>")
@@ -224,8 +245,8 @@ def militia_step(realm, by_id):
         basic.sk = skills(realm, MILITIA_BASELINE_LEVEL, basic.role)
         vet.sk = {k: v + MILITIA_ELITE_BONUS for k, v in basic.sk.items()}
         if basic.role == "ranged":
-            basic.sk["Bow"] = bow_skill(realm.culture, basic.level)
-            vet.sk["Bow"] = bow_skill(realm.culture, vet.level)
+            basic.sk["Bow"] = bow_skill(realm.line, basic.level)
+            vet.sk["Bow"] = bow_skill(realm.line, vet.level)
 
 
 def clamp_skills(realm, troops):
@@ -298,6 +319,8 @@ def self_check(party_templates, troops):
             errors.append(f"{tr.id}: the two rosters fill different armour slots")
         if "Body" not in tr.gear[0]:
             errors.append(f"{tr.id}: no Body armour (MISSING_BODY_ARMOUR)")
+        if tr.realm and tr.realm.race == "dwarf" and (tr.horse or tr.group in ("Cavalry", "HorseArcher")):
+            errors.append(f"{tr.id}: a mounted dwarf (MOUNTED_DWARF)")
         shields = any("shield" in w for w in ra + rb)
         twohanders = any(re.search(r"greatsword|poleaxe|_2h_", w) for w in ra + rb)
         if shields and twohanders:

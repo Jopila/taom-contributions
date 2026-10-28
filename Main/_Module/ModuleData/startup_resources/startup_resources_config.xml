@@ -103,6 +103,11 @@
        richest culture on the map; it fields no cavalry at all, so it was also paying a mounted
        premium it never incurs. -->
   <Culture id="erebor"      gold="275000" influence="600"  playerGold="3500"  />
+  <!-- Ered Luin: the Blue Mountains dwarves, a step under Erebor. Runway 150 days (the great
+       realms' tier, one under Erebor's 270) on its measured 4.86 denars a head from
+       kingdom_hero_party_eredluin_template, 72,900 rounded; influence 400 and playerGold 3,000,
+       each one step under Erebor's. -->
+  <Culture id="eredluin"    gold="75000"  influence="400"  playerGold="3000"  />
 
   <!-- Human Good cultures -->
   <Culture id="gondor"      gold="150000"  influence="600"  playerGold="2000"  />

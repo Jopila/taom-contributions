@@ -47,7 +47,10 @@ WIRING
 
 A one-off swap map (apply_dead_mesh_item_swaps.py and friends) names retired
 ids on purpose on its FROM side, so those are not generators and are not
-listed here. Add a script to GENERATORS when it WRITES item ids into ModuleData.
+listed here. Add a script to GENERATORS when it WRITES item ids into ModuleData,
+unless its output (a whole file or a marker region) has its --check in
+tools/tests/test_generator_regions_in_sync.py: the shipped XML then equals a fresh
+run, so BROKEN_ITEM_REF sees every id it writes (the realm troop generators below).
 """
 from __future__ import annotations
 
@@ -79,6 +82,11 @@ class GeneratorSpec:
     tuple_from: int = 0  # tuple rows: skip this many leading label columns
 
 
+# The realm_troops.py generators (generate_arthedain/cardolan/rhudaur/eredluin_troops.py) stay out.
+# A bare run prints a summary and no XML, so a "run" entry would collect no ids and pass. Each writes
+# its troops_<culture>.xml whole. tools/tests/test_generator_regions_in_sync.py (OWNERS) runs its
+# --check, which fails unless the shipped file equals a fresh run, and BROKEN_ITEM_REF resolves
+# every item in that file.
 GENERATORS = (
     GeneratorSpec("tools/generate_gondor_troops.py", "run"),
     GeneratorSpec("tools/generate_rhun_troops.py", "run"),

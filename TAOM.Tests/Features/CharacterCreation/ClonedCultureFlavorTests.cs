@@ -76,6 +76,18 @@ public class ClonedCultureFlavorTests
         // Arthedain as a rival or Weathertop as the border is deliberate and stays legal.
         ["cardolan"] = GondorAndArthedainSeats(),
         ["rhudaur"] = GondorAndArthedainSeats(),
+        // Ered Luin is cloned from Erebor: Durin's Folk in their western exile, at Thorin's Halls,
+        // Belegost and Nogrod. The Lonely Mountain, its king (Dáin Ironfoot and his heir Stonehelm),
+        // the dragon and the Arkenstone, Dale and the Long Lake, and the Iron Hills all belong to
+        // Erebor, and so does the liege title "King under the Mountain". Thorin, Durin's Folk and the
+        // Dwarf-road stay legal: Thorin's Halls is Ered Luin's own. Its text names Erebor only as
+        // "kin in the east", so the name itself is forbidden too.
+        ["eredluin"] = new[]
+        {
+            "Erebor", "Lonely Mountain", "Under the Mountain", "under the Mountain", "Dale", "Esgaroth",
+            "Lake-town", "Laketown", "Long Lake", "River Running", "Celduin", "Smaug", "Arkenstone",
+            "Ravenhill", "Iron Hills", "Dáin", "Dain", "Ironfoot", "Stonehelm",
+        },
     };
 
     private static string[] GondorAndArthedainSeats() => new[]
