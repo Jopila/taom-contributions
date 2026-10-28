@@ -61,7 +61,8 @@ nothing ran on either commit and trunk carried red gates for five days. The same
 `rca-eye-of-sauron-2026-10-14.md` and `rca-wildmesh-mounts-2026-10-15.md`. Every one of the 08b30bfc4 findings above is a
 gate that existed and did not run. A preventive action needs a gate that runs for every committer: a repository-level
 git hook (`core.hooksPath`), a required check on the GitHub remote, or CI again. That is Mike's decision; it is owed as
-an issue.
+an issue. (Update 2026-10-28: Mike chose the git hook for the commit rules: `.githooks/commit-msg` checks every
+committer's subject label, length and attribution. The data gates in these findings still run only for Claude.)
 
 **B. Generators that build player kits disagree on launcher difficulty.** The career and starter generators protect the
 player from an unequippable bow; the enlistment generator does not. Finding 1 is that gap reaching shipped data.

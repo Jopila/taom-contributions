@@ -17,7 +17,10 @@ when Mike asks for them.
   `chore(release): v2.0.29 - TAOM v2.0.29`.
 - **Enforced** for Claude sessions by `.claude/hooks/check-commit-subject-version.sh`, which refuses a
   subject without the label or with the wrong version. Amend, fixup and squash forms that bring no new
-  subject pass. Commits made outside Claude (IDE, terminal) are not checked. The hook reads the
+  subject pass. Commits made outside Claude (IDE, terminal) meet the same label, length and
+  attribution rules through the git hook `.githooks/commit-msg` (`core.hooksPath` = `.githooks`,
+  2026-10-28), which runs `tools/check_commit_msg.py` and reads the version of the tree being
+  committed. The Claude hook reads the
   version from the session's main checkout, not from the tree a `git -C <worktree> commit` names, so
   a Claude commit in a worktree on another branch whose `<Version>` differs is refused even with
   the right label: make that commit from a terminal
