@@ -138,10 +138,10 @@ TARGETS = {
         "knight_of_belfalas": ("rider_of_the_fells", "rotf", "Rider of the Fells"),
     },
     # A LIST clones that source once per entry. The ids avoid the troop ids
-    # eredluin_firebeard_arbalester and eredluin_broadbeam_shieldguard, which the display names echo.
+    # eredluin_firebeard_arbalester and eredluin_hewer, which the display names echo.
     "eredluin": {
         "ironguard": [("warden_of_thorins_halls", "woth", "Warden of Thorin's Halls"),
-                      ("shieldguard_of_belegost", "sgob", "Broadbeam Shield-guard")],
+                      ("hewer_of_belegost", "hob", "Mattock Hewer of Belegost")],
         "crossbow_master": ("nogrod_arbalester", "nga", "Firebeard Arbalester"),
     },
 }
@@ -404,22 +404,22 @@ CAREER_TEXT_REMAP = {
         ("Mithril Bulwark", "Iron Bulwark"),
         ("Mithril Bastion", "Bastion of the Halls"),
     ],
-    # The Broadbeams of Belegost: long spear and tower shield, the shieldwall of the Blue Mountains.
-    "shieldguard_of_belegost": [
-        ("Invoke the strength of dwarven craft — boosts", "Lock tower shields with your kin: boosts"),
+    # The Broadbeam hewers of Belegost: the two-handed mattock and great axe line (#1045).
+    "hewer_of_belegost": [
+        ("Invoke the strength of dwarven craft — boosts", "Swing the great mattock with your kin: boosts"),
         ("An elite dwarven warrior clad in mithril-forged plate who holds the deeps of Erebor against orc and dragon alike.",
-         "A Broadbeam warrior of Belegost who fights behind a tower shield with a long spear, locking shields with kin until no foe can find a gap in the wall."),
-        ("dwarven craft protecting you", "the tower shield protecting you"),
-        ("Ironguard of Erebor", "Broadbeam Shield-guard"),
-        ("Shieldwall of Durin", "Great Shield of Belegost"),
+         "A Broadbeam hewer of Belegost who swings a great mattock in both hands, breaking shields and the orcs behind them."),
+        ("dwarven craft protecting you", "the weight of the mattock behind you"),
+        ("Ironguard of Erebor", "Hewer of Belegost"),
+        ("Shieldwall of Durin", "Stonebreaker of the Blue Mountains"),
         ("Wrath of Durin's Folk", "Wrath of the Broadbeams"),
-        ("Shieldwall of Erebor", "Shieldwall of Belegost"),
-        ("Guard of the Arkenstone", "Guard of the Broad Gate"),
-        ("Hammer of the Deeps", "Spear of the Deeps"),
-        ("Gatewall Warden", "Tower-Shield Warden"),
-        ("Mithril Bulwark", "Bulwark of Belegost"),
-        ("Mithril Bastion", "Broadbeam Wall"),
-        ("Deep Warden", "Shield-bearer of Belegost"),
+        ("Shieldwall of Erebor", "Hewing of Belegost"),
+        ("Guard of the Arkenstone", "Breaker of the Broad Gate"),
+        ("Hammer of the Deeps", "Mattock of the Deeps"),
+        ("Gatewall Warden", "Shield-Breaker"),
+        ("Mithril Bulwark", "Stonebreaker's Fury"),
+        ("Mithril Bastion", "Mattock Storm"),
+        ("Deep Warden", "Mattock-bearer"),
     ],
     # The Firebeards of Nogrod, crossbow-smiths of the southern halls.
     "nogrod_arbalester": [

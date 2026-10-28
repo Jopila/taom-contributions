@@ -154,10 +154,39 @@ class ShippedCareers(unittest.TestCase):
         # Cavalry row would hand a dwarf the mounted kit roster.
         rows = dict(re.findall(r'\["([a-z_]+)"\]\s*=\s*CareerArchetype\.(\w+)',
                                IOC.read_text(encoding="utf-8")))
-        expected = {"ironguard": "Infantry", "crossbow_master": "Ranged"}
+        expected = {"warden_of_thorins_halls": "Infantry", "hewer_of_belegost": "TwoHanded",
+                    "nogrod_arbalester": "Ranged"}
         for row in eredluin_rows():
             with self.subTest(career=row[2]):
-                self.assertEqual(rows.get(row[2]), expected[row[0]])
+                self.assertEqual(rows.get(row[2]), expected[row[2]])
+
+    def test_the_broadbeam_shieldguard_career_is_gone(self):
+        self.assertEqual([r[2] for r in eredluin_rows()],
+                         ["warden_of_thorins_halls", "hewer_of_belegost", "nogrod_arbalester"])
+        self.assertNotIn("shieldguard_of_belegost", ic.CAREERS_XML.read_text(encoding="utf-8"))
+
+    def test_the_two_foot_careers_name_their_choice_groups_differently(self):
+        # the Warden and the Hewer share one career screen: no group name may repeat across them
+        root = ET.parse(ic.CHOICES_XML).getroot()
+        names = {c: [g.get("display_name") for g in root.findall(f"./ChoiceGroup[@career_id='{c}']")]
+                 for c in ("warden_of_thorins_halls", "hewer_of_belegost")}
+        shown = lambda c: {re.sub(r"^\{=[^}]*\}", "", n) for n in names[c]}  # noqa: E731
+        self.assertEqual(len(names["hewer_of_belegost"]), 6)
+        self.assertEqual(shown("warden_of_thorins_halls") & shown("hewer_of_belegost"), set())
+
+    def test_the_shipped_hewer_is_what_the_tool_generates(self):
+        careers, abilities, choices = (ic.read(p)[0] for p in (ic.CAREERS_XML, ic.ABILITIES_XML, ic.CHOICES_XML))
+        row = next(r for r in eredluin_rows() if r[2] == "hewer_of_belegost")
+        career, ability, rest = ic.build("eredluin", *row, careers, abilities, choices)
+        self.assertIn(career, careers)
+        self.assertIn(ability, abilities)
+        self.assertIn(rest, choices)
+
+    def test_the_hewer_wording_is_two_handed_not_shield_and_spear(self):
+        text = " ".join(career_text("hewer_of_belegost")).lower()
+        for word in ("tower shield", "tower-shield", "spear", "shield-bearer"):
+            self.assertNotIn(word, text)
+        self.assertIn("mattock", text)
 
 
 class DryRunAndApply(unittest.TestCase):

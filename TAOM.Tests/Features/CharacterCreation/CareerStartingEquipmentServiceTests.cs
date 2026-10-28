@@ -61,6 +61,18 @@ public class CareerStartingEquipmentServiceTests
     }
 
     [TestMethod]
+    public void Apply_TwoHandedEredLuinMale_BuildsTwoHandedRosterId()
+    {
+        ArchetypeReturns("hewer_of_belegost", CareerArchetype.TwoHanded);
+        _adapter.ApplyRosterToPlayer("player_career_eredluin_twohanded_m", "player_hero_id")
+                .Returns(PlayerEquipmentApplyResult.Success);
+
+        _sut.ApplyCareerStartingEquipment("eredluin", "hewer_of_belegost", isFemale: false, "player_hero_id");
+
+        _adapter.Received(1).ApplyRosterToPlayer("player_career_eredluin_twohanded_m", "player_hero_id");
+    }
+
+    [TestMethod]
     public void Apply_InfantryMordor_BuildsCorrectRosterId()
     {
         ArchetypeReturns("black_uruk_captain", CareerArchetype.Infantry);

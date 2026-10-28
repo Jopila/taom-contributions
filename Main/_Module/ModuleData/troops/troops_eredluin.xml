@@ -311,6 +311,7 @@
     <Equipments>
       <EquipmentRoster>
         <equipment slot="Item0" id="Item.sm_dwarf_erebor_axe_2h_a" />
+        <equipment slot="Item1" id="Item.southern_throwing_axe_1_t4" />
         <equipment slot="Head" id="Item.sk_dwarf_erebor_helmet_leather_med_a" />
         <equipment slot="Body" id="Item.sk_dwarf_iron_chest_chain_a" />
         <equipment slot="Cape" id="Item.sk_dwarf_iron_pauldron_med_c" />
@@ -319,6 +320,7 @@
       </EquipmentRoster>
       <EquipmentRoster>
         <equipment slot="Item0" id="Item.sm_dwarf_iron_axe_b" />
+        <equipment slot="Item1" id="Item.southern_throwing_axe_1_t4" />
         <equipment slot="Head" id="Item.sk_dwarf_erebor_helmet_leather_med_b" />
         <equipment slot="Body" id="Item.sk_dwarf_iron_chest_chain_a" />
         <equipment slot="Cape" id="Item.sk_dwarf_erebor_pauldron_scale_a" />
@@ -356,6 +358,7 @@
     <Equipments>
       <EquipmentRoster>
         <equipment slot="Item0" id="Item.sm_dwarf_erebor_axe_2h_b" />
+        <equipment slot="Item1" id="Item.southern_throwing_axe_1_t4" />
         <equipment slot="Head" id="Item.sk_dwarf_iron_helmet_med_d1" />
         <equipment slot="Body" id="Item.sk_dwarf_iron_chest_scale_a" />
         <equipment slot="Cape" id="Item.sk_dwarf_iron_pauldron_medium_b" />
@@ -364,6 +367,7 @@
       </EquipmentRoster>
       <EquipmentRoster>
         <equipment slot="Item0" id="Item.sm_dwarf_erebor_axe_2h_b" />
+        <equipment slot="Item1" id="Item.southern_throwing_axe_1_t4" />
         <equipment slot="Head" id="Item.sk_dwarf_iron_helmet_med_d2" />
         <equipment slot="Body" id="Item.sk_dwarf_iron_chest_scale_a" />
         <equipment slot="Cape" id="Item.sk_dwarf_iron_pauldron_medium_d" />
@@ -399,6 +403,7 @@
     <Equipments>
       <EquipmentRoster>
         <equipment slot="Item0" id="Item.sm_dwarf_iron_mattock_a" />
+        <equipment slot="Item1" id="Item.southern_throwing_axe_1_t4" />
         <equipment slot="Head" id="Item.sk_dwarf_iron_helmet_heavy_c1" />
         <equipment slot="Body" id="Item.sk_dwarf_iron_chest_heavy_c" />
         <equipment slot="Cape" id="Item.sk_dwarf_iron_pauldron_heavy_cape_a" />
@@ -407,6 +412,7 @@
       </EquipmentRoster>
       <EquipmentRoster>
         <equipment slot="Item0" id="Item.sm_dwarf_iron_mattock_b" />
+        <equipment slot="Item1" id="Item.southern_throwing_axe_1_t4" />
         <equipment slot="Head" id="Item.sk_dwarf_iron_helmet_heavy_c2" />
         <equipment slot="Body" id="Item.sk_dwarf_iron_chest_heavy_d" />
         <equipment slot="Cape" id="Item.sk_dwarf_iron_pauldron_heavy_cape_a" />

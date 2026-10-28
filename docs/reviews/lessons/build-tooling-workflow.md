@@ -4615,3 +4615,15 @@ A script rewrote a section of `ered-luin.md` at offsets it computed before an ea
 - **Why missed:** the script parsed nothing it could fail on: markdown has no parser to refuse a cut sentence.
 - **Prevent:** replace by an exact old string that must match once (the Edit tool, or a script that asserts the count is 1), and re-read the section after the edit. This is the same rule as restoring masked XML by token (`.claude/rules/moduledata-validation.md`).
 - **Source:** [rca-ered-luin-2026-10-27.md](../rca-ered-luin-2026-10-27.md) "Process notes".
+
+### When a tool's data model gains a new shape, find every reader of the old shape (Ered Luin careers, 2026-10-28)
+`generate_career_kits.py`'s layout gained a slot of `None` (a two-handed kit has no `Item2`) and a borrowed source. The slot lookup still assumed every roster slot is in the layout (a `KeyError` on a stray `Item2`), `verify()` still walked only the slots a roster has (a lost slot passed), the archetype list stayed hand-written in two regexes, and a C# test mirrored the borrow more loosely than the tool.
+- **Why missed:** each assumption sat in a different function, and the change was made where the new shape is used, not where the old one is read.
+- **Prevent:** before changing a tool's data model, list every reader of it (grep the names, the regexes and any mirror in the tests) and give each new shape a test at each reader; derive repeated lists from the model (`ARCH = "|".join(LAYOUT)`). Prove a refusal path with a mutation, not only the accepting path.
+- **Source:** [rca-ered-luin-two-handed-career-2026-10-28.md](../rca-ered-luin-two-handed-career-2026-10-28.md) findings 2, 3, 4 and 7.
+
+### A fallback that makes a rule pass hides the rule's break: check the data first (Ered Luin careers, 2026-10-28)
+The two-handed kit's throwing slot found no candidate in Ered Luin's troops, so the tool borrowed Erebor's, and the pick rule's last-resort branch then chose a vanilla throwing axe that Erebor first fields at level 36. The kit passed `--verify` while breaking the rule the tool states ("a career never starts better equipped than the troops it recruits").
+- **Why missed:** the borrow was designed to make the kit pass; nothing reports a pick made by a fallback.
+- **Prevent:** when a kit layout gains a slot class, first check that every culture using it has a troop that carries that class. If one has none, that is a design question for Mike (give a troop the item, or accept the exception in the docs), not a borrow.
+- **Source:** [rca-ered-luin-two-handed-career-2026-10-28.md](../rca-ered-luin-two-handed-career-2026-10-28.md) finding 8.

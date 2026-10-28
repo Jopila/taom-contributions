@@ -12,9 +12,11 @@ item counted as troop gear, and a rewrite that touches the mounts or the file's 
 """
 import os
 import sys
+import tempfile
 import unittest
 import xml.etree.ElementTree as ET
 from pathlib import Path
+from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -63,6 +65,13 @@ class TestLayout(unittest.TestCase):
         self.assertEqual(ck.slot_classes("gondor", "cavalry")["Item0"], "TwoHandedPolearm")
         self.assertEqual(ck.slot_classes("gondor", "infantry")["Item2"], "TwoHandedPolearm")
 
+    def test_twohanded_takes_a_two_handed_axe_and_a_throwing_axe_and_nothing_else(self):
+        # no one-handed sidearm, shield, polearm or third weapon
+        self.assertEqual(ck.slot_classes("eredluin", "twohanded"),
+                         {"Item0": "TwoHandedAxe", "Item1": "ThrowingAxe",
+                          "Body": "BodyArmor", "Leg": "LegArmor"})
+        self.assertEqual(ck.slot_classes("gondor", "twohanded")["Item1"], "ThrowingAxe")
+
     def test_culture_exceptions(self):
         self.assertEqual(ck.slot_classes("empire", "infantry")["Item0"], "OneHandedAxe")
         self.assertEqual(ck.slot_classes("erebor", "ranged")["Item2"], "OneHandedAxe")
@@ -100,6 +109,28 @@ class TestDerive(unittest.TestCase):
     def _sources(self, culture, archetype, troop_items, items):
         return ck.Sources({culture: troop_items}, {el.get("id"): el for el in items}, {}, set(),
                           [(culture, archetype)], [])
+
+    def test_ered_luins_own_troops_supply_the_throwing_slot(self):
+        items = [_item("hewer_axe", "TwoHandedAxe"), _item("own_throw", "ThrowingAxe"),
+                 _item("erebor_throw", "ThrowingAxe"), _item("chest", "BodyArmor"), _item("boots", "LegArmor")]
+        troops = {"eredluin": {"hewer_axe": (16, 1), "own_throw": (16, 1), "chest": (16, 1), "boots": (16, 1)},
+                  "erebor": {"erebor_throw": (11, 4)}}
+        sources = ck.Sources(troops, {el.get("id"): el for el in items}, {}, set(),
+                             [("eredluin", "twohanded")], [])
+        kit = ck.derive_kits(sources)[("eredluin", "twohanded")]
+        self.assertEqual((kit["Item0"], kit["Item1"]), ("hewer_axe", "own_throw"))
+        self.assertNotIn("Item2", kit)
+
+    def test_a_culture_whose_troops_throw_nothing_gets_no_throwing_axe_from_another(self):
+        items = [_item("erebor_throw", "ThrowingAxe")]
+        sources = ck.Sources({"eredluin": {}, "erebor": {"erebor_throw": (11, 4)}},
+                             {el.get("id"): el for el in items}, {}, set(), [], [])
+        self.assertEqual(ck.candidates(sources, "eredluin", "ThrowingAxe"), [])
+
+    def test_the_shipped_mattock_line_throws_the_throwing_axe_the_kit_takes(self):
+        root = ET.parse(ck.TROOPS_DIR / "troops_eredluin.xml").getroot()
+        carried = ck.index_troop_gear([root])["eredluin"]
+        self.assertEqual(carried["southern_throwing_axe_1_t4"][0], 16)   # from the Mattock Hewer up
 
     def test_isengard_and_mordor_careers_wear_their_uruk_line(self):
         # uruk armour fits every race these cultures offer; their L1 orcs wear Mordor orc kit.
@@ -251,13 +282,85 @@ class TestRewrite(unittest.TestCase):
         with self.assertRaises(ck.CareerKitError):
             ck.apply_kits(CAREER, {})
 
+    def test_a_roster_with_fewer_slots_than_five_is_filled_from_its_kit(self):
+        text = CAREER.replace("player_career_gondor_ranged_m", "player_career_gondor_twohanded_m")
+        text = text.replace('            <Equipment slot="Item2" id="Item.old_sword" />\r\n', "")
+        kit = {"Item0": "axe", "Item1": "knife", "Body": "body", "Leg": "leg"}
+        out, changed = ck.apply_kits(text, {("gondor", "twohanded"): kit})
+        self.assertEqual(changed, 4)
+        self.assertIn('id="Item.knife"', out)
+        self.assertNotIn("Item2", out)
+
     def test_a_slot_the_culture_has_no_candidate_for_fails_loudly(self):
         with self.assertRaises(ck.CareerKitError):
             ck.apply_kits(CAREER, {("gondor", "ranged"): {**KIT, "Item0": None}})
 
+    def test_a_roster_with_a_slot_its_layout_lacks_fails_loudly(self):
+        text = CAREER.replace("player_career_gondor_ranged_m", "player_career_gondor_twohanded_m")
+        kit = {"Item0": "axe", "Item1": "throw", "Body": "body", "Leg": "leg"}
+        with self.assertRaises(ck.CareerKitError) as caught:
+            ck.apply_kits(text, {("gondor", "twohanded"): kit})
+        self.assertIn("Item2", str(caught.exception))
+
+    def test_a_roster_missing_a_slot_its_kit_expects_fails_loudly(self):
+        no_item2 = CAREER.replace('            <Equipment slot="Item2" id="Item.old_sword" />\r\n', "")
+        with self.assertRaises(ck.CareerKitError) as caught:
+            ck.apply_kits(no_item2, {("gondor", "ranged"): KIT})
+        self.assertIn("lacks", str(caught.exception))
+        no_item1 = CAREER.replace("player_career_gondor_ranged_m", "player_career_gondor_twohanded_m")
+        no_item1 = no_item1.replace('            <Equipment slot="Item1" id="Item.old_arrows" />\r\n', "")
+        no_item1 = no_item1.replace('            <Equipment slot="Item2" id="Item.old_sword" />\r\n', "")
+        kit = {"Item0": "axe", "Item1": "throw", "Body": "body", "Leg": "leg"}
+        with self.assertRaises(ck.CareerKitError) as caught:
+            ck.apply_kits(no_item1, {("gondor", "twohanded"): kit})
+        self.assertIn("lacks", str(caught.exception))
+
+
+class TestVerify(unittest.TestCase):
+    def _verify(self, text, kits):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "career.xml"
+            path.write_bytes(text.encode("utf-8"))
+            return ck.verify(path, kits)
+
+    def test_a_clean_file_reports_nothing(self):
+        kit = {"Item0": "old_bow", "Item1": "old_arrows", "Item2": "old_sword", "Body": "old_body", "Leg": "old_leg"}
+        self.assertEqual(self._verify(CAREER, {("gondor", "ranged"): kit}), [])
+
+    def test_a_slot_the_kit_expects_but_the_roster_lacks_is_reported(self):
+        no_item2 = CAREER.replace('            <Equipment slot="Item2" id="Item.old_sword" />\r\n', "")
+        kit = {"Item0": "old_bow", "Item1": "old_arrows", "Item2": "old_sword", "Body": "old_body", "Leg": "old_leg"}
+        drift = self._verify(no_item2, {("gondor", "ranged"): kit})
+        self.assertEqual(len(drift), 1)
+        self.assertIn("Item2", drift[0])
+
+    def test_a_career_roster_id_matching_no_archetype_is_reported(self):
+        berserker = CAREER.replace("player_career_gondor_ranged_m", "player_career_gondor_berserker_m")
+        drift = self._verify(berserker, {("gondor", "ranged"): KIT})
+        self.assertEqual(len(drift), 1)
+        self.assertIn("player_career_gondor_berserker_m", drift[0])
+
+    def test_a_clean_four_slot_twohanded_roster_reports_nothing(self):
+        text = CAREER.replace("player_career_gondor_ranged_m", "player_career_gondor_twohanded_m")
+        text = text.replace('            <Equipment slot="Item2" id="Item.old_sword" />\r\n', "")
+        kit = {"Item0": "old_bow", "Item1": "old_arrows", "Body": "old_body", "Leg": "old_leg"}
+        self.assertEqual(self._verify(text, {("gondor", "twohanded"): kit}), [])
+
+
+class TestMain(unittest.TestCase):
+    def test_an_unreadable_input_exits_2_with_an_error_not_a_traceback(self):
+        for exc in (ET.ParseError("not well-formed"), OSError("no such file")):
+            for argv in (["generate_career_kits.py"], ["generate_career_kits.py", "--verify"]):
+                with self.subTest(exc=type(exc).__name__, argv=argv), \
+                        mock.patch.object(sys, "argv", argv), \
+                        mock.patch.object(ck, "load_sources", side_effect=exc), \
+                        mock.patch("builtins.print") as printed:
+                    self.assertEqual(ck.main(), 2)
+                    self.assertTrue(any(c.args and c.args[0] == "ERROR:" for c in printed.call_args_list))
+
 
 class TestEredLuinCareerRosters(unittest.TestCase):
-    """Ered Luin offers infantry and ranged careers only: dwarves do not ride and the realm fields no
+    """Ered Luin offers infantry, two-handed and ranged careers only: dwarves do not ride and the realm fields no
     war ram. The rosters are applied at runtime, so MOUNTED_DWARF never sees them."""
 
     def setUp(self):
@@ -265,9 +368,16 @@ class TestEredLuinCareerRosters(unittest.TestCase):
         self.rosters = {r.get("id"): r for r in root.iter("EquipmentRoster")
                         if (r.get("id") or "").startswith("player_career_eredluin_")}
 
-    def test_infantry_and_ranged_for_both_sexes_and_no_cavalry(self):
+    def test_infantry_twohanded_and_ranged_for_both_sexes_and_no_cavalry(self):
         self.assertEqual(sorted(self.rosters), [f"player_career_eredluin_{a}_{s}"
-                                                for a in ("infantry", "ranged") for s in ("f", "m")])
+                                                for a in ("infantry", "ranged", "twohanded") for s in ("f", "m")])
+
+    def test_twohanded_kit_is_a_two_handed_weapon_and_a_throwing_weapon(self):
+        for sex in ("m", "f"):
+            slots = {e.get("slot"): e.get("id") for e in self.rosters[f"player_career_eredluin_twohanded_{sex}"].iter("Equipment")}
+            self.assertEqual(sorted(slots), ["Body", "Item0", "Item1", "Leg"])
+            self.assertEqual(slots["Item0"], "Item.sm_dwarf_erebor_axe_2h_a")
+            self.assertEqual(slots["Item1"], "Item.southern_throwing_axe_1_t4")
 
     def test_no_roster_carries_a_mount(self):
         mounts = [rid for rid, r in self.rosters.items() for e in r.iter("Equipment")

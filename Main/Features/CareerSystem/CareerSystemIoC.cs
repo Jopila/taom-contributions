@@ -48,7 +48,7 @@ public static class CareerSystemIoC
         // override bodies). Reads ICareerPassiveService + the static CareerAbilityBuffTracker.
         container.Register<Abilities.ICareerAgentStatService, Abilities.CareerAgentStatService>(Reuse.Singleton);
 
-        // Phase 4C: Ability effect execution — all 50 careers mapped to 3 archetypes.
+        // Phase 4C: Ability effect execution — all 79 mapped careers on 4 archetypes (Infantry, Ranged, Cavalry, TwoHanded).
         // GetCareerArchetypeMap() is the single source of truth — the executor registry and
         // the ICareerArchetypeService both read from it.
         container.RegisterDelegate(r => BuildAbilityEffectRegistry(r.Resolve<ICareerConfigProvider>()), Reuse.Singleton);
@@ -70,7 +70,8 @@ public static class CareerSystemIoC
         {
             switch (pair.Value)
             {
-                case CareerArchetype.Infantry: registry.Register(new InfantryAbilityExecutor(pair.Key, config)); break;
+                case CareerArchetype.Infantry:
+                case CareerArchetype.TwoHanded: registry.Register(new InfantryAbilityExecutor(pair.Key, config)); break;
                 case CareerArchetype.Ranged:   registry.Register(new RangedAbilityExecutor(pair.Key, config));   break;
                 case CareerArchetype.Cavalry:  registry.Register(new CavalryAbilityExecutor(pair.Key, config));  break;
             }
@@ -151,9 +152,10 @@ public static class CareerSystemIoC
         ["ram_rider"]              = CareerArchetype.Cavalry,
 
         // ═══ ERED LUIN ═══ (Erebor's foot careers, re-themed by tools/insert_new_faction_careers.py;
-        // dwarves never ride, so two Infantry careers stand where Erebor has the Ram Rider)
+        // dwarves never ride, so a TwoHanded career stands where Erebor has the Ram Rider. It runs
+        // Ironguard's Infantry abilities and starts with the mattock-line kit)
         ["warden_of_thorins_halls"] = CareerArchetype.Infantry,
-        ["shieldguard_of_belegost"] = CareerArchetype.Infantry,
+        ["hewer_of_belegost"]       = CareerArchetype.TwoHanded,
         ["nogrod_arbalester"]       = CareerArchetype.Ranged,
 
         // ═══ RIVENDELL ═══

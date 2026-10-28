@@ -18,8 +18,8 @@ namespace TAOM.Tests.Features.CharacterCreation;
 /// the career's archetype) or is a documented exception that keeps the youth-title kit through
 /// CareerStartingEquipmentService's fallback. The three Arnor realms shipped without kits because nothing failed
 /// (#978 review). The archetypes are read from the careers the culture offers (taom_careers.xml through
-/// CareerSystemIoC's archetype map), so Ered Luin, whose careers are infantry and ranged only (dwarves do not ride
-/// and it fields no war ram), needs no cavalry kit, and a culture that gains a career gains its kit demand the same
+/// CareerSystemIoC's archetype map), so Ered Luin, whose careers are infantry, two-handed and ranged only (dwarves do not
+/// ride and it fields no war ram), needs no cavalry kit, and a culture that gains a career gains its kit demand the same
 /// day. A culture that offers no career at all is CareerCultureCoverageTests' finding.
 /// </summary>
 [TestClass]

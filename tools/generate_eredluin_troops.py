@@ -15,7 +15,8 @@ again. A small realm of good soldiers, on foot like every dwarf host:
 
   Delver (basic, L6) -> Axeman (L11) -> Hearth-guard -> Hall Warden -> Veteran Hall Warden
       -> Warden of Thorin's Halls (L31)                      axe + shield
-  Axeman also -> Mattock Hewer (L16) -> Mattock Warrior -> Veteran Mattock Warrior (L26), two-handed
+  Axeman also -> Mattock Hewer (L16) -> Mattock Warrior -> Veteran Mattock Warrior (L26), two-handed,
+      each with a throwing axe in Item1
   Delver also -> Bowman (L11) -> Veteran Bowman -> Blue Mountain Bowman (L21)
   Noble (elite basic, L11) splits two ways:
       Broadbeams: Broadbeam Guard (L16) -> Broadbeam Shield-guard -> Gatewarden of Belegost
@@ -94,6 +95,10 @@ TOWER_TOP = ("sm_iron_shield_tower_c", "sm_dwarf_erebor_shield_tower_e")
 ARROWS = "sk_dwarf_erebor_arrow_a"
 ARROWS_B = "sk_dwarf_erebor_arrow_b"
 BOLTS = "sm_dwarf_iron_bolt_a"
+# Vanilla's Tribesman Throwing Axe (class ThrowingAxe), the one throwing weapon Erebor's troops carry. The
+# mattock line from the Mattock Hewer (L16) up throws it from Item1, and the two-handed career kit takes
+# it from the Hewer (generate_career_kits.py, #1045).
+THROWING_AXE = "southern_throwing_axe_1_t4"
 
 
 def build():
@@ -134,21 +139,21 @@ def build():
                           ("iron_boots_elite_b1", "iron_boots_elite_b3"), one("iron_bracer_elite_c4"),
                           ("iron_pauldron_elite_a", "iron_pauldron_elite_cape_a"))))
 
-    # ---- The mattock line: two-handed axes and mattocks, no shield ----
+    # ---- The mattock line: two-handed axes and mattocks, a throwing axe in Item1, no shield ----
     t.append(Troop("eredluin_hewer", "Mattock Hewer", 16, "Infantry", "twohand",
-                   paired(("sm_dwarf_erebor_axe_2h_a", "sm_dwarf_iron_axe_b")),
+                   paired(("sm_dwarf_erebor_axe_2h_a", "sm_dwarf_iron_axe_b"), THROWING_AXE),
                    armour(ab("erebor_helmet_leather_med"), one("iron_chest_chain_a"),
                           ("iron_boots_med_a1", "iron_boots_med_c1"), ("iron_bracer_light_b1", "iron_bracer_light_c1"),
                           ("iron_pauldron_med_c", "erebor_pauldron_scale_a")),
                    ["eredluin_mattock_warrior"]))
     t.append(Troop("eredluin_mattock_warrior", "Mattock Warrior", 21, "Infantry", "twohand",
-                   same("sm_dwarf_erebor_axe_2h_b"),
+                   same("sm_dwarf_erebor_axe_2h_b", THROWING_AXE),
                    armour(("iron_helmet_med_d1", "iron_helmet_med_d2"), one("iron_chest_scale_a"),
                           one("iron_boots_med_b1"), ("iron_bracer_med_a1", "iron_bracer_med_b1"),
                           ("iron_pauldron_medium_b", "iron_pauldron_medium_d")),
                    ["eredluin_veteran_mattock_warrior"]))
     t.append(Troop("eredluin_veteran_mattock_warrior", "Veteran Mattock Warrior", 26, "Infantry", "twohand",
-                   paired(("sm_dwarf_iron_mattock_a", "sm_dwarf_iron_mattock_b")),
+                   paired(("sm_dwarf_iron_mattock_a", "sm_dwarf_iron_mattock_b"), THROWING_AXE),
                    armour(("iron_helmet_heavy_c1", "iron_helmet_heavy_c2"), ("iron_chest_heavy_c", "iron_chest_heavy_d"),
                           ("iron_boots_heavy_b1", "iron_boots_heavy_b2"), ("iron_bracer_heavy_c8", "iron_bracer_heavy_c9"),
                           one("iron_pauldron_heavy_cape_a"))))

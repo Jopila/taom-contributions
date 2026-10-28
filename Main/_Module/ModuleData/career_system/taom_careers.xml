@@ -1712,24 +1712,24 @@
     </ChoiceGroups>
   </Career>
 
-  <Career id="shieldguard_of_belegost" rank1_name="{=taom_career_rank1_shieldguard_of_belegost}Shield-bearer of Belegost" rank2_name="{=taom_career_rank2_shieldguard_of_belegost}Broadbeam Shield-guard" rank3_name="{=taom_career_rank3_shieldguard_of_belegost}Great Shield of Belegost"
-          display_name="{=taom_career_shieldguard_of_belegost}Broadbeam Shield-guard"
-          description="{=taom_career_shieldguard_of_belegost_desc}A Broadbeam warrior of Belegost who fights behind a tower shield with a long spear, locking shields with kin until no foe can find a gap in the wall."
+  <Career id="hewer_of_belegost" rank1_name="{=taom_career_rank1_hewer_of_belegost}Mattock-bearer" rank2_name="{=taom_career_rank2_hewer_of_belegost}Hewer of Belegost" rank3_name="{=taom_career_rank3_hewer_of_belegost}Stonebreaker of the Blue Mountains"
+          display_name="{=taom_career_hewer_of_belegost}Mattock Hewer of Belegost"
+          description="{=taom_career_hewer_of_belegost_desc}A Broadbeam hewer of Belegost who swings a great mattock in both hands, breaking shields and the orcs behind them."
           portrait_sprite="career_ironguard_portrait"
-          ability_template_id="shieldguard_of_belegost_ability"
+          ability_template_id="hewer_of_belegost_ability"
           min_clan_tier="0"
-          root_choice_id="shieldguard_of_belegost_root"
+          root_choice_id="hewer_of_belegost_root"
           keystone_icon="24019">
     <EligibleCultures>
       <Culture id="eredluin" />
     </EligibleCultures>
     <ChoiceGroups>
-      <Group id="shieldguard_of_belegost_t1_a" />
-      <Group id="shieldguard_of_belegost_t1_b" />
-      <Group id="shieldguard_of_belegost_t2_a" />
-      <Group id="shieldguard_of_belegost_t2_b" />
-      <Group id="shieldguard_of_belegost_t3_a" />
-      <Group id="shieldguard_of_belegost_t3_b" />
+      <Group id="hewer_of_belegost_t1_a" />
+      <Group id="hewer_of_belegost_t1_b" />
+      <Group id="hewer_of_belegost_t2_a" />
+      <Group id="hewer_of_belegost_t2_b" />
+      <Group id="hewer_of_belegost_t3_a" />
+      <Group id="hewer_of_belegost_t3_b" />
     </ChoiceGroups>
   </Career>
 
