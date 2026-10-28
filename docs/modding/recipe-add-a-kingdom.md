@@ -237,7 +237,9 @@ See [arthedain.md](../features/arthedain.md).
    binding all twelve party templates ([party-templates](party-templates.md)) before going further.
 4. Write the `<Kingdom>` into `Main/_Module/ModuleData/taom_spkingdoms.xml`. Copy a shipped entry of
    a realm the same size, then change `id`, `culture`, `owner`, `initial_home_settlement`, the four
-   colours, the five text attributes and `banner_key`.
+   colours, the five text attributes and `banner_key`. The `name` is the bare realm name (`Erebor`,
+   `Lindon`, `Ered Luin`); "Kingdom of X" goes in `title` and on the faction card, never in `name`
+   (gotcha below).
 5. Write the clans into `Main/_Module/ModuleData/characters/clans.xml`, ruling clan first, each with
    `super_faction="Kingdom.<your id>"`. The ruling clan need not be tier 6: nothing in v1.5.4 gates a
    ruler on tier. Tier sets the party limit (below 3 one party, 3 and 4 two, 5 and up three), each
@@ -325,6 +327,19 @@ Code: No code changes needed
   `LordNeedsHorsesIssueBehavior.ConditionsHold`, and the repair is one row,
   `<Hero id="lord_X_1" faction="Faction.clan_{id}_{N}" />`
   ([`kingdom-creation.md:516-525`](../features/kingdom-creation.md)).
+- **A kingdom `name` of "Kingdom of X" reads wrong in every kingdom list.** Every realm's `name` is
+  the bare name (`Erebor`, `Imladris`, `Lindon`); "Kingdom of X" belongs in `title` and on the
+  faction card (`factionmap/factions.json`, which says it for every realm). Arthedain, Cardolan,
+  Rhudaur and Ered Luin shipped with it in `name` until #1050, because the generator table copied the
+  card's wording. To rename a kingdom, change its `KINGDOMS` row in
+  `tools/generate_new_faction_kingdoms.py` and re-run `--apply` (a hand edit of
+  `taom_spkingdoms.xml` is reverted by the next run), then set the 12 language rows **and** each
+  `tools/translation_cache/<lang>.json` entry: the cache maps the id to the text, so a translator run
+  or a rebuild serves an old cached "Königreich X" back over a corrected row. Reusing each language's
+  `taom_<id>_short_name` keeps the translations. `KingdomNameTests`
+  (`tools/tests/test_generate_new_faction_kingdoms.py`) fails a "Kingdom of" name in the generator
+  table, in `taom_spkingdoms.xml` or `spkingdoms.xslt`, and a language row of a bare name that adds
+  its language's word for kingdom.
 - **A generated clan keeps its template's banner.** The generator rewrites ids, names, tiers and
   colours and deliberately leaves `banner_key` alone, so 32 of the 172 clans in `characters/clans.xml`
   fly the same banner as `clan_gundabad_1` (the six Lindon clans did too, until 2026-10-28; a realm that names a

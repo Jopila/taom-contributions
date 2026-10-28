@@ -33,6 +33,9 @@ The same applies to additional Preachers, Headmen, or any new notable beyond the
 ## Culture Attribute References
 Culture XML attributes (`merchant_notary`, `artisan_notary`, etc.) must reference the FIRST NPC of each occupation type.
 
+## Kingdom Names
+A `<Kingdom>` `name` is the bare realm name (`Erebor`, `Ered Luin`); "Kingdom of X" goes in `title` and on the faction card only. Gate: `KingdomNameTests`. To rename one, follow [recipe-add-a-kingdom.md](../../docs/modding/recipe-add-a-kingdom.md) "Gotchas" (generator, language rows and translation cache together).
+
 ## Region Codes
 Settlement prefixes, measured from the live map in [id-cheatsheet](../../docs/modding/id-cheatsheet.md) "Region prefixes": A=Khand and Harad (Aserai-mapped), AN=Arthedain, CA=Cardolan, DG=Dol Guldur, E=Erebor, EL=Ered Luin, EN=Dunland, ES=Mordor, EW=Gondor, FH=Far Harad, G=Gundabad, GBC=Blue Craig, GT=Goblin-town, I=Isengard, K=Khand (Variag), L=Lothlorien, LN=Lindon, M=Mirkwood, MM=Misty Mountains, R=Rivendell, RH=Rhudaur, RU=Rhun, S=Dale, U=Umbar, V=Rohan
 

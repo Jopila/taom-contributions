@@ -2242,3 +2242,9 @@ Ered Luin's ladies got a hair tag "because an unmatched tag falls back to Bald",
 - **Why missed:** the reason was copied with the fix, for a different race and template.
 - **Prevent:** when a precedent's fix rests on a mechanism (a fallback, an index, a default), check the mechanism against the new data before writing the same reason down.
 - **Source:** [rca-ered-luin-2026-10-27.md](../rca-ered-luin-2026-10-27.md) finding 6.
+
+### A kingdom's name is the bare realm name; a renamed text needs its cache entry changed too (#1050, 2026-10-28)
+Arthedain, Cardolan, Rhudaur and Ered Luin shipped as "Kingdom of X" in the kingdom list, where every other realm shows a bare name. The generator table had copied the faction card's wording into `name`. Arthedain's translations followed it ("Königreich Arthedain"), and the translation cache, which maps an id straight to its text, would have served that text back over any row corrected by hand.
+- **Why missed:** each realm was built from the previous one's table row, and no check compared one kingdom's `name` with the others.
+- **Prevent:** `KingdomNameTests` (`tools/tests/test_generate_new_faction_kingdoms.py`) fails a "Kingdom of" `name` in the generator table and the shipped XML or XSLT, and a language row of a bare name that adds its language's word for kingdom. Rename through the generator, then change each language row and its `translation_cache` entry together ([recipe-add-a-kingdom.md](../../modding/recipe-add-a-kingdom.md) "Gotchas").
+- **Source:** #1050.
