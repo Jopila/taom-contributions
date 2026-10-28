@@ -446,8 +446,9 @@ Code: No code changes needed
    sanctioned idioms are in [tools/README.md](../../tools/README.md) under "XML I/O convention".
 
 Check: `python tools/validate_moduledata.py`
-Takes effect: next save load for `posX`/`posY`/`gate_pos*` and for display names; new campaign only
-for `owner`, `prosperity`, `hearth` and `<Building level>`
+Takes effect: next save load for `posX`/`posY`/`gate_pos*` and the English display name; the 12
+translated names at the next game start or after a language switch ([settlements.md](settlements.md)
+"Modify" 3); new campaign only for `owner`, `prosperity`, `hearth` and `<Building level>`
 Code: No code changes needed
 
 ### Delete a settlement

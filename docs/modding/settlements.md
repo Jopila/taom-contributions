@@ -8,10 +8,10 @@
 
 | Path | What it is |
 |---|---|
-| `TAOM_Map/ModuleData/settlements.xml` | **The live file.** 1,153,217 bytes, last written 2026-09-04. Every edit that reaches a player is made here. |
+| `TAOM_Map/ModuleData/settlements.xml` | **The live file.** 1,322,823 bytes, last written 2026-10-28. Every edit that reaches a player is made here. |
 | `TAOM_Map/ModuleData/settlements.xslt` | 15 lines. An identity transform plus `<xsl:template match="Settlement"/>`, which deletes every vanilla settlement so Calradia does not appear underneath TAOM's map. |
-| `TAOM_Map/ModuleData/Languages/<LANG>/loc_settlements.xml` | 12 files, 1,349 `<string>` rows each (2026-10-27). The translated display names and Encyclopedia text. |
-| `Main/_Module/ModuleData/settlements.xml` | **A stale shadow. Editing it changes nothing in game.** 1,023,041 bytes, last written 2026-05-26, 863 settlements against the live file's 1,110 (2026-10-27). |
+| `TAOM_Map/ModuleData/Languages/<LANG>/loc_settlements.xml` | 12 files, 1,388 `<string>` rows each (2026-10-28). The translated display names and Encyclopedia text. |
+| `Main/_Module/ModuleData/settlements.xml` | **A stale shadow. Editing it changes nothing in game.** 1,023,041 bytes, last written 2026-05-26, 863 settlements against the live file's 1,141 (2026-10-28). |
 
 This file lives in the game install, not the repo; a module reinstall reverts hand edits, so land a repo-side validator gate with any fix. <!-- measured: ls -l on both settlements.xml copies, wc -l on settlements.xslt, and rg -oF '<string id=' on each of the 12 loc_settlements.xml 2026-09-05 -->
 
@@ -21,7 +21,7 @@ This file lives in the game install, not the repo; a module reinstall reverts ha
 
 The three PowerShell scripts named for this file, [`tools/Apply-SettlementNames.ps1`](../../tools/Apply-SettlementNames.ps1), [`tools/Generate-Settlements.ps1`](../../tools/Generate-Settlements.ps1) and [`tools/Settlement-Breakdown.ps1`](../../tools/Settlement-Breakdown.ps1), all target that shadow. Do not reach for them expecting an in-game change ([taom-map-settlement-naming.md](../reference/taom-map-settlement-naming.md)).
 
-**What is in the live file.** 1,141 settlements: 256 fortifications (92 towns and 164 castles), 726 villages, 158 hideouts and 1 `CustomSettlementComponent` (the retirement retreat). Under them sit 2,908 `<Building>` rows, 2,205 `<Location>` rows and 2,454 `<Area>` rows. Every settlement carries a `culture=`, 235 carry `text=`, and exactly the 256 fortifications carry `gate_posX`. No settlement carries `port_posX`. <!-- measured: a python count of each element and attribute name against the live settlements.xml, and a regex pass over the 1,141 <Settlement> open tags 2026-10-27, after Arthedain, Luinkrag, Carn Dûm, Lithur, Cardolan, Rhudaur, the Lindon expansion and Ered Luin -->
+**What is in the live file.** 1,141 settlements: 256 fortifications (92 towns and 164 castles), 726 villages, 158 hideouts and 1 `CustomSettlementComponent` (the retirement retreat). Under them sit 2,908 `<Building>` rows, 2,205 `<Location>` rows and 2,454 `<Area>` rows. Every settlement carries a `culture=`, 242 carry `text=`, and exactly the 256 fortifications carry `gate_posX`. No settlement carries `port_posX`. <!-- measured: a python count of each element and attribute name against the live settlements.xml, and a regex pass over the 1,141 <Settlement> open tags 2026-10-27 (text= re-counted 2026-10-28, after the #1042 descriptions), after Arthedain, Luinkrag, Carn Dûm, Lithur, Cardolan, Rhudaur, the Lindon expansion and Ered Luin -->
 
 ## Attributes
 
@@ -218,7 +218,7 @@ A village has no `owner` of its own. It has `bound`.
 <!-- example file="TAOM_Map/ModuleData/settlements.xml" id="castle_village_EN3_1" -->
 
 ```xml
-<Settlement id="castle_village_EN3_1" name="{=Settlements.Settlement.name.castle_village_EN3_1}Brynbuarth" posX="545.806" posY="793.34" culture="Culture.empire" text="{=Settlements.Settlement.text.castle_village_EN3_1}Brynbuarth sits in a plateau in the Dryatic mountains. Highland cattle thrive on the grasses of the heights.">
+<Settlement id="castle_village_EN3_1" name="{=Settlements.Settlement.name.castle_village_EN3_1}Brynbuarth" posX="545.806" posY="793.34" culture="Culture.empire" text="{=Settlements.Settlement.text.castle_village_EN3_1}Brynbuarth sits on a hill below Tûr Morva. The Dunlendings dig red clay from the stream banks and fire it into pots and roof tiles.">
     <Components>
       <Village id="castle_village_comp_EN3_1" village_type="VillageType.clay_mine" hearth="610" bound="Settlement.castle_EN3" background_crop_position="0.0" background_mesh="gui_bg_village_empire" wait_mesh="wait_empire_village" castle_background_mesh="gui_bg_castle_empire" />
     </Components>
@@ -300,7 +300,7 @@ Adding a settlement is the one operation in this file with a prerequisite outsid
 3. **Copy a whole sibling entry** of the shape you want from the live file. For a village, [`tools/add_map_villages.py`](../../tools/add_map_villages.py) does steps 2 to 6 from one table row (dry run by default, `--apply` writes, `--check` proves the row, the 12 loc rows and the scene entity all exist and agree on position); it is how the nine Isengard villages landed on 2026-09-11. Copy the `<Locations>` block from that sibling too, unchanged, unless you have a scene of your own. **Paste the new row at the END of the file, never beside its sibling**, and put a town ahead of its castles and villages; the reason is under "Takes effect" below. Both map tools do this (`tools/add_map_fortifications.py` for towns and castles, with gates computed from the scene). Each tool's `--check` covers only the ids in its own table, so after a scene edit also prove the whole file against the scene: every row has an entity, every entity tagged `town`, `castle` or `village` has a row, positions agree, and no two entities share a name. Two entities with one name bind the row to the first one in the scene, and `--check` notices only when their positions differ (2026-10-17: two `castle_village_G6_2`; 2026-10-23: two `village_CA1_1` at one spot).
 4. **Change the ids** (`<Settlement id>`, the component `id`), the name key, `posX`, `posY`, `culture`, and for a fortification `owner`, `prosperity` and the `<Building>` levels. For a village change `bound`, `village_type` and `hearth`.
 5. **Set `gate_posX` and `gate_posY`** on a fortification from the scene, never by hand (see the entrance gotcha below). The gate is the world position of the entity's child tagged `main_map_city_gate`: that is the only tag `SettlementPositionScript.LoadSettlementData` reads, and the editor writes it back to `gate_posX`/`gate_posY` on every scene save. `tools/add_map_fortifications.py` computes it the same way and refuses to write unless it reproduces every recorded gate. Castles carry the tag too, on a child named `gate_position`; the `main_map_castle_gate` tag on a castle's `emp_siege` or `ase_siege` child marks the siege camp, not the gate. A fortification with no `main_map_city_gate` child keeps whatever gate its row holds and the editor never refreshes it (`castle_A8` until 2026-10-17, when Mike added the child).
-6. **Add a row per language.** 12 rows, one in each `TAOM_Map/ModuleData/Languages/<LANG>/loc_settlements.xml`, using the key from step 4. Tolkien proper nouns take the same spelling in every language.
+6. **Add a row per language.** 12 rows, one in each `TAOM_Map/ModuleData/Languages/<LANG>/loc_settlements.xml`, using the key from step 4. Write the English name in every language; the translation backlog (#763) later translates it, or transliterates it in JP, KO, CN and RU.
 7. **Audit the entrances, then rebuild the settlement distance cache.** First, in a new campaign with cheat mode on, run `taom.audit_settlement_entrances` ([dev-console.md](../features/dev-console.md)). An entrance on a navmesh island passes every per-face check and only wedges the AI (the entrance gotcha below), and no tool under `tools/` reads `FaceIslandIndex`, so this is the only check. For each new id it lists, fix the position in the map editor: move a village's entity, or a town's or castle's `main_map_city_gate` child, onto the printed coordinate and save the scene, which writes `posX`/`posY` and `gate_posX`/`gate_posY`. Never paste the coordinate into `settlements.xml` alone: both map tools' `--check` compare the file with the scene and fail, `tools/add_map_fortifications.py` refuses its next `--apply` once a recorded gate is more than `GATE_TOLERANCE` off the scene, and the next editor save reverts it. Re-run `python tools/add_map_fortifications.py --check` and `python tools/add_map_villages.py --check`, and only then rebuild: in game, Options, Mod Options, TAOM, Map Tools, Rebuild Now, then reload ([editor-cache-rebuild.md](../features/editor-cache-rebuild.md)). The cache is `TAOM_Map/ModuleData/DistanceCaches/settlements_distance_cache_Default.bin`, 10,205,146 bytes, and it is keyed by settlement id.
 
 Check: `python tools/validate_moduledata.py` then `python tools/audit_scene_names.py`
@@ -413,17 +413,17 @@ Code: Code changes required in `Main/Features/TroopProgression/` if the id has a
 
 ## Numbers in this chapter
 
-Every count was produced on 2026-09-05 by the command beside it, except the rows marked 2026-10-23 or 2026-10-27, re-measured after Arthedain, Luinkrag, Carn Dûm, Lithur, Cardolan, Rhudaur, the Lindon expansion (#1039) and Ered Luin ([ered-luin.md](../features/ered-luin.md)). The live file is `TAOM_Map/ModuleData/settlements.xml` in the game install.
+Every count was produced on 2026-09-05 by the command beside it, except the rows marked 2026-10-23, 2026-10-27 or 2026-10-28, re-measured after the #1042 descriptions and after Arthedain, Luinkrag, Carn Dûm, Lithur, Cardolan, Rhudaur, the Lindon expansion (#1039) and Ered Luin ([ered-luin.md](../features/ered-luin.md)). The live file is `TAOM_Map/ModuleData/settlements.xml` in the game install.
 
 | Number | Command |
 |---|---|
 | 1,141 `<Settlement>` live, 863 in the repo shadow (2026-10-27) | `rg -oF '<Settlement ' <file>` piped to `wc -l`, on each copy |
 | 256 `<Town>`, of which 164 `is_castle="true"` and 92 towns; 726 `<Village>`; 158 `<Hideout>`; 1 `<CustomSettlementComponent>` (2026-10-27) | `rg -oF` for each element name, and `rg -oF 'is_castle="true"'`, piped to `wc -l` |
 | 2,908 `<Building>`, 2,205 `<Location>`, 2,454 `<Area>` (2026-10-27) | the same count per element name |
-| 1,141 with `culture=`, 235 with `text=`, 256 with `gate_posX`, 256 with `owner=`, 0 with `port_posX` (2026-10-27) | a python regex pass over the 1,141 `<Settlement>` open tags |
-| Live file 1,153,217 bytes dated 2026-09-04; shadow 1,023,041 bytes dated 2026-05-26; the deployed copy at `TAOM/ModuleData/settlements.xml` matches the shadow byte for byte | `ls -l` on all three |
+| 1,141 with `culture=`, 242 with `text=` (2026-10-28), 256 with `gate_posX`, 256 with `owner=`, 0 with `port_posX` (2026-10-27) | a python regex pass over the 1,141 `<Settlement>` open tags |
+| Live file 1,322,823 bytes dated 2026-10-28; shadow 1,023,041 bytes dated 2026-05-26; the deployed copy at `TAOM/ModuleData/settlements.xml` matches the shadow byte for byte | `ls -l` on all three |
 | 100 `<XmlName>` rows in `Main/_Module/SubModule.xml`, none of them `Settlements` | `rg -c '<XmlName' Main/_Module/SubModule.xml` and `rg -n 'Settlements'` on it |
-| 15 lines in `settlements.xslt`; 1,396 `<string>` rows in each of the 12 `loc_settlements.xml` (DE counted 2026-10-27) | `wc -l`, and `rg -oF '<string id='` piped to `wc -l` per language |
+| 15 lines in `settlements.xslt`; 1,388 `<string>` rows in each of the 12 `loc_settlements.xml` (DE, BR and PL counted 2026-10-28) | `wc -l`, and `rg -oF '<string id='` piped to `wc -l` per language |
 | Town prosperity 1,700 to 5,600, median 3,940 (n=92); castle 420 to 1,100, median 800 (n=164); village hearth 100 to 722, median 350 (n=726) (2026-10-27) | a python regex and `statistics.median` pass over the live file |
 | 6 towns at or above the 5,000 crowd band, 81 between 2,000 and 5,000, 5 below; 18 villages at or above hearth 600 (2026-10-27) | the same pass, bucketed at the thresholds in `Town.cs:738-749` and `Village.cs:320-331` |
 | 34 distinct cultures on settlements; 26 own fortifications (2026-10-27); 8 appear on hideouts, matching the 8 `is_bandit="true"` cultures in `taom_spcultures.xml` | a python `collections.Counter` over `culture="Culture.X"` per settlement block, and `rg -c 'is_bandit="true"'` on `taom_spcultures.xml` |

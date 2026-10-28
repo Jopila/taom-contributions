@@ -153,7 +153,7 @@ on 2026-10-27 (backup `loc_settlements.xml.bak_nametags_20261027_214259` in the 
 | `tools/rebuild_translation_files.py` | Has a tagging step (TAOM rows always, the TAOM_Map file only with `--allow-live-write`) but is stale for the TAOM module: do not run it there. It always rewrites the TAOM_Map file, so a run without the flag strips the tags; `--dry-run` writes nothing |
 | `tools/translate_with_claude.py` | Tags cache and override fills in one write pass (repo files always, outside files with `--allow-live-write`); fresh model output is not tagged; `placeholders_match` counts the grammar tags, so a dropped or added one is rejected |
 | `tools/check_external_loc_coverage.py` | Reports the live file's tags (correct, missing, wrong, orphan); `--require-tags` makes a miss fail |
-| `tools/Apply-MapVillageNames.py`, `tools/add_map_villages.py`, `tools/rename_map_settlements.py` | Live-map writers: they keep or add the BR and IT tag of the names they write; the rename also renames the table id |
+| `tools/Apply-MapVillageNames.py`, `tools/add_map_villages.py`, `tools/rename_map_settlements.py` | Live-map writers: they keep or add the BR and IT tag of the names they write; the rename also renames the table id. `tools/add_map_fortifications.py` writes its names without a tag: run `generate_name_tags.py --write` and `name_tags.py --target live-map --apply --allow-live-write` after it |
 | `Main/Features/NameGrammarTags/` | The render service, the pair finder, the variable classifier, the binding plan, the canary, the report format |
 | `Main/Features/DevConsole/Cheats/KeptPairCheats.cs` | `taom.print_kept_pairs` |
 | `Main/Adapters/GrammarRendererAdapter.cs` | Stateless engine reads by id and the text render |

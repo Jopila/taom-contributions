@@ -69,3 +69,13 @@ the class is to name, before trusting a check, every place the checked thing flo
 
 None beyond the lessons entries: `lessons/data-content-cultures.md` (read a reused template's contents) and
 `lessons/build-tooling-workflow.md` (record a baseline after the last write).
+
+---
+
+<!-- backlinks-start auto-generated; edit lint_docs.py / build_backlinks.py to change -->
+
+## Referenced by
+
+- [docs/reviews/lessons/data-content-cultures.md](lessons/data-content-cultures.md)
+
+<!-- backlinks-end -->

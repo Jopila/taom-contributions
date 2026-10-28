@@ -43,10 +43,9 @@ Not applied, with reasons: a map-wide duplicate-name line in `--check` (needs th
 and the three older duplicate names (the new names are Mike's call; #1043).
 
 `FOLLOW-UP` #1043: Sardol's shared vanilla description, the three repeated names, 99 vanilla descriptions, nine `{==`
-keys, a map-wide duplicate report. The dedicated-server stage still holds the old map (owed, as in the Lindon RCA). Also owed: the loc coverage
-baseline, after the Ered Luin branch merges (both change it): this change adds 11 untranslated rows per language
-(the 7 new descriptions and the 4 Dunland names; PL 7), so run `python tools/check_external_loc_coverage.py
---update-baseline` then.
+keys, a map-wide duplicate report. The dedicated-server stage still holds the old map (owed, as in the Lindon RCA). The loc coverage baseline
+was refreshed with the Ered Luin merge (`aa135873d`, 11,487 untranslated), which includes this change's 11 rows per
+language (the 7 new descriptions and the 4 Dunland names; PL 7).
 
 ## Root-cause pattern
 

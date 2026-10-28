@@ -36,13 +36,13 @@ Located at `Main/_Module/ModuleData/Languages/<LANG>/`:
 | `std_taom_bandit_voice_strings_{locale}.xml` | Bandit Voices (#900): the eight talking bandit clans' robbery lines and greetings; 45 of the 80 rows carry conversation animation tags (added 2026-10-26) | 80 |
 | `std_taom_battle_scene_strings_{locale}.xml` | Custom Battle scene names, generated from `custom_battle_scenes.xml` (added 2026-10-01) | 27 |
 
-### TAOM_Map module (1 file, ~1,102 strings)
+### TAOM_Map module (1 file, 1,388 strings on 2026-10-28)
 
 Located at `TAOM_Map/ModuleData/Languages/<LANG>/`:
 
 | File | What it contains | Entries |
 |------|------------------|---------|
-| `loc_settlements.xml` | Settlement names and descriptions (towns, castles, villages) | ~1,102 |
+| `loc_settlements.xml` | Settlement names and descriptions (towns, castles, villages) | 1,388 |
 
 ### LOTRLOME_Armory module (19 files, ~2,782 strings)
 

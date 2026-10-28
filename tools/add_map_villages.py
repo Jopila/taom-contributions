@@ -19,7 +19,8 @@ save made before the batch still loads this file (until the distance cache is re
 #1041), and a new village or town ahead of an existing
 row makes that save skip the existing row (2026-10-07, docs/modding/settlements.md "Add"). The
 row's `after` anchor (default INSERT_AFTER) now places only its loc rows, after that anchor's last
-row in each language, same display name in all 12 (Tolkien proper nouns do not translate). A name
+row in each language, with the English display name in all 12 (the translation backlog, #763,
+later translates or transliterates it). A name
 another settlement already carries is refused, and named by `--check` (name_collisions). A row
 whose `bound` settlement has no row is refused, and named by `--check`. `hearth` is per row too (default HEARTH):
 the #597 Gondor rows sit at 350 like their EW10/EW11 castle-village neighbours; the Isengard and

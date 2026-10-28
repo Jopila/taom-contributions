@@ -173,8 +173,9 @@ The three fields to get right first:
 1. **`tmpl`** picks which shipped kingdom is copied. Lindon copies `rivendell`, the three orc realms
    copy `gundabad`. Everything the rewrite does not name is inherited from that template, banner key
    included.
-2. **`culture`** is a reference to an existing culture, not a new one. Lindon runs on `rivendell`
-   and Blue Craig on `goblin`, which is why neither needed its own troop tree
+2. **`culture`** is a reference to an existing culture, not a new one. Lindon was generated on
+   `rivendell` and Blue Craig on `goblin`, which is why neither needed its own troop tree at first;
+   `tools/promote_borrowed_cultures.py` later gave both a culture of their own (`lindon`, `bluecraig`)
    ([`new-factions-misty-mountains-lindon.md:24-40`](../features/new-factions-misty-mountains-lindon.md)).
 3. **`clans`** is `(clan id, tier, home settlement, display name)`, ruling clan first at tier 6. The
    lord ids come from `region`, not from the clan id.

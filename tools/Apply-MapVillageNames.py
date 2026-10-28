@@ -13,8 +13,8 @@ stale snapshot last touched 2026-04-06 and is NOT registered in SubModule.xml.
 The NAMES dict below maps Settlement IDs to display-name defaults. The script:
   1. Updates `name="{=key}DEFAULT"` in the master settlements.xml (EN fallback)
   2. Updates `<string ... text="..."/>` in 12 per-language loc_settlements.xml files
-     (BR, CNs, CNt, DE, FR, IT, JP, KO, PL, RU, SP, TR — same name in every language
-     because proper nouns of invented Tolkien languages don't translate)
+     (BR, CNs, CNt, DE, FR, IT, JP, KO, PL, RU, SP, TR), all with the English name; the translation
+     backlog (#763) later translates it, or transliterates it in JP, KO, CN and RU
 
 Properties:
   - Only RENAMES are written: an id whose English name= in settlements.xml differs from the table.

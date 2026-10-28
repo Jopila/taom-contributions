@@ -19,7 +19,7 @@ findings; 5 are fixed in this change and 2 are owed.
 | 4 | LOW | The feature doc table, the #978 body and the harness memory card still stated the old mapping | Records of a name not swept | The swap was planned from data files; records in prose were left for the docs pass | All three updated |
 | 5 | LOW | The two one-off scripts parsed and wrote file by file, where `tools/README.md` asks that every output parses before any is written | Writer rule not followed in a scratch script | The scripts were judged one-offs; every file was written and parses, so no data is affected | Recorded only; no issue: scratch scripts that do not ship, and the README rule already covers them |
 | 6 | LOW, open | The dedicated server stage (`E:\repos\BannerlordCoop.DedicatedServer\.stage-win`) holds copies of TAOM_Map and TAOM with the old names | Copy outside the deploy path | Not part of `./build.ps1` | Owed: re-stage after the deploying build |
-| 7 | LOW, open | The orchestrator said `Apply-MapVillageNames.py` would revert later renames; its 438 rows match the live names exactly, so it was safe | Claim made before the evidence | Reasoned from the script's shape, not from its data | Corrected in the report; no data affected |
+| 7 | LOW, open | The orchestrator said `Apply-MapVillageNames.py` would revert later renames; its 438 rows match the live names exactly, so it was safe | Claim made before the evidence | Reasoned from the script's shape, not from its data | Corrected in the report; no data affected. Later found incomplete: only the master was compared, and the 12 language files held pre-rename text (`lessons/localization-ui.md`, #1042) |
 
 ## Root-cause pattern
 

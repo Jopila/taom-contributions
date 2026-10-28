@@ -24,9 +24,9 @@ central Misty Mountains and the Grey Havens are populated and playable in the ca
 
 | Kingdom id | Culture | Region code (settlements / lords) | Capital | Fiefs | Side |
 |---|---|---|---|---|---|
-| `mistymountainorcs` | `mistymountainorcs` (race `orc`) | `MM` / `MM` | `town_MM1` (Hrakdûr) | 3 towns, 7 castles, 23 villages | evil |
+| `mistymountainorcs` | `mistymountainorcs` (race `orc`) | `MM` / `MM` | `town_MM1` (Eastern Moria) | 3 towns, 7 castles, 23 villages | evil |
 | `goblin` | `goblin` (race `goblin`) | `GT` / `GB` | `town_GT1` (Goblin Town) | 1 town, 6 villages | evil |
-| `bluecraig` | `goblin` (race `goblin`) | `GBC` / `BC` | `town_GBC1` (Blue Craig)†, far west by Lindon | 2 towns (Luinkrag `town_GBC2` since 2026-10-07) + 7 villages (+ user-placed castles) | evil |
+| `bluecraig` | `bluecraig` (race `goblin`; `goblin` until its promotion) | `GBC` / `BC` | `town_GBC1` (Blue Craig)†, far west by Lindon | 2 towns (Luinkrag `town_GBC2` since 2026-10-07), 4 castles, 6 villages, 12 castle-villages | evil |
 | `lindon` | `lindon` (race `elf`; `rivendell` until 2026-08-11) | `LN` / `LN` | `town_LN1` (Mithlond) | 3 towns, 3 castles, 22 villages* | free |
 
 \* Every Lindon settlement is a live editor placement. Mithlond's 4 villages (`village_LN1_1..4`) came
@@ -174,7 +174,7 @@ troops; clans 2 to 6 share the second template.
 | `tools/assign_orc_village_types.py` | Per-fief orc/goblin village economy (animal food + 1 mine; `VALID_VILLAGE_TYPES` guard); `--apply` edits the live settlements.xml in place |
 | `tools/make_new_factions_playable.py` | The 4 CC faction-map cards in `factions.json` (`--apply` dry-run guard); then `tools/harvest_factionmap_strings.py` propagates the card strings into `taom_module_strings.xml` |
 | `tools/insert_new_faction_cc_menus.py` | Clones gundabad's CC narrative menu entries → goblin/mistymountainorcs (parents/youth/adulthood/education); childhood is culture-independent. Fixes blank CC stages. |
-| `tools/add_bluecraig_castles.py` | Adds the 4 Blue Craig castles (`castle_GBC1..4`) + 11 castle-villages to the live settlements.xml, spread across clans 2-5 (`--apply` + backup; idempotent; positions FROM scene.xscene). Only adds ids already placed in the scene. |
+| `tools/add_bluecraig_castles.py` | Adds the 4 Blue Craig castles (`castle_GBC1..4`) + 12 castle-villages to the live settlements.xml, spread across clans 2-5 (`--apply` + backup; idempotent; positions FROM scene.xscene). Only adds ids already placed in the scene. |
 
 Re-run order: `generate_new_factions.py` → `insert_new_factions.py` → `generate_new_faction_kingdoms.py`
 (it takes `--only`, offers only `arthedain`, `cardolan`, `rhudaur` and `eredluin`, and writes only with
@@ -203,7 +203,7 @@ childhood clothing):
 | `taom_lord_template_equipment.xml` | `IsLordTemplate`, and `IsTeenagerEquipmentTemplate` on the teen rosters | 10 (lord/ruler battle/civ/teen × m/f) |
 | `taom_education_equipment_templates.xml` | none (id-suffix `_<culture>`, childhood-education events) | 98 |
 
-bluecraig (Culture.goblin) inherits its culture's templates; Lindon has its own `Culture.lindon` ones (for example `child_template_lindon_noble_male`). Guarded by
+bluecraig has its own `Culture.bluecraig` ones since its promotion (`child_template_bluecraig_noble_male`, `tools/promote_borrowed_cultures.py`); Lindon has its own `Culture.lindon` ones (for example `child_template_lindon_noble_male`). Guarded by
 `ConfigIdValidationTests.ChildGenerationCultures_HaveChildTeenAndLordEquipmentTemplates` +
 `NewOrcCultures_HaveChildEducationEquipmentRosters`. RCA: [docs/reviews/rca-new-factions-2026-06-02.md](../reviews/rca-new-factions-2026-06-02.md) Phase 4.
 
@@ -249,7 +249,7 @@ After `/engine-bump`, with TAOM, TAOM_Map and LOTRLOME_Armory loaded:
 | Clans | `characters/clans.xml` | +9 `<Faction>` rows |
 | Lords | `characters/lords.xml` | +42 `<NPCCharacter>` lords |
 | Heroes | `characters/heroes.xml` | +42 `<Hero>` rows |
-| Settlements | `TAOM_Map/ModuleData/settlements.xml` (LIVE, external) | +45 `<Settlement>` (968 total) |
+| Settlements | `TAOM_Map/ModuleData/settlements.xml` (LIVE, external) | +45 `<Settlement>` (968 total then; 1,141 on 2026-10-28) |
 | Registration | `SubModule.xml` | +6 `<XmlNode>` (troops/npcs/equipment ×2 orc cultures) |
 | Recruitment | `Features/TroopProgression/VolunteerRecruitmentService.cs` | +`InitializeGoblinCulture/MistyMountainOrcsCulture/RivendellCulture` (fixes the previously-missing `CultureMap["rivendell"]`, which also benefits the existing Rivendell kingdom) |
 | Faction map | `factionmap/factions.json` | `game_faction` set on `goblins_of_goblin_town`→goblin, `kingdom_of_moria`→mistymountainorcs (`high_kingdom_of_lindon`: `lindon` since 2026-08-11) |
@@ -328,5 +328,6 @@ starting a campaign if `golbin` was intended.
 - [docs/modding/kingdoms.md](../modding/kingdoms.md)
 - [docs/modding/recipe-add-a-culture.md](../modding/recipe-add-a-culture.md)
 - [docs/modding/recipe-add-a-kingdom.md](../modding/recipe-add-a-kingdom.md)
+- [docs/reference/feature-map.md](../reference/feature-map.md)
 
 <!-- backlinks-end -->

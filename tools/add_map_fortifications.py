@@ -24,7 +24,8 @@ Idempotent per id: an id already in the master is skipped. `--check` fails on an
 row, loc row or scene entity is missing, whose master name differs from the table's (the live map
 is unversioned, so the table is the repo's only record of each name), or whose position or gate
 drifted from the scene, and when this batch's rows (BATCH: the FORTS ids not in RELEASED, plus the villages bound to them) are
-not the file's tail under a town.
+not the file's tail under a town. `--check` also names, and `--apply` refuses, a table name another
+settlement already carries, case ignored (add_map_villages.name_collisions, #1042).
 
 Usage:
   python tools/add_map_fortifications.py            # dry run
