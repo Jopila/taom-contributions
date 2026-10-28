@@ -238,7 +238,8 @@ first target only, so diff its other targets by hand (#1038): `grep -rlE 'IEnume
      `GameReferencesTargetsTests.BannerlordRefAsmVersion_PinnedGameVersion_IsTheSameGameBuild` goes
      red as soon as the engine moves (`DefaultChangeSet` is compiled in), whatever the pin says, and
      stays red until BUTR publishes. No CI uses the reference assemblies since the workflows were
-     removed (`c8d69a0dc`).
+     removed (`c8d69a0dc`). After the pin moves, run the three no-game commands in
+     `.ai/verification.md` and quote that run.
    - The per-build native address pins. The two C# `KnownBuilds` tables, in
      `ClipBudgetSignatureInstalledBinaryTests` and `SkeletonBufferInstalledBinaryTests`, skip in the
      default suite and FAIL in the binding gate (item 1) on a build with no row; `NativePinGateTests`
@@ -268,6 +269,9 @@ first target only, so diff its other targets by hand (#1038): `grep -rlE 'IEnume
    string targets in `SaveShield.cs`.
 9. Run `/armory-audit` and `tools/audit_scene_names.py` plus `tools/build_battle_scenes.py --check`,
    because an update can re-pack Native asset packages and scenes.
+10. Write the Gates section of `docs/migration/v<ver>-impact.md` from the final `/verify` output,
+    after the commit, in the past tense, and name the commit each number comes from. A later commit
+    that changes one of those numbers rewrites the whole section, not only its own clause.
 
 ## Phase 5 — Control battles before believing anything
 
