@@ -27,6 +27,11 @@
 	<string id="taom_erebor_ruler_title" text="{=taom_erebor_ruler_title}King" />
 	<string id="taom_erebor_short_name" text="{=taom_erebor_short_name}Erebor" />
 	<string id="taom_erebor_title" text="{=taom_erebor_title}Kingdom of Erebor" />
+	<string id="taom_eredluin_desc" text="{=taom_eredluin_desc}The dwarf kingdom of the Blue Mountains. Durin's Folk made Thorin's Halls there in their exile, and in this age the Broadbeams and the Firebeards hold Belegost and Nogrod again. Its lords are few and its halls are poorer than those of its kin in the east, but its smiths are the oldest in the West, and its axes keep the goblins of Blue Craig from the roads to Lindon." />
+	<string id="taom_eredluin_name" text="{=taom_eredluin_name}Kingdom of Ered Luin" />
+	<string id="taom_eredluin_ruler_title" text="{=taom_eredluin_ruler_title}King" />
+	<string id="taom_eredluin_short_name" text="{=taom_eredluin_short_name}Ered Luin" />
+	<string id="taom_eredluin_title" text="{=taom_eredluin_title}Kingdom of Ered Luin" />
 	<string id="taom_goblin_desc" text="{=taom_goblin_desc}The Goblins of the High Pass swarm the tunnels beneath the Misty Mountains, the spawn of the host the Great Goblin once led against dwarf and wayfarer alike. Numberless and vicious, they pour from Goblin-town to raid the mountain roads." />
 	<string id="taom_goblin_name" text="{=taom_goblin_name}Goblins" />
 	<string id="taom_goblin_ruler_title" text="{=taom_goblin_ruler_title}Great Goblin" />

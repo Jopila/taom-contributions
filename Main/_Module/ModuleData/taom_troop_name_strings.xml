@@ -262,6 +262,33 @@
 	<string id="aom_erebor_reg_miner_name" text="{=aom_erebor_reg_miner_name}[Erebor] Miner" />
 	<string id="aom_erebor_reg_skirmisher_name" text="{=aom_erebor_reg_skirmisher_name}[Erebor] Skirmisher" />
 	<string id="aom_erebor_reg_warrior_name" text="{=aom_erebor_reg_warrior_name}[Erebor] Warrior" />
+	<string id="aom_eredluin_axeman_name" text="{=aom_eredluin_axeman_name}[Ered Luin] Axeman" />
+	<string id="aom_eredluin_bowman_name" text="{=aom_eredluin_bowman_name}[Ered Luin] Bowman" />
+	<string id="aom_eredluin_broadbeam_guard_name" text="{=aom_eredluin_broadbeam_guard_name}[Ered Luin] Broadbeam Guard" />
+	<string id="aom_eredluin_broadbeam_shieldguard_name" text="{=aom_eredluin_broadbeam_shieldguard_name}[Ered Luin] Broadbeam Shield-guard" />
+	<string id="aom_eredluin_delver_name" text="{=aom_eredluin_delver_name}[Ered Luin] Delver" />
+	<string id="aom_eredluin_firebeard_arbalester_name" text="{=aom_eredluin_firebeard_arbalester_name}[Ered Luin] Firebeard Arbalester" />
+	<string id="aom_eredluin_firebeard_bowman_name" text="{=aom_eredluin_firebeard_bowman_name}[Ered Luin] Firebeard Bowman" />
+	<string id="aom_eredluin_firebeard_marksman_name" text="{=aom_eredluin_firebeard_marksman_name}[Ered Luin] Firebeard Marksman" />
+	<string id="aom_eredluin_firebeard_master_name" text="{=aom_eredluin_firebeard_master_name}[Ered Luin] Master Arbalester of Nogrod" />
+	<string id="aom_eredluin_gatewarden_name" text="{=aom_eredluin_gatewarden_name}[Ered Luin] Gatewarden of Belegost" />
+	<string id="aom_eredluin_hall_warden_name" text="{=aom_eredluin_hall_warden_name}[Ered Luin] Hall Warden" />
+	<string id="aom_eredluin_halls_warden_name" text="{=aom_eredluin_halls_warden_name}[Ered Luin] Warden of Thorin's Halls" />
+	<string id="aom_eredluin_hearthguard_name" text="{=aom_eredluin_hearthguard_name}[Ered Luin] Hearth-guard" />
+	<string id="aom_eredluin_hewer_name" text="{=aom_eredluin_hewer_name}[Ered Luin] Mattock Hewer" />
+	<string id="aom_eredluin_ironbound_warden_name" text="{=aom_eredluin_ironbound_warden_name}[Ered Luin] Ironbound Warden" />
+	<string id="aom_eredluin_kings_guard_name" text="{=aom_eredluin_kings_guard_name}[Ered Luin] King's Guard of Thorin's Halls" />
+	<string id="aom_eredluin_mattock_warrior_name" text="{=aom_eredluin_mattock_warrior_name}[Ered Luin] Mattock Warrior" />
+	<string id="aom_eredluin_militia_archer_name" text="{=aom_eredluin_militia_archer_name}[Ered Luin] Militia Archer" />
+	<string id="aom_eredluin_militia_spearman_name" text="{=aom_eredluin_militia_spearman_name}[Ered Luin] Militia Spearman" />
+	<string id="aom_eredluin_militia_veteran_archer_name" text="{=aom_eredluin_militia_veteran_archer_name}[Ered Luin] Veteran Militia Archer" />
+	<string id="aom_eredluin_militia_veteran_spearman_name" text="{=aom_eredluin_militia_veteran_spearman_name}[Ered Luin] Veteran Militia Spearman" />
+	<string id="aom_eredluin_mountain_bowman_name" text="{=aom_eredluin_mountain_bowman_name}[Ered Luin] Blue Mountain Bowman" />
+	<string id="aom_eredluin_noble_merc_name" text="{=aom_eredluin_noble_merc_name}[Ered Luin] Hired Noble" />
+	<string id="aom_eredluin_noble_name" text="{=aom_eredluin_noble_name}[Ered Luin] Noble" />
+	<string id="aom_eredluin_veteran_bowman_name" text="{=aom_eredluin_veteran_bowman_name}[Ered Luin] Veteran Bowman" />
+	<string id="aom_eredluin_veteran_hall_warden_name" text="{=aom_eredluin_veteran_hall_warden_name}[Ered Luin] Veteran Hall Warden" />
+	<string id="aom_eredluin_veteran_mattock_warrior_name" text="{=aom_eredluin_veteran_mattock_warrior_name}[Ered Luin] Veteran Mattock Warrior" />
 	<string id="aom_far_rhun_cataphract_name" text="{=aom_far_rhun_cataphract_name}[Rhûn] Far-Rhun Kataphract" />
 	<string id="aom_far_rhun_cavalry_name" text="{=aom_far_rhun_cavalry_name}[Rhûn] Far-Rhun Cavalry" />
 	<string id="aom_far_rhun_footman_name" text="{=aom_far_rhun_footman_name}[Rhûn] Far-Rhun Footman" />

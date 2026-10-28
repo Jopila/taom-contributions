@@ -11584,4 +11584,349 @@
     </Choice>
   </ChoiceGroup>
 
+  <!-- ═══ Warden of Thorin's Halls (eredluin), cloned from ironguard ═══ -->
+  <Choice id="warden_of_thorins_halls_root" group_id="" type="Passive"
+          description="{=taom_warden_of_thorins_halls_root_desc}Bastion of the Halls grants +5 health, dwarven craft protecting you."
+          icon_sprite="career_choice_ironguard_root">
+    <PassiveEffect type="Health" magnitude="5" operation="Add" />
+  </Choice>
+
+  <ChoiceGroup id="warden_of_thorins_halls_t1_a" display_name="{=taom_career_grp_warden_of_thorins_halls_t1_a}Hammer of the Deeps" career_id="warden_of_thorins_halls" tier="1">
+    <Choice id="warden_of_thorins_halls_t1_a_key" type="Keystone" description="{=taom_woth_t1_a_key}Bastion of the Halls radius increased, empowering more warriors." icon_sprite="career_choice_ig_t1_a_key">
+      <Mutations><Mutation target_id="warden_of_thorins_halls_ability" property="Radius" calculator="flat" value="3" operation="Add" /></Mutations>
+    </Choice>
+    <Choice id="warden_of_thorins_halls_t1_a_p1" type="Passive" description="{=taom_woth_t1_a_p1}+8% melee damage." icon_sprite="career_choice_ig_t1_a_p1">
+      <PassiveEffect type="Damage" magnitude="0.08" operation="Add" is_percentage="true" attack_type_mask="Melee" />
+    </Choice>
+    <Choice id="warden_of_thorins_halls_t1_a_p2" type="Passive" description="{=taom_woth_t1_a_p2}+3% troop damage." icon_sprite="career_choice_ig_t1_a_p2">
+      <PassiveEffect type="TroopDamage" magnitude="0.03" operation="Add" is_percentage="true" />
+    </Choice>
+    <Choice id="warden_of_thorins_halls_t1_a_p3" type="Passive" description="{=taom_woth_t1_a_p3}+6 max health." icon_sprite="career_choice_ig_t1_a_p3">
+      <PassiveEffect type="Health" magnitude="6" operation="Add" />
+    </Choice>
+    <Choice id="warden_of_thorins_halls_t1_a_p4" type="Passive" description="{=taom_woth_t1_a_p4}+7% swing speed." icon_sprite="career_choice_ig_t1_a_p4">
+      <PassiveEffect type="SwingSpeed" magnitude="0.07" operation="Add" is_percentage="true" />
+    </Choice>
+  </ChoiceGroup>
+
+  <ChoiceGroup id="warden_of_thorins_halls_t1_b" display_name="{=taom_career_grp_warden_of_thorins_halls_t1_b}Gatewall Warden" career_id="warden_of_thorins_halls" tier="1">
+    <Choice id="warden_of_thorins_halls_t1_b_key" type="Keystone" description="{=taom_woth_t1_b_key}Bastion of the Halls duration extended, fortifying the defense." icon_sprite="career_choice_ig_t1_b_key">
+      <Mutations><Mutation target_id="warden_of_thorins_halls_ability" property="Duration" calculator="flat" value="4" operation="Add" /></Mutations>
+    </Choice>
+    <Choice id="warden_of_thorins_halls_t1_b_p1" type="Passive" description="{=taom_woth_t1_b_p1}+8% resistance." icon_sprite="career_choice_ig_t1_b_p1">
+      <PassiveEffect type="Resistance" magnitude="0.08" operation="Add" is_percentage="true" />
+    </Choice>
+    <Choice id="warden_of_thorins_halls_t1_b_p2" type="Passive" description="{=taom_woth_t1_b_p2}+5% troop morale." icon_sprite="career_choice_ig_t1_b_p2">
+      <PassiveEffect type="TroopMorale" magnitude="0.05" operation="Add" is_percentage="true" />
+    </Choice>
+    <Choice id="warden_of_thorins_halls_t1_b_p3" type="Passive" description="{=taom_woth_t1_b_p3}+10% troop resistance." icon_sprite="career_choice_ig_t1_b_p3">
+      <PassiveEffect type="TroopResistance" magnitude="0.10" operation="Add" is_percentage="true" />
+    </Choice>
+    <Choice id="warden_of_thorins_halls_t1_b_p4" type="Passive" description="{=taom_woth_t1_b_p4}+5% troop survival." icon_sprite="career_choice_ig_t1_b_p4">
+      <PassiveEffect type="TroopSurvival" magnitude="0.05" operation="Add" is_percentage="true" />
+    </Choice>
+  </ChoiceGroup>
+
+  <ChoiceGroup id="warden_of_thorins_halls_t2_a" display_name="{=taom_career_grp_warden_of_thorins_halls_t2_a}Wrath of the Blue Mountains" career_id="warden_of_thorins_halls" tier="2">
+    <Choice id="warden_of_thorins_halls_t2_a_key" type="Keystone" description="{=taom_woth_t2_a_key}Bastion of the Halls charge reduced, activating more frequently." icon_sprite="career_choice_ig_t2_a_key">
+      <Mutations><Mutation target_id="warden_of_thorins_halls_ability" property="CooldownReduction" calculator="flat" value="6" operation="Add" /></Mutations>
+    </Choice>
+    <Choice id="warden_of_thorins_halls_t2_a_p1" type="Passive" description="{=taom_woth_t2_a_p1}+10% troop morale." icon_sprite="career_choice_ig_t2_a_p1">
+      <PassiveEffect type="TroopMorale" magnitude="0.10" operation="Add" is_percentage="true" />
+    </Choice>
+    <Choice id="warden_of_thorins_halls_t2_a_p2" type="Passive" description="{=taom_woth_t2_a_p2}+2 party size." icon_sprite="career_choice_ig_t2_a_p2">
+      <PassiveEffect type="PartySize" magnitude="2" operation="Add" />
+    </Choice>
+    <Choice id="warden_of_thorins_halls_t2_a_p3" type="Passive" description="{=taom_woth_t2_a_p3}+10% battle renown gain." icon_sprite="career_choice_ig_t2_a_p3">
+      <PassiveEffect type="RenownGain" magnitude="0.10" operation="Add" is_percentage="true" />
+    </Choice>
+    <Choice id="warden_of_thorins_halls_t2_a_p4" type="Passive" description="{=taom_woth_t2_a_p4}-10% troop wages." icon_sprite="career_choice_ig_t2_a_p4">
+      <PassiveEffect type="TroopWages" magnitude="-0.10" operation="Add" is_percentage="true" />
+    </Choice>
+  </ChoiceGroup>
+
+  <ChoiceGroup id="warden_of_thorins_halls_t2_b" display_name="{=taom_career_grp_warden_of_thorins_halls_t2_b}Shieldwall of Thorin's Halls" career_id="warden_of_thorins_halls" tier="2">
+    <Choice id="warden_of_thorins_halls_t2_b_key" type="Keystone" description="{=taom_woth_t2_b_key}Bastion of the Halls grants additional defensive buffs while active." icon_sprite="career_choice_ig_t2_b_key">
+      <Mutations><Mutation target_id="warden_of_thorins_halls_ability" property="Duration" calculator="flat" value="2" operation="Add" /></Mutations>
+    </Choice>
+    <Choice id="warden_of_thorins_halls_t2_b_p1" type="Passive" description="{=taom_woth_t2_b_p1}+12% resistance." icon_sprite="career_choice_ig_t2_b_p1">
+      <PassiveEffect type="Resistance" magnitude="0.12" operation="Add" is_percentage="true" />
+    </Choice>
+    <Choice id="warden_of_thorins_halls_t2_b_p2" type="Passive" description="{=taom_woth_t2_b_p2}+8 max health." icon_sprite="career_choice_ig_t2_b_p2">
+      <PassiveEffect type="Health" magnitude="8" operation="Add" />
+    </Choice>
+    <Choice id="warden_of_thorins_halls_t2_b_p3" type="Passive" description="{=taom_woth_t2_b_p3}+13% troop resistance." icon_sprite="career_choice_ig_t2_b_p3">
+      <PassiveEffect type="TroopResistance" magnitude="0.13" operation="Add" is_percentage="true" />
+    </Choice>
+    <Choice id="warden_of_thorins_halls_t2_b_p4" type="Passive" description="{=taom_woth_t2_b_p4}+5% troop damage." icon_sprite="career_choice_ig_t2_b_p4">
+      <PassiveEffect type="TroopDamage" magnitude="0.05" operation="Add" is_percentage="true" />
+    </Choice>
+  </ChoiceGroup>
+
+  <ChoiceGroup id="warden_of_thorins_halls_t3_a" display_name="{=taom_career_grp_warden_of_thorins_halls_t3_a}Iron Bulwark" career_id="warden_of_thorins_halls" tier="3">
+    <Choice id="warden_of_thorins_halls_t3_a_key" type="Keystone" description="{=taom_woth_t3_a_key}Bastion of the Halls radius greatly expanded, devastating power." icon_sprite="career_choice_ig_t3_a_key">
+      <Mutations><Mutation target_id="warden_of_thorins_halls_ability" property="Radius" calculator="flat" value="5" operation="Add" /></Mutations>
+    </Choice>
+    <Choice id="warden_of_thorins_halls_t3_a_p1" type="Passive" description="{=taom_woth_t3_a_p1}+15% melee damage." icon_sprite="career_choice_ig_t3_a_p1">
+      <PassiveEffect type="Damage" magnitude="0.15" operation="Add" is_percentage="true" attack_type_mask="Melee" />
+    </Choice>
+    <Choice id="warden_of_thorins_halls_t3_a_p2" type="Passive" description="{=taom_woth_t3_a_p2}+10 max health." icon_sprite="career_choice_ig_t3_a_p2">
+      <PassiveEffect type="Health" magnitude="10" operation="Add" />
+    </Choice>
+    <Choice id="warden_of_thorins_halls_t3_a_p3" type="Passive" description="{=taom_woth_t3_a_p3}+7% troop damage." icon_sprite="career_choice_ig_t3_a_p3">
+      <PassiveEffect type="TroopDamage" magnitude="0.07" operation="Add" is_percentage="true" />
+    </Choice>
+    <Choice id="warden_of_thorins_halls_t3_a_p4" type="Passive" description="{=taom_woth_t3_a_p4}+4 party size." icon_sprite="career_choice_ig_t3_a_p4">
+      <PassiveEffect type="PartySize" magnitude="4" operation="Add" />
+    </Choice>
+  </ChoiceGroup>
+
+  <ChoiceGroup id="warden_of_thorins_halls_t3_b" display_name="{=taom_career_grp_warden_of_thorins_halls_t3_b}Guard of the King's Hall" career_id="warden_of_thorins_halls" tier="3">
+    <Choice id="warden_of_thorins_halls_t3_b_key" type="Keystone" description="{=taom_woth_t3_b_key}Bastion of the Halls charge greatly reduced, nearly always available." icon_sprite="career_choice_ig_t3_b_key">
+      <Mutations><Mutation target_id="warden_of_thorins_halls_ability" property="CooldownReduction" calculator="flat" value="9" operation="Add" /></Mutations>
+    </Choice>
+    <Choice id="warden_of_thorins_halls_t3_b_p1" type="Passive" description="{=taom_woth_t3_b_p1}+18% resistance." icon_sprite="career_choice_ig_t3_b_p1">
+      <PassiveEffect type="Resistance" magnitude="0.18" operation="Add" is_percentage="true" />
+    </Choice>
+    <Choice id="warden_of_thorins_halls_t3_b_p2" type="Passive" description="{=taom_woth_t3_b_p2}+15% hero health regeneration." icon_sprite="career_choice_ig_t3_b_p2">
+      <PassiveEffect type="HeroHealing" magnitude="0.15" operation="Add" is_percentage="true" />
+    </Choice>
+    <Choice id="warden_of_thorins_halls_t3_b_p3" type="Passive" description="{=taom_woth_t3_b_p3}+20% troop morale." icon_sprite="career_choice_ig_t3_b_p3">
+      <PassiveEffect type="TroopMorale" magnitude="0.20" operation="Add" is_percentage="true" />
+    </Choice>
+    <Choice id="warden_of_thorins_halls_t3_b_p4" type="Passive" description="{=taom_woth_t3_b_p4}+15% troop survival." icon_sprite="career_choice_ig_t3_b_p4">
+      <PassiveEffect type="TroopSurvival" magnitude="0.15" operation="Add" is_percentage="true" />
+    </Choice>
+  </ChoiceGroup>
+
+  <!-- ═══ Broadbeam Shield-guard (eredluin), cloned from ironguard ═══ -->
+  <Choice id="shieldguard_of_belegost_root" group_id="" type="Passive"
+          description="{=taom_shieldguard_of_belegost_root_desc}Broadbeam Wall grants +5 health, the tower shield protecting you."
+          icon_sprite="career_choice_ironguard_root">
+    <PassiveEffect type="Health" magnitude="5" operation="Add" />
+  </Choice>
+
+  <ChoiceGroup id="shieldguard_of_belegost_t1_a" display_name="{=taom_career_grp_shieldguard_of_belegost_t1_a}Spear of the Deeps" career_id="shieldguard_of_belegost" tier="1">
+    <Choice id="shieldguard_of_belegost_t1_a_key" type="Keystone" description="{=taom_sgob_t1_a_key}Broadbeam Wall radius increased, empowering more warriors." icon_sprite="career_choice_ig_t1_a_key">
+      <Mutations><Mutation target_id="shieldguard_of_belegost_ability" property="Radius" calculator="flat" value="3" operation="Add" /></Mutations>
+    </Choice>
+    <Choice id="shieldguard_of_belegost_t1_a_p1" type="Passive" description="{=taom_sgob_t1_a_p1}+8% melee damage." icon_sprite="career_choice_ig_t1_a_p1">
+      <PassiveEffect type="Damage" magnitude="0.08" operation="Add" is_percentage="true" attack_type_mask="Melee" />
+    </Choice>
+    <Choice id="shieldguard_of_belegost_t1_a_p2" type="Passive" description="{=taom_sgob_t1_a_p2}+3% troop damage." icon_sprite="career_choice_ig_t1_a_p2">
+      <PassiveEffect type="TroopDamage" magnitude="0.03" operation="Add" is_percentage="true" />
+    </Choice>
+    <Choice id="shieldguard_of_belegost_t1_a_p3" type="Passive" description="{=taom_sgob_t1_a_p3}+6 max health." icon_sprite="career_choice_ig_t1_a_p3">
+      <PassiveEffect type="Health" magnitude="6" operation="Add" />
+    </Choice>
+    <Choice id="shieldguard_of_belegost_t1_a_p4" type="Passive" description="{=taom_sgob_t1_a_p4}+7% swing speed." icon_sprite="career_choice_ig_t1_a_p4">
+      <PassiveEffect type="SwingSpeed" magnitude="0.07" operation="Add" is_percentage="true" />
+    </Choice>
+  </ChoiceGroup>
+
+  <ChoiceGroup id="shieldguard_of_belegost_t1_b" display_name="{=taom_career_grp_shieldguard_of_belegost_t1_b}Tower-Shield Warden" career_id="shieldguard_of_belegost" tier="1">
+    <Choice id="shieldguard_of_belegost_t1_b_key" type="Keystone" description="{=taom_sgob_t1_b_key}Broadbeam Wall duration extended, fortifying the defense." icon_sprite="career_choice_ig_t1_b_key">
+      <Mutations><Mutation target_id="shieldguard_of_belegost_ability" property="Duration" calculator="flat" value="4" operation="Add" /></Mutations>
+    </Choice>
+    <Choice id="shieldguard_of_belegost_t1_b_p1" type="Passive" description="{=taom_sgob_t1_b_p1}+8% resistance." icon_sprite="career_choice_ig_t1_b_p1">
+      <PassiveEffect type="Resistance" magnitude="0.08" operation="Add" is_percentage="true" />
+    </Choice>
+    <Choice id="shieldguard_of_belegost_t1_b_p2" type="Passive" description="{=taom_sgob_t1_b_p2}+5% troop morale." icon_sprite="career_choice_ig_t1_b_p2">
+      <PassiveEffect type="TroopMorale" magnitude="0.05" operation="Add" is_percentage="true" />
+    </Choice>
+    <Choice id="shieldguard_of_belegost_t1_b_p3" type="Passive" description="{=taom_sgob_t1_b_p3}+10% troop resistance." icon_sprite="career_choice_ig_t1_b_p3">
+      <PassiveEffect type="TroopResistance" magnitude="0.10" operation="Add" is_percentage="true" />
+    </Choice>
+    <Choice id="shieldguard_of_belegost_t1_b_p4" type="Passive" description="{=taom_sgob_t1_b_p4}+5% troop survival." icon_sprite="career_choice_ig_t1_b_p4">
+      <PassiveEffect type="TroopSurvival" magnitude="0.05" operation="Add" is_percentage="true" />
+    </Choice>
+  </ChoiceGroup>
+
+  <ChoiceGroup id="shieldguard_of_belegost_t2_a" display_name="{=taom_career_grp_shieldguard_of_belegost_t2_a}Wrath of the Broadbeams" career_id="shieldguard_of_belegost" tier="2">
+    <Choice id="shieldguard_of_belegost_t2_a_key" type="Keystone" description="{=taom_sgob_t2_a_key}Broadbeam Wall charge reduced, activating more frequently." icon_sprite="career_choice_ig_t2_a_key">
+      <Mutations><Mutation target_id="shieldguard_of_belegost_ability" property="CooldownReduction" calculator="flat" value="6" operation="Add" /></Mutations>
+    </Choice>
+    <Choice id="shieldguard_of_belegost_t2_a_p1" type="Passive" description="{=taom_sgob_t2_a_p1}+10% troop morale." icon_sprite="career_choice_ig_t2_a_p1">
+      <PassiveEffect type="TroopMorale" magnitude="0.10" operation="Add" is_percentage="true" />
+    </Choice>
+    <Choice id="shieldguard_of_belegost_t2_a_p2" type="Passive" description="{=taom_sgob_t2_a_p2}+2 party size." icon_sprite="career_choice_ig_t2_a_p2">
+      <PassiveEffect type="PartySize" magnitude="2" operation="Add" />
+    </Choice>
+    <Choice id="shieldguard_of_belegost_t2_a_p3" type="Passive" description="{=taom_sgob_t2_a_p3}+10% battle renown gain." icon_sprite="career_choice_ig_t2_a_p3">
+      <PassiveEffect type="RenownGain" magnitude="0.10" operation="Add" is_percentage="true" />
+    </Choice>
+    <Choice id="shieldguard_of_belegost_t2_a_p4" type="Passive" description="{=taom_sgob_t2_a_p4}-10% troop wages." icon_sprite="career_choice_ig_t2_a_p4">
+      <PassiveEffect type="TroopWages" magnitude="-0.10" operation="Add" is_percentage="true" />
+    </Choice>
+  </ChoiceGroup>
+
+  <ChoiceGroup id="shieldguard_of_belegost_t2_b" display_name="{=taom_career_grp_shieldguard_of_belegost_t2_b}Shieldwall of Belegost" career_id="shieldguard_of_belegost" tier="2">
+    <Choice id="shieldguard_of_belegost_t2_b_key" type="Keystone" description="{=taom_sgob_t2_b_key}Broadbeam Wall grants additional defensive buffs while active." icon_sprite="career_choice_ig_t2_b_key">
+      <Mutations><Mutation target_id="shieldguard_of_belegost_ability" property="Duration" calculator="flat" value="2" operation="Add" /></Mutations>
+    </Choice>
+    <Choice id="shieldguard_of_belegost_t2_b_p1" type="Passive" description="{=taom_sgob_t2_b_p1}+12% resistance." icon_sprite="career_choice_ig_t2_b_p1">
+      <PassiveEffect type="Resistance" magnitude="0.12" operation="Add" is_percentage="true" />
+    </Choice>
+    <Choice id="shieldguard_of_belegost_t2_b_p2" type="Passive" description="{=taom_sgob_t2_b_p2}+8 max health." icon_sprite="career_choice_ig_t2_b_p2">
+      <PassiveEffect type="Health" magnitude="8" operation="Add" />
+    </Choice>
+    <Choice id="shieldguard_of_belegost_t2_b_p3" type="Passive" description="{=taom_sgob_t2_b_p3}+13% troop resistance." icon_sprite="career_choice_ig_t2_b_p3">
+      <PassiveEffect type="TroopResistance" magnitude="0.13" operation="Add" is_percentage="true" />
+    </Choice>
+    <Choice id="shieldguard_of_belegost_t2_b_p4" type="Passive" description="{=taom_sgob_t2_b_p4}+5% troop damage." icon_sprite="career_choice_ig_t2_b_p4">
+      <PassiveEffect type="TroopDamage" magnitude="0.05" operation="Add" is_percentage="true" />
+    </Choice>
+  </ChoiceGroup>
+
+  <ChoiceGroup id="shieldguard_of_belegost_t3_a" display_name="{=taom_career_grp_shieldguard_of_belegost_t3_a}Bulwark of Belegost" career_id="shieldguard_of_belegost" tier="3">
+    <Choice id="shieldguard_of_belegost_t3_a_key" type="Keystone" description="{=taom_sgob_t3_a_key}Broadbeam Wall radius greatly expanded, devastating power." icon_sprite="career_choice_ig_t3_a_key">
+      <Mutations><Mutation target_id="shieldguard_of_belegost_ability" property="Radius" calculator="flat" value="5" operation="Add" /></Mutations>
+    </Choice>
+    <Choice id="shieldguard_of_belegost_t3_a_p1" type="Passive" description="{=taom_sgob_t3_a_p1}+15% melee damage." icon_sprite="career_choice_ig_t3_a_p1">
+      <PassiveEffect type="Damage" magnitude="0.15" operation="Add" is_percentage="true" attack_type_mask="Melee" />
+    </Choice>
+    <Choice id="shieldguard_of_belegost_t3_a_p2" type="Passive" description="{=taom_sgob_t3_a_p2}+10 max health." icon_sprite="career_choice_ig_t3_a_p2">
+      <PassiveEffect type="Health" magnitude="10" operation="Add" />
+    </Choice>
+    <Choice id="shieldguard_of_belegost_t3_a_p3" type="Passive" description="{=taom_sgob_t3_a_p3}+7% troop damage." icon_sprite="career_choice_ig_t3_a_p3">
+      <PassiveEffect type="TroopDamage" magnitude="0.07" operation="Add" is_percentage="true" />
+    </Choice>
+    <Choice id="shieldguard_of_belegost_t3_a_p4" type="Passive" description="{=taom_sgob_t3_a_p4}+4 party size." icon_sprite="career_choice_ig_t3_a_p4">
+      <PassiveEffect type="PartySize" magnitude="4" operation="Add" />
+    </Choice>
+  </ChoiceGroup>
+
+  <ChoiceGroup id="shieldguard_of_belegost_t3_b" display_name="{=taom_career_grp_shieldguard_of_belegost_t3_b}Guard of the Broad Gate" career_id="shieldguard_of_belegost" tier="3">
+    <Choice id="shieldguard_of_belegost_t3_b_key" type="Keystone" description="{=taom_sgob_t3_b_key}Broadbeam Wall charge greatly reduced, nearly always available." icon_sprite="career_choice_ig_t3_b_key">
+      <Mutations><Mutation target_id="shieldguard_of_belegost_ability" property="CooldownReduction" calculator="flat" value="9" operation="Add" /></Mutations>
+    </Choice>
+    <Choice id="shieldguard_of_belegost_t3_b_p1" type="Passive" description="{=taom_sgob_t3_b_p1}+18% resistance." icon_sprite="career_choice_ig_t3_b_p1">
+      <PassiveEffect type="Resistance" magnitude="0.18" operation="Add" is_percentage="true" />
+    </Choice>
+    <Choice id="shieldguard_of_belegost_t3_b_p2" type="Passive" description="{=taom_sgob_t3_b_p2}+15% hero health regeneration." icon_sprite="career_choice_ig_t3_b_p2">
+      <PassiveEffect type="HeroHealing" magnitude="0.15" operation="Add" is_percentage="true" />
+    </Choice>
+    <Choice id="shieldguard_of_belegost_t3_b_p3" type="Passive" description="{=taom_sgob_t3_b_p3}+20% troop morale." icon_sprite="career_choice_ig_t3_b_p3">
+      <PassiveEffect type="TroopMorale" magnitude="0.20" operation="Add" is_percentage="true" />
+    </Choice>
+    <Choice id="shieldguard_of_belegost_t3_b_p4" type="Passive" description="{=taom_sgob_t3_b_p4}+15% troop survival." icon_sprite="career_choice_ig_t3_b_p4">
+      <PassiveEffect type="TroopSurvival" magnitude="0.15" operation="Add" is_percentage="true" />
+    </Choice>
+  </ChoiceGroup>
+
+  <!-- ═══ Firebeard Arbalester (eredluin), cloned from crossbow_master ═══ -->
+  <Choice id="nogrod_arbalester_root" group_id="" type="Passive"
+          description="{=taom_nogrod_arbalester_root_desc}Firebeard Volley grants +5% ranged damage with masterwork bolts."
+          icon_sprite="career_choice_crossbow_master_root">
+    <PassiveEffect type="Damage" magnitude="0.05" operation="Add" is_percentage="true" attack_type_mask="Ranged" />
+  </Choice>
+
+  <ChoiceGroup id="nogrod_arbalester_t1_a" display_name="{=taom_career_grp_nogrod_arbalester_t1_a}Nogrod Volley" career_id="nogrod_arbalester" tier="1">
+    <Choice id="nogrod_arbalester_t1_a_key" type="Keystone" description="{=taom_nga_t1_a_key}Firebeard Volley radius increased, covering wider kill zones." icon_sprite="career_choice_cbm_t1_a_key">
+      <Mutations><Mutation target_id="nogrod_arbalester_ability" property="Radius" calculator="flat" value="3" operation="Add" /></Mutations>
+    </Choice>
+    <Choice id="nogrod_arbalester_t1_a_p1" type="Passive" description="{=taom_nga_t1_a_p1}+8% ranged damage." icon_sprite="career_choice_cbm_t1_a_p1">
+      <PassiveEffect type="Damage" magnitude="0.08" operation="Add" is_percentage="true" attack_type_mask="Ranged" />
+    </Choice>
+    <Choice id="nogrod_arbalester_t1_a_p2" type="Passive" description="{=taom_nga_t1_a_p2}+5% armor penetration." icon_sprite="career_choice_cbm_t1_a_p2">
+      <PassiveEffect type="ArmorPenetration" magnitude="0.05" operation="Add" is_percentage="true" />
+    </Choice>
+    <Choice id="nogrod_arbalester_t1_a_p3" type="Passive" description="{=taom_nga_t1_a_p3}+7% movement speed." icon_sprite="career_choice_cbm_t1_a_p3">
+      <PassiveEffect type="MovementSpeed" magnitude="0.07" operation="Add" is_percentage="true" />
+    </Choice>
+    <Choice id="nogrod_arbalester_t1_a_p4" type="Passive" description="{=taom_nga_t1_a_p4}+5% battle renown gain." icon_sprite="career_choice_cbm_t1_a_p4">
+      <PassiveEffect type="RenownGain" magnitude="0.05" operation="Add" is_percentage="true" />
+    </Choice>
+  </ChoiceGroup>
+
+  <ChoiceGroup id="nogrod_arbalester_t1_b" display_name="{=taom_career_grp_nogrod_arbalester_t1_b}Watcher of the Dwarf-road" career_id="nogrod_arbalester" tier="1">
+    <Choice id="nogrod_arbalester_t1_b_key" type="Keystone" description="{=taom_nga_t1_b_key}Firebeard Volley duration extended, sustained barrage." icon_sprite="career_choice_cbm_t1_b_key">
+      <Mutations><Mutation target_id="nogrod_arbalester_ability" property="Duration" calculator="flat" value="4" operation="Add" /></Mutations>
+    </Choice>
+    <Choice id="nogrod_arbalester_t1_b_p1" type="Passive" description="{=taom_nga_t1_b_p1}+5% resistance." icon_sprite="career_choice_cbm_t1_b_p1">
+      <PassiveEffect type="Resistance" magnitude="0.05" operation="Add" is_percentage="true" />
+    </Choice>
+    <Choice id="nogrod_arbalester_t1_b_p2" type="Passive" description="{=taom_nga_t1_b_p2}+5 max health." icon_sprite="career_choice_cbm_t1_b_p2">
+      <PassiveEffect type="Health" magnitude="5" operation="Add" />
+    </Choice>
+    <Choice id="nogrod_arbalester_t1_b_p3" type="Passive" description="{=taom_nga_t1_b_p3}+5% party spotting range." icon_sprite="career_choice_cbm_t1_b_p3">
+      <PassiveEffect type="PartySpottingRange" magnitude="0.05" operation="Add" is_percentage="true" />
+    </Choice>
+    <Choice id="nogrod_arbalester_t1_b_p4" type="Passive" description="{=taom_nga_t1_b_p4}+10% stealth bonus." icon_sprite="career_choice_cbm_t1_b_p4">
+      <PassiveEffect type="StealthBonus" magnitude="0.10" operation="Add" is_percentage="true" />
+    </Choice>
+  </ChoiceGroup>
+
+  <ChoiceGroup id="nogrod_arbalester_t2_a" display_name="{=taom_career_grp_nogrod_arbalester_t2_a}Relentless Bolt" career_id="nogrod_arbalester" tier="2">
+    <Choice id="nogrod_arbalester_t2_a_key" type="Keystone" description="{=taom_nga_t2_a_key}Firebeard Volley charge reduced, maintaining constant pressure." icon_sprite="career_choice_cbm_t2_a_key">
+      <Mutations><Mutation target_id="nogrod_arbalester_ability" property="CooldownReduction" calculator="flat" value="6" operation="Add" /></Mutations>
+    </Choice>
+    <Choice id="nogrod_arbalester_t2_a_p1" type="Passive" description="{=taom_nga_t2_a_p1}+10% party spotting range." icon_sprite="career_choice_cbm_t2_a_p1">
+      <PassiveEffect type="PartySpottingRange" magnitude="0.10" operation="Add" is_percentage="true" />
+    </Choice>
+    <Choice id="nogrod_arbalester_t2_a_p2" type="Passive" description="{=taom_nga_t2_a_p2}+10% movement speed." icon_sprite="career_choice_cbm_t2_a_p2">
+      <PassiveEffect type="MovementSpeed" magnitude="0.10" operation="Add" is_percentage="true" />
+    </Choice>
+    <Choice id="nogrod_arbalester_t2_a_p3" type="Passive" description="{=taom_nga_t2_a_p3}+13% stealth bonus." icon_sprite="career_choice_cbm_t2_a_p3">
+      <PassiveEffect type="StealthBonus" magnitude="0.13" operation="Add" is_percentage="true" />
+    </Choice>
+    <Choice id="nogrod_arbalester_t2_a_p4" type="Passive" description="{=taom_nga_t2_a_p4}+10% battle renown gain." icon_sprite="career_choice_cbm_t2_a_p4">
+      <PassiveEffect type="RenownGain" magnitude="0.10" operation="Add" is_percentage="true" />
+    </Choice>
+  </ChoiceGroup>
+
+  <ChoiceGroup id="nogrod_arbalester_t2_b" display_name="{=taom_career_grp_nogrod_arbalester_t2_b}Ballista of the Mountain" career_id="nogrod_arbalester" tier="2">
+    <Choice id="nogrod_arbalester_t2_b_key" type="Keystone" description="{=taom_nga_t2_b_key}Firebeard Volley gains additional penetration while active." icon_sprite="career_choice_cbm_t2_b_key">
+      <Mutations><Mutation target_id="nogrod_arbalester_ability" property="Duration" calculator="flat" value="2" operation="Add" /></Mutations>
+    </Choice>
+    <Choice id="nogrod_arbalester_t2_b_p1" type="Passive" description="{=taom_nga_t2_b_p1}+12% ranged damage." icon_sprite="career_choice_cbm_t2_b_p1">
+      <PassiveEffect type="Damage" magnitude="0.12" operation="Add" is_percentage="true" attack_type_mask="Ranged" />
+    </Choice>
+    <Choice id="nogrod_arbalester_t2_b_p2" type="Passive" description="{=taom_nga_t2_b_p2}+10% armor penetration." icon_sprite="career_choice_cbm_t2_b_p2">
+      <PassiveEffect type="ArmorPenetration" magnitude="0.10" operation="Add" is_percentage="true" />
+    </Choice>
+    <Choice id="nogrod_arbalester_t2_b_p3" type="Passive" description="{=taom_nga_t2_b_p3}+8 max health." icon_sprite="career_choice_cbm_t2_b_p3">
+      <PassiveEffect type="Health" magnitude="8" operation="Add" />
+    </Choice>
+    <Choice id="nogrod_arbalester_t2_b_p4" type="Passive" description="{=taom_nga_t2_b_p4}+3% troop damage." icon_sprite="career_choice_cbm_t2_b_p4">
+      <PassiveEffect type="TroopDamage" magnitude="0.03" operation="Add" is_percentage="true" />
+    </Choice>
+  </ChoiceGroup>
+
+  <ChoiceGroup id="nogrod_arbalester_t3_a" display_name="{=taom_career_grp_nogrod_arbalester_t3_a}Storm of Steel" career_id="nogrod_arbalester" tier="3">
+    <Choice id="nogrod_arbalester_t3_a_key" type="Keystone" description="{=taom_nga_t3_a_key}Firebeard Volley radius greatly expanded, inescapable volleys." icon_sprite="career_choice_cbm_t3_a_key">
+      <Mutations><Mutation target_id="nogrod_arbalester_ability" property="Radius" calculator="flat" value="5" operation="Add" /></Mutations>
+    </Choice>
+    <Choice id="nogrod_arbalester_t3_a_p1" type="Passive" description="{=taom_nga_t3_a_p1}+18% ranged damage." icon_sprite="career_choice_cbm_t3_a_p1">
+      <PassiveEffect type="Damage" magnitude="0.18" operation="Add" is_percentage="true" attack_type_mask="Ranged" />
+    </Choice>
+    <Choice id="nogrod_arbalester_t3_a_p2" type="Passive" description="{=taom_nga_t3_a_p2}+15% armor penetration." icon_sprite="career_choice_cbm_t3_a_p2">
+      <PassiveEffect type="ArmorPenetration" magnitude="0.15" operation="Add" is_percentage="true" />
+    </Choice>
+    <Choice id="nogrod_arbalester_t3_a_p3" type="Passive" description="{=taom_nga_t3_a_p3}+15% battle renown gain." icon_sprite="career_choice_cbm_t3_a_p3">
+      <PassiveEffect type="RenownGain" magnitude="0.15" operation="Add" is_percentage="true" />
+    </Choice>
+    <Choice id="nogrod_arbalester_t3_a_p4" type="Passive" description="{=taom_nga_t3_a_p4}+5% troop damage." icon_sprite="career_choice_cbm_t3_a_p4">
+      <PassiveEffect type="TroopDamage" magnitude="0.05" operation="Add" is_percentage="true" />
+    </Choice>
+  </ChoiceGroup>
+
+  <ChoiceGroup id="nogrod_arbalester_t3_b" display_name="{=taom_career_grp_nogrod_arbalester_t3_b}Engine of Nogrod" career_id="nogrod_arbalester" tier="3">
+    <Choice id="nogrod_arbalester_t3_b_key" type="Keystone" description="{=taom_nga_t3_b_key}Firebeard Volley charge greatly reduced, relentless fire." icon_sprite="career_choice_cbm_t3_b_key">
+      <Mutations><Mutation target_id="nogrod_arbalester_ability" property="CooldownReduction" calculator="flat" value="9" operation="Add" /></Mutations>
+    </Choice>
+    <Choice id="nogrod_arbalester_t3_b_p1" type="Passive" description="{=taom_nga_t3_b_p1}+15% stealth bonus." icon_sprite="career_choice_cbm_t3_b_p1">
+      <PassiveEffect type="StealthBonus" magnitude="0.15" operation="Add" is_percentage="true" />
+    </Choice>
+    <Choice id="nogrod_arbalester_t3_b_p2" type="Passive" description="{=taom_nga_t3_b_p2}+15% movement speed." icon_sprite="career_choice_cbm_t3_b_p2">
+      <PassiveEffect type="MovementSpeed" magnitude="0.15" operation="Add" is_percentage="true" />
+    </Choice>
+    <Choice id="nogrod_arbalester_t3_b_p3" type="Passive" description="{=taom_nga_t3_b_p3}+9 max health." icon_sprite="career_choice_cbm_t3_b_p3">
+      <PassiveEffect type="Health" magnitude="9" operation="Add" />
+    </Choice>
+    <Choice id="nogrod_arbalester_t3_b_p4" type="Passive" description="{=taom_nga_t3_b_p4}+15% party spotting range." icon_sprite="career_choice_cbm_t3_b_p4">
+      <PassiveEffect type="PartySpottingRange" magnitude="0.15" operation="Add" is_percentage="true" />
+    </Choice>
+  </ChoiceGroup>
+
 </CareerChoices>

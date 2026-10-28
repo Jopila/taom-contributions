@@ -84,6 +84,13 @@
     <Stock match="^numenorean_" weight="3" />
     <Stock from="gondor" kind="not_armour" weight="0.5" />
   </Culture>
+  <!-- Ered Luin's troops wear Erebor's armour and carry its weapons, so its markets sell both and its lord
+       kit and lord's material are Erebor's. Erebor's war rams and their barding stay out: they are neither
+       armour nor weapons, and Ered Luin fields no rams. -->
+  <Culture id="eredluin" armour_from="erebor">
+    <Stock from="erebor" kind="armour" />
+    <Stock from="erebor" kind="weapons" />
+  </Culture>
   <!-- Gondor's own pool carries the Arnor pieces (tagged Culture.gondor); the crown stays out of it too. -->
   <Culture id="gondor">
     <Blacklist>

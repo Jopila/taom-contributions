@@ -142,6 +142,17 @@
     { "kingdomA": "arthedain", "kingdomB": "bluecraig", "tier": "Hostile" },
     { "kingdomA": "arthedain", "kingdomB": "rivendell", "tier": "Natural" },
     { "kingdomA": "arthedain", "kingdomB": "lindon", "tier": "Natural" },
-    { "kingdomA": "arthedain", "kingdomB": "empire_w", "tier": "Natural" }
+    { "kingdomA": "arthedain", "kingdomB": "empire_w", "tier": "Natural" },
+    { "kingdomA": "eredluin", "kingdomB": "gundabad", "tier": "Hostile" },
+    { "kingdomA": "eredluin", "kingdomB": "empire", "tier": "Hostile" },
+    { "kingdomA": "eredluin", "kingdomB": "isengard", "tier": "Hostile" },
+    { "kingdomA": "eredluin", "kingdomB": "empire_s", "tier": "Hostile" },
+    { "kingdomA": "eredluin", "kingdomB": "dolguldur", "tier": "Hostile" },
+    { "kingdomA": "eredluin", "kingdomB": "khuzait", "tier": "Hostile" },
+    { "kingdomA": "eredluin", "kingdomB": "goblin", "tier": "Hostile" },
+    { "kingdomA": "eredluin", "kingdomB": "mistymountainorcs", "tier": "Hostile" },
+    { "kingdomA": "eredluin", "kingdomB": "bluecraig", "tier": "Hostile" },
+    { "kingdomA": "eredluin", "kingdomB": "erebor", "tier": "Natural" },
+    { "kingdomA": "eredluin", "kingdomB": "lindon", "tier": "Natural" }
   ]
 }

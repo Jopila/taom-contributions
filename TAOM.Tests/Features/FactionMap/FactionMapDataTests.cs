@@ -61,6 +61,7 @@ public class FactionMapDataTests
     [DataRow("kingdom_of_moria")]
     [DataRow("high_kingdom_of_lindon")]
     [DataRow("goblins_of_blue_craig")]
+    [DataRow("kingdom_of_ered_duin")]
     public void PlayableFaction_HasMinimumContentSections(string factionKey)
     {
         var root = LoadFactions();

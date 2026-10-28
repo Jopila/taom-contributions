@@ -106,7 +106,7 @@ stage; the rest fail silently.
 | 5 | CC starting equipment, m+f per `title_type` | `equipmentsets/taom_char_creation_equipment.xml` | silent |
 | 6 | Starting denars | `startup_resources/startup_resources_config.xml` | silent |
 | 7 | At least one eligible career | `career_system/taom_careers.xml` + `charactercreation/career_menu.json` | silent |
-| 7b | Career starting kits, one per archetype and sex | `equipmentsets/taom_career_starting_equipment.xml` (skeletons, then `tools/generate_career_kits.py --apply`) | silent: the career start keeps the youth kit |
+| 7b | Career starting kits, one per sex for each archetype the culture's careers offer | `equipmentsets/taom_career_starting_equipment.xml` (skeletons, then `tools/generate_career_kits.py --apply`) | silent: the career start keeps the youth kit |
 | 8 | Child / teen / lord / education equipment templates | `equipmentsets/taom_{child_equipment,lord_template_equipment,education_equipment}_templates.xml` | fatal — NRE on new game |
 | 9 | Stage-2 education tutor templates | `taom_education_character_templates.xml` | fatal — age-8 CTD (#354) |
 | 10 | Enlistment rosters, 4 ranks | `equipmentsets/taom_enlistment_equipment.xml` | silent — issues another culture's gear |
@@ -135,8 +135,11 @@ that has died and respawned, before treating it as a regression.
 
 1. Confirm the `<Culture>` block exists and `basic_troop` / `elite_basic_troop` resolve.
 2. Add it to `cultures.json` with `races`, `starting_settlement` and body defaults.
-3. Give it narrative options in all four culture-scoped menus. `tools/insert_new_faction_cc_menus.py`
-   clones another culture's with a per-culture text remap.
+3. Give it narrative options in all four culture-scoped menus. Add the culture to `NEW` and
+   `SRC_FOR` in `tools/insert_new_faction_cc_menus.py`, with a `SUBS` remap or `AUTHORED` text, and a
+   `FORBIDDEN_FOR` row for a new source. Then `tools/insert_new_faction_cc_menus.py --apply` clones the
+   source culture's entries. A bare run is only a dry run, and `--check` exits 0 once every entry and
+   `taom_cc_strings.xml` row exists.
 4. Read the `title_type` set from its own `youth_menu.json` options, then generate CC rosters:
    `python tools/generate_char_creation_equipment.py --append <culture> --apply`.
    Add a `no_mount: True` entry to that script's `CULTURES` table if the culture's troop tree
@@ -284,7 +287,7 @@ before retuning `taom_partyTemplates.xml`.
 | File | Purpose |
 |------|---------|
 | `Main/_Module/ModuleData/spcultures.xslt` | Retags the six vanilla cultures; party-template bindings live here |
-| `Main/_Module/ModuleData/taom_spcultures.xml` | The 24 TAOM-native cultures |
+| `Main/_Module/ModuleData/taom_spcultures.xml` | The 30 TAOM-native `<Culture>` blocks, the bandit and creature cultures among them |
 | `Main/_Module/ModuleData/taom_partyTemplates.xml` | Every party template TAOM authors |
 | `Main/Features/CharacterCreation/CharacterCreationContentService.cs` | Registers custom cultures, sets race, teleports to the starting settlement |
 | `Main/Features/CharacterCreation/PlayerEquipmentRosterIds.cs` | Builds the CC roster id — unconditionally |
@@ -304,8 +307,10 @@ before retuning `taom_partyTemplates.xml`.
 - `TAOM.Tests/Features/CharacterCreation/NarrativeCultureCoverageTests.cs` — options in all four
   culture-scoped menus, plus a stale-suppression check.
 - `TAOM.Tests/Features/CharacterCreation/CareerCultureCoverageTests.cs` — at least one eligible career.
-- `TAOM.Tests/Features/CharacterCreation/CareerKitCoverageTests.cs`: all six career kits for every
-  culture in `cultures.json` (no exceptions since 2026-10-23).
+- `TAOM.Tests/Features/CharacterCreation/CareerKitCoverageTests.cs`: for every culture in
+  `cultures.json`, a male and a female kit for each archetype among the careers it offers (read from
+  `taom_careers.xml` through `CareerSystemIoC`'s archetype map). Ered Luin offers only Infantry and
+  Ranged careers, so it needs four; the other 25 cultures need all six. No exceptions since 2026-10-23.
 - `TAOM.Tests/Features/Enlistment/EnlistmentRosterCultureCoverageTests.cs` — four rank rosters.
 - `TAOM.Tests/Core/CulturePartyTemplateTests.cs`: every party-template binding on every culture, for
   both sources. Runs `spcultures.xslt` over a sentinel stub rather than reading the markup, which is

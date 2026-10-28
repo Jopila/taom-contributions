@@ -92,7 +92,7 @@ Per-culture body-properties strings. Cultures listed here override the vanilla r
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `Culture/@id` | string | Culture string id (case-insensitive). Vanilla: `vlandia`, `empire`, `aserai`, `battania`, `sturgia`, `khuzait`. TAOM custom: `mordor`, `gondor`, `erebor`, `mirkwood`, `lothlorien`, `rivendell`, `dolguldur`, `gundabad`, `isengard`, `umbar`, `dale` |
+| `Culture/@id` | string | Culture string id (case-insensitive). Vanilla: `vlandia`, `empire`, `aserai`, `battania`, `sturgia`, `khuzait`. TAOM custom: `mordor`, `gondor`, `erebor`, `mirkwood`, `lothlorien`, `rivendell`, `dolguldur`, `gundabad`, `isengard`, `umbar`, `dale`, `goblin`, `mistymountainorcs`, `lindon`, `bluecraig`, `arthedain`, `cardolan`, `rhudaur`, `eredluin` |
 | `BodyProperties/@version` | int | `4` for the current body-key encoding |
 | `BodyProperties/@key` | hex string | Exactly 128 hex characters. Shorter or empty keys are skipped with a warning |
 | `BodyProperties/@weight` | float (optional) | Defaults to `0` if absent |
@@ -122,7 +122,7 @@ In TAOM, several vanilla culture ids are XSLT-rebound to LOTR factions:
 | `sturgia` | Barding |
 | `khuzait` | Rhun |
 
-TAOM custom cultures (`mordor`, `gondor`, `erebor`, `mirkwood`, `lothlorien`, `rivendell`, `dolguldur`, `gundabad`, `isengard`, `umbar`, `dale`) keep their natural ids.
+TAOM custom cultures (`mordor`, `gondor`, `erebor`, `mirkwood`, `lothlorien`, `rivendell`, `dolguldur`, `gundabad`, `isengard`, `umbar`, `dale`, `goblin`, `mistymountainorcs`, `lindon`, `bluecraig`, `arthedain`, `cardolan`, `rhudaur`, `eredluin`) keep their natural ids. Ered Luin's row is Erebor's dwarf body.
 
 ### Reload Scope
 

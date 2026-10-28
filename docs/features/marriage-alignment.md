@@ -70,9 +70,10 @@ about peoples, so it keys on culture:
 - `GetClanAfterMarriage` moves the bride into the groom's clan and kingdom, so kingdom is the thing
   the marriage itself changes.
 
-All 1,184 lords in `lords.xml` resolve to 22 cultures and every one of them is classified in
-`execution/alignment.json` (725 evil, 261 free, 198 neutral). The 8 cultures absent from that file
-are minor and bandit cultures that seed no lords.
+All 1,286 lords in `lords.xml` resolve to 26 cultures and every one of them is classified in
+`execution/alignment.json` (723 evil, 337 free, 226 neutral; counted 2026-10-27, Ered Luin's 16 free
+lords included). The 10 `taom_spcultures.xml` cultures absent from that file are the bandit and
+creature cultures, which seed no lords.
 
 There is deliberately **no runtime kingdom fallback** for an unclassified culture. An unclassified
 culture resolves Neutral, which means "may marry anyone", so the gap is a silent permit rather than

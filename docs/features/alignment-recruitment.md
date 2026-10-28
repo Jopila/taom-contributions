@@ -60,7 +60,7 @@ Note: the service deliberately does **not** call `IAlignmentService.AreEnemyAlig
 | | `applyToPlayer` | `true` | When false, the player recruits unrestricted (AI lords are still gated if `applyToAi`). |
 | MCM "World/Recruitment Alignment" | Enable Recruitment Alignment Block / Only Good Rejects Evil / Apply To Player / Apply To AI Lords | as above | MCM overrides JSON at runtime (`Reuse.Singleton` — JSON edits need a process restart; MCM is live). The player and AI toggles are independent; the master toggle off disables the feature for everyone. |
 
-Alignment data itself lives in `execution/alignment.json` (shared with Execution + Diplomacy): 31 keys (kingdom ids, culture ids and minor clan ids; see [configs-balance.md](../modding/configs-balance.md)), no changes needed for this feature.
+Alignment data itself lives in `execution/alignment.json` (shared with Execution + Diplomacy): 32 keys (kingdom ids, culture ids and minor clan ids; see [configs-balance.md](../modding/configs-balance.md)), no changes needed for this feature.
 
 ## Key Files
 

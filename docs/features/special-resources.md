@@ -4,7 +4,7 @@
 
 ## Overview
 
-Per-kingdom special resource system: 11 of the 15 kingdoms in `taom_spkingdoms.xml` have a secondary currency required to recruit and maintain elite troops (goblin, mistymountainorcs, bluecraig and lindon have none, and their heroes get no map-bar entry). 11 unique resources mapped to faction groups — shared balance within each group. Resources are earned through combat, displayed in the map bar, enforced in the party screen with pending transaction support, and trigger troop desertion when depleted.
+Per-kingdom special resource system: 14 of the 18 kingdoms in `taom_spkingdoms.xml` have a secondary currency required to recruit and maintain elite troops (goblin, mistymountainorcs, bluecraig and lindon have none, and their heroes get no map-bar entry). 11 unique resources mapped to faction groups, with a shared balance within each group. Resources are earned through combat, displayed in the map bar, enforced in the party screen with pending transaction support, and trigger troop desertion when depleted.
 
 ## Why This Exists
 
@@ -17,8 +17,8 @@ Per-kingdom special resource system: 11 of the 15 kingdoms in `taom_spkingdoms.x
 | Resource | Kingdoms | Theme |
 |----------|----------|-------|
 | War Spoils | Mordor, Isengard, Gundabad, Dol Guldur | Orc plunder from battles |
-| Gems | Erebor | Dwarven mining wealth |
-| Castar | Gondor | Numenorean silver coin (the resource id stays `caster`) |
+| Gems | Erebor, Ered Luin | Dwarven mining wealth |
+| Castar | Gondor, Arthedain, Cardolan, Rhudaur | Numenorean silver coin (the resource id stays `caster`) |
 | Marks | Rohan | Horse-lord currency |
 | Elven Wine | Rivendell, Lothlorien, Mirkwood | Elven trade goods |
 | Lake Fish | Dale | Laketown trade |
@@ -109,6 +109,9 @@ Earning rates are now differentiated per faction identity:
   </Tiers>
 </Resource>
 ```
+
+The Gems tiers are shared, so an Ered Luin player also reads "Erebor's forges burn bright" and "The
+wealth of Erebor flows". Rewording them for both dwarf realms is open.
 
 Tiers are sorted by threshold at parse time. `GetCurrentTier()` reverse-walks to find the highest met threshold. Resources without `<Tiers>` have an empty list (backward compatible).
 
@@ -295,7 +298,8 @@ question, not a defect, and the daily toast now makes it visible.
 - `SpecialResourceTierServiceTests.cs` (14), `SpecialResourceConfigProviderTierTests.cs` (6, plus the 2 `GetById` tests for a known and an unknown or null id) and `ResourceTierTests.cs` (3): tier resolution by threshold, `<Tiers>` parsing and sort order, the domain record
 - `SpecialResourceTroopBadgeTests.cs`: 14 tests (#590). The predicate for each cost field alone, the merchant-only row shape and a null row; the rows for a captain, an elephant rider and a ram in their fixed order with zero fields omitted; the paid-in note only when the player's resource differs; no digit baked into any label
 - `RecruitGatePatchTests.cs`: 4 tests (#600). `RecruitCartGrouping` counts duplicates, skips nulls, keeps first-seen order; the `ExecuteDone` prefix carries Patch51's category and targets `ExecuteDone`
-- `TroopResourceCostDataTests.cs`: tests reading the shipped XML: every `resource_id` names a configured resource, every badged row reaches a `SpecialResources\` icon sprite, every Gondor troop at level 41 or above carries an `upgrade_cost` and a `daily_upkeep`, no tree troop's `daily_upkeep` exceeds the 0.4 band ceiling, every volunteer-pooled upkeep troop carries a `recruit_cost` (#600), and no troop in `troops_arthedain.xml` has a row (#963)
+- `TroopResourceCostDataTests.cs`: tests reading the shipped XML: every `resource_id` names a configured resource, every badged row reaches a `SpecialResources\` icon sprite, every Gondor troop at level 41 or above carries an `upgrade_cost` and a `daily_upkeep`, no tree troop's `daily_upkeep` exceeds the 0.4 band ceiling, every volunteer-pooled upkeep troop carries a `recruit_cost` (#600), and no troop in `troops_arthedain.xml` has a row (#963). Ered Luin's troops have no row either, by the
+comment in `troop_resource_costs.xml`, but no test pins that
 - `TAOM.Tests/Features/DevConsole/ConsoleCommandBindingTests.cs` — 5 tests pinning the engine reflection contract for every attributed TAOM console command (assembly-wide; see [dev-console.md](dev-console.md))
 
 ## Cheat Command

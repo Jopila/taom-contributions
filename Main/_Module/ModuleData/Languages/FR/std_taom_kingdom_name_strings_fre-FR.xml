@@ -81,5 +81,10 @@
     <string id="taom_rhudaur_ruler_title" text="King" />
     <string id="taom_rhudaur_short_name" text="Rhudaur" />
     <string id="taom_rhudaur_title" text="Kingdom of Rhudaur" />
+    <string id="taom_eredluin_desc" text="The dwarf kingdom of the Blue Mountains. Durin's Folk made Thorin's Halls there in their exile, and in this age the Broadbeams and the Firebeards hold Belegost and Nogrod again. Its lords are few and its halls are poorer than those of its kin in the east, but its smiths are the oldest in the West, and its axes keep the goblins of Blue Craig from the roads to Lindon." />
+    <string id="taom_eredluin_name" text="Kingdom of Ered Luin" />
+    <string id="taom_eredluin_ruler_title" text="King" />
+    <string id="taom_eredluin_short_name" text="Ered Luin" />
+    <string id="taom_eredluin_title" text="Kingdom of Ered Luin" />
   </strings>
 </base>

@@ -1800,5 +1800,91 @@
     <string id="aom_spc_wanderer_rhudaur_7_name" text="{FIRSTNAME} Egladilionath" />
     <string id="aom_spc_wanderer_rhudaur_8_name" text="{FIRSTNAME} Forostirionath" />
     <string id="aom_spc_wanderer_rhudaur_9_name" text="{FIRSTNAME} Valandilionath" />
+    <string id="aom_elu_arena" text="Arena Master" />
+    <string id="aom_elu_armed_trader" text="Ered Luin Armed Trader" />
+    <string id="aom_elu_armorer" text="Armorer" />
+    <string id="aom_elu_barber" text="Barber" />
+    <string id="aom_elu_beggar" text="Beggar" />
+    <string id="aom_elu_blacksmith" text="Blacksmith" />
+    <string id="aom_elu_caravan_guard" text="Ered Luin Caravan Guard" />
+    <string id="aom_elu_caravan_master" text="Ered Luin Caravan Master" />
+    <string id="aom_elu_dancer" text="Dancer" />
+    <string id="aom_elu_female_beggar" text="Beggar" />
+    <string id="aom_elu_gamehost" text="Game Host" />
+    <string id="aom_elu_gang_bodyguard" text="Gang Bodyguard" />
+    <string id="aom_elu_gear_dummy" text="Gear Dummy" />
+    <string id="aom_elu_guard" text="Guard" />
+    <string id="aom_elu_headman_1" text="Rebellious dwarven headman" />
+    <string id="aom_elu_headman_2" text="Conservative dwarven headman" />
+    <string id="aom_elu_headman_3" text="Devious dwarven headman" />
+    <string id="aom_elu_horse_merchant" text="Horse Merchant" />
+    <string id="aom_elu_merchant" text="Trader" />
+    <string id="aom_elu_musician" text="Musician" />
+    <string id="aom_elu_notable_0" text="Cautious dwarven merchant" />
+    <string id="aom_elu_notable_0b" text="Dwarven vintner" />
+    <string id="aom_elu_notable_1" text="Ruthless dwarven trader" />
+    <string id="aom_elu_notable_10" text="Ironic dwarven gang leader" />
+    <string id="aom_elu_notable_11" text="Intimidating dwarven enforcer" />
+    <string id="aom_elu_notable_12" text="Cunning dwarven smuggler" />
+    <string id="aom_elu_notable_13" text="Menacing dwarven gang leader" />
+    <string id="aom_elu_notable_1b" text="Cold dwarven merchant" />
+    <string id="aom_elu_notable_2" text="Dwarven gem dealer" />
+    <string id="aom_elu_notable_21" text="Gruff dwarven landowner" />
+    <string id="aom_elu_notable_22" text="Agreeable dwarven elder" />
+    <string id="aom_elu_notable_2b" text="Cautious dwarven ore trader" />
+    <string id="aom_elu_notable_3" text="Self-made dwarven merchant" />
+    <string id="aom_elu_notable_3b" text="Jocular dwarven merchant" />
+    <string id="aom_elu_notable_4" text="Shrewd dwarven merchant" />
+    <string id="aom_elu_notable_4b" text="Devious dwarven merchant" />
+    <string id="aom_elu_notable_5" text="Zealous dwarven loremaster" />
+    <string id="aom_elu_notable_6" text="Stern dwarven elder" />
+    <string id="aom_elu_notable_7" text="Dwarven keeper of traditions" />
+    <string id="aom_elu_notable_8" text="Gruff dwarven smith" />
+    <string id="aom_elu_notable_9" text="Outgoing dwarven craftsman" />
+    <string id="aom_elu_notable_gl1" text="Protective dwarven ringleader" />
+    <string id="aom_elu_notable_gl4" text="Bestial dwarven thug" />
+    <string id="aom_elu_practice_1" text="Practice Fighter" />
+    <string id="aom_elu_practice_2" text="Practice Fighter" />
+    <string id="aom_elu_practice_3" text="Practice Fighter" />
+    <string id="aom_elu_practice_dummy" text="Practice Dummy" />
+    <string id="aom_elu_prison_guard" text="Prison Guard" />
+    <string id="aom_elu_ransom_broker" text="Ransom Broker" />
+    <string id="aom_elu_shop_worker" text="Shop Worker" />
+    <string id="aom_elu_tavern_wench" text="Tavern Wench" />
+    <string id="aom_elu_tavernkeeper" text="Tavern Keeper" />
+    <string id="aom_elu_town_child" text="Town Child" />
+    <string id="aom_elu_town_teen" text="Town Teenager" />
+    <string id="aom_elu_townsman" text="Townsman" />
+    <string id="aom_elu_townsman_child" text="Townsman" />
+    <string id="aom_elu_townsman_infant" text="Townsman" />
+    <string id="aom_elu_townsman_teen" text="Townsman" />
+    <string id="aom_elu_townswoman" text="Townswoman" />
+    <string id="aom_elu_townswoman_child" text="Townswoman" />
+    <string id="aom_elu_townswoman_infant" text="Townswoman" />
+    <string id="aom_elu_townswoman_teen" text="Townswoman" />
+    <string id="aom_elu_vet_caravan_guard" text="Ered Luin Veteran Caravan Guard" />
+    <string id="aom_elu_village_child" text="Village Child" />
+    <string id="aom_elu_village_teen" text="Village Teenager" />
+    <string id="aom_elu_village_woman" text="Village Woman" />
+    <string id="aom_elu_village_woman_child" text="Village Child" />
+    <string id="aom_elu_village_woman_teen" text="Village Teenager" />
+    <string id="aom_elu_villager" text="Villager" />
+    <string id="aom_elu_villager_child" text="Village Child" />
+    <string id="aom_elu_villager_teen" text="Village Teenager" />
+    <string id="aom_elu_weaponsmith" text="Weaponsmith" />
+    <string id="aom_eredluin_lord_1" text="Bold dwarven lord" />
+    <string id="aom_eredluin_lord_2" text="Cautious dwarven lord" />
+    <string id="aom_spc_wanderer_eredluin_0_name" text="{FIRSTNAME} Bit Barukkhaz" />
+    <string id="aom_spc_wanderer_eredluin_10_name" text="{FIRSTNAME} Bit Norin" />
+    <string id="aom_spc_wanderer_eredluin_11_name" text="{FIRSTNAME} Bit Kár" />
+    <string id="aom_spc_wanderer_eredluin_1_name" text="{FIRSTNAME} Bit Durakûn" />
+    <string id="aom_spc_wanderer_eredluin_2_name" text="{FIRSTNAME} Bit Gamilzar" />
+    <string id="aom_spc_wanderer_eredluin_3_name" text="{FIRSTNAME} Bit Buzrûn" />
+    <string id="aom_spc_wanderer_eredluin_4_name" text="{FIRSTNAME} Bit Tharin" />
+    <string id="aom_spc_wanderer_eredluin_5_name" text="{FIRSTNAME} Bit Barin" />
+    <string id="aom_spc_wanderer_eredluin_6_name" text="{FIRSTNAME} Bit Argan" />
+    <string id="aom_spc_wanderer_eredluin_7_name" text="{FIRSTNAME} Bit Gór" />
+    <string id="aom_spc_wanderer_eredluin_8_name" text="{FIRSTNAME} Bit Lóin" />
+    <string id="aom_spc_wanderer_eredluin_9_name" text="{FIRSTNAME} Bit Garin" />
   </strings>
 </base>

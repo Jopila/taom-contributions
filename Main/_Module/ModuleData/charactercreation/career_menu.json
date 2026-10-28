@@ -606,5 +606,29 @@
         "focus_to_add": 0,
         "skill_level_to_add": 0,
         "attribute_level_to_add": 0
+    },
+    {
+        "career_string_id": "warden_of_thorins_halls",
+        "skills": [],
+        "attribute": "",
+        "focus_to_add": 0,
+        "skill_level_to_add": 0,
+        "attribute_level_to_add": 0
+    },
+    {
+        "career_string_id": "shieldguard_of_belegost",
+        "skills": [],
+        "attribute": "",
+        "focus_to_add": 0,
+        "skill_level_to_add": 0,
+        "attribute_level_to_add": 0
+    },
+    {
+        "career_string_id": "nogrod_arbalester",
+        "skills": [],
+        "attribute": "",
+        "focus_to_add": 0,
+        "skill_level_to_add": 0,
+        "attribute_level_to_add": 0
     }
 ]

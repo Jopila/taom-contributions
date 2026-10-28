@@ -60,6 +60,7 @@ public sealed class RealmBordersSettingsProvider : IRealmBordersSettings
         ("arthedain", "Arthedain", s => s.RealmColourArthedain),
         ("cardolan", "Cardolan", s => s.RealmColourCardolan),
         ("rhudaur", "Rhudaur", s => s.RealmColourRhudaur),
+        ("eredluin", "Ered Luin", s => s.RealmColourEredLuin),
     };
 
     /// <summary>The Your Realm field's slot in the colour arrays, after one slot per realm field.</summary>

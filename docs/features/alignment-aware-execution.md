@@ -282,6 +282,7 @@ never infer one from the other.
 | `mirkwood` | Mirkwood | Free | Custom kingdom |
 | `lindon` | Lindon | Free | Custom kingdom |
 | `arthedain` | Arthedain | Free | Custom kingdom |
+| `eredluin` | Ered Luin | Free | Custom kingdom |
 | `empire` | Dunland | Evil | Empire (main) |
 | `empire_s` | Mordor | Evil | Southern Empire |
 | `aserai` | Harad | Evil | Aserai |
@@ -296,6 +297,8 @@ never infer one from the other.
 | `umbar` | Umbar (Corsairs) | Neutral | Custom kingdom |
 | `shaghana` | Shaghana | Neutral | Custom kingdom |
 | `abanissa` | Abanissa | Neutral | Custom kingdom |
+| `cardolan` | Cardolan | Neutral | Custom kingdom |
+| `rhudaur` | Rhudaur | Neutral | Custom kingdom |
 
 That is every kingdom the game actually loads, verified against the live install.
 
@@ -560,7 +563,7 @@ SubModule.OnGameInitializationFinished:
 | `Main/Features/Execution/Hooks/ExecutionActionHook.cs` | Honor-penalty decision, delegation to the relation service | 44 |
 | `Main/Features/Execution/Hooks/ExecutionCampaignBehavior_BloodFeudRelationPenalty_Patch.cs` | Harmony postfix: rewrites the per-clan relation penalty | 82 |
 | `Main/Features/Execution/Hooks/TraitLevelingHelper_OnBloodFeudStarted_Patch.cs` | Harmony prefix: skips the honor penalty | 54 |
-| `Main/_Module/ModuleData/execution/alignment.json` | Kingdom, culture and minor clan id to side (29 entries: 23 kingdoms, `gondor`, `mordor`, 4 minor clans) | 31 |
+| `Main/_Module/ModuleData/execution/alignment.json` | Kingdom, culture and minor clan id to side (32 entries: 26 kingdoms, `gondor`, `mordor`, 4 minor clans) | 34 |
 
 ### Modified Files
 

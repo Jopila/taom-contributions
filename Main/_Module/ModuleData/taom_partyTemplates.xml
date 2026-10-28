@@ -5178,6 +5178,12 @@
 			<PartyTemplateStack min_value="1" max_value="3" troop="NPCCharacter.caravan_guard_erebor" />
 		</stacks>
 	</MBPartyTemplate>
+	<MBPartyTemplate id="supply_caravan_template_eredluin">
+		<stacks>
+			<PartyTemplateStack min_value="3" max_value="5" troop="NPCCharacter.armed_trader_eredluin" />
+			<PartyTemplateStack min_value="1" max_value="3" troop="NPCCharacter.caravan_guard_eredluin" />
+		</stacks>
+	</MBPartyTemplate>
 	<MBPartyTemplate id="supply_caravan_template_goblin">
 		<stacks>
 			<PartyTemplateStack min_value="3" max_value="5" troop="NPCCharacter.armed_trader_goblin" />
@@ -5590,4 +5596,117 @@
 	</MBPartyTemplate>
 
   <!-- TAOM-NEWCULTURE:rhudaur:END -->
+	<!-- TAOM-EREDLUIN-PT:BEGIN -->
+	<MBPartyTemplate id="kingdom_hero_party_eredluin_template">
+		<stacks>
+			<PartyTemplateStack min_value="3" max_value="26" troop="NPCCharacter.eredluin_delver" />
+			<PartyTemplateStack min_value="2" max_value="22" troop="NPCCharacter.eredluin_axeman" />
+			<PartyTemplateStack min_value="1" max_value="19" troop="NPCCharacter.eredluin_noble" />
+			<PartyTemplateStack min_value="1" max_value="19" troop="NPCCharacter.eredluin_bowman" />
+			<PartyTemplateStack min_value="1" max_value="17" troop="NPCCharacter.eredluin_hearthguard" />
+			<PartyTemplateStack min_value="0" max_value="15" troop="NPCCharacter.eredluin_hewer" />
+			<PartyTemplateStack min_value="0" max_value="13" troop="NPCCharacter.eredluin_veteran_bowman" />
+			<PartyTemplateStack min_value="0" max_value="13" troop="NPCCharacter.eredluin_broadbeam_guard" />
+			<PartyTemplateStack min_value="0" max_value="10" troop="NPCCharacter.eredluin_firebeard_bowman" />
+			<PartyTemplateStack min_value="0" max_value="10" troop="NPCCharacter.eredluin_hall_warden" />
+			<PartyTemplateStack min_value="0" max_value="8" troop="NPCCharacter.eredluin_mattock_warrior" />
+			<PartyTemplateStack min_value="0" max_value="8" troop="NPCCharacter.eredluin_broadbeam_shieldguard" />
+			<PartyTemplateStack min_value="0" max_value="8" troop="NPCCharacter.eredluin_firebeard_arbalester" />
+			<PartyTemplateStack min_value="0" max_value="5" troop="NPCCharacter.eredluin_veteran_hall_warden" />
+			<PartyTemplateStack min_value="0" max_value="4" troop="NPCCharacter.eredluin_gatewarden" />
+			<PartyTemplateStack min_value="0" max_value="3" troop="NPCCharacter.eredluin_firebeard_marksman" />
+		</stacks>
+	</MBPartyTemplate>
+
+	<MBPartyTemplate id="kingdom_hero_party_mercenary_eredluin_template">
+		<stacks>
+			<PartyTemplateStack min_value="8" max_value="16" troop="NPCCharacter.eredluin_axeman" />
+			<PartyTemplateStack min_value="4" max_value="8" troop="NPCCharacter.eredluin_bowman" />
+			<PartyTemplateStack min_value="4" max_value="8" troop="NPCCharacter.eredluin_hearthguard" />
+			<PartyTemplateStack min_value="2" max_value="4" troop="NPCCharacter.eredluin_veteran_bowman" />
+			<PartyTemplateStack min_value="2" max_value="4" troop="NPCCharacter.eredluin_hewer" />
+		</stacks>
+	</MBPartyTemplate>
+
+	<MBPartyTemplate id="kingdom_hero_party_outlaw_eredluin_template">
+		<stacks>
+			<PartyTemplateStack min_value="8" max_value="16" troop="NPCCharacter.eredluin_delver" />
+			<PartyTemplateStack min_value="4" max_value="8" troop="NPCCharacter.eredluin_militia_spearman" />
+			<PartyTemplateStack min_value="4" max_value="8" troop="NPCCharacter.eredluin_militia_archer" />
+			<PartyTemplateStack min_value="2" max_value="4" troop="NPCCharacter.eredluin_bowman" />
+		</stacks>
+	</MBPartyTemplate>
+
+	<MBPartyTemplate id="militia_eredluin_template">
+		<stacks>
+			<PartyTemplateStack min_value="1" max_value="1" troop="NPCCharacter.eredluin_militia_spearman" />
+			<PartyTemplateStack min_value="1" max_value="1" troop="NPCCharacter.eredluin_militia_archer" />
+		</stacks>
+	</MBPartyTemplate>
+
+	<MBPartyTemplate id="patrol_party_eredluin_template_level_1">
+		<stacks>
+			<PartyTemplateStack min_value="6" max_value="6" troop="NPCCharacter.eredluin_delver" />
+			<PartyTemplateStack min_value="3" max_value="3" troop="NPCCharacter.eredluin_axeman" />
+			<PartyTemplateStack min_value="2" max_value="2" troop="NPCCharacter.eredluin_bowman" />
+		</stacks>
+	</MBPartyTemplate>
+
+	<MBPartyTemplate id="patrol_party_eredluin_template_level_2">
+		<stacks>
+			<PartyTemplateStack min_value="5" max_value="5" troop="NPCCharacter.eredluin_axeman" />
+			<PartyTemplateStack min_value="4" max_value="4" troop="NPCCharacter.eredluin_hearthguard" />
+			<PartyTemplateStack min_value="3" max_value="3" troop="NPCCharacter.eredluin_veteran_bowman" />
+			<PartyTemplateStack min_value="2" max_value="2" troop="NPCCharacter.eredluin_hewer" />
+		</stacks>
+	</MBPartyTemplate>
+
+	<MBPartyTemplate id="patrol_party_eredluin_template_level_3">
+		<stacks>
+			<PartyTemplateStack min_value="5" max_value="5" troop="NPCCharacter.eredluin_hall_warden" />
+			<PartyTemplateStack min_value="3" max_value="3" troop="NPCCharacter.eredluin_veteran_hall_warden" />
+			<PartyTemplateStack min_value="3" max_value="3" troop="NPCCharacter.eredluin_mountain_bowman" />
+			<PartyTemplateStack min_value="2" max_value="2" troop="NPCCharacter.eredluin_mattock_warrior" />
+			<PartyTemplateStack min_value="1" max_value="1" troop="NPCCharacter.eredluin_firebeard_arbalester" />
+		</stacks>
+	</MBPartyTemplate>
+
+	<MBPartyTemplate id="rebels_eredluin_template">
+		<stacks>
+			<PartyTemplateStack min_value="24" max_value="32" troop="NPCCharacter.eredluin_delver" />
+			<PartyTemplateStack min_value="2" max_value="3" troop="NPCCharacter.eredluin_militia_spearman" />
+			<PartyTemplateStack min_value="2" max_value="3" troop="NPCCharacter.eredluin_militia_archer" />
+		</stacks>
+	</MBPartyTemplate>
+
+	<MBPartyTemplate id="vassal_reward_troops_eredluin">
+		<stacks>
+			<PartyTemplateStack min_value="1" max_value="1" troop="NPCCharacter.eredluin_kings_guard" />
+			<PartyTemplateStack min_value="3" max_value="3" troop="NPCCharacter.eredluin_ironbound_warden" />
+			<PartyTemplateStack min_value="2" max_value="2" troop="NPCCharacter.eredluin_halls_warden" />
+		</stacks>
+	</MBPartyTemplate>
+	<!-- TAOM-EREDLUIN-PT:END -->
+  <!-- TAOM-NEWCULTURE:eredluin:BEGIN -->
+	<MBPartyTemplate id="villager_eredluin_template">
+		<stacks>
+			<PartyTemplateStack min_value="15" max_value="30" troop="NPCCharacter.villager_eredluin" />
+		</stacks>
+	</MBPartyTemplate>
+	<MBPartyTemplate id="caravan_template_eredluin">
+		<stacks>
+			<PartyTemplateStack min_value="31" max_value="36" troop="NPCCharacter.armed_trader_eredluin" />
+			<PartyTemplateStack min_value="19" max_value="22" troop="NPCCharacter.caravan_guard_eredluin" />
+			<PartyTemplateStack min_value="10" max_value="12" troop="NPCCharacter.veteran_caravan_guard_eredluin" />
+		</stacks>
+	</MBPartyTemplate>
+	<MBPartyTemplate id="elite_caravan_template_eredluin">
+		<stacks>
+			<PartyTemplateStack min_value="24" max_value="28" troop="NPCCharacter.armed_trader_eredluin" />
+			<PartyTemplateStack min_value="19" max_value="21" troop="NPCCharacter.caravan_guard_eredluin" />
+			<PartyTemplateStack min_value="23" max_value="26" troop="NPCCharacter.veteran_caravan_guard_eredluin" />
+		</stacks>
+	</MBPartyTemplate>
+
+  <!-- TAOM-NEWCULTURE:eredluin:END -->
 </partyTemplates>

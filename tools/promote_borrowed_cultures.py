@@ -379,6 +379,77 @@ TARGETS["rhudaur"] = _arnor_successor(
     },
 )
 
+# Ered Luin (2026-10-27): the dwarf kingdom of the Blue Mountains, a NEW culture scaffolded from
+# Erebor as Arthedain is from Gondor, with its own troop tree (tools/generate_eredluin_troops.py).
+TARGETS["eredluin"] = {
+    "src": "erebor",
+    "capital": "town_EL3",  # Thorin's Halls
+    "race": "dwarf",
+    "raceword": "Dwarf",
+    "adjective": "Ered Luin",
+    "tag": "Ered Luin",
+    "short": "elu",
+    # Erebor's notable and townsfolk name keys are aom_er_*, not aom_ere_*.
+    "src_short": "er",
+    "color": "0xFF3E5A7A",
+    "color2": "0xFFB8C4CC",
+    "orc_remap": False,
+    "subs": [
+        ("Kingdom Under the Mountain", "Kingdom of the Blue Mountains"),
+        ("King Under the Mountain", "King of Ered Luin"),
+        ("King under the Mountain", "King of Ered Luin"),
+        ("Queen Under the Mountain", "Queen of Ered Luin"),
+        ("Queen under the Mountain", "Queen of Ered Luin"),
+        ("the Lonely Mountain", "the Blue Mountains"),
+        ("The Lonely Mountain", "The Blue Mountains"),
+        ("Lonely Mountain", "Blue Mountains"),
+        ("Erebor", "Ered Luin"),
+    ],
+    "culture_name": "Dwarves of Ered Luin",
+    "culture_desc": (
+        "The dwarves of Ered Luin dwell in the Blue Mountains at the western edge of Middle-earth. "
+        "Durin's Folk came there in exile and made Thorin's Halls, and in this age the Broadbeams "
+        "and the Firebeards keep Belegost and Nogrod again, the oldest dwarf-cities of the West. "
+        "They are miners and smiths, poorer than their kin in the east, and they trade iron with the "
+        "Elves of Lindon and the Men of Eriador while the goblins of Blue Craig gnaw at their roads."),
+    # Erebor's feats, verbatim (see Lindon's note), less the two that come from Erebor's wealth:
+    # garrison wages and tariff income.
+    "feats": ["taom_erebor_production", "taom_erebor_construction_speed", "taom_erebor_loyalty",
+              "taom_erebor_morale", "taom_erebor_smithing", "taom_erebor_snow_speed"],
+    # ---- opt-in keys, as Arthedain's ----
+    "standalone": ["characters/npcs_{c}.xml", "equipmentsets/taom_equipment_sets_{c}.xml"],
+    # The lord template family a to e only: Erebor's ram rosters are for a realm that rides rams.
+    "rosters_kept": r"^eredluin_(bat_template_medium|civ_template_default)_[a-e]$",
+    "party_names": ["villager_{c}_template", "caravan_template_{c}", "elite_caravan_template_{c}"],
+    # The villager's upgrade path and the culture's basic troop land on the generated tree. The
+    # noble and the four militia ids are the same names in both trees.
+    "id_overrides": {"eredluin_reg_miner": "eredluin_delver"},
+    "mercenaries": ["eredluin_noble_merc"],
+    "string_overrides": _ruler_strings("eredluin", "Kingdom of Ered Luin", "Ered Luin", "Dwarves of Ered Luin",
+                                       "Dwarves of the Blue Mountains", "Ered Luin", "Farin", "Dísa"),
+    # Dwarf names in Tolkien's manner, from the Old Norse dwarf-lists he drew on, avoiding every
+    # name Erebor's lords and bandits already use and every canonical dwarf of the age. Two are also
+    # in Erebor's culture pool: Hanar, and Farin, kept with Borin for the royal House of Borin (the
+    # king is Farin II).
+    "names": {
+        "male_names": [
+            "Andvari", "Fjalar", "Frosti", "Ginnar", "Hepti", "Skirfir", "Virfir", "Aurvang", "Jari",
+            "Hár", "Alf", "Yngvi", "Finnar", "Hlévang", "Dolgthrasir", "Haugspori", "Svíur", "Nýrád",
+            "Reginn", "Vitr", "Litr", "Veggr", "Ánarr", "Hornbori", "Fræg", "Lóin", "Bárin", "Dúri",
+            "Thekk", "Glór", "Narvi", "Borin", "Farin", "Grór", "Thrár", "Durlin", "Hanar", "Bruni",
+            "Skáfid", "Eikin"],
+        "female_names": [
+            "Bryndís", "Gerda", "Hlíf", "Sigrún", "Ásta", "Védís", "Ragna", "Herdís", "Una", "Eydís",
+            "Hildis", "Thórdís", "Arndís", "Valdís", "Jódís", "Ingdís", "Steindís", "Ölrún", "Gudrún",
+            "Hervör", "Thóra", "Járnsaxa", "Brynja", "Svanhild"],
+        "clan_names": [
+            "House of Borin", "Broadbeams", "Firebeards", "Wardens of Dolmed", "House of Frerin",
+            "House of Narvi", "Stonehands of Belegost", "Hammerers of Nogrod", "House of Telchar",
+            "House of Azaghâl", "Keepers of the Dwarf-road", "House of Gamil"],
+    },
+    "own_reg": True,
+}
+
 # BANNERLORD_GAME_DIR overrides the install path (#404), as in tools/add_map_villages.py.
 LIVE_SETTLEMENTS = (Path(game_dir(r"E:/Steam/steamapps/common/Mount & Blade II Bannerlord"))
                     / "Modules" / "TAOM_Map" / "ModuleData" / "settlements.xml")

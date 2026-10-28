@@ -307,5 +307,15 @@
         "default_build": 0.7222,
         "focus_to_add": 0,
         "skill_level_to_add": 0
+    },
+    {
+        "culture_id": "eredluin",
+        "races": ["dwarf"],
+        "starting_settlement": "town_EL3",
+        "default_age": 20.0,
+        "default_weight": 0.5648,
+        "default_build": 0.5347,
+        "focus_to_add": 0,
+        "skill_level_to_add": 0
     }
 ]

@@ -128,6 +128,11 @@ N/A. Skills bake at hero CREATION (one-time, ~ms per hero). No per-tick / per-fr
 
 Total: 17 cultures, ~880 adult NPCs, 120 SkillSets. 18 GitHub issues #228-#245.
 
+Realms generated later by `tools/generate_new_faction_kingdoms.py` reuse these SkillSets and add none.
+In `lords.xml`, Arthedain's 20 lords (`lord_AN*`), Cardolan's 16 (`lord_CA*`) and Rhudaur's 12
+(`lord_RH*`) take `taom_gondor_knight_skills` and `taom_gondor_young_lady_skills`; Ered Luin's 16
+(`lord_EL*`) take `taom_dwarf_lord_skills` and `taom_dwarf_lady_skills`, as Erebor's lords do.
+
 > **Erratum (2026-06-22, commit `c9434b5a`).** The per-culture counts above record the 2026-05-27 sweep's scope (issues #228–#245) and were accurate then. A later culture-vs-faction deconfliction re-cultured several lords across factions — **21 Mordor→Dunland**, **Khamûl + 3 Nazgûl Mordor→Dol Guldur**, **Alcaea Dunland→Khand**, **Duilin Dunland→Gondor** — so current per-culture rosters differ (Mordor lower, Dunland/Dol Guldur higher). Notably **Dol Guldur now holds the Khamûl + 3-Nazgûl canonical overrides** (`taom_nazgul_skills`), and the 21 Norse-themed Group-A lords are now Dunland. The grand total (~880) is unchanged — lords moved *between* cultures. Re-run `tools/apply_culture_skills_traits.py --culture <c>` for live counts.
 
 ## Save Compatibility

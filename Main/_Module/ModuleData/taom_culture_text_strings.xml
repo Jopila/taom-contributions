@@ -577,6 +577,84 @@
 	<string id="aom_erebor_male_name_8" text="{=aom_erebor_male_name_8}Hanar" />
 	<string id="aom_erebor_male_name_9" text="{=aom_erebor_male_name_9}Galar" />
 	<string id="aom_erebor_name" text="{=aom_erebor_name}Dwarves" />
+	<string id="aom_eredluin_clan_1" text="{=aom_eredluin_clan_1}House of Borin" />
+	<string id="aom_eredluin_clan_10" text="{=aom_eredluin_clan_10}House of Azaghâl" />
+	<string id="aom_eredluin_clan_11" text="{=aom_eredluin_clan_11}Keepers of the Dwarf-road" />
+	<string id="aom_eredluin_clan_12" text="{=aom_eredluin_clan_12}House of Gamil" />
+	<string id="aom_eredluin_clan_2" text="{=aom_eredluin_clan_2}Broadbeams" />
+	<string id="aom_eredluin_clan_3" text="{=aom_eredluin_clan_3}Firebeards" />
+	<string id="aom_eredluin_clan_4" text="{=aom_eredluin_clan_4}Wardens of Dolmed" />
+	<string id="aom_eredluin_clan_5" text="{=aom_eredluin_clan_5}House of Frerin" />
+	<string id="aom_eredluin_clan_6" text="{=aom_eredluin_clan_6}House of Narvi" />
+	<string id="aom_eredluin_clan_7" text="{=aom_eredluin_clan_7}Stonehands of Belegost" />
+	<string id="aom_eredluin_clan_8" text="{=aom_eredluin_clan_8}Hammerers of Nogrod" />
+	<string id="aom_eredluin_clan_9" text="{=aom_eredluin_clan_9}House of Telchar" />
+	<string id="aom_eredluin_desc" text="{=aom_eredluin_desc}The dwarves of Ered Luin dwell in the Blue Mountains at the western edge of Middle-earth. Durin's Folk came there in exile and made Thorin's Halls, and in this age the Broadbeams and the Firebeards keep Belegost and Nogrod again, the oldest dwarf-cities of the West. They are miners and smiths, poorer than their kin in the east, and they trade iron with the Elves of Lindon and the Men of Eriador while the goblins of Blue Craig gnaw at their roads." />
+	<string id="aom_eredluin_female_name_1" text="{=aom_eredluin_female_name_1}Bryndís" />
+	<string id="aom_eredluin_female_name_10" text="{=aom_eredluin_female_name_10}Eydís" />
+	<string id="aom_eredluin_female_name_11" text="{=aom_eredluin_female_name_11}Hildis" />
+	<string id="aom_eredluin_female_name_12" text="{=aom_eredluin_female_name_12}Thórdís" />
+	<string id="aom_eredluin_female_name_13" text="{=aom_eredluin_female_name_13}Arndís" />
+	<string id="aom_eredluin_female_name_14" text="{=aom_eredluin_female_name_14}Valdís" />
+	<string id="aom_eredluin_female_name_15" text="{=aom_eredluin_female_name_15}Jódís" />
+	<string id="aom_eredluin_female_name_16" text="{=aom_eredluin_female_name_16}Ingdís" />
+	<string id="aom_eredluin_female_name_17" text="{=aom_eredluin_female_name_17}Steindís" />
+	<string id="aom_eredluin_female_name_18" text="{=aom_eredluin_female_name_18}Ölrún" />
+	<string id="aom_eredluin_female_name_19" text="{=aom_eredluin_female_name_19}Gudrún" />
+	<string id="aom_eredluin_female_name_2" text="{=aom_eredluin_female_name_2}Gerda" />
+	<string id="aom_eredluin_female_name_20" text="{=aom_eredluin_female_name_20}Hervör" />
+	<string id="aom_eredluin_female_name_21" text="{=aom_eredluin_female_name_21}Thóra" />
+	<string id="aom_eredluin_female_name_22" text="{=aom_eredluin_female_name_22}Járnsaxa" />
+	<string id="aom_eredluin_female_name_23" text="{=aom_eredluin_female_name_23}Brynja" />
+	<string id="aom_eredluin_female_name_24" text="{=aom_eredluin_female_name_24}Svanhild" />
+	<string id="aom_eredluin_female_name_3" text="{=aom_eredluin_female_name_3}Hlíf" />
+	<string id="aom_eredluin_female_name_4" text="{=aom_eredluin_female_name_4}Sigrún" />
+	<string id="aom_eredluin_female_name_5" text="{=aom_eredluin_female_name_5}Ásta" />
+	<string id="aom_eredluin_female_name_6" text="{=aom_eredluin_female_name_6}Védís" />
+	<string id="aom_eredluin_female_name_7" text="{=aom_eredluin_female_name_7}Ragna" />
+	<string id="aom_eredluin_female_name_8" text="{=aom_eredluin_female_name_8}Herdís" />
+	<string id="aom_eredluin_female_name_9" text="{=aom_eredluin_female_name_9}Una" />
+	<string id="aom_eredluin_male_name_1" text="{=aom_eredluin_male_name_1}Andvari" />
+	<string id="aom_eredluin_male_name_10" text="{=aom_eredluin_male_name_10}Hár" />
+	<string id="aom_eredluin_male_name_11" text="{=aom_eredluin_male_name_11}Alf" />
+	<string id="aom_eredluin_male_name_12" text="{=aom_eredluin_male_name_12}Yngvi" />
+	<string id="aom_eredluin_male_name_13" text="{=aom_eredluin_male_name_13}Finnar" />
+	<string id="aom_eredluin_male_name_14" text="{=aom_eredluin_male_name_14}Hlévang" />
+	<string id="aom_eredluin_male_name_15" text="{=aom_eredluin_male_name_15}Dolgthrasir" />
+	<string id="aom_eredluin_male_name_16" text="{=aom_eredluin_male_name_16}Haugspori" />
+	<string id="aom_eredluin_male_name_17" text="{=aom_eredluin_male_name_17}Svíur" />
+	<string id="aom_eredluin_male_name_18" text="{=aom_eredluin_male_name_18}Nýrád" />
+	<string id="aom_eredluin_male_name_19" text="{=aom_eredluin_male_name_19}Reginn" />
+	<string id="aom_eredluin_male_name_2" text="{=aom_eredluin_male_name_2}Fjalar" />
+	<string id="aom_eredluin_male_name_20" text="{=aom_eredluin_male_name_20}Vitr" />
+	<string id="aom_eredluin_male_name_21" text="{=aom_eredluin_male_name_21}Litr" />
+	<string id="aom_eredluin_male_name_22" text="{=aom_eredluin_male_name_22}Veggr" />
+	<string id="aom_eredluin_male_name_23" text="{=aom_eredluin_male_name_23}Ánarr" />
+	<string id="aom_eredluin_male_name_24" text="{=aom_eredluin_male_name_24}Hornbori" />
+	<string id="aom_eredluin_male_name_25" text="{=aom_eredluin_male_name_25}Fræg" />
+	<string id="aom_eredluin_male_name_26" text="{=aom_eredluin_male_name_26}Lóin" />
+	<string id="aom_eredluin_male_name_27" text="{=aom_eredluin_male_name_27}Bárin" />
+	<string id="aom_eredluin_male_name_28" text="{=aom_eredluin_male_name_28}Dúri" />
+	<string id="aom_eredluin_male_name_29" text="{=aom_eredluin_male_name_29}Thekk" />
+	<string id="aom_eredluin_male_name_3" text="{=aom_eredluin_male_name_3}Frosti" />
+	<string id="aom_eredluin_male_name_30" text="{=aom_eredluin_male_name_30}Glór" />
+	<string id="aom_eredluin_male_name_31" text="{=aom_eredluin_male_name_31}Narvi" />
+	<string id="aom_eredluin_male_name_32" text="{=aom_eredluin_male_name_32}Borin" />
+	<string id="aom_eredluin_male_name_33" text="{=aom_eredluin_male_name_33}Farin" />
+	<string id="aom_eredluin_male_name_34" text="{=aom_eredluin_male_name_34}Grór" />
+	<string id="aom_eredluin_male_name_35" text="{=aom_eredluin_male_name_35}Thrár" />
+	<string id="aom_eredluin_male_name_36" text="{=aom_eredluin_male_name_36}Durlin" />
+	<string id="aom_eredluin_male_name_37" text="{=aom_eredluin_male_name_37}Hanar" />
+	<string id="aom_eredluin_male_name_38" text="{=aom_eredluin_male_name_38}Bruni" />
+	<string id="aom_eredluin_male_name_39" text="{=aom_eredluin_male_name_39}Skáfid" />
+	<string id="aom_eredluin_male_name_4" text="{=aom_eredluin_male_name_4}Ginnar" />
+	<string id="aom_eredluin_male_name_40" text="{=aom_eredluin_male_name_40}Eikin" />
+	<string id="aom_eredluin_male_name_5" text="{=aom_eredluin_male_name_5}Hepti" />
+	<string id="aom_eredluin_male_name_6" text="{=aom_eredluin_male_name_6}Skirfir" />
+	<string id="aom_eredluin_male_name_7" text="{=aom_eredluin_male_name_7}Virfir" />
+	<string id="aom_eredluin_male_name_8" text="{=aom_eredluin_male_name_8}Aurvang" />
+	<string id="aom_eredluin_male_name_9" text="{=aom_eredluin_male_name_9}Jari" />
+	<string id="aom_eredluin_name" text="{=aom_eredluin_name}Dwarves of Ered Luin" />
 	<string id="aom_goblin_clan_1" text="{=aom_goblin_clan_1}Goblin-town Horde" />
 	<string id="aom_goblin_clan_10" text="{=aom_goblin_clan_10}Grey Mountain Raiders" />
 	<string id="aom_goblin_clan_11" text="{=aom_goblin_clan_11}Ettenmoors Horde" />

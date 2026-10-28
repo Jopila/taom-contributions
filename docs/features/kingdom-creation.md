@@ -568,6 +568,8 @@ pass to keep that change to party data. If you are here to add a culture, do not
 | Abanissa | `abanissa` | Custom XML | `AB` | Independent kingdom in the deep south of Harad. 8 NPC lords, own ruler title (Châjaphân). Same inheritance pattern as Shaghana. |
 | Gondor | `gondor` | Custom XML | varies | Fully custom troops and equipment sets |
 | Harwan | n/a | XSLT | — | Stays on `Kingdom.aserai`; clans defined in `spclans.xslt` |
+| Arthedain, Cardolan, Rhudaur | `arthedain`, `cardolan`, `rhudaur` | Generated | `AN`, `CA`, `RH` | Built by the generators, not by hand: [arthedain.md](arthedain.md), [cardolan-rhudaur.md](cardolan-rhudaur.md) |
+| Ered Luin | `eredluin` | Generated | `EL` | The first non-human realm on the generators: dwarf race, Erebor's culture as the scaffold. [ered-luin.md](ered-luin.md) |
 
 When in doubt, use Umbar as the reference implementation — it is the most complete custom kingdom and all 13 files are present.
 

@@ -42,7 +42,7 @@ maintainer; the other slots and the bands below are fixed ratios of it
 
 | Cap | Kingdoms | Chest | Helmet .9 | Bracer .6 | Pauldron .6 | Greaves .5 |
 |----:|---|---:|---:|---:|---:|---:|
-| 70 | Erebor, Iron Hills | 70 | 63 | 42 | 42 | 35 |
+| 70 | Erebor, Iron Hills (Ered Luin wears both lines' pieces) | 70 | 63 | 42 | 42 | 35 |
 | 68 | Rivendell, Lindon | 68 | 61 | 41 | 41 | 34 |
 | 63 | Mirkwood | 63 | 57 | 38 | 38 | 32 |
 | 60 | Lothlorien (no item yet) | 60 | 54 | 36 | 36 | 30 |

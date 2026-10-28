@@ -133,8 +133,8 @@ forms a Circle sized around the archers' `BehaviorFireFromInfantryCover` Square,
 
 | Tactic | Cultures | Plan | Weight |
 |---|---|---|---|
-| `TaomTacticShieldWall` | `erebor`, `erebor_warriors`, `isengard`, `sturgia` (Dale) | Defender: infantry `BracedDefend` at the position the high-ground race picks (below) with a low `TacticalCharge`; cavalry `ProtectFlank` + `CavalryScreen` in both phases, never `Flank`. Attacker: infantry `BracedAdvance` with `TacticalCharge` 0.5 then 0.8; cavalry may take a flank once joined | `(Inf + Rng) * 1.2 * advantage / sqrt(RemainingPowerRatio)`, not gated on `IsDefenseApplicable` |
-| `TaomTacticTwoLineWall` | `erebor`, `erebor_warriors` (defender only) | 2/1/2/1 split: the front line as the wall, the second line `BracedDefend` twelve paces behind it (facing the enemy) until joined, then `TacticalCharge` 1 over `BracedDefend` 0.5, the reserve committing | the wall's weight times 1.6 (`GatedEdge`), 0 under 80 infantry |
+| `TaomTacticShieldWall` | `erebor`, `erebor_warriors`, `eredluin`, `isengard`, `sturgia` (Dale) | Defender: infantry `BracedDefend` at the position the high-ground race picks (below) with a low `TacticalCharge`; cavalry `ProtectFlank` + `CavalryScreen` in both phases, never `Flank`. Attacker: infantry `BracedAdvance` with `TacticalCharge` 0.5 then 0.8; cavalry may take a flank once joined | `(Inf + Rng) * 1.2 * advantage / sqrt(RemainingPowerRatio)`, not gated on `IsDefenseApplicable` |
+| `TaomTacticTwoLineWall` | `erebor`, `erebor_warriors`, `eredluin` (defender only) | 2/1/2/1 split: the front line as the wall, the second line `BracedDefend` twelve paces behind it (facing the enemy) until joined, then `TacticalCharge` 1 over `BracedDefend` 0.5, the reserve committing | the wall's weight times 1.6 (`GatedEdge`), 0 under 80 infantry |
 | `TaomTacticInfantryMass` | `mordor`, `dolguldur`, `gundabad`, `gundabad_raiders`, `mistymountainorcs`, `goblin`, `dunland_raiders` (attacker) | Always engaged: infantry `Charge` 1.5 + `TacticalCharge` 1, archers `Skirmish`, cavalry `TacticalCharge` + `Flank` | `1.5 * Inf * clamp(members / enemies, 0.5, 2) * sqrt(RemainingPowerRatio)` |
 | `TaomTacticEnvelop` | the six orc cultures | 3/1/2/1 split, always engaged: centre `Advance` + `TacticalCharge`, left and right wings `EnvelopWing` (a deep line to a point beside the enemy body on its own side, then `ChargeToTarget`), archers `Skirmish`, cavalry `TacticalCharge` + `Flank` | the mass's weight times 1.6 (`GatedEdge`); 0 under 1.2x numbers or 60 infantry |
 | `TaomTacticCavalryDominance` | `vlandia` (Rohan), `khuzait` (Rhun), `battania` (Khand) | 1/1/1/1 split, 7 s join threshold: cavalry `Advance` + `Vanguard`, then `CycleCharge` 1.2 + `TacticalCharge` 0.8 + `Flank` 0.8; infantry `Advance` behind | vanilla `FrontalCavalryCharge` formula times 1.3 |
@@ -387,6 +387,7 @@ still opt in: `erebor_warriors` is one, with its own row and stand block. Shippe
 |---|---|---|
 | `erebor` | false | every mounted troop rides a war ram |
 | `erebor_warriors` | false | no mounted troops |
+| `eredluin` (Ered Luin) | false | no mounted troops; Erebor's row, copied whole |
 | `isengard` | false | every mounted troop rides a warg |
 | `sturgia` (Dale) | true | ordinary horses |
 
@@ -748,7 +749,7 @@ foot.
   (preference order, choke facing and insurmountable, choke width, the cap, the hold distance, a
   race lost to horse that a foot-only race would win, NaN speeds, empty input),
   `StandWeaponFavorTests` (the predicate and the service's switch); `ShippedDoctrineOrderingTests` also
-  pins the stand army and `StandEdge`, and `ShippedCultureDoctrinesConfigTests` the four opted-in cultures
+  pins the stand army and `StandEdge`, and `ShippedCultureDoctrinesConfigTests` the five opted-in cultures
   and their `dismount` flags. `HorseStandTests` also pins the side-vs-side outnumbered rule and
   `PolicyFor` (switch off, player team, attacker, AI defender); `StandGroundTests` pins `HoldOf`;
   `BraceDecisionTests` pins no Square while holding a choke. The stand's binding tests
@@ -1003,7 +1004,7 @@ What each culture carries after Phase C and D (2026-09-17), with the Phase B sta
 
 | Culture | Phase B | Now |
 |---|---|---|
-| Erebor (Dwarves) | ShieldWall, race | ShieldWall on `BracedDefend`/`BracedAdvance` (the anti-cavalry square), TwoLineWall as defender; never rout, bravery +15; shield 1.5, attack 0.9; horse stand with `dismount: false` (war rams) |
+| Erebor and Ered Luin (Dwarves) | ShieldWall, race | ShieldWall on `BracedDefend`/`BracedAdvance` (the anti-cavalry square), TwoLineWall as defender; never rout, bravery +15; shield 1.5, attack 0.9; horse stand with `dismount: false` (war rams) |
 | Lindon, Rivendell, Lothlorien, Mirkwood (Elves) | ArcherRing (defender), weighted `RangedHarrassmentOffensive` (attacker) | ArcherRing and ArcherAdvance, both under volley control; Mirkwood `DefensiveLine` 0.8 (the forest bias vanilla's scoring already carries); never rout, bravery +10; shooterError 0.5 |
 | Rohan (`vlandia`) | CavalryDominance | CavalryDominance with `CycleCharge` once joined, EoredScreen as defender; routs, bravery +5; attack 1.2, chargeDistance 1.3 |
 | Rhun (`khuzait`) | default | CavalryDominance and DisciplinedLine (heavy cavalry like Rohan, better foot and bow, few horse archers: Mike, 2026-09-16); routs; attack 1.1, shield 1.2, chargeDistance 1.2 |

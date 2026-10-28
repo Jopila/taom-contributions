@@ -272,8 +272,11 @@ ships, the faction is on the map, and character creation is blank.
 
 1. Confirm `basic_troop` and `elite_basic_troop` resolve to TAOM ids.
 2. Add the `cultures.json` entry with `races`, `starting_settlement` and body defaults.
-3. Give it narrative options in all four culture-scoped menus.
-   `python tools/insert_new_faction_cc_menus.py` clones another culture's with a text remap.
+3. Give it narrative options in all four culture-scoped menus. Add the culture to `NEW` and
+   `SRC_FOR` in `tools/insert_new_faction_cc_menus.py`, with a `SUBS` remap or `AUTHORED` text, and a
+   `FORBIDDEN_FOR` row for a new source. Then `python tools/insert_new_faction_cc_menus.py --apply`
+   clones the source culture's entries. A bare run is only a dry run, and `--check` exits 0 once every
+   entry and `taom_cc_strings.xml` row exists.
 4. Read the `title_type` values out of its own `youth_menu.json`, then
    `python tools/generate_char_creation_equipment.py --append <culture> --apply`. Add a
    `no_mount: True` row to that script's `CULTURES` table if the troop tree has no `slot="Horse"`.

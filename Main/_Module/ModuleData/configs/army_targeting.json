@@ -25,7 +25,8 @@
     "lindon": [],
     "arthedain": ["north"],
     "cardolan": ["north"],
-    "rhudaur": ["north"]
+    "rhudaur": ["north"],
+    "eredluin": ["north"]
   },
   "BorderRescueRadiusInTownGaps": 3.2,
   "PrimaryTheaterWeight": 1.25,

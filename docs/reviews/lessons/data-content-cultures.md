@@ -2214,3 +2214,15 @@ The four new Lindon clans reused `clan_lindon_2`'s `default_party_template`, as 
 - **Why missed:** the plan checked that the template id exists, which is what the Dale one-off asserts, and never read its stacks.
 - **Prevent:** before reusing a template, roster or binding for a culture, read one entry of it and confirm its culture. A borrowed-era leftover keeps its old troops after the culture is promoted.
 - **Source:** [rca-lindon-expansion-2026-10-27.md](../rca-lindon-expansion-2026-10-27.md) finding 2.
+
+### A realm that borrows another kingdom's armour wears it at or above that kingdom's band (Ered Luin, 2026-10-27)
+Ered Luin's first troop tree put 50 Erebor and Iron Hills pieces on troops below the level Erebor wears them at. The armour class table and the restat band a piece by its lowest battle wearer, so 26 Erebor pieces fell from elite to heavy and 14 left the armoury gate, an economy change to Erebor that nobody asked for. Erebor dresses above its id tiers (its "heavy" pieces from level 31), so any level-26 borrower lands below it.
+- **Why missed:** the tree was dressed by the id tier word, which `ARMOUR_MESH_TIER_LADDER` checks; no gate compares a piece's wearers across kingdoms. The same thing happened once with Cardolan (#978 finding 2) and was accepted as data.
+- **Prevent:** a generated realm wears a borrowed piece only at or above the band of its lowest wearer elsewhere; `BorrowedArmourAnchorTests` in `tools/tests/test_realm_troops.py` gates Ered Luin. Also check that a borrowed weapon is not in `<NamedWeapons>` (Dáin's hammer was).
+- **Source:** [rca-ered-luin-2026-10-27.md](../rca-ered-luin-2026-10-27.md) findings 1 and 5.
+
+### Re-derive a precedent's mechanism before you copy its reason (Ered Luin, 2026-10-27)
+Ered Luin's ladies got a hair tag "because an unmatched tag falls back to Bald", the reason the Cardolan ladies got theirs. That holds for `fighter_gondor` and not for `fighter_erebor`, whose keys carry hair indices 1 and 10, so no dwarf lady could start bald.
+- **Why missed:** the reason was copied with the fix, for a different race and template.
+- **Prevent:** when a precedent's fix rests on a mechanism (a fallback, an index, a default), check the mechanism against the new data before writing the same reason down.
+- **Source:** [rca-ered-luin-2026-10-27.md](../rca-ered-luin-2026-10-27.md) finding 6.

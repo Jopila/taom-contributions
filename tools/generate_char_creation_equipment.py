@@ -7,6 +7,7 @@ Each culture gets 55 equipment rosters following vanilla Bannerlord patterns.
 
 import os
 import sys
+import xml.etree.ElementTree as ET
 
 OUTPUT_PATH = os.path.join(
     os.path.dirname(__file__),
@@ -28,6 +29,8 @@ OUTPUT_PATH = os.path.join(
 #   shield                        - shield
 #   axe_or_mace                   - secondary melee (optional)
 #   javelin                       - thrown weapon (optional, for skirmisher)
+#   mother_body, father_body      - optional torso for every mother / father roster (Erebor's dress
+#                                   and noble tunic); without them the parents wear the body_* pieces
 
 CULTURES = {
     "gondor": {
@@ -87,6 +90,9 @@ CULTURES = {
         "arrows": "sk_dwarf_erebor_arrow_a",
         "shield": "sm_dwarf_erebor_shield_leather_a",
         "axe_or_mace": "sm_dwarf_erebor_1h_axe_a",
+        # what the shipped Erebor parent rosters wear since 307df401a, so mother and father differ
+        "mother_body": "sk_dwarf_dress_normal_a",
+        "father_body": "sk_dwarf_tunic_noble_a",
     },
     "rivendell": {
         "body_civilian": "rivendell_torso_light_light_tier1",
@@ -332,6 +338,12 @@ CULTURES["cardolan"] = {
 }
 CULTURES["rhudaur"] = dict(CULTURES["arthedain"], sword="sturgia_axe_2_t2", shield="dunland_wulf_shield_light_a")
 
+# Ered Luin: the Blue Mountains dwarves wear Erebor's dwarf kit, piece for piece, so nothing human
+# reaches a dwarf. Unlike Erebor's table it is no-mount: dwarves do not ride a horse and Ered Luin
+# fields no war ram, so its rosters carry no Horse or HorseHarness slot (Patch20 skips the horse
+# actor in the narrative stages for a roster without one).
+CULTURES["eredluin"] = dict(CULTURES["erebor"], no_mount=True)
+
 OCCUPATIONS = ["retainer", "merchant", "farmer", "artisan", "hunter", "vagabond"]
 CAREERS = ["retainer", "mercenary", "guard", "hunter", "infantry", "skirmisher", "bard", "6"]
 
@@ -375,7 +387,7 @@ def build_roster(roster_id, culture_id, equipment_sets):
 
 def mother_items(c, occupation):
     """Mother equipment: civilian dress-like items."""
-    items = [equip("Body", c["body_civilian"])]
+    items = [equip("Body", c.get("mother_body") or c["body_civilian"])]
     items.append(equip("Leg", c["leg"]))
     if occupation == "retainer" and c.get("head_light"):
         items.append(equip("Head", c["head_light"]))
@@ -387,7 +399,9 @@ def mother_items(c, occupation):
 def father_items(c, occupation):
     """Father equipment: occupation-appropriate gear."""
     items = []
-    if occupation in ("retainer", "hunter"):
+    if c.get("father_body"):
+        items.append(equip("Body", c["father_body"]))
+    elif occupation in ("retainer", "hunter"):
         items.append(equip("Body", c["body_military"]))
     elif occupation == "merchant":
         items.append(equip("Body", c["body_alt"]))
@@ -545,7 +559,7 @@ def generate_culture(culture_id):
 
     # 1. Parent fallback (none)
     rosters.append(f'\t<!-- Parent fallback -->')
-    mother_none = [equip("Body", c["body_civilian"]), equip("Leg", c["leg"])]
+    mother_none = [equip("Body", c.get("mother_body") or c["body_civilian"]), equip("Leg", c["leg"])]
     if c.get("cape"):
         mother_none.append(equip("Cape", c["cape"]))
     rosters.append(build_roster(
@@ -554,7 +568,7 @@ def generate_culture(culture_id):
     ))
     total_count += 1
 
-    father_none = [equip("Body", c["body_civilian"]), equip("Leg", c["leg"])]
+    father_none = [equip("Body", c.get("father_body") or c["body_civilian"]), equip("Leg", c["leg"])]
     rosters.append(build_roster(
         f"father_char_creation_none_{culture_id}", culture_id,
         [{"items": father_none}]
@@ -687,6 +701,10 @@ def append_cultures(culture_ids, apply=False):
 
     head, _, tail = text.rpartition(closing)
     updated = head + "\n".join(lines) + "\n" + closing + tail
+    try:  # tools/README.md "XML I/O convention": never write a document that no longer parses
+        ET.fromstring(updated.lstrip("﻿").encode("utf-8"))
+    except ET.ParseError as exc:
+        raise SystemExit(f"{output}: the appended rosters do not parse ({exc}); nothing written")
 
     if not apply:
         print(f"DRY RUN: would add {added} rosters for {[c for c in culture_ids if c not in skipped]}")

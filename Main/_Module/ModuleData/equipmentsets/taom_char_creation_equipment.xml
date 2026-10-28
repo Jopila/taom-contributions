@@ -23618,4 +23618,1092 @@
 				id="Item.sk_ar_art_boots_a" />
 		</EquipmentSet>
 	</EquipmentRoster>
+	<!-- ═══ Culture: EREDLUIN ═══ -->
+	<!-- Parent fallback -->
+	<EquipmentRoster
+		id="mother_char_creation_none_eredluin"
+		culture="Culture.eredluin">
+		<EquipmentSet>
+			<Equipment
+				slot="Body"
+				id="Item.sk_dwarf_dress_normal_a" />
+			<Equipment
+				slot="Leg"
+				id="Item.sk_dwarf_erebor_boots_light_a" />
+			<Equipment
+				slot="Cape"
+				id="Item.sk_dwarf_erebor_pauldron_scale_a" />
+		</EquipmentSet>
+	</EquipmentRoster>
+	<EquipmentRoster
+		id="father_char_creation_none_eredluin"
+		culture="Culture.eredluin">
+		<EquipmentSet>
+			<Equipment
+				slot="Body"
+				id="Item.sk_dwarf_tunic_noble_a" />
+			<Equipment
+				slot="Leg"
+				id="Item.sk_dwarf_erebor_boots_light_a" />
+		</EquipmentSet>
+	</EquipmentRoster>
+	<!--1.Retainer-->
+	<EquipmentRoster
+		id="mother_char_creation_retainer_eredluin"
+		culture="Culture.eredluin">
+		<EquipmentSet>
+			<Equipment
+				slot="Body"
+				id="Item.sk_dwarf_dress_normal_a" />
+			<Equipment
+				slot="Leg"
+				id="Item.sk_dwarf_erebor_boots_light_a" />
+			<Equipment
+				slot="Head"
+				id="Item.sk_dwarf_erebor_helmet_leather_light_a" />
+			<Equipment
+				slot="Cape"
+				id="Item.sk_dwarf_erebor_pauldron_scale_a" />
+		</EquipmentSet>
+	</EquipmentRoster>
+	<EquipmentRoster
+		id="father_char_creation_retainer_eredluin"
+		culture="Culture.eredluin">
+		<EquipmentSet>
+			<Equipment
+				slot="Body"
+				id="Item.sk_dwarf_tunic_noble_a" />
+			<Equipment
+				slot="Leg"
+				id="Item.sk_dwarf_erebor_boots_light_b" />
+			<Equipment
+				slot="Head"
+				id="Item.sk_dwarf_erebor_helmet_leather_light_b" />
+		</EquipmentSet>
+	</EquipmentRoster>
+	<!--2.Merchant-->
+	<EquipmentRoster
+		id="mother_char_creation_merchant_eredluin"
+		culture="Culture.eredluin">
+		<EquipmentSet>
+			<Equipment
+				slot="Body"
+				id="Item.sk_dwarf_dress_normal_a" />
+			<Equipment
+				slot="Leg"
+				id="Item.sk_dwarf_erebor_boots_light_a" />
+		</EquipmentSet>
+	</EquipmentRoster>
+	<EquipmentRoster
+		id="father_char_creation_merchant_eredluin"
+		culture="Culture.eredluin">
+		<EquipmentSet>
+			<Equipment
+				slot="Body"
+				id="Item.sk_dwarf_tunic_noble_a" />
+			<Equipment
+				slot="Leg"
+				id="Item.sk_dwarf_erebor_boots_light_b" />
+			<Equipment
+				slot="Head"
+				id="Item.sk_dwarf_erebor_helmet_leather_light_a" />
+		</EquipmentSet>
+	</EquipmentRoster>
+	<!--3.Farmer-->
+	<EquipmentRoster
+		id="mother_char_creation_farmer_eredluin"
+		culture="Culture.eredluin">
+		<EquipmentSet>
+			<Equipment
+				slot="Body"
+				id="Item.sk_dwarf_dress_normal_a" />
+			<Equipment
+				slot="Leg"
+				id="Item.sk_dwarf_erebor_boots_light_a" />
+		</EquipmentSet>
+	</EquipmentRoster>
+	<EquipmentRoster
+		id="father_char_creation_farmer_eredluin"
+		culture="Culture.eredluin">
+		<EquipmentSet>
+			<Equipment
+				slot="Body"
+				id="Item.sk_dwarf_tunic_noble_a" />
+			<Equipment
+				slot="Leg"
+				id="Item.sk_dwarf_erebor_boots_light_b" />
+		</EquipmentSet>
+	</EquipmentRoster>
+	<!--4.Artisan-->
+	<EquipmentRoster
+		id="mother_char_creation_artisan_eredluin"
+		culture="Culture.eredluin">
+		<EquipmentSet>
+			<Equipment
+				slot="Body"
+				id="Item.sk_dwarf_dress_normal_a" />
+			<Equipment
+				slot="Leg"
+				id="Item.sk_dwarf_erebor_boots_light_a" />
+			<Equipment
+				slot="Cape"
+				id="Item.sk_dwarf_erebor_pauldron_scale_a" />
+		</EquipmentSet>
+	</EquipmentRoster>
+	<EquipmentRoster
+		id="father_char_creation_artisan_eredluin"
+		culture="Culture.eredluin">
+		<EquipmentSet>
+			<Equipment
+				slot="Body"
+				id="Item.sk_dwarf_tunic_noble_a" />
+			<Equipment
+				slot="Leg"
+				id="Item.sk_dwarf_erebor_boots_light_b" />
+		</EquipmentSet>
+	</EquipmentRoster>
+	<!--5.Hunter-->
+	<EquipmentRoster
+		id="mother_char_creation_hunter_eredluin"
+		culture="Culture.eredluin">
+		<EquipmentSet>
+			<Equipment
+				slot="Body"
+				id="Item.sk_dwarf_dress_normal_a" />
+			<Equipment
+				slot="Leg"
+				id="Item.sk_dwarf_erebor_boots_light_a" />
+		</EquipmentSet>
+	</EquipmentRoster>
+	<EquipmentRoster
+		id="father_char_creation_hunter_eredluin"
+		culture="Culture.eredluin">
+		<EquipmentSet>
+			<Equipment
+				slot="Body"
+				id="Item.sk_dwarf_tunic_noble_a" />
+			<Equipment
+				slot="Leg"
+				id="Item.sk_dwarf_erebor_boots_light_b" />
+			<Equipment
+				slot="Cape"
+				id="Item.sk_dwarf_erebor_pauldron_scale_a" />
+			<Equipment
+				slot="Head"
+				id="Item.sk_dwarf_erebor_helmet_leather_light_a" />
+		</EquipmentSet>
+	</EquipmentRoster>
+	<!--6.Vagabond-->
+	<EquipmentRoster
+		id="mother_char_creation_vagabond_eredluin"
+		culture="Culture.eredluin">
+		<EquipmentSet>
+			<Equipment
+				slot="Body"
+				id="Item.sk_dwarf_dress_normal_a" />
+			<Equipment
+				slot="Leg"
+				id="Item.sk_dwarf_erebor_boots_light_a" />
+		</EquipmentSet>
+	</EquipmentRoster>
+	<EquipmentRoster
+		id="father_char_creation_vagabond_eredluin"
+		culture="Culture.eredluin">
+		<EquipmentSet>
+			<Equipment
+				slot="Body"
+				id="Item.sk_dwarf_tunic_noble_a" />
+			<Equipment
+				slot="Leg"
+				id="Item.sk_dwarf_erebor_boots_light_b" />
+		</EquipmentSet>
+	</EquipmentRoster>
+	<!-- Childhood & Education age -->
+	<EquipmentRoster
+		id="player_char_creation_childhood_age_eredluin_retainer_m"
+		culture="Culture.eredluin">
+		<EquipmentSet>
+			<Equipment
+				slot="Body"
+				id="Item.sk_dwarf_erebor_chest_leather_light_b" />
+			<Equipment
+				slot="Leg"
+				id="Item.sk_dwarf_erebor_boots_light_a" />
+		</EquipmentSet>
+	</EquipmentRoster>
+	<EquipmentRoster
+		id="player_char_creation_education_age_eredluin_retainer_m"
+		culture="Culture.eredluin">
+		<EquipmentSet>
+			<Equipment
+				slot="Body"
+				id="Item.sk_dwarf_erebor_chest_leather_light_b" />
+			<Equipment
+				slot="Leg"
+				id="Item.sk_dwarf_erebor_boots_light_a" />
+		</EquipmentSet>
+	</EquipmentRoster>
+	<EquipmentRoster
+		id="player_char_creation_childhood_age_eredluin_retainer_f"
+		culture="Culture.eredluin">
+		<EquipmentSet>
+			<Equipment
+				slot="Body"
+				id="Item.sk_dwarf_erebor_chest_leather_light_a" />
+			<Equipment
+				slot="Leg"
+				id="Item.sk_dwarf_erebor_boots_light_a" />
+		</EquipmentSet>
+	</EquipmentRoster>
+	<EquipmentRoster
+		id="player_char_creation_education_age_eredluin_retainer_f"
+		culture="Culture.eredluin">
+		<EquipmentSet>
+			<Equipment
+				slot="Body"
+				id="Item.sk_dwarf_erebor_chest_leather_light_a" />
+			<Equipment
+				slot="Leg"
+				id="Item.sk_dwarf_erebor_boots_light_a" />
+		</EquipmentSet>
+	</EquipmentRoster>
+	<EquipmentRoster
+		id="player_char_creation_childhood_age_eredluin_merchant_m"
+		culture="Culture.eredluin">
+		<EquipmentSet>
+			<Equipment
+				slot="Body"
+				id="Item.sk_dwarf_erebor_chest_leather_light_b" />
+			<Equipment
+				slot="Leg"
+				id="Item.sk_dwarf_erebor_boots_light_a" />
+		</EquipmentSet>
+	</EquipmentRoster>
+	<EquipmentRoster
+		id="player_char_creation_education_age_eredluin_merchant_m"
+		culture="Culture.eredluin">
+		<EquipmentSet>
+			<Equipment
+				slot="Body"
+				id="Item.sk_dwarf_erebor_chest_leather_light_b" />
+			<Equipment
+				slot="Leg"
+				id="Item.sk_dwarf_erebor_boots_light_a" />
+		</EquipmentSet>
+	</EquipmentRoster>
+	<EquipmentRoster
+		id="player_char_creation_childhood_age_eredluin_merchant_f"
+		culture="Culture.eredluin">
+		<EquipmentSet>
+			<Equipment
+				slot="Body"
+				id="Item.sk_dwarf_erebor_chest_leather_light_a" />
+			<Equipment
+				slot="Leg"
+				id="Item.sk_dwarf_erebor_boots_light_a" />
+		</EquipmentSet>
+	</EquipmentRoster>
+	<EquipmentRoster
+		id="player_char_creation_education_age_eredluin_merchant_f"
+		culture="Culture.eredluin">
+		<EquipmentSet>
+			<Equipment
+				slot="Body"
+				id="Item.sk_dwarf_erebor_chest_leather_light_a" />
+			<Equipment
+				slot="Leg"
+				id="Item.sk_dwarf_erebor_boots_light_a" />
+		</EquipmentSet>
+	</EquipmentRoster>
+	<EquipmentRoster
+		id="player_char_creation_childhood_age_eredluin_farmer_m"
+		culture="Culture.eredluin">
+		<EquipmentSet>
+			<Equipment
+				slot="Body"
+				id="Item.sk_dwarf_erebor_chest_leather_light_a" />
+			<Equipment
+				slot="Leg"
+				id="Item.sk_dwarf_erebor_boots_light_a" />
+		</EquipmentSet>
+	</EquipmentRoster>
+	<EquipmentRoster
+		id="player_char_creation_education_age_eredluin_farmer_m"
+		culture="Culture.eredluin">
+		<EquipmentSet>
+			<Equipment
+				slot="Body"
+				id="Item.sk_dwarf_erebor_chest_leather_light_a" />
+			<Equipment
+				slot="Leg"
+				id="Item.sk_dwarf_erebor_boots_light_a" />
+		</EquipmentSet>
+	</EquipmentRoster>
+	<EquipmentRoster
+		id="player_char_creation_childhood_age_eredluin_farmer_f"
+		culture="Culture.eredluin">
+		<EquipmentSet>
+			<Equipment
+				slot="Body"
+				id="Item.sk_dwarf_erebor_chest_leather_light_a" />
+			<Equipment
+				slot="Leg"
+				id="Item.sk_dwarf_erebor_boots_light_a" />
+		</EquipmentSet>
+	</EquipmentRoster>
+	<EquipmentRoster
+		id="player_char_creation_education_age_eredluin_farmer_f"
+		culture="Culture.eredluin">
+		<EquipmentSet>
+			<Equipment
+				slot="Body"
+				id="Item.sk_dwarf_erebor_chest_leather_light_a" />
+			<Equipment
+				slot="Leg"
+				id="Item.sk_dwarf_erebor_boots_light_a" />
+		</EquipmentSet>
+	</EquipmentRoster>
+	<EquipmentRoster
+		id="player_char_creation_childhood_age_eredluin_artisan_m"
+		culture="Culture.eredluin">
+		<EquipmentSet>
+			<Equipment
+				slot="Body"
+				id="Item.sk_dwarf_erebor_chest_leather_light_a" />
+			<Equipment
+				slot="Leg"
+				id="Item.sk_dwarf_erebor_boots_light_a" />
+		</EquipmentSet>
+	</EquipmentRoster>
+	<EquipmentRoster
+		id="player_char_creation_education_age_eredluin_artisan_m"
+		culture="Culture.eredluin">
+		<EquipmentSet>
+			<Equipment
+				slot="Body"
+				id="Item.sk_dwarf_erebor_chest_leather_light_a" />
+			<Equipment
+				slot="Leg"
+				id="Item.sk_dwarf_erebor_boots_light_a" />
+		</EquipmentSet>
+	</EquipmentRoster>
+	<EquipmentRoster
+		id="player_char_creation_childhood_age_eredluin_artisan_f"
+		culture="Culture.eredluin">
+		<EquipmentSet>
+			<Equipment
+				slot="Body"
+				id="Item.sk_dwarf_erebor_chest_leather_light_a" />
+			<Equipment
+				slot="Leg"
+				id="Item.sk_dwarf_erebor_boots_light_a" />
+		</EquipmentSet>
+	</EquipmentRoster>
+	<EquipmentRoster
+		id="player_char_creation_education_age_eredluin_artisan_f"
+		culture="Culture.eredluin">
+		<EquipmentSet>
+			<Equipment
+				slot="Body"
+				id="Item.sk_dwarf_erebor_chest_leather_light_a" />
+			<Equipment
+				slot="Leg"
+				id="Item.sk_dwarf_erebor_boots_light_a" />
+		</EquipmentSet>
+	</EquipmentRoster>
+	<EquipmentRoster
+		id="player_char_creation_childhood_age_eredluin_hunter_m"
+		culture="Culture.eredluin">
+		<EquipmentSet>
+			<Equipment
+				slot="Body"
+				id="Item.sk_dwarf_erebor_chest_leather_light_a" />
+			<Equipment
+				slot="Leg"
+				id="Item.sk_dwarf_erebor_boots_light_b" />
+		</EquipmentSet>
+	</EquipmentRoster>
+	<EquipmentRoster
+		id="player_char_creation_education_age_eredluin_hunter_m"
+		culture="Culture.eredluin">
+		<EquipmentSet>
+			<Equipment
+				slot="Body"
+				id="Item.sk_dwarf_erebor_chest_leather_light_a" />
+			<Equipment
+				slot="Leg"
+				id="Item.sk_dwarf_erebor_boots_light_b" />
+		</EquipmentSet>
+	</EquipmentRoster>
+	<EquipmentRoster
+		id="player_char_creation_childhood_age_eredluin_hunter_f"
+		culture="Culture.eredluin">
+		<EquipmentSet>
+			<Equipment
+				slot="Body"
+				id="Item.sk_dwarf_erebor_chest_leather_light_a" />
+			<Equipment
+				slot="Leg"
+				id="Item.sk_dwarf_erebor_boots_light_a" />
+		</EquipmentSet>
+	</EquipmentRoster>
+	<EquipmentRoster
+		id="player_char_creation_education_age_eredluin_hunter_f"
+		culture="Culture.eredluin">
+		<EquipmentSet>
+			<Equipment
+				slot="Body"
+				id="Item.sk_dwarf_erebor_chest_leather_light_a" />
+			<Equipment
+				slot="Leg"
+				id="Item.sk_dwarf_erebor_boots_light_a" />
+		</EquipmentSet>
+	</EquipmentRoster>
+	<EquipmentRoster
+		id="player_char_creation_childhood_age_eredluin_vagabond_m"
+		culture="Culture.eredluin">
+		<EquipmentSet>
+			<Equipment
+				slot="Body"
+				id="Item.sk_dwarf_erebor_chest_leather_light_a" />
+			<Equipment
+				slot="Leg"
+				id="Item.sk_dwarf_erebor_boots_light_a" />
+		</EquipmentSet>
+	</EquipmentRoster>
+	<EquipmentRoster
+		id="player_char_creation_education_age_eredluin_vagabond_m"
+		culture="Culture.eredluin">
+		<EquipmentSet>
+			<Equipment
+				slot="Body"
+				id="Item.sk_dwarf_erebor_chest_leather_light_a" />
+			<Equipment
+				slot="Leg"
+				id="Item.sk_dwarf_erebor_boots_light_a" />
+		</EquipmentSet>
+	</EquipmentRoster>
+	<EquipmentRoster
+		id="player_char_creation_childhood_age_eredluin_vagabond_f"
+		culture="Culture.eredluin">
+		<EquipmentSet>
+			<Equipment
+				slot="Body"
+				id="Item.sk_dwarf_erebor_chest_leather_light_a" />
+			<Equipment
+				slot="Leg"
+				id="Item.sk_dwarf_erebor_boots_light_a" />
+		</EquipmentSet>
+	</EquipmentRoster>
+	<EquipmentRoster
+		id="player_char_creation_education_age_eredluin_vagabond_f"
+		culture="Culture.eredluin">
+		<EquipmentSet>
+			<Equipment
+				slot="Body"
+				id="Item.sk_dwarf_erebor_chest_leather_light_a" />
+			<Equipment
+				slot="Leg"
+				id="Item.sk_dwarf_erebor_boots_light_a" />
+		</EquipmentSet>
+	</EquipmentRoster>
+	<!-- Adult careers -->
+	<EquipmentRoster
+		id="player_char_creation_eredluin_retainer_m"
+		culture="Culture.eredluin">
+		<EquipmentSet>
+			<Equipment
+				slot="Item0"
+				id="Item.starter_sm_dwarf_iron_sword_a" />
+			<Equipment
+				slot="Item1"
+				id="Item.starter_sm_dwarf_erebor_shield_leather_a" />
+			<Equipment
+				slot="Item2"
+				id="Item.starter_sm_dwarf_erebor_spear_a" />
+			<Equipment
+				slot="Body"
+				id="Item.starter_sk_dwarf_erebor_chest_leather_med_a" />
+			<Equipment
+				slot="Leg"
+				id="Item.starter_sk_dwarf_erebor_boots_light_a" />
+		</EquipmentSet>
+		<EquipmentSet
+			equipmentType="Civilian">
+			<Equipment
+				slot="Item0"
+				id="Item.starter_sm_dwarf_iron_sword_a" />
+			<Equipment
+				slot="Body"
+				id="Item.starter_sk_dwarf_erebor_chest_leather_light_b" />
+			<Equipment
+				slot="Cape"
+				id="Item.starter_sk_dwarf_erebor_pauldron_scale_a" />
+			<Equipment
+				slot="Leg"
+				id="Item.starter_sk_dwarf_erebor_boots_light_a" />
+		</EquipmentSet>
+	</EquipmentRoster>
+	<EquipmentRoster
+		id="player_char_creation_eredluin_retainer_f"
+		culture="Culture.eredluin">
+		<EquipmentSet>
+			<Equipment
+				slot="Item0"
+				id="Item.starter_sm_dwarf_iron_sword_a" />
+			<Equipment
+				slot="Item1"
+				id="Item.starter_sm_dwarf_erebor_shield_leather_a" />
+			<Equipment
+				slot="Item2"
+				id="Item.starter_sm_dwarf_erebor_spear_a" />
+			<Equipment
+				slot="Body"
+				id="Item.starter_sk_dwarf_erebor_chest_leather_med_a" />
+			<Equipment
+				slot="Leg"
+				id="Item.starter_sk_dwarf_erebor_boots_light_a" />
+		</EquipmentSet>
+		<EquipmentSet
+			equipmentType="Civilian">
+			<Equipment
+				slot="Item0"
+				id="Item.starter_sm_dwarf_iron_sword_a" />
+			<Equipment
+				slot="Body"
+				id="Item.starter_sk_dwarf_erebor_chest_leather_light_b" />
+			<Equipment
+				slot="Cape"
+				id="Item.starter_sk_dwarf_erebor_pauldron_scale_a" />
+			<Equipment
+				slot="Leg"
+				id="Item.starter_sk_dwarf_erebor_boots_light_a" />
+		</EquipmentSet>
+	</EquipmentRoster>
+	<EquipmentRoster
+		id="player_char_creation_eredluin_mercenary_m"
+		culture="Culture.eredluin">
+		<EquipmentSet>
+			<Equipment
+				slot="Item0"
+				id="Item.starter_sm_dwarf_iron_sword_a" />
+			<Equipment
+				slot="Item1"
+				id="Item.starter_sm_dwarf_erebor_shield_leather_a" />
+			<Equipment
+				slot="Item2"
+				id="Item.starter_sm_dwarf_erebor_spear_a" />
+			<Equipment
+				slot="Body"
+				id="Item.starter_sk_dwarf_erebor_chest_leather_med_a" />
+			<Equipment
+				slot="Leg"
+				id="Item.starter_sk_dwarf_erebor_boots_light_a" />
+		</EquipmentSet>
+		<EquipmentSet
+			equipmentType="Civilian">
+			<Equipment
+				slot="Item0"
+				id="Item.starter_sm_dwarf_iron_sword_a" />
+			<Equipment
+				slot="Body"
+				id="Item.starter_sk_dwarf_erebor_chest_leather_light_b" />
+			<Equipment
+				slot="Cape"
+				id="Item.starter_sk_dwarf_erebor_pauldron_scale_a" />
+			<Equipment
+				slot="Leg"
+				id="Item.starter_sk_dwarf_erebor_boots_light_a" />
+		</EquipmentSet>
+	</EquipmentRoster>
+	<EquipmentRoster
+		id="player_char_creation_eredluin_mercenary_f"
+		culture="Culture.eredluin">
+		<EquipmentSet>
+			<Equipment
+				slot="Item0"
+				id="Item.starter_sm_dwarf_iron_sword_a" />
+			<Equipment
+				slot="Item1"
+				id="Item.starter_sm_dwarf_erebor_shield_leather_a" />
+			<Equipment
+				slot="Item2"
+				id="Item.starter_sm_dwarf_erebor_spear_a" />
+			<Equipment
+				slot="Body"
+				id="Item.starter_sk_dwarf_erebor_chest_leather_med_a" />
+			<Equipment
+				slot="Leg"
+				id="Item.starter_sk_dwarf_erebor_boots_light_a" />
+		</EquipmentSet>
+		<EquipmentSet
+			equipmentType="Civilian">
+			<Equipment
+				slot="Item0"
+				id="Item.starter_sm_dwarf_iron_sword_a" />
+			<Equipment
+				slot="Body"
+				id="Item.starter_sk_dwarf_erebor_chest_leather_light_b" />
+			<Equipment
+				slot="Cape"
+				id="Item.starter_sk_dwarf_erebor_pauldron_scale_a" />
+			<Equipment
+				slot="Leg"
+				id="Item.starter_sk_dwarf_erebor_boots_light_a" />
+		</EquipmentSet>
+	</EquipmentRoster>
+	<EquipmentRoster
+		id="player_char_creation_eredluin_guard_m"
+		culture="Culture.eredluin">
+		<EquipmentSet>
+			<Equipment
+				slot="Item0"
+				id="Item.starter_sm_dwarf_erebor_shield_leather_a" />
+			<Equipment
+				slot="Item1"
+				id="Item.starter_sm_dwarf_iron_sword_a" />
+			<Equipment
+				slot="Item2"
+				id="Item.starter_sm_dwarf_erebor_bow_a" />
+			<Equipment
+				slot="Item3"
+				id="Item.starter_sk_dwarf_erebor_arrow_a" />
+			<Equipment
+				slot="Body"
+				id="Item.starter_sk_dwarf_erebor_chest_leather_med_a" />
+			<Equipment
+				slot="Leg"
+				id="Item.starter_sk_dwarf_erebor_boots_light_a" />
+		</EquipmentSet>
+		<EquipmentSet
+			equipmentType="Civilian">
+			<Equipment
+				slot="Item0"
+				id="Item.starter_sm_dwarf_iron_sword_a" />
+			<Equipment
+				slot="Body"
+				id="Item.starter_sk_dwarf_erebor_chest_leather_light_a" />
+			<Equipment
+				slot="Cape"
+				id="Item.starter_sk_dwarf_erebor_pauldron_scale_a" />
+			<Equipment
+				slot="Leg"
+				id="Item.starter_sk_dwarf_erebor_boots_light_a" />
+		</EquipmentSet>
+	</EquipmentRoster>
+	<EquipmentRoster
+		id="player_char_creation_eredluin_guard_f"
+		culture="Culture.eredluin">
+		<EquipmentSet>
+			<Equipment
+				slot="Item0"
+				id="Item.starter_sm_dwarf_erebor_shield_leather_a" />
+			<Equipment
+				slot="Item1"
+				id="Item.starter_sm_dwarf_iron_sword_a" />
+			<Equipment
+				slot="Item2"
+				id="Item.starter_sm_dwarf_erebor_bow_a" />
+			<Equipment
+				slot="Item3"
+				id="Item.starter_sk_dwarf_erebor_arrow_a" />
+			<Equipment
+				slot="Body"
+				id="Item.starter_sk_dwarf_erebor_chest_leather_med_a" />
+			<Equipment
+				slot="Leg"
+				id="Item.starter_sk_dwarf_erebor_boots_light_a" />
+		</EquipmentSet>
+		<EquipmentSet
+			equipmentType="Civilian">
+			<Equipment
+				slot="Item0"
+				id="Item.starter_sm_dwarf_iron_sword_a" />
+			<Equipment
+				slot="Body"
+				id="Item.starter_sk_dwarf_erebor_chest_leather_light_a" />
+			<Equipment
+				slot="Cape"
+				id="Item.starter_sk_dwarf_erebor_pauldron_scale_a" />
+			<Equipment
+				slot="Leg"
+				id="Item.starter_sk_dwarf_erebor_boots_light_a" />
+		</EquipmentSet>
+	</EquipmentRoster>
+	<EquipmentRoster
+		id="player_char_creation_eredluin_hunter_m"
+		culture="Culture.eredluin">
+		<EquipmentSet>
+			<Equipment
+				slot="Item0"
+				id="Item.starter_sm_dwarf_iron_sword_a" />
+			<Equipment
+				slot="Item2"
+				id="Item.starter_sm_dwarf_erebor_bow_a" />
+			<Equipment
+				slot="Item3"
+				id="Item.starter_sk_dwarf_erebor_arrow_a" />
+			<Equipment
+				slot="Body"
+				id="Item.starter_sk_dwarf_erebor_chest_leather_med_a" />
+			<Equipment
+				slot="Leg"
+				id="Item.starter_sk_dwarf_erebor_boots_light_a" />
+		</EquipmentSet>
+		<EquipmentSet
+			equipmentType="Civilian">
+			<Equipment
+				slot="Item0"
+				id="Item.starter_sm_dwarf_iron_sword_a" />
+			<Equipment
+				slot="Body"
+				id="Item.starter_sk_dwarf_erebor_chest_leather_light_a" />
+			<Equipment
+				slot="Cape"
+				id="Item.starter_sk_dwarf_erebor_pauldron_scale_a" />
+			<Equipment
+				slot="Leg"
+				id="Item.starter_sk_dwarf_erebor_boots_light_a" />
+		</EquipmentSet>
+	</EquipmentRoster>
+	<EquipmentRoster
+		id="player_char_creation_eredluin_hunter_f"
+		culture="Culture.eredluin">
+		<EquipmentSet>
+			<Equipment
+				slot="Item0"
+				id="Item.starter_sm_dwarf_iron_sword_a" />
+			<Equipment
+				slot="Item2"
+				id="Item.starter_sm_dwarf_erebor_bow_a" />
+			<Equipment
+				slot="Item3"
+				id="Item.starter_sk_dwarf_erebor_arrow_a" />
+			<Equipment
+				slot="Body"
+				id="Item.starter_sk_dwarf_erebor_chest_leather_med_a" />
+			<Equipment
+				slot="Leg"
+				id="Item.starter_sk_dwarf_erebor_boots_light_a" />
+		</EquipmentSet>
+		<EquipmentSet
+			equipmentType="Civilian">
+			<Equipment
+				slot="Item0"
+				id="Item.starter_sm_dwarf_iron_sword_a" />
+			<Equipment
+				slot="Body"
+				id="Item.starter_sk_dwarf_erebor_chest_leather_light_a" />
+			<Equipment
+				slot="Cape"
+				id="Item.starter_sk_dwarf_erebor_pauldron_scale_a" />
+			<Equipment
+				slot="Leg"
+				id="Item.starter_sk_dwarf_erebor_boots_light_a" />
+		</EquipmentSet>
+	</EquipmentRoster>
+	<EquipmentRoster
+		id="player_char_creation_eredluin_infantry_m"
+		culture="Culture.eredluin">
+		<EquipmentSet>
+			<Equipment
+				slot="Item0"
+				id="Item.starter_sm_dwarf_iron_sword_a" />
+			<Equipment
+				slot="Item2"
+				id="Item.starter_sm_dwarf_erebor_spear_a" />
+			<Equipment
+				slot="Body"
+				id="Item.starter_sk_dwarf_erebor_chest_leather_med_a" />
+			<Equipment
+				slot="Leg"
+				id="Item.starter_sk_dwarf_erebor_boots_light_a" />
+		</EquipmentSet>
+		<EquipmentSet
+			equipmentType="Civilian">
+			<Equipment
+				slot="Item0"
+				id="Item.starter_sm_dwarf_iron_sword_a" />
+			<Equipment
+				slot="Body"
+				id="Item.starter_sk_dwarf_erebor_chest_leather_light_a" />
+			<Equipment
+				slot="Cape"
+				id="Item.starter_sk_dwarf_erebor_pauldron_scale_a" />
+			<Equipment
+				slot="Leg"
+				id="Item.starter_sk_dwarf_erebor_boots_light_a" />
+		</EquipmentSet>
+	</EquipmentRoster>
+	<EquipmentRoster
+		id="player_char_creation_eredluin_infantry_f"
+		culture="Culture.eredluin">
+		<EquipmentSet>
+			<Equipment
+				slot="Item0"
+				id="Item.starter_sm_dwarf_iron_sword_a" />
+			<Equipment
+				slot="Item2"
+				id="Item.starter_sm_dwarf_erebor_spear_a" />
+			<Equipment
+				slot="Body"
+				id="Item.starter_sk_dwarf_erebor_chest_leather_med_a" />
+			<Equipment
+				slot="Leg"
+				id="Item.starter_sk_dwarf_erebor_boots_light_a" />
+		</EquipmentSet>
+		<EquipmentSet
+			equipmentType="Civilian">
+			<Equipment
+				slot="Item0"
+				id="Item.starter_sm_dwarf_iron_sword_a" />
+			<Equipment
+				slot="Body"
+				id="Item.starter_sk_dwarf_erebor_chest_leather_light_a" />
+			<Equipment
+				slot="Cape"
+				id="Item.starter_sk_dwarf_erebor_pauldron_scale_a" />
+			<Equipment
+				slot="Leg"
+				id="Item.starter_sk_dwarf_erebor_boots_light_a" />
+		</EquipmentSet>
+	</EquipmentRoster>
+	<EquipmentRoster
+		id="player_char_creation_eredluin_skirmisher_m"
+		culture="Culture.eredluin">
+		<EquipmentSet>
+			<Equipment
+				slot="Item0"
+				id="Item.starter_sm_dwarf_iron_sword_a" />
+			<Equipment
+				slot="Item2"
+				id="Item.starter_sm_dwarf_erebor_bow_a" />
+			<Equipment
+				slot="Item3"
+				id="Item.starter_sk_dwarf_erebor_arrow_a" />
+			<Equipment
+				slot="Body"
+				id="Item.starter_sk_dwarf_erebor_chest_leather_med_a" />
+			<Equipment
+				slot="Leg"
+				id="Item.starter_sk_dwarf_erebor_boots_light_a" />
+		</EquipmentSet>
+		<EquipmentSet
+			equipmentType="Civilian">
+			<Equipment
+				slot="Item0"
+				id="Item.starter_sm_dwarf_iron_sword_a" />
+			<Equipment
+				slot="Body"
+				id="Item.starter_sk_dwarf_erebor_chest_leather_light_a" />
+			<Equipment
+				slot="Cape"
+				id="Item.starter_sk_dwarf_erebor_pauldron_scale_a" />
+			<Equipment
+				slot="Leg"
+				id="Item.starter_sk_dwarf_erebor_boots_light_a" />
+		</EquipmentSet>
+	</EquipmentRoster>
+	<EquipmentRoster
+		id="player_char_creation_eredluin_skirmisher_f"
+		culture="Culture.eredluin">
+		<EquipmentSet>
+			<Equipment
+				slot="Item0"
+				id="Item.starter_sm_dwarf_iron_sword_a" />
+			<Equipment
+				slot="Item2"
+				id="Item.starter_sm_dwarf_erebor_bow_a" />
+			<Equipment
+				slot="Item3"
+				id="Item.starter_sk_dwarf_erebor_arrow_a" />
+			<Equipment
+				slot="Body"
+				id="Item.starter_sk_dwarf_erebor_chest_leather_med_a" />
+			<Equipment
+				slot="Leg"
+				id="Item.starter_sk_dwarf_erebor_boots_light_a" />
+		</EquipmentSet>
+		<EquipmentSet
+			equipmentType="Civilian">
+			<Equipment
+				slot="Item0"
+				id="Item.starter_sm_dwarf_iron_sword_a" />
+			<Equipment
+				slot="Body"
+				id="Item.starter_sk_dwarf_erebor_chest_leather_light_a" />
+			<Equipment
+				slot="Cape"
+				id="Item.starter_sk_dwarf_erebor_pauldron_scale_a" />
+			<Equipment
+				slot="Leg"
+				id="Item.starter_sk_dwarf_erebor_boots_light_a" />
+		</EquipmentSet>
+	</EquipmentRoster>
+	<EquipmentRoster
+		id="player_char_creation_eredluin_bard_m"
+		culture="Culture.eredluin">
+		<EquipmentSet>
+			<Equipment
+				slot="Item0"
+				id="Item.starter_sm_dwarf_erebor_spear_a" />
+			<Equipment
+				slot="Item2"
+				id="Item.starter_sm_dwarf_erebor_bow_a" />
+			<Equipment
+				slot="Item3"
+				id="Item.starter_sk_dwarf_erebor_arrow_a" />
+			<Equipment
+				slot="Body"
+				id="Item.starter_sk_dwarf_erebor_chest_leather_light_a" />
+			<Equipment
+				slot="Leg"
+				id="Item.starter_sk_dwarf_erebor_boots_light_a" />
+		</EquipmentSet>
+		<EquipmentSet
+			equipmentType="Civilian">
+			<Equipment
+				slot="Item0"
+				id="Item.starter_sm_dwarf_iron_sword_a" />
+			<Equipment
+				slot="Body"
+				id="Item.starter_sk_dwarf_erebor_chest_leather_light_a" />
+			<Equipment
+				slot="Cape"
+				id="Item.starter_sk_dwarf_erebor_pauldron_scale_a" />
+			<Equipment
+				slot="Leg"
+				id="Item.starter_sk_dwarf_erebor_boots_light_a" />
+		</EquipmentSet>
+	</EquipmentRoster>
+	<EquipmentRoster
+		id="player_char_creation_eredluin_bard_f"
+		culture="Culture.eredluin">
+		<EquipmentSet>
+			<Equipment
+				slot="Item0"
+				id="Item.starter_sm_dwarf_erebor_spear_a" />
+			<Equipment
+				slot="Item2"
+				id="Item.starter_sm_dwarf_erebor_bow_a" />
+			<Equipment
+				slot="Item3"
+				id="Item.starter_sk_dwarf_erebor_arrow_a" />
+			<Equipment
+				slot="Body"
+				id="Item.starter_sk_dwarf_erebor_chest_leather_light_a" />
+			<Equipment
+				slot="Leg"
+				id="Item.starter_sk_dwarf_erebor_boots_light_a" />
+		</EquipmentSet>
+		<EquipmentSet
+			equipmentType="Civilian">
+			<Equipment
+				slot="Item0"
+				id="Item.starter_sm_dwarf_iron_sword_a" />
+			<Equipment
+				slot="Body"
+				id="Item.starter_sk_dwarf_erebor_chest_leather_light_a" />
+			<Equipment
+				slot="Cape"
+				id="Item.starter_sk_dwarf_erebor_pauldron_scale_a" />
+			<Equipment
+				slot="Leg"
+				id="Item.starter_sk_dwarf_erebor_boots_light_a" />
+		</EquipmentSet>
+	</EquipmentRoster>
+	<EquipmentRoster
+		id="player_char_creation_eredluin_6_m"
+		culture="Culture.eredluin">
+		<EquipmentSet>
+			<Equipment
+				slot="Item2"
+				id="Item.starter_sm_dwarf_erebor_1h_axe_a" />
+			<Equipment
+				slot="Item3"
+				id="Item.starter_sm_dwarf_erebor_shield_leather_a" />
+			<Equipment
+				slot="Body"
+				id="Item.starter_sk_dwarf_erebor_chest_leather_med_a" />
+			<Equipment
+				slot="Leg"
+				id="Item.starter_sk_dwarf_erebor_boots_light_a" />
+		</EquipmentSet>
+		<EquipmentSet
+			equipmentType="Civilian">
+			<Equipment
+				slot="Item0"
+				id="Item.starter_sm_dwarf_iron_sword_a" />
+			<Equipment
+				slot="Body"
+				id="Item.starter_sk_dwarf_erebor_chest_leather_light_a" />
+			<Equipment
+				slot="Cape"
+				id="Item.starter_sk_dwarf_erebor_pauldron_scale_a" />
+			<Equipment
+				slot="Leg"
+				id="Item.starter_sk_dwarf_erebor_boots_light_a" />
+		</EquipmentSet>
+	</EquipmentRoster>
+	<EquipmentRoster
+		id="player_char_creation_eredluin_6_f"
+		culture="Culture.eredluin">
+		<EquipmentSet>
+			<Equipment
+				slot="Item2"
+				id="Item.starter_sm_dwarf_erebor_1h_axe_a" />
+			<Equipment
+				slot="Item3"
+				id="Item.starter_sm_dwarf_erebor_shield_leather_a" />
+			<Equipment
+				slot="Body"
+				id="Item.starter_sk_dwarf_erebor_chest_leather_med_a" />
+			<Equipment
+				slot="Leg"
+				id="Item.starter_sk_dwarf_erebor_boots_light_a" />
+		</EquipmentSet>
+		<EquipmentSet
+			equipmentType="Civilian">
+			<Equipment
+				slot="Item0"
+				id="Item.starter_sm_dwarf_iron_sword_a" />
+			<Equipment
+				slot="Body"
+				id="Item.starter_sk_dwarf_erebor_chest_leather_light_a" />
+			<Equipment
+				slot="Cape"
+				id="Item.starter_sk_dwarf_erebor_pauldron_scale_a" />
+			<Equipment
+				slot="Leg"
+				id="Item.starter_sk_dwarf_erebor_boots_light_a" />
+		</EquipmentSet>
+	</EquipmentRoster>
+	<!-- Show -->
+	<EquipmentRoster
+		id="player_char_creation_show_eredluin"
+		culture="Culture.eredluin">
+		<EquipmentSet>
+			<Equipment
+				slot="Body"
+				id="Item.sk_dwarf_erebor_chest_leather_med_a" />
+			<Equipment
+				slot="Gloves"
+				id="Item.sk_dwarf_erebor_gloves_a" />
+			<Equipment
+				slot="Leg"
+				id="Item.sk_dwarf_erebor_boots_light_a" />
+		</EquipmentSet>
+		<EquipmentSet
+			equipmentType="Civilian">
+			<Equipment
+				slot="Item0"
+				id="Item.sm_dwarf_erebor_1h_axe_a" />
+			<Equipment
+				slot="Body"
+				id="Item.sk_dwarf_erebor_chest_leather_light_a" />
+			<Equipment
+				slot="Leg"
+				id="Item.sk_dwarf_erebor_boots_light_a" />
+		</EquipmentSet>
+	</EquipmentRoster>
 </EquipmentRosters>

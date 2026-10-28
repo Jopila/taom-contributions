@@ -1429,4 +1429,55 @@
         </policies>
     </Kingdom>
   <!-- TAOM-NEWFACTIONS:rhudaur:END -->
+  <!-- TAOM-NEWFACTIONS:eredluin:BEGIN -->
+    <Kingdom
+        id="eredluin"
+        owner="Hero.lord_EL1_1"
+        initial_home_settlement="Settlement.town_EL3"
+        banner_key="11.200.200.1528.1528.764.764.1.0.0.24000.110.110.700.700.764.764.0.0.0"        primary_banner_color="0xFF3E5A7A"
+        secondary_banner_color="0xFFB8C4CC"
+        color="0xFF3E5A7A"
+        color2="0xFFB8C4CC"      
+        culture="Culture.eredluin"
+        settlement_banner_mesh="encounter_flag_a"
+        flag_mesh="info_screen_flags_b"
+        name="{=taom_eredluin_name}Kingdom of Ered Luin"
+        short_name="{=taom_eredluin_short_name}Ered Luin"
+        title="{=taom_eredluin_title}Kingdom of Ered Luin"
+        ruler_title="{=taom_eredluin_ruler_title}King"
+        text="{=taom_eredluin_desc}The dwarf kingdom of the Blue Mountains. Durin's Folk made Thorin's Halls there in their exile, and in this age the Broadbeams and the Firebeards hold Belegost and Nogrod again. Its lords are few and its halls are poorer than those of its kin in the east, but its smiths are the oldest in the West, and its axes keep the goblins of Blue Craig from the roads to Lindon.">
+        <relationships>
+            <relationship
+                kingdom="Kingdom.bluecraig"
+                value="0"
+                isAtWar="false" />
+            <relationship
+                kingdom="Kingdom.goblin"
+                value="0"
+                isAtWar="false" />
+            <relationship
+                kingdom="Kingdom.gundabad"
+                value="0"
+                isAtWar="false" />
+            <relationship
+                kingdom="Kingdom.mistymountainorcs"
+                value="0"
+                isAtWar="false" />
+            <relationship
+                kingdom="Kingdom.erebor"
+                value="1"
+                isAtWar="false" />
+            <relationship
+                kingdom="Kingdom.lindon"
+                value="1"
+                isAtWar="false" />
+        </relationships>
+        <policies>
+            <policy
+                id="policy_royal_privilege" />
+            <policy
+                id="policy_castle_charters" />
+        </policies>
+    </Kingdom>
+  <!-- TAOM-NEWFACTIONS:eredluin:END -->
 </Kingdoms>

@@ -349,19 +349,84 @@
     "difficulty": 6
   },
   "kingdom_of_ered_duin": {
-    "name": "{=taom_faction_kingdom_of_ered_duin_name}Kingdom of Ered Duin",
+    "name": "{=taom_faction_kingdom_of_ered_duin_name}Kingdom of Ered Luin",
     "color": "#607888FF",
-    "playable": false,
-    "game_faction": "erebor",
+    "playable": true,
+    "game_faction": "eredluin",
     "side": "free",
-    "description": "{=taom_faction_kingdom_of_ered_duin_desc}The Dwarven mansions of the Blue Mountains, ancestral halls of Durin's Folk. After the loss of Erebor, many Dwarves found refuge here before Thorin's quest.",
+    "description": "{=taom_faction_kingdom_of_ered_duin_desc}The dwarf-halls of the Blue Mountains at the western edge of Middle-earth. Durin's Folk made Thorin's Halls in their exile, and the Broadbeams and the Firebeards keep Belegost and Nogrod again. They mine iron and sell it to the Elves of Lindon and the Men of Eriador, while the goblins of Blue Craig gnaw at their roads.",
     "traits": [
       "{=taom_faction_kingdom_of_ered_duin_trait_0}Blue Mountain Halls",
       "{=taom_faction_kingdom_of_ered_duin_trait_1}Durin's Folk",
       "{=taom_faction_kingdom_of_ered_duin_trait_2}Exiled Dwarves",
       "{=taom_faction_kingdom_of_ered_duin_trait_3}Mining and Smithing"
     ],
-    "image": "faction_kingdom_of_ered_duin"
+    "image": "faction_kingdom_of_ered_duin",
+    "bonuses": [
+      {
+        "text": "{=taom_faction_kingdom_of_ered_duin_bonus_0}-30% smithing energy cost (Master Smiths)",
+        "positive": true
+      },
+      {
+        "text": "{=taom_faction_kingdom_of_ered_duin_bonus_1}+10% village production (Dwarven Industry)",
+        "positive": true
+      },
+      {
+        "text": "{=taom_faction_kingdom_of_ered_duin_bonus_2}+10% party speed on snow (Mountain Folk)",
+        "positive": true
+      },
+      {
+        "text": "{=taom_faction_kingdom_of_ered_duin_bonus_3}+5 party morale (Dwarven Stubbornness)",
+        "positive": true
+      },
+      {
+        "text": "{=taom_faction_kingdom_of_ered_duin_bonus_4}+1 settlement loyalty per day (Dwarven Honor)",
+        "positive": true
+      },
+      {
+        "text": "{=taom_faction_kingdom_of_ered_duin_bonus_5}-15% building construction speed (Dwarven Perfectionism)",
+        "positive": false
+      }
+    ],
+    "perks": [
+      {
+        "name": "{=taom_faction_kingdom_of_ered_duin_perk_0_name}Master Smiths",
+        "description": "{=taom_faction_kingdom_of_ered_duin_perk_0_desc}-30% smithing energy cost. The forges of Belegost and Nogrod are the oldest in the West."
+      },
+      {
+        "name": "{=taom_faction_kingdom_of_ered_duin_perk_1_name}Dwarven Stubbornness",
+        "description": "{=taom_faction_kingdom_of_ered_duin_perk_1_desc}+5 party morale and +1 settlement loyalty per day."
+      },
+      {
+        "name": "{=taom_faction_kingdom_of_ered_duin_perk_2_name}Mountain Folk",
+        "description": "{=taom_faction_kingdom_of_ered_duin_perk_2_desc}+10% party speed on snow and +10% village production from the mines of the Blue Mountains."
+      }
+    ],
+    "special_units": [
+      {
+        "name": "{=taom_faction_kingdom_of_ered_duin_su_0_name}King's Guard of Thorin's Halls",
+        "description": "{=taom_faction_kingdom_of_ered_duin_su_0_desc}Tower-shield elite of the Broadbeam line, the King's own guard."
+      },
+      {
+        "name": "{=taom_faction_kingdom_of_ered_duin_su_1_name}Master Arbalester of Nogrod",
+        "description": "{=taom_faction_kingdom_of_ered_duin_su_1_desc}Veteran Firebeard crossbowman."
+      },
+      {
+        "name": "{=taom_faction_kingdom_of_ered_duin_su_2_name}Warden of Thorin's Halls",
+        "description": "{=taom_faction_kingdom_of_ered_duin_su_2_desc}Axe and shield guard of the capital's gates."
+      }
+    ],
+    "strengths": [
+      "{=taom_faction_kingdom_of_ered_duin_strength_0}Stubborn heavy infantry and steady crossbows",
+      "{=taom_faction_kingdom_of_ered_duin_strength_1}Fast forges and rich mines",
+      "{=taom_faction_kingdom_of_ered_duin_strength_2}Loyal halls and steady morale"
+    ],
+    "weaknesses": [
+      "{=taom_faction_kingdom_of_ered_duin_weakness_0}No cavalry at all",
+      "{=taom_faction_kingdom_of_ered_duin_weakness_1}Slow to build",
+      "{=taom_faction_kingdom_of_ered_duin_weakness_2}Few lords, with goblins at the door"
+    ],
+    "difficulty": 5
   },
   "kingdom_of_cardolan": {
     "name": "{=taom_faction_kingdom_of_cardolan_name}Kingdom of Cardolan",

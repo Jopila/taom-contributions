@@ -66,6 +66,7 @@ class TestLayout(unittest.TestCase):
     def test_culture_exceptions(self):
         self.assertEqual(ck.slot_classes("empire", "infantry")["Item0"], "OneHandedAxe")
         self.assertEqual(ck.slot_classes("erebor", "ranged")["Item2"], "OneHandedAxe")
+        self.assertEqual(ck.slot_classes("eredluin", "infantry")["Item0"], "OneHandedAxe")   # dwarves carry axes
         self.assertEqual(ck.slot_classes("dolguldur", "infantry")["Item2"], "TwoHandedAxe")
         self.assertEqual(ck.slot_classes("dolguldur", "cavalry")["Item0"], "TwoHandedPolearm")
 
@@ -74,6 +75,8 @@ class TestLayout(unittest.TestCase):
         weapons = lambda c: tuple(ck.slot_classes(c, "ranged")[s] for s in ("Item0", "Item1", "Item2"))  # noqa: E731
         self.assertEqual(weapons("isengard"), ("Crossbow", "Bolts", "OneHandedSword"))
         self.assertEqual(weapons("erebor"), ("Crossbow", "Bolts", "OneHandedAxe"))
+        # Firebeard Arbalester: Ered Luin's ranged career is a crossbow career, never a ladder bow
+        self.assertEqual(weapons("eredluin"), ("Crossbow", "Bolts", "OneHandedAxe"))
         self.assertEqual(weapons("aserai"), ("Javelin", "Shield", "OneHandedSword"))
         # Chatak Javelineer: every Shaghana bow needs skill 100, so a new character could not re-equip one
         self.assertEqual(weapons("shaghana"), ("Javelin", "Shield", "OneHandedSword"))
@@ -251,6 +254,25 @@ class TestRewrite(unittest.TestCase):
     def test_a_slot_the_culture_has_no_candidate_for_fails_loudly(self):
         with self.assertRaises(ck.CareerKitError):
             ck.apply_kits(CAREER, {("gondor", "ranged"): {**KIT, "Item0": None}})
+
+
+class TestEredLuinCareerRosters(unittest.TestCase):
+    """Ered Luin offers infantry and ranged careers only: dwarves do not ride and the realm fields no
+    war ram. The rosters are applied at runtime, so MOUNTED_DWARF never sees them."""
+
+    def setUp(self):
+        root = ET.fromstring(ck.gk.read_xml(ck.CAREER_FILE)[0].encode("utf-8"))
+        self.rosters = {r.get("id"): r for r in root.iter("EquipmentRoster")
+                        if (r.get("id") or "").startswith("player_career_eredluin_")}
+
+    def test_infantry_and_ranged_for_both_sexes_and_no_cavalry(self):
+        self.assertEqual(sorted(self.rosters), [f"player_career_eredluin_{a}_{s}"
+                                                for a in ("infantry", "ranged") for s in ("f", "m")])
+
+    def test_no_roster_carries_a_mount(self):
+        mounts = [rid for rid, r in self.rosters.items() for e in r.iter("Equipment")
+                  if e.get("slot") in ("Horse", "HorseHarness")]
+        self.assertEqual(mounts, [])
 
 
 @unittest.skipUnless(ck.DEFAULT_ARMORY.exists(), "needs the LOTRLOME_Armory install; skipped, never faked")

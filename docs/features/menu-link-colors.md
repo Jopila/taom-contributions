@@ -94,6 +94,10 @@ is an XML edit with no rebuild.
 | | | | `goblin` | Goblins | `#2E4322` |
 | | | | `mistymountainorcs` | Misty Mountain Orcs | `#3F3A33` |
 
+The six kingdom cultures added since have no style: `lindon`, `bluecraig`, `arthedain`, `cardolan`,
+`rhudaur` and `eredluin` (Ered Luin) are not in `TaomCultureLinkStyles`, so their links keep vanilla's
+style (`MenuLinkStyleRewriter` "KEPT VANILLA"), as a bandit culture's do.
+
 ### The contrast rule
 
 Every menu link colour must sit inside relative luminance **0.035 ≤ L ≤ 0.10**:

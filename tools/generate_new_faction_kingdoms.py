@@ -172,9 +172,45 @@ KINGDOMS = {
         # Its lords are Dunedain: Gondor's face range, drawn per lord as Cardolan's.
         face_template="fighter_gondor", female_hair_tag="empire",
     ),
+    # Ered Luin (2026-10-27): the dwarf kingdom of the Blue Mountains, on its own culture
+    # (promote_borrowed_cultures.py, cut from Erebor, and generate_eredluin_troops.py). A middling
+    # realm: the ruling House of Borin at tier 5, the Broadbeams and Firebeards at 4, the Wardens of
+    # Dolmed at 3, so about 9 lord parties. Free side, with Erebor and Lindon as its natural allies.
+    "eredluin": dict(
+        region="EL", culture="eredluin", race="dwarf", capital="town_EL3", tmpl="rivendell", lords="dwarf",
+        equip="eredluin", side="free", color="0xFF3E5A7A", color2="0xFFB8C4CC",
+        name="Kingdom of Ered Luin", short="Ered Luin", title="Kingdom of Ered Luin", ruler="King",
+        desc="The dwarf kingdom of the Blue Mountains. Durin's Folk made Thorin's Halls there in their exile, and in this age the Broadbeams and the Firebeards hold Belegost and Nogrod again. Its lords are few and its halls are poorer than those of its kin in the east, but its smiths are the oldest in the West, and its axes keep the goblins of Blue Craig from the roads to Lindon.",
+        # The dwarf templates' own skill sets (SKILL_TEMPLATE_MISMATCH, as Arthedain's note says).
+        lord_skill=("taom_dwarf_lord_skills", "taom_dwarf_lord_skills", "taom_dwarf_lady_skills"),
+        lords_per_clan=4,  # 4 clans x 4 = 16 lords (2 male + 2 female, married within the clan)
+        clans=[("clan_eredluin_1", 5, "town_EL3", "House of Borin"),
+               ("clan_eredluin_2", 4, "town_EL1", "Broadbeams"),
+               ("clan_eredluin_3", 4, "town_EL2", "Firebeards"),
+               ("clan_eredluin_4", 3, "castle_EL2", "Wardens of Dolmed")],
+        leader_name="Farin II",
+        male_names=["Andvari", "Fjalar", "Frosti", "Ginnar", "Hepti", "Skirfir", "Virfir", "Aurvang"],
+        female_names=["Bryndís", "Gerda", "Hlíf", "Sigrún", "Ásta", "Védís", "Ragna", "Herdís"],
+        party_template="PartyTemplate.kingdom_hero_party_eredluin_template",
+        # Dwarf icons (Main/_Module/ModuleData/banner_icons.xml 24000-24030, ones no clan flies yet) in
+        # silver (palette 110) on the slate blue of the Blue Mountains (palette 200).
+        banner="11.200.200.1528.1528.764.764.1.0.0.{icon}.110.110.700.700.764.764.0.0.0",
+        kingdom_icon=24000, clan_icons=[24000, 24001, 24002, 24003],
+        clan_colors=[("FF3E5A7A", "FFB8C4CC"), ("FF34495E", "FFC8CCD0"), ("FF6A3A2A", "FFE0B080"),
+                     ("FF2C3E50", "FFB0B8C0")],
+        # No war on day one (see Arthedain's note); the enemies are in diplomacy.json.
+        relationships={"bluecraig": (0, False), "goblin": (0, False), "gundabad": (0, False),
+                       "mistymountainorcs": (0, False), "erebor": (1, False), "lindon": (1, False)},
+        # Erebor's dwarf face range drawn per lord at campaign start. fighter_erebor's keys carry hair
+        # indices 1 and 10, and a tag list that matches no hair (the template's tags are culture names,
+        # the dwarf skin's are styles) draws between them (native FUN_18057c9f0, v1.5.6), so no dwarf
+        # lady can start bald. TiedAcrossBack is a style choice: the 8 tied styles (dwarf_hair_c, _e to
+        # _k) instead of _a to _j. main() requires a tag on every face-template realm.
+        face_template="fighter_erebor", female_hair_tag="TiedAcrossBack",
+    ),
 }
 # The realms a regeneration reproduces (main() --only). See the note there.
-REGENERATABLE = ("arthedain", "cardolan", "rhudaur")
+REGENERATABLE = ("arthedain", "cardolan", "rhudaur", "eredluin")
 # Leader (clan-1 lord-1) descriptions, period-correct for TA 3018 (War of the Ring).
 LEADER_BLURB = {
     "goblin": "the Great Goblin of Goblin Town, master of the warrens of the High Pass.",
@@ -184,6 +220,7 @@ LEADER_BLURB = {
     "arthedain": "King of Arthedain, heir of Arvedui and of Isildur, who holds Fornost against the orcs of Gundabad and keeps an uneasy peace with his kin in Cardolan and Rhudaur.",
     "cardolan": "King of Cardolan, heir of Earendur's second son, who keeps the barrow-kings' crown at Caras Gorthad.",
     "rhudaur": "King of Rhudaur, heir of Earendur's third son, lord of Cameth Brin and of the hill-men of the Angle.",
+    "eredluin": "King of Ered Luin, of the line of Borin, Lord of Thorin's Halls, who holds the Blue Mountains with the Broadbeams of Belegost and the Firebeards of Nogrod.",
 }
 # lords per clan: ruling clan (first) 6, vassals 4
 LORDS_RULING, LORDS_VASSAL = 6, 4
@@ -280,8 +317,12 @@ def main():
     # *_bat_template_medium_* rosters the equipment rewrite below expects.
     lord_human_m = get_block(lords, r'<NPCCharacter\b[^>]*\bid="lord_WE9_l_1".*?</NPCCharacter>')
     lord_human_f = get_block(lords, r'<NPCCharacter\b[^>]*\bid="lord_1_57_1".*?</NPCCharacter>')
+    # Dwarf lords (Ered Luin): Erebor's Náin and Dísa, both race="dwarf" on the generic
+    # erebor_*_template_* rosters.
+    lord_dwarf_m = get_block(lords, r'<NPCCharacter\b[^>]*\bid="lord_E1_4".*?</NPCCharacter>')
+    lord_dwarf_f = get_block(lords, r'<NPCCharacter\b[^>]*\bid="lord_E1_3".*?</NPCCharacter>')
     lord_templates = {"orc": (lord_orc_m, lord_orc_f), "elf": (lord_elf_m, lord_elf_f),
-                      "human": (lord_human_m, lord_human_f)}
+                      "human": (lord_human_m, lord_human_f), "dwarf": (lord_dwarf_m, lord_dwarf_f)}
 
     new_kingdoms, new_clans, new_lords, new_heroes = {}, {}, {}, {}
 

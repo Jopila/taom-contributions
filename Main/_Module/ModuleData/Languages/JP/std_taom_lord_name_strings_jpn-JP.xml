@@ -1083,5 +1083,21 @@
     <string id="aom_lord_LN6_1_name" text="Aearion" />
     <string id="aom_lord_LN6_2_name" text="Gwaeriel" />
     <string id="aom_lord_LN6_3_name" text="Rínthal" />
+    <string id="aom_lord_EL1_1_name" text="Farin II" />
+    <string id="aom_lord_EL1_2_name" text="Andvari" />
+    <string id="aom_lord_EL1_3_name" text="Bryndís" />
+    <string id="aom_lord_EL1_4_name" text="Gerda" />
+    <string id="aom_lord_EL2_1_name" text="Fjalar" />
+    <string id="aom_lord_EL2_2_name" text="Frosti" />
+    <string id="aom_lord_EL2_3_name" text="Hlíf" />
+    <string id="aom_lord_EL2_4_name" text="Sigrún" />
+    <string id="aom_lord_EL3_1_name" text="Ginnar" />
+    <string id="aom_lord_EL3_2_name" text="Hepti" />
+    <string id="aom_lord_EL3_3_name" text="Ásta" />
+    <string id="aom_lord_EL3_4_name" text="Védís" />
+    <string id="aom_lord_EL4_1_name" text="Skirfir" />
+    <string id="aom_lord_EL4_2_name" text="Virfir" />
+    <string id="aom_lord_EL4_3_name" text="Ragna" />
+    <string id="aom_lord_EL4_4_name" text="Herdís" />
   </strings>
 </base>

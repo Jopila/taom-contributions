@@ -98,6 +98,7 @@ Authoritative table for naming new settlements anywhere on the map. Match the pr
 | `AN` | Arthedain (Arnor, 2026-10-07) | `Culture.arthedain` | Sindarin of the North + Bree-land Mannish | Fornost Erain, Annúminas, Bree, Amon Sûl, Staddle, Archet | Barad Forn, Lond Nenuial, Talath Forn, Rhaw Field, Hoarwell Watch (`castle_AN5`, renamed from Weather Hills 2026-10-16: the Weather Hills stay the broken country round Weathertop) |
 | `GBC` | Blue Craig (Ered Luin goblins) | `Culture.bluecraig` | Black Speech, hyphenated compounds | Blue Craig, Bolgkrag, Krimp-morn | Luinkrag, Gash-nakh, Mok-bûr, Zog-tang |
 | `LN` | Lindon (Grey Havens) | `Culture.lindon` | Sindarin of the Falathrim: sea, shore and haven words (`aear`, `falas`, `lond`, `luin`, `harn` south, `forn` north) | Mithlond, Harlond, Forlond, Harlindon, Lhûnbar | Ost Falas, Barad Luin, Tirith Aear, Maewlond, Ethir Forn (#1039) |
+| `EL` | Ered Luin (dwarves of the Blue Mountains, 2026-10-27) | `Culture.eredluin` | Tolkien's names for the old cities, Westron for the rest (the names dwarves use before Men): mines, delvings, folds, steadings | Thorin's Halls, Belegost, Nogrod, Dwarrowgate, Ironcrag | Mickleburg Delving, Emberdeep, Hollowbold Mead, Thrór's Steading, Dolmed Shieling ([ered-luin.md](../features/ered-luin.md)) |
 
 ### Suffix vocabulary (for compound names)
 
@@ -150,11 +151,11 @@ This is **save-safe** for the same reason renames are: only the `owner=` text at
 
 ## Correcting Entrance Coordinates (distinct from renaming)
 
-The third edit class on the same `<Settlement>` tag: the position AI parties actually path to. `posX`/`posY` is the map position; `gate_posX`/`gate_posY` overrides it for the entrance, and 221 of the live file's settlements carry it. `Settlement.Deserialize` (v1.4.7) sets `GatePosition` from `posX`/`posY` first and replaces it only when a `gate_posX` attribute exists — so a settlement with no gate attributes is entered at its map position.
+The third edit class on the same `<Settlement>` tag: the position AI parties actually path to. `posX`/`posY` is the map position; `gate_posX`/`gate_posY` overrides it for the entrance, and 256 of the live file's settlements carry it (every town and castle, 2026-10-27). `Settlement.Deserialize` (v1.4.7) sets `GatePosition` from `posX`/`posY` first and replaces it only when a `gate_posX` attribute exists, so a settlement with no gate attributes is entered at its map position.
 
 **The failure this fixes is silent.** An entrance can sit on a navmesh *island* the rest of the map cannot path to. Nothing crashes and nothing is written to the log: AI parties targeting that settlement simply fail their path query every tick, which the engine surfaces only as a repeating "Path finding target is not valid" assert. `PathFaceRecord.IsValid()` returns **true** for such faces, so an off-mesh check finds nothing — only comparing `FaceIslandIndex` against the rest of the map does.
 
-**Never hand-pick a replacement coordinate.** Run `taom.audit_settlement_entrances` in a loaded campaign (see [dev-console.md](../features/dev-console.md)). It resolves every settlement's entrance to a `PathFaceRecord`, derives the main landmass as the island index the most settlements agree on, and prints a replacement from `GetAccessiblePointNearPosition` for each disagreement — the engine's own navmesh answering, not a guess. The output names the attribute to edit: `gate_posX`/`gate_posY` for towns and castles, `posX`/`posY` for everything else. If it names the gate attributes on a settlement that has none, add them.
+**Never hand-pick a replacement coordinate.** Run `taom.audit_settlement_entrances` in a loaded campaign (see [dev-console.md](../features/dev-console.md)). It resolves every settlement's entrance to a `PathFaceRecord`, derives the main landmass as the island index the most settlements agree on, and prints a replacement from `GetAccessiblePointNearPosition` for each disagreement: the engine's own navmesh answers, not a guess. The output names the attribute to edit: `gate_posX`/`gate_posY` for towns and castles, `posX`/`posY` for everything else.
 
 **Reported, not yet corrected.** Three destinations were reported wedging AI parties in 2026-08-03 field testing. The values below are the current live coordinates, verified byte-exact against `TAOM_Map/ModuleData/settlements.xml`. The replacements do not exist yet — producing them takes one in-game campaign run of the audit.
 
@@ -164,7 +165,7 @@ The third edit class on the same `<Settlement>` tag: the position AI parties act
 | `hideout_desert_7` | Haradrim Raider's Camp | `posX`/`posY` | `1072.412, 374.593` |
 | `castle_village_MM1_2` | Throk-gûl | `posX`/`posY` | `725.024, 1032.055` |
 
-Apply corrections to the **LIVE** `TAOM_Map/ModuleData/settlements.xml`. The repo copy is the stale shadow described above; the audit repeats that warning in its own output. Save impact is covered under "Save Compatibility" below — coordinates are re-read from XML on every load, so a correction reaches existing saves too.
+Apply a correction in the map editor and save the scene: move a village's entity, or a town's or castle's `main_map_city_gate` child, onto the printed coordinate, and the editor writes the **LIVE** `TAOM_Map/ModuleData/settlements.xml`. A coordinate pasted into the file alone is reverted by the next editor save and fails the `--check` of `tools/add_map_fortifications.py` and `tools/add_map_villages.py`, which compare the file with the scene ([settlements.md](../modding/settlements.md) "Add" step 7). The repo copy is the stale shadow described above; the audit repeats that warning in its own output. Save impact is covered under "Save Compatibility" below: coordinates are re-read from XML on every load, so a correction reaches existing saves too.
 
 ## Validation Checks
 

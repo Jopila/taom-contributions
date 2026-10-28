@@ -436,8 +436,11 @@ Code: No code changes needed
    no `owner` and inherit through `bound=`. `python tools/Assign-SettlementOwners.py` is the
    rules-driven version, dry-run by default.
 4. **Move the entrance:** never hand-pick a coordinate. Run `taom.audit_settlement_entrances` in a
-   loaded campaign and paste the engine's own replacement into the attribute it names
-   (`gate_posX`/`gate_posY` for towns and castles, `posX`/`posY` for everything else).
+   loaded campaign and put the engine's own replacement into the map editor, not into
+   `settlements.xml` alone: move a village's entity, or a town's or castle's `main_map_city_gate`
+   child, onto the printed coordinate and save the scene, which writes `posX`/`posY` and
+   `gate_posX`/`gate_posY`. A coordinate pasted into the file alone is reverted by the next editor
+   save and fails both map tools' `--check` ([settlements.md](settlements.md) "Add" step 7).
 5. If you edit by script, keep the bytes faithful: the file is UTF-8 **with BOM** and CRLF, and a
    plain `utf-8` text read plus a text-mode write strips the BOM and rewrites every line ending. The
    sanctioned idioms are in [tools/README.md](../../tools/README.md) under "XML I/O convention".

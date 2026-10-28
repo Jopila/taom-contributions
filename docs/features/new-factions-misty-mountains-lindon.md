@@ -177,7 +177,7 @@ troops; clans 2 to 6 share the second template.
 | `tools/add_bluecraig_castles.py` | Adds the 4 Blue Craig castles (`castle_GBC1..4`) + 11 castle-villages to the live settlements.xml, spread across clans 2-5 (`--apply` + backup; idempotent; positions FROM scene.xscene). Only adds ids already placed in the scene. |
 
 Re-run order: `generate_new_factions.py` → `insert_new_factions.py` → `generate_new_faction_kingdoms.py`
-(it takes `--only`, offers only `arthedain`, `cardolan` and `rhudaur`, and writes only with
+(it takes `--only`, offers only `arthedain`, `cardolan`, `rhudaur` and `eredluin`, and writes only with
 `--apply`: this doc's four realms have drifted from
 their table entries, Lindon retagged to `Culture.lindon`, so a regeneration would revert them)
 → `generate_new_faction_settlements.py --apply`. All inserts are idempotent

@@ -105,7 +105,7 @@ public class ShippedCultureDoctrinesConfigTests
     public void ShippedConfig_NeverRoutCultures_AreTheOnesMikeNamed()
     {
         var catalog = _sut.GetCatalog();
-        var neverRout = new[] { "gundabad", "gundabad_raiders", "isengard", "dolguldur", "erebor", "erebor_warriors", "lindon", "lothlorien", "mirkwood", "mirkwood_stalkers", "rivendell" };
+        var neverRout = new[] { "gundabad", "gundabad_raiders", "isengard", "dolguldur", "erebor", "erebor_warriors", "eredluin", "lindon", "lothlorien", "mirkwood", "mirkwood_stalkers", "rivendell" };
         var rout = new[] { "vlandia", "gondor", "gondor_soldiers", "mordor", "khuzait", "aserai", "umbar", "sturgia", "empire", "dunland_raiders", "battania", "goblin", "mistymountainorcs" };
 
         foreach (var id in neverRout)
@@ -191,17 +191,18 @@ public class ShippedCultureDoctrinesConfigTests
     }
 
     /// <summary>The cultures Mike opted in, and whether their cavalry get off. Erebor rides war
-    /// rams, Isengard wargs; Dale rides ordinary horses.</summary>
+    /// rams, Isengard wargs; Dale rides ordinary horses. Ered Luin carries Erebor's row whole.</summary>
     [TestMethod]
-    public void ShippedConfig_HorseStandCultures_AreTheFourOptedIn_WithTheirDismountFlags()
+    public void ShippedConfig_HorseStandCultures_AreTheFiveOptedIn_WithTheirDismountFlags()
     {
         var catalog = _sut.GetCatalog();
 
         var standing = catalog.CultureIds.Where(c => catalog.Resolve(c).HorseStand != null).OrderBy(c => c).ToArray();
 
-        CollectionAssert.AreEqual(new[] { "erebor", "erebor_warriors", "isengard", "sturgia" }, standing);
+        CollectionAssert.AreEqual(new[] { "erebor", "erebor_warriors", "eredluin", "isengard", "sturgia" }, standing);
         Assert.IsFalse(catalog.Resolve("erebor").HorseStand!.Dismount, "erebor: its mounted troops ride war rams");
         Assert.IsFalse(catalog.Resolve("erebor_warriors").HorseStand!.Dismount, "erebor_warriors: no mounted troops");
+        Assert.IsFalse(catalog.Resolve("eredluin").HorseStand!.Dismount, "eredluin: no mounted troops");
         Assert.IsFalse(catalog.Resolve("isengard").HorseStand!.Dismount, "isengard: its mounted troops ride wargs");
         Assert.IsTrue(catalog.Resolve("sturgia").HorseStand!.Dismount, "sturgia: Dale rides ordinary horses");
     }

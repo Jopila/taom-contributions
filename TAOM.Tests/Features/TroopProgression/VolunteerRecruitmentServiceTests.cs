@@ -3341,6 +3341,47 @@ public class VolunteerRecruitmentServiceTests
         Assert.IsTrue(_sut.HasCulturePool("rhudaur"));
     }
 
+    // --- Ered Luin: delver-heavy, the Noble of Ered Luin as the one elite root ---
+    // pool: eredluin_delver(6)[0..5] + eredluin_noble(2)[6..7] = total 8
+
+    [TestMethod]
+    public void GetVolunteerTroopId_EredLuinCulture_Roll0_ReturnsDelver()
+    {
+        _random.Next(8).Returns(0);
+        var context = new VolunteerContext(null, null, null, "eredluin");
+        Assert.AreEqual("eredluin_delver", _sut.GetVolunteerTroopId(context));
+    }
+
+    [TestMethod]
+    public void GetVolunteerTroopId_EredLuinCulture_Roll5_ReturnsDelver()
+    {
+        _random.Next(8).Returns(5);
+        var context = new VolunteerContext(null, null, null, "eredluin");
+        Assert.AreEqual("eredluin_delver", _sut.GetVolunteerTroopId(context));
+    }
+
+    [TestMethod]
+    public void GetVolunteerTroopId_EredLuinCulture_Roll6_ReturnsNoble()
+    {
+        _random.Next(8).Returns(6);
+        var context = new VolunteerContext(null, null, null, "eredluin");
+        Assert.AreEqual("eredluin_noble", _sut.GetVolunteerTroopId(context));
+    }
+
+    [TestMethod]
+    public void GetVolunteerTroopId_EredLuinCulture_Roll7_ReturnsNoble()
+    {
+        _random.Next(8).Returns(7);
+        var context = new VolunteerContext(null, null, null, "eredluin");
+        Assert.AreEqual("eredluin_noble", _sut.GetVolunteerTroopId(context));
+    }
+
+    [TestMethod]
+    public void HasCulturePool_EredLuin_True()
+    {
+        Assert.IsTrue(_sut.HasCulturePool("eredluin"));
+    }
+
     [TestMethod]
     public void HasCulturePool_MirkwoodAndUmbar_NowTrue()
     {

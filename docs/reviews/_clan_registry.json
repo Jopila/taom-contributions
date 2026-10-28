@@ -2185,6 +2185,58 @@
       "source": "xml"
     },
     {
+      "id": "clan_eredluin_1",
+      "culture": "Culture.eredluin",
+      "super_faction": "Kingdom.eredluin",
+      "color": "FF3E5A7A",
+      "color2": "FFB8C4CC",
+      "default_party_template": "PartyTemplate.kingdom_hero_party_eredluin_template",
+      "is_bandit": null,
+      "is_minor_faction": null,
+      "is_clan_type_mercenary": null,
+      "is_outlaw": null,
+      "source": "xml"
+    },
+    {
+      "id": "clan_eredluin_2",
+      "culture": "Culture.eredluin",
+      "super_faction": "Kingdom.eredluin",
+      "color": "FF34495E",
+      "color2": "FFC8CCD0",
+      "default_party_template": "PartyTemplate.kingdom_hero_party_eredluin_template",
+      "is_bandit": null,
+      "is_minor_faction": null,
+      "is_clan_type_mercenary": null,
+      "is_outlaw": null,
+      "source": "xml"
+    },
+    {
+      "id": "clan_eredluin_3",
+      "culture": "Culture.eredluin",
+      "super_faction": "Kingdom.eredluin",
+      "color": "FF6A3A2A",
+      "color2": "FFE0B080",
+      "default_party_template": "PartyTemplate.kingdom_hero_party_eredluin_template",
+      "is_bandit": null,
+      "is_minor_faction": null,
+      "is_clan_type_mercenary": null,
+      "is_outlaw": null,
+      "source": "xml"
+    },
+    {
+      "id": "clan_eredluin_4",
+      "culture": "Culture.eredluin",
+      "super_faction": "Kingdom.eredluin",
+      "color": "FF2C3E50",
+      "color2": "FFB0B8C0",
+      "default_party_template": "PartyTemplate.kingdom_hero_party_eredluin_template",
+      "is_bandit": null,
+      "is_minor_faction": null,
+      "is_clan_type_mercenary": null,
+      "is_outlaw": null,
+      "source": "xml"
+    },
+    {
       "id": "player_faction",
       "culture": "Culture.battania",
       "super_faction": null,

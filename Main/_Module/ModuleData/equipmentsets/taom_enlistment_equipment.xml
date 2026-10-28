@@ -3988,4 +3988,163 @@
     </EquipmentRoster>
 
   <!-- TAOM-NEWCULTURE:rhudaur:END -->
+  <!-- TAOM-NEWCULTURE:eredluin:BEGIN -->
+    <EquipmentRoster id="enlist_eredluin_infantry_recruit" culture="Culture.eredluin">
+        <EquipmentSet>
+            <Equipment slot="Item0" id="Item.sm_dwarf_erebor_spear_b" />
+            <Equipment slot="Item1" id="Item.sm_iron_shield_tower_a" />
+            <Equipment slot="Head" id="Item.sk_dwarf_iron_helmet_light_c1" />
+            <Equipment slot="Body" id="Item.sk_dwarf_iron_chest_heavy_a" />
+            <Equipment slot="Leg" id="Item.sk_dwarf_iron_boots_light_a" />
+            <Equipment slot="Gloves" id="Item.sk_dwarf_iron_gloves_a" />
+        </EquipmentSet>
+    </EquipmentRoster>
+    <EquipmentRoster id="enlist_eredluin_archer_recruit" culture="Culture.eredluin">
+        <EquipmentSet>
+            <Equipment slot="Item0" id="Item.sm_dwarf_erebor_bow_a" />
+            <Equipment slot="Item1" id="Item.sk_dwarf_erebor_arrow_a" />
+            <Equipment slot="Item3" id="Item.sm_dwarf_erebor_1h_axe_b" />
+            <Equipment slot="Head" id="Item.sk_dwarf_erebor_helmet_leather_light_a" />
+            <Equipment slot="Body" id="Item.sk_dwarf_erebor_chest_leather_light_a" />
+            <Equipment slot="Leg" id="Item.sk_dwarf_erebor_boots_light_a" />
+        </EquipmentSet>
+    </EquipmentRoster>
+    <EquipmentRoster id="enlist_eredluin_support_recruit" culture="Culture.eredluin">
+        <EquipmentSet>
+            <Equipment slot="Item0" id="Item.sm_dwarf_erebor_spear_b" />
+            <Equipment slot="Head" id="Item.sk_dwarf_iron_helmet_light_c1" />
+            <Equipment slot="Body" id="Item.sk_dwarf_iron_chest_heavy_a" />
+            <Equipment slot="Leg" id="Item.sk_dwarf_iron_boots_light_a" />
+            <Equipment slot="Gloves" id="Item.sk_dwarf_iron_gloves_a" />
+        </EquipmentSet>
+    </EquipmentRoster>
+    <EquipmentRoster id="enlist_eredluin_infantry_soldier" culture="Culture.eredluin">
+        <EquipmentSet>
+            <Equipment slot="Item0" id="Item.sm_dwarf_iron_sword_a" />
+            <Equipment slot="Item1" id="Item.sm_iron_shield_a" />
+            <Equipment slot="Head" id="Item.sk_dwarf_iron_helmet_light_d1" />
+            <Equipment slot="Body" id="Item.sk_dwarf_iron_chest_chain_a" />
+            <Equipment slot="Leg" id="Item.sk_dwarf_iron_boots_heavy_c1" />
+            <Equipment slot="Gloves" id="Item.sk_dwarf_iron_bracer_light_c1" />
+            <Equipment slot="Cape" id="Item.sk_dwarf_iron_pauldron_light_a" />
+        </EquipmentSet>
+    </EquipmentRoster>
+    <EquipmentRoster id="enlist_eredluin_archer_soldier" culture="Culture.eredluin">
+        <EquipmentSet>
+            <Equipment slot="Item0" id="Item.sm_dwarf_erebor_bow_a" />
+            <Equipment slot="Item1" id="Item.sk_dwarf_erebor_arrow_a" />
+            <Equipment slot="Item3" id="Item.sm_dwarf_erebor_1h_axe_a" />
+            <Equipment slot="Head" id="Item.sk_dwarf_erebor_helmet_leather_med_a" />
+            <Equipment slot="Body" id="Item.sk_dwarf_erebor_chest_leather_med_a" />
+            <Equipment slot="Leg" id="Item.sk_dwarf_erebor_boots_med_a" />
+            <Equipment slot="Gloves" id="Item.sk_dwarf_erebor_bracers_med_a" />
+        </EquipmentSet>
+    </EquipmentRoster>
+    <EquipmentRoster id="enlist_eredluin_cavalry_soldier" culture="Culture.eredluin">
+        <EquipmentSet>
+            <Equipment slot="Item0" id="Item.sm_dwarf_erebor_spear_a" />
+            <Equipment slot="Item1" id="Item.sm_dwarf_erebor_shield_metal_a" />
+            <Equipment slot="Item2" id="Item.sm_dwarf_iron_axe_a" />
+            <Equipment slot="Head" id="Item.sk_dwarf_iron_helmet_med_c2" />
+            <Equipment slot="Body" id="Item.sk_dwarf_iron_chest_heavy_c" />
+            <Equipment slot="Leg" id="Item.sk_dwarf_iron_boots_heavy_b1" />
+            <Equipment slot="Gloves" id="Item.sk_dwarf_iron_bracer_med_b1" />
+            <Equipment slot="Cape" id="Item.sk_dwarf_iron_pauldron_medium_b" />
+        </EquipmentSet>
+    </EquipmentRoster>
+    <EquipmentRoster id="enlist_eredluin_support_soldier" culture="Culture.eredluin">
+        <EquipmentSet>
+            <Equipment slot="Item0" id="Item.sm_dwarf_iron_sword_a" />
+            <Equipment slot="Head" id="Item.sk_dwarf_iron_helmet_light_d1" />
+            <Equipment slot="Body" id="Item.sk_dwarf_iron_chest_chain_a" />
+            <Equipment slot="Leg" id="Item.sk_dwarf_iron_boots_heavy_c1" />
+            <Equipment slot="Gloves" id="Item.sk_dwarf_iron_bracer_light_c1" />
+            <Equipment slot="Cape" id="Item.sk_dwarf_iron_pauldron_light_a" />
+        </EquipmentSet>
+    </EquipmentRoster>
+    <EquipmentRoster id="enlist_eredluin_infantry_veteran" culture="Culture.eredluin">
+        <EquipmentSet>
+            <Equipment slot="Item0" id="Item.sm_dwarf_erebor_spear_a" />
+            <Equipment slot="Item1" id="Item.sm_dwarf_iron_axe_a" />
+            <Equipment slot="Item2" id="Item.sm_dwarf_erebor_shield_tower_a" />
+            <Equipment slot="Head" id="Item.sk_dwarf_iron_helmet_med_c2" />
+            <Equipment slot="Body" id="Item.sk_dwarf_iron_chest_heavy_c" />
+            <Equipment slot="Leg" id="Item.sk_dwarf_iron_boots_heavy_b1" />
+            <Equipment slot="Gloves" id="Item.sk_dwarf_iron_bracer_med_b1" />
+            <Equipment slot="Cape" id="Item.sk_dwarf_iron_pauldron_heavy_cape_a" />
+        </EquipmentSet>
+    </EquipmentRoster>
+    <EquipmentRoster id="enlist_eredluin_archer_veteran" culture="Culture.eredluin">
+        <EquipmentSet>
+            <Equipment slot="Item0" id="Item.sm_dwarf_erebor_bow_a" />
+            <Equipment slot="Item1" id="Item.sk_dwarf_erebor_arrow_a" />
+            <Equipment slot="Item2" id="Item.sm_dwarf_erebor_1h_axe_b" />
+            <Equipment slot="Item3" id="Item.sm_dwarf_erebor_shield_tower_b" />
+            <Equipment slot="Head" id="Item.sk_dwarf_erebor_helmet_plate_med_a" />
+            <Equipment slot="Body" id="Item.sk_dwarf_erebor_chest_plate_heavy_a" />
+            <Equipment slot="Leg" id="Item.sk_dwarf_erebor_boots_med_c" />
+            <Equipment slot="Gloves" id="Item.sk_dwarf_erebor_bracers_med_a" />
+            <Equipment slot="Cape" id="Item.sk_dwarf_erebor_pauldron_plate_med_a" />
+        </EquipmentSet>
+    </EquipmentRoster>
+    <EquipmentRoster id="enlist_eredluin_support_veteran" culture="Culture.eredluin">
+        <EquipmentSet>
+            <Equipment slot="Item0" id="Item.sm_dwarf_erebor_spear_a" />
+            <Equipment slot="Head" id="Item.sk_dwarf_iron_helmet_med_c2" />
+            <Equipment slot="Body" id="Item.sk_dwarf_iron_chest_heavy_c" />
+            <Equipment slot="Leg" id="Item.sk_dwarf_iron_boots_heavy_b1" />
+            <Equipment slot="Gloves" id="Item.sk_dwarf_iron_bracer_med_b1" />
+            <Equipment slot="Cape" id="Item.sk_dwarf_iron_pauldron_heavy_cape_a" />
+        </EquipmentSet>
+    </EquipmentRoster>
+    <EquipmentRoster id="enlist_eredluin_infantry_sergeant" culture="Culture.eredluin">
+        <EquipmentSet>
+            <Equipment slot="Item0" id="Item.sm_dwarf_erebor_1h_axe_a2" />
+            <Equipment slot="Item1" id="Item.sm_dwarf_erebor_spear_a" />
+            <Equipment slot="Item2" id="Item.sm_dwarf_erebor_shield_metal_d2" />
+            <Equipment slot="Item3" id="Item.southern_throwing_axe_1_t4" />
+            <Equipment slot="Head" id="Item.sk_dwarf_erebor_helmet_plate_lord_a2" />
+            <Equipment slot="Body" id="Item.sk_dwarf_erebor_chest_plate_elite_a2" />
+            <Equipment slot="Leg" id="Item.sk_dwarf_erebor_greaves_elite_b" />
+            <Equipment slot="Gloves" id="Item.sk_dwarf_erebor_bracers_elite_b" />
+            <Equipment slot="Cape" id="Item.sk_dwarf_erebor_pauldron_plate_cape_elite_a" />
+        </EquipmentSet>
+    </EquipmentRoster>
+    <EquipmentRoster id="enlist_eredluin_archer_sergeant" culture="Culture.eredluin">
+        <EquipmentSet>
+            <Equipment slot="Item0" id="Item.sm_dwarf_erebor_bow_b" />
+            <Equipment slot="Item1" id="Item.sk_dwarf_erebor_arrow_b" />
+            <Equipment slot="Item2" id="Item.sm_dwarf_erebor_1h_axe_a" />
+            <Equipment slot="Item3" id="Item.sm_dwarf_erebor_shield_tower_c" />
+            <Equipment slot="Head" id="Item.sk_dwarf_erebor_helmet_plate_med_b" />
+            <Equipment slot="Body" id="Item.sk_dwarf_erebor_chest_plate_heavy_b" />
+            <Equipment slot="Leg" id="Item.sk_dwarf_erebor_boots_med_d" />
+            <Equipment slot="Gloves" id="Item.sk_dwarf_erebor_bracers_med_b" />
+            <Equipment slot="Cape" id="Item.sk_dwarf_erebor_pauldron_plate_med_b" />
+        </EquipmentSet>
+    </EquipmentRoster>
+    <EquipmentRoster id="enlist_eredluin_cavalry_sergeant" culture="Culture.eredluin">
+        <EquipmentSet>
+            <Equipment slot="Item0" id="Item.sm_dwarf_erebor_spear_b" />
+            <Equipment slot="Item1" id="Item.sm_dwarf_erebor_shield_metal_c" />
+            <Equipment slot="Item2" id="Item.sm_dwarf_iron_axe_b" />
+            <Equipment slot="Head" id="Item.sk_dwarf_iron_helmet_heavy_c1" />
+            <Equipment slot="Body" id="Item.sk_dwarf_iron_chest_heavy_e" />
+            <Equipment slot="Leg" id="Item.sk_dwarf_iron_boots_heavy_b2" />
+            <Equipment slot="Gloves" id="Item.sk_dwarf_iron_bracer_heavy_c1" />
+            <Equipment slot="Cape" id="Item.sk_dwarf_iron_pauldron_heavy_cape_b" />
+        </EquipmentSet>
+    </EquipmentRoster>
+    <EquipmentRoster id="enlist_eredluin_support_sergeant" culture="Culture.eredluin">
+        <EquipmentSet>
+            <Equipment slot="Item0" id="Item.sm_dwarf_erebor_1h_axe_a2" />
+            <Equipment slot="Head" id="Item.sk_dwarf_erebor_helmet_plate_lord_a2" />
+            <Equipment slot="Body" id="Item.sk_dwarf_erebor_chest_plate_elite_a2" />
+            <Equipment slot="Leg" id="Item.sk_dwarf_erebor_greaves_elite_b" />
+            <Equipment slot="Gloves" id="Item.sk_dwarf_erebor_bracers_elite_b" />
+            <Equipment slot="Cape" id="Item.sk_dwarf_erebor_pauldron_plate_cape_elite_a" />
+        </EquipmentSet>
+    </EquipmentRoster>
+
+  <!-- TAOM-NEWCULTURE:eredluin:END -->
 </EquipmentRosters>

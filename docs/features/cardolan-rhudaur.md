@@ -135,7 +135,7 @@ Every table that names `arthedain` was decided for both. Four keep no row for ei
 
 | File | Purpose |
 |------|---------|
-| `tools/realm_troops.py` | shared troop machinery for the three Arnor realms |
+| `tools/realm_troops.py` | shared troop machinery for the three Arnor realms and, since 2026-10-27, the dwarf realm of [Ered Luin](ered-luin.md) |
 | `tools/generate_cardolan_troops.py`, `tools/generate_rhudaur_troops.py` | each realm's tree and party templates; `--check` |
 | `Main/Features/TroopProgression/RecruitmentPools/VolunteerRecruitmentService.Cardolan.cs`, `.Rhudaur.cs` | volunteer pools (Levy 6, Dunadan 2) |
 | `Main/Features/LiegeTitles/TaomCultureTags.cs` | `TaomCardolanCultureTag`, `TaomRhudaurCultureTag` for the King and Queen titles |
@@ -205,7 +205,8 @@ generator and `--only <culture>`. Both `generate_new_faction_kingdoms.py` and
 - All new English text waits for the paid translation run (#763). The 12 translated
   `loc_arnor.xml` files in the live Armory have no row yet for the 9 new ladder bows, so
   `sync_ranged_ladder_translations.py` stops on `ladder_rhudaur_bow_t2` until that run adds them.
-- No faction-screen art for either realm.
+- No new faction-screen art was made: both cards show the existing `faction_kingdom_of_cardolan.png`
+  and `faction_kingdom_of_rhudaur.png` in `Main/_Module/GUI/SpriteData/FactionMap/`.
 
 ## Changelog
 

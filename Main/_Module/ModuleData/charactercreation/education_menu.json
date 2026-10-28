@@ -2014,5 +2014,77 @@
         "focus_to_add": 1,
         "skill_level_to_add": 10,
         "attribute_level_to_add": 1
+    },
+    {
+        "string_id": "taom_education_eredluin_1",
+        "culture_id": "eredluin",
+        "occupation_type": "retainer",
+        "text": "Trained in the great hall with the King's axe-brothers.",
+        "description": "You practised combat alongside the young warriors of King Farin's household, learning to swing the two-handed axe in the echoing training halls deep in the Blue Mountains. Every scar was a lesson; every lesson was a point of pride.",
+        "skills": ["TwoHanded", "Leadership"],
+        "attribute": "Cunning",
+        "focus_to_add": 1,
+        "skill_level_to_add": 10,
+        "attribute_level_to_add": 1
+    },
+    {
+        "string_id": "taom_education_eredluin_2",
+        "culture_id": "eredluin",
+        "occupation_type": "merchant_urban",
+        "text": "Apprenticed at the forges of Nogrod.",
+        "description": "You spent your youth at the smith's bench in Nogrod, learning to work the iron of the Blue Mountains in forges older than any kingdom of Men. When the work was done you carried finished blades to the Elves of Lindon, who paid in silver and in patience.",
+        "skills": ["Crafting", "Trade"],
+        "attribute": "Endurance",
+        "focus_to_add": 1,
+        "skill_level_to_add": 10,
+        "attribute_level_to_add": 1
+    },
+    {
+        "string_id": "taom_education_eredluin_3",
+        "culture_id": "eredluin",
+        "occupation_type": "farmer",
+        "text": "Worked the iron mines of Mount Dolmed.",
+        "description": "You swung a pick in the deep galleries under Mount Dolmed before your beard had grown, learning the hidden passages of the mountain and the engineering of tunnels and supports. The deep stone became as familiar to you as open sky.",
+        "skills": ["Engineering", "Trade"],
+        "attribute": "Endurance",
+        "focus_to_add": 1,
+        "skill_level_to_add": 10,
+        "attribute_level_to_add": 1
+    },
+    {
+        "string_id": "taom_education_eredluin_4",
+        "culture_id": "eredluin",
+        "occupation_type": "artisan_urban",
+        "text": "Drilled with the Broadbeam shieldwall.",
+        "description": "You trained in the close-quarters style of the Broadbeams of Belegost, learning to brace a shield and swing an axe in tight tunnel formations. Your short stride was an advantage in the corridors where taller folk stumbled.",
+        "skills": ["OneHanded", "Athletics"],
+        "attribute": "Vigor",
+        "focus_to_add": 1,
+        "skill_level_to_add": 10,
+        "attribute_level_to_add": 1
+    },
+    {
+        "string_id": "taom_education_eredluin_5",
+        "culture_id": "eredluin",
+        "occupation_type": "hunter",
+        "text": "Counted the stores of Thorin's Halls.",
+        "description": "You helped tally the iron, grain and coin of Thorin's Halls from an early age, learning to keep ledgers and to supply a mountain hold through the long winters. The work made you methodical and gave you a strategist's eye for resources.",
+        "skills": ["Steward", "Tactics"],
+        "attribute": "Intelligence",
+        "focus_to_add": 1,
+        "skill_level_to_add": 10,
+        "attribute_level_to_add": 1
+    },
+    {
+        "string_id": "taom_education_eredluin_6",
+        "culture_id": "eredluin",
+        "occupation_type": "vagabond_urban",
+        "text": "Patrolled the foothills and the Dwarf-road.",
+        "description": "You ranged the eastern foothills of the Blue Mountains with the outer watch, learning to track orc raiders and shoot from cover among the pines along the Dwarf-road. The mountain air sharpened your senses and distance became your ally.",
+        "skills": ["Scouting", "Bow"],
+        "attribute": "Control",
+        "focus_to_add": 1,
+        "skill_level_to_add": 10,
+        "attribute_level_to_add": 1
     }
 ]

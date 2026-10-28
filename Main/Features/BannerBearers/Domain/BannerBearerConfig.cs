@@ -74,6 +74,7 @@ public sealed class BannerBearerConfig
         // Dwarves — heavy shield-wall standards
         { "erebor", "banner_of_oaken_shields_t1" },
         { "erebor_warriors", "banner_of_oaken_shields_t1" },
+        { "eredluin", "banner_of_oaken_shields_t1" },    // the Blue Mountains dwarves, cloned from Erebor
 
         // Elves — ranged/precision standards
         { "rivendell", "archers_flag_t1" },

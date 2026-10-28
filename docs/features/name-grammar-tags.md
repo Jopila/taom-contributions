@@ -115,18 +115,22 @@ taom.print_kept_pairs <lang>       renders each kept pair in game, writes a repo
 | Settlements (live TAOM_Map) | 1086 | 1086 | 1086 |
 | Lore town names (`LoreNames.cs`, the Namegiving feature) | 4 | 2 | 2 |
 
+On 2026-10-27, after Ered Luin, `name_tag_inventory.py` counts 78 kingdom keys, 28 minor faction keys, 579 clan keys, 26
+culture keys, 1140 live settlement names and 4 lore names (1855 in all), and `check_external_loc_coverage.py
+--require-tags` reports all 1140 settlement names tagged in both languages. The other tagged columns were not re-measured.
+
 Tagged rows in the repo language files: 674 BR (646 ids) and 673 IT (645 ids); an id counts once per file that holds it.
 
 The four lore names are in the inventory. "Minas Ithil" and "Amon Lanc" are Sindarin names kept as written and take the plain
 town tag. "Deadmen's Dike" and "Treegarth of Orthanc" are still English in every language, so the table excludes them until
 they are translated.
 
-Undecided: 45 BR and 46 IT. Per language that is 40 rows still in English, 3 Haradric titles and the 2 lore names that are
-still English; IT also holds "Gondoriano", excluded as an adjective. `python tools/generate_name_tags.py --list-undecided`
+Undecided: 57 BR and 58 IT (2026-10-27). Per language that is 52 rows still in English (11 of them Ered Luin's clan and
+kingdom names, seeded in English until the translation run), 3 Haradric titles and the 2 lore names that are still English; IT also holds "Gondoriano", excluded as an adjective. `python tools/generate_name_tags.py --list-undecided`
 prints each with its reason.
 
 Settlement tags are judged on the live text, because that is what the apply tags. 47 live names (the Carn Dûm, Cardolan and
-Rhudaur additions) have no translation cache entry, so a rebuild writes their English default, which is what the live file
+Rhudaur additions) and Ered Luin's 31 (2026-10-27) have no translation cache entry, so a rebuild writes their English default, which is what the live file
 holds. `castle_AN5` differs the other way round (live "Vigia do Mitheithel", cache "Colinas do Vento"), so the live file is
 tagged in place with `name_tags.py --target live-map`, never by rebuild; its tag is `{.FS}` in both languages.
 
@@ -134,7 +138,9 @@ tagged in place with `name_tags.py --target live-map`, never by rebuild; its tag
 "Morannon"), and `name_tags.py --target live-map --apply --allow-live-write` then tagged 1,086 rows per language, 2,172 in all.
 `check_external_loc_coverage.py --require-tags` reports 1086/1086 in both languages and `generate_name_tags.py --check` passes.
 The untagged originals are kept outside the install. The Italian castle change above is the one difference between the table and
-the live Italian file until the next apply.
+the live Italian file until the next apply. Later applies tagged each new realm's names the same way, Ered Luin's 31 per language
+on 2026-10-27 (backup `loc_settlements.xml.bak_nametags_20261027_214259` in the BR and IT folders); on 2026-10-27
+`check_external_loc_coverage.py --require-tags` reports 1140/1140 in both languages.
 
 ## Key Files
 
@@ -250,7 +256,7 @@ tags. Re-apply with this procedure, on Mike's word:
 3. **The apply.** `python tools/name_tags.py --target live-map --apply --allow-live-write`. It backs the file up beside itself as
    `loc_settlements.xml.bak_nametags_<time>`, only when its bytes change.
 4. **The confirm step.** `python tools/generate_name_tags.py --check` and `python tools/check_external_loc_coverage.py
-   --require-tags`. The second reports `0` or `1086/1086` live names tagged per language; `--require-tags` makes a missing, wrong
+   --require-tags`. The second reports `0` or the full count (`1140/1140` on 2026-10-27) of live names tagged per language; `--require-tags` makes a missing, wrong
    or orphan tag fail (exit 1) and a missing report exit 2.
 
 **Writers that strip or skip the tags.** The tags are only as durable as the last tool that wrote the file:
@@ -268,6 +274,9 @@ table does not know, so a rewritten name never loses it. The three live-map writ
 
 ## Changelog
 
+- 2026-10-27 (Ered Luin): `generate_name_tags.py --write` added the Ered Luin rows to the tag table, `name_tags.py --lang
+  all --apply` tagged its seeded BR and IT name rows, and a live apply tagged its 31 settlement names per language; the
+  confirm gate reads 1140/1140 in both languages.
 - 2026-10-26 (live apply): `castle_ES1` was rewritten without its article, then the live `loc_settlements.xml` was tagged
   (1,086 rows per language, 2,172 in all). The IT castle rule (`{.MN}` for an untitled castle) came after it, and a second
   apply re-tagged those 146 live Italian rows; the confirm gate reads 1086/1086 in both languages.

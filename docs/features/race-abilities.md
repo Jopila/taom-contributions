@@ -276,7 +276,7 @@ get x1.2), and heroes take x1.25.
 
 | Culture | Ability | Cooldown / length | Fires when | Effect | Price |
 |---|---|---|---|---|---|
-| `gondor`, `gondor_soldiers` | Guard of the Citadel | 120 s / 10 s | enemy within 15 m and (2 within 5 m, or cavalry closing, or health half) | block +30%; 10% less damage; knock-back resistance x2; cannot panic | -10% speed |
+| `gondor`, `gondor_soldiers`, `arthedain`, `cardolan`, `rhudaur` | Guard of the Citadel | 120 s / 10 s | enemy within 15 m and (2 within 5 m, or cavalry closing, or health half) | block +30%; 10% less damage; knock-back resistance x2; cannot panic | -10% speed |
 | `vlandia` (Rohan) | Forth Eorlingas | 120 s / 10 s | mounted, enemy within 30 m | horse +15%; +15% melee; +10% swing; dismount resistance x2.5; cannot panic | none |
 | `sturgia` (Dale) | Bard's Aim | 120 s / 8 s | a target within 40 m with a bow | +20% draw; aim error -40%; +15% arrow speed; +10% ranged damage | none |
 | `empire`, `dunland_raiders` (Dunland) | Hill-clan Fury | 80 s / 6 s | enemy within 3 m and (took damage, or kin fell within 8 m) | +15% melee; +10% swing; +10% speed | block -30%; 3 s spent: -10% speed |
@@ -285,6 +285,9 @@ get x1.2), and heroes take x1.25.
 | `umbar`, `umbar_corsairs` | Corsair Raid | 80 s / 6 s | enemy within 4 m and (took damage, or a kill in 2 s) | +20% swing; +15% speed; +10% melee | 3 s spent: -10% speed |
 | `battania` (Khand's lords, caravan masters and tavern mercenaries, and the Variag Ravagers) | Variag Ferocity | 100 s / 8 s | enemy within 6 m | +15% melee; +10% swing; knockdown resistance x2; dismount resistance x2 | none |
 | `mordor`, `dolguldur` (their men) | Servants of the Shadow | 120 s / 8 s | enemy within 4 m and (a kill in 2 s, or health half) | each kill frightens enemies within 6 m; cannot panic; +10% melee | none |
+
+Erebor and Ered Luin have no culture row: all 27 Ered Luin troops are `race="dwarf"`, so they fight with
+the dwarf's Stand Fast, as Erebor's do.
 
 Rally radii run 6 to 12 m. The initiator and every third joiner shout.
 

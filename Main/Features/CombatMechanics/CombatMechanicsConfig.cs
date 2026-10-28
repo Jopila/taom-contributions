@@ -98,6 +98,7 @@ public class ChargeDamageConfig
         ["aserai"] = 1.2f,
         ["battania"] = 1.2f,
         ["erebor"] = 1.0f,
+        ["eredluin"] = 1.0f,
     };
 }
 

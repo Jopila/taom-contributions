@@ -1903,5 +1903,77 @@
         "focus_to_add": 1,
         "skill_level_to_add": 10,
         "attribute_level_to_add": 1
+    },
+    {
+        "string_id": "taom_youth_eredluin_1",
+        "culture_id": "eredluin",
+        "title_type": "infantry",
+        "text": "Served in the King's Guard of Thorin's Halls.",
+        "description": "You pledged your loyalty to King Farin, serving in the guard of Thorin's Halls and learning to wield axe and long-hafted mattock in defence of the mountain halls.",
+        "skills": ["TwoHanded", "Polearm"],
+        "attribute": "Vigor",
+        "focus_to_add": 1,
+        "skill_level_to_add": 10,
+        "attribute_level_to_add": 1
+    },
+    {
+        "string_id": "taom_youth_eredluin_2",
+        "culture_id": "eredluin",
+        "title_type": "guard",
+        "text": "Defended the gates of Belegost.",
+        "description": "As part of the garrison of Belegost, you manned the crossbows on the gate-towers and held the passes against all comers, learning the craft of dwarven siege defence.",
+        "skills": ["Crossbow", "Polearm"],
+        "attribute": "Vigor",
+        "focus_to_add": 1,
+        "skill_level_to_add": 10,
+        "attribute_level_to_add": 1
+    },
+    {
+        "string_id": "taom_youth_eredluin_3",
+        "culture_id": "eredluin",
+        "title_type": "skirmisher",
+        "text": "Trained with the Firebeard hewers.",
+        "description": "You joined the hewers of the Firebeards, the shock troops of Nogrod, learning to hurl throwing axes and fight in the narrow corridors of the mountain halls.",
+        "skills": ["Throwing", "OneHanded"],
+        "attribute": "Endurance",
+        "focus_to_add": 1,
+        "skill_level_to_add": 10,
+        "attribute_level_to_add": 1
+    },
+    {
+        "string_id": "taom_youth_eredluin_4",
+        "culture_id": "eredluin",
+        "title_type": "hunter",
+        "text": "Scouted the slopes below Blue Craig.",
+        "description": "You ranged the northern slopes of the Blue Mountains, where the goblins of Blue Craig hold their caves, tracking raiders and wolves and keeping watch on the passes.",
+        "skills": ["Scouting", "Bow"],
+        "attribute": "Control",
+        "focus_to_add": 1,
+        "skill_level_to_add": 10,
+        "attribute_level_to_add": 1
+    },
+    {
+        "string_id": "taom_youth_eredluin_5",
+        "culture_id": "eredluin",
+        "title_type": "infantry",
+        "text": "Stood in the vanguard of the Broadbeams.",
+        "description": "You trained in the vanguard of the Broadbeams, mastering the long spear and the two-handed axe in the close formations of the dwarven host.",
+        "skills": ["Polearm", "TwoHanded"],
+        "attribute": "Vigor",
+        "focus_to_add": 1,
+        "skill_level_to_add": 10,
+        "attribute_level_to_add": 1
+    },
+    {
+        "string_id": "taom_youth_eredluin_6",
+        "culture_id": "eredluin",
+        "title_type": "bard",
+        "text": "Marched with the caravan guards on the Dwarf-road.",
+        "description": "You marched with the trading caravans along the Dwarf-road through the Shire to Bree, learning the ways of commerce and the art of defending valuable cargo.",
+        "skills": ["OneHanded", "Trade"],
+        "attribute": "Social",
+        "focus_to_add": 1,
+        "skill_level_to_add": 10,
+        "attribute_level_to_add": 1
     }
 ]

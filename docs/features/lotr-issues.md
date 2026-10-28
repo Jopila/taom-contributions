@@ -9,11 +9,13 @@
 > follow are the original research deliverable, kept for provenance. Engine mechanics are documented in
 > [issue-and-quest-system.md](../reference/engine/issue-and-quest-system.md).
 >
-> Since 2026-09-28 the shipped file holds 74 issues: the 43, 18 "Armourer's Commission" DeliverGoods rows
+> Since 2026-10-27 the shipped file holds 78 issues: the 43, 22 "Armourer's Commission" DeliverGoods rows
 > from [armour acquisition](armour-acquisition.md) (an artisan trades a heavy chest of the town's people for
-> steel, through the template's until-then unused `reward_item`), and 13 "Deep Seam" rows for its lord's
+> steel, through the template's until-then unused `reward_item`; 18 on 2026-09-28, then Arthedain's,
+> Cardolan's, Rhudaur's and Ered Luin's), and 13 "Deep Seam" rows for its lord's
 > gear ladder (a village headman pays five of the culture's lord's materials for timber: `reward_count`,
-> how many of `reward_item` completion grants, 1 to 99, default 1).
+> how many of `reward_item` completion grants, 1 to 99, default 1). Ered Luin shares Erebor's Deep Seam
+> row (`cultures="erebor,eredluin"`), and its commission rewards `sk_dwarf_iron_chest_heavy_b`.
 >
 > `for_player_culture="true"` offers a row only while the player, not only the giver, is of one of its
 > `cultures`, and an untaken offer is withdrawn once that stops being true: a new campaign creates its

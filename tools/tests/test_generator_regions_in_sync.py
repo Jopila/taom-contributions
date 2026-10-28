@@ -9,8 +9,8 @@ generator's next --apply. This shipped three times in three days (2026-10-16 KEY
 "check who owns the region" and that check was skipped each time. Each case here runs the owner's
 own --check, so the edit fails /verify instead of waiting for a regeneration.
 
-promote_borrowed_cultures.py --check is covered for Arthedain, Cardolan and Rhudaur (the #979 strings
-blocker is cleared). It reads the culture start points from the live TAOM_Map settlements.xml, so those
+promote_borrowed_cultures.py --check is covered for Arthedain, Cardolan, Rhudaur and Ered Luin (the #979
+strings blocker is cleared). It reads the culture start points from the live TAOM_Map settlements.xml, so those
 cases skip, never fake a pass, when that install is absent.
 """
 import os
@@ -27,9 +27,11 @@ OWNERS = [
     ("generate_arthedain_troops.py", ["--check"]),
     ("generate_cardolan_troops.py", ["--check"]),
     ("generate_rhudaur_troops.py", ["--check"]),
+    ("generate_eredluin_troops.py", ["--check"]),
     ("generate_new_faction_kingdoms.py", ["--only", "arthedain", "--check"]),
     ("generate_new_faction_kingdoms.py", ["--only", "cardolan", "--check"]),
     ("generate_new_faction_kingdoms.py", ["--only", "rhudaur", "--check"]),
+    ("generate_new_faction_kingdoms.py", ["--only", "eredluin", "--check"]),
 ]
 
 # Owners whose output depends on the live (unversioned) TAOM_Map install.
@@ -37,6 +39,7 @@ LIVE_OWNERS = [
     ("promote_borrowed_cultures.py", ["--only", "arthedain", "--check"]),
     ("promote_borrowed_cultures.py", ["--only", "cardolan", "--check"]),
     ("promote_borrowed_cultures.py", ["--only", "rhudaur", "--check"]),
+    ("promote_borrowed_cultures.py", ["--only", "eredluin", "--check"]),
 ]
 
 sys.path.insert(0, TOOLS)

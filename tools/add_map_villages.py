@@ -78,6 +78,7 @@ MESHES = {
     "rhudaur": ("gui_bg_village_empire", "wait_empire_village", "gui_bg_castle_empire"),
     "bluecraig": ("gui_bg_village_sturgia", "wait_sturgia_village", "gui_bg_castle_sturgia"),
     "lindon": ("gui_bg_village_battania", "wait_battania_village", "gui_bg_castle_battania"),
+    "eredluin": ("gui_bg_village_sturgia", "wait_sturgia_village", "gui_bg_castle_sturgia"),
 }
 HEARTH = "500"  # the SETTLEMENT_ECONOMY_FLOOR for isengard (tools/settlement_economy_floor.json)
 
@@ -221,6 +222,31 @@ VILLAGES = [
     Village("castle_village_LN3_1", "Cirith Forn", "castle_LN3", "trapper", "lindon", "battania_village_g", after="castle_LN3"),
     Village("castle_village_LN3_2", "Forlas", "castle_LN3", "lumberjack", "lindon", "battania_village_h", after="castle_LN3"),
     Village("castle_village_LN3_3", "Falathlin", "castle_LN3", "fisherman", "lindon", "battania_village_i", after="castle_LN3"),
+    # Ered Luin (Mike placed the entities 2026-10-27). Mines and upland farms in Westron, the names the
+    # dwarves use before Men; hearth at Erebor's 350; the least used sturgia village scenes.
+    Village("village_EL1_1", "Mickleburg Delving", "town_EL1", "iron_mine", "eredluin", "sturgia_village_k", hearth="350", after="town_EL1"),
+    Village("village_EL1_2", "Lunewater", "town_EL1", "fisherman", "eredluin", "sturgia_village_c", hearth="350", after="town_EL1"),
+    Village("village_EL1_3", "Broadbeam Fold", "town_EL1", "sheep_farm", "eredluin", "sturgia_village_d", hearth="350", after="town_EL1"),
+    Village("village_EL1_4", "Greystone Pits", "town_EL1", "clay_mine", "eredluin", "sturgia_village_a", hearth="350", after="town_EL1"),
+    Village("village_EL2_1", "Emberdeep", "town_EL2", "iron_mine", "eredluin", "sturgia_village_b", hearth="350", after="town_EL2"),
+    Village("village_EL2_2", "Hollowbold Mead", "town_EL2", "wheat_farm", "eredluin", "sturgia_village_e", hearth="350", after="town_EL2"),
+    Village("village_EL2_3", "Coalbrook", "town_EL2", "lumberjack", "eredluin", "sturgia_village_g", hearth="350", after="town_EL2"),
+    Village("village_EL3_1", "Thrór's Steading", "town_EL3", "cattle_farm", "eredluin", "sturgia_village_h", hearth="350", after="town_EL3"),
+    Village("village_EL3_2", "Ironhearth", "town_EL3", "iron_mine", "eredluin", "sturgia_village_j", hearth="350", after="town_EL3"),
+    Village("village_EL3_3", "Silverbrook", "town_EL3", "silver_mine", "eredluin", "sturgia_village_l", hearth="350", after="town_EL3"),
+    Village("village_EL3_4", "Roadsend", "town_EL3", "swine_farm", "eredluin", "sturgia_village_k", hearth="350", after="town_EL3"),
+    Village("castle_village_EL1_1", "Craigfoot", "castle_EL1", "sheep_farm", "eredluin", "sturgia_village_c", hearth="350", after="castle_EL1"),
+    Village("castle_village_EL1_2", "Goatfell", "castle_EL1", "trapper", "eredluin", "sturgia_village_d", hearth="350", after="castle_EL1"),
+    Village("castle_village_EL1_3", "Rimestone", "castle_EL1", "salt_mine", "eredluin", "sturgia_village_a", hearth="350", after="castle_EL1"),
+    Village("castle_village_EL2_1", "Dolmed Shieling", "castle_EL2", "sheep_farm", "eredluin", "sturgia_village_b", hearth="350", after="castle_EL2"),
+    Village("castle_village_EL2_2", "Silverthread", "castle_EL2", "silver_mine", "eredluin", "sturgia_village_e", hearth="350", after="castle_EL2"),
+    Village("castle_village_EL3_1", "Anvilstead", "castle_EL3", "clay_mine", "eredluin", "sturgia_village_g", hearth="350", after="castle_EL3"),
+    Village("castle_village_EL3_2", "Harrowmead", "castle_EL3", "wheat_farm", "eredluin", "sturgia_village_h", hearth="350", after="castle_EL3"),
+    Village("castle_village_EL4_1", "Southdelf", "castle_EL4", "iron_mine", "eredluin", "sturgia_village_j", hearth="350", after="castle_EL4"),
+    Village("castle_village_EL4_2", "Greyfold", "castle_EL4", "cattle_farm", "eredluin", "sturgia_village_l", hearth="350", after="castle_EL4"),
+    Village("castle_village_EL4_3", "Flintmoor", "castle_EL4", "wheat_farm", "eredluin", "sturgia_village_k", hearth="350", after="castle_EL4"),
+    Village("castle_village_EL5_1", "Dwarrowstead", "castle_EL5", "wheat_farm", "eredluin", "sturgia_village_c", hearth="350", after="castle_EL5"),
+    Village("castle_village_EL5_2", "Wayhearth", "castle_EL5", "swine_farm", "eredluin", "sturgia_village_d", hearth="350", after="castle_EL5"),
 ]
 INSERT_AFTER = "village_isengard_a"   # default anchor: last settlement of the Isengard block, and its last loc row
 

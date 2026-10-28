@@ -102,6 +102,19 @@ FORTS = [
     Fort("castle_LN1", "Ost Falas", "clan_lindon_4", "lindon", "castle", "battania_castle_a", 950, "town_LN3"),
     Fort("castle_LN2", "Barad Luin", "clan_lindon_5", "lindon", "castle", "battania_castle_b", 950, "castle_LN1"),
     Fort("castle_LN3", "Tirith Aear", "clan_lindon_6", "lindon", "castle", "battania_castle_c", 950, "castle_LN2"),
+    # Ered Luin, the dwarf kingdom of the Blue Mountains (Mike placed the entities 2026-10-27). The
+    # ruling House of Borin holds Thorin's Halls (the capital) and the castle nearest it; the
+    # Broadbeams Belegost, the Firebeards Nogrod, each with its nearest castle; the Wardens of Dolmed
+    # the two castles between. Prosperity a step under Erebor's (towns 3500) and no economy-floor
+    # row. Sturgia scenes, as every Erebor fief uses.
+    Fort("town_EL3", "Thorin's Halls", "clan_eredluin_1", "eredluin", "town", "sturgia_town_g", 3200, "castle_village_LN3_3"),
+    Fort("town_EL1", "Belegost", "clan_eredluin_2", "eredluin", "town", "sturgia_town_c", 3000, "town_EL3"),
+    Fort("town_EL2", "Nogrod", "clan_eredluin_3", "eredluin", "town", "sturgia_town_b", 3000, "town_EL1"),
+    Fort("castle_EL5", "Dwarrowgate", "clan_eredluin_1", "eredluin", "castle", "sturgia_castle_c", 800, "town_EL2"),
+    Fort("castle_EL1", "Ironcrag", "clan_eredluin_2", "eredluin", "castle", "sturgia_castle_003", 800, "castle_EL5"),
+    Fort("castle_EL4", "Stonewatch", "clan_eredluin_3", "eredluin", "castle", "sturgia_castle_c", 800, "castle_EL1"),
+    Fort("castle_EL2", "Dolmed Hold", "clan_eredluin_4", "eredluin", "castle", "sturgia_castle_003", 800, "castle_EL4"),
+    Fort("castle_EL3", "Hammerdeep", "clan_eredluin_4", "eredluin", "castle", "sturgia_castle_siege_001", 800, "castle_EL2"),
 ]
 
 # FORTS ids a release has shipped. The save-order check protects saves made BEFORE a batch only until the
@@ -109,7 +122,15 @@ FORTS = [
 # a release carries a batch, add its ids here and the next batch's rows become the required tail.
 # Limit: a village a later batch binds to an already released fortification is not counted as new
 # (batch_ids follows the bound fortification), so --check would name it; widen batch_ids first.
-RELEASED = set()
+# Filled 2026-10-27 from the newest published TAOM_Map package (testing channel, v2.0.35), which
+# carries 13 of FORTS; Cardolan, Rhudaur, Lindon and Ered Luin are not in it, so they are one batch:
+#   python -c "import sys; sys.path.insert(0, 'tools'); import add_map_fortifications as m; t = open(sys.argv[1], 'rb').read().decode('utf-8-sig'); print([f.id for f in m.FORTS if '<Settlement id=\"%s\"' % f.id in t])" E:/LOTRAOM_Releases/testing/Modules/TAOM_Map/ModuleData/settlements.xml
+# The public and patreon channels (v2.0.29.5) carry none of FORTS, so this no longer judges the
+# boundary their saves meet, before town_GBC2.
+RELEASED = {
+    "town_AN2", "town_AN1", "town_AN3", "castle_AN9", "castle_AN10", "castle_AN4", "castle_AN5",
+    "castle_AN6", "castle_AN8", "castle_AN11", "town_GBC2", "town_G3", "castle_G6",
+}
 
 
 def batch_ids(forts=None, villages=None, released=None):
@@ -214,6 +235,23 @@ STYLE["lindon"] = dict(town_menu="gui_bg_town_battania", castle_menu="gui_bg_cas
                            ("building_castle_granary", 1), ("building_castle_craftmans_quarters", 0),
                            ("building_castle_farmlands", 1), ("building_castle_mason", 1),
                            ("building_castle_roads_and_paths", 2)])
+# Ered Luin from Erebor's town_E2 and castle_E1 (sturgia scenes and meshes, gate rotations), with
+# building levels a step under Erebor's: strong walls and masons, poorer markets.
+STYLE["eredluin"] = dict(STYLE["gundabad"],
+                         town_buildings=[
+                             ("building_settlement_fortifications", 2), ("building_settlement_barracks", 2),
+                             ("building_settlement_training_fields", 1), ("building_settlement_guard_house", 1),
+                             ("building_settlement_siege_workshop", 1), ("building_settlement_tax_office", 1),
+                             ("building_settlement_marketplace", 1), ("building_settlement_warehouse", 2),
+                             ("building_settlement_mason", 2), ("building_settlement_waterworks", 1),
+                             ("building_settlement_courthouse", 0), ("building_settlement_roads_and_paths", 1)],
+                         castle_buildings=[
+                             ("building_castle_fortifications", 2), ("building_castle_barracks", 1),
+                             ("building_castle_training_fields", 1), ("building_castle_guard_house", 0),
+                             ("building_castle_siege_workshop", 1), ("building_castle_castallans_office", 1),
+                             ("building_castle_granary", 1), ("building_castle_craftmans_quarters", 1),
+                             ("building_castle_farmlands", 1), ("building_castle_mason", 1),
+                             ("building_castle_roads_and_paths", 1)])
 
 
 # ---------------------------------------------------------------- scene transforms

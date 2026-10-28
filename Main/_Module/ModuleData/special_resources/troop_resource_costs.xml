@@ -98,6 +98,9 @@
   <Troop id="gondor_pel_anchor_guard" resource_id="caster" upgrade_cost="4" daily_upkeep="0.2" />
   <!-- Arthedain troops cost no special resource (Mike, 2026-10-21): no rows, pinned by
        NoArthedainTroop_CarriesASpecialResourceCost. -->
+  <!-- Ered Luin troops cost no special resource either. Erebor's only costed tree troops are the
+       Ironpass war rams above, which Ered Luin does not field, and Erebor's other Gems rows are
+       emissary offers at level 41 and up, past Ered Luin's level 36 King's Guard. -->
 
   <!-- ============================================================================
        Elite Emissary merchant offers (merchant_cost = one-time price the faction

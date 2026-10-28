@@ -42,6 +42,7 @@ public sealed class CrownGuardMap
             ["sturgia"] = "dale_running_river_warden",
             ["empire"] = "dunland_wolf_champion",
             ["erebor"] = "erebor_noble_royal_warden",
+            ["eredluin"] = "eredluin_kings_guard",
             ["mirkwood"] = "mirkwood_palaceguard",
             ["rivendell"] = "imladris_warden",
             ["lothlorien"] = "imladris_warden",

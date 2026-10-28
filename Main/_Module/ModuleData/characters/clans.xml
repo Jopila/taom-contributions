@@ -2427,4 +2427,58 @@
 		default_party_template="PartyTemplate.kingdom_hero_party_rivendell_lindon_2_template"
 		banner_key="11.330.166.1528.1528.764.764.1.0.0.22000.149.171.700.700.764.764.0.0.0.22001.142.116.350.350.765.854.1.0.0" />
   <!-- TAOM-LINDON-EXPANSION:END -->
+  <!-- TAOM-NEWFACTIONS:eredluin:BEGIN -->
+  <Faction
+		id="clan_eredluin_1"
+		initial_home_settlement="Settlement.town_EL3"
+		name="{=aom_clan_eredluin_1_name}House of Borin"
+		tier="5"
+		owner="Hero.lord_EL1_1"
+		culture="Culture.eredluin"
+		super_faction="Kingdom.eredluin"
+		is_noble="true"
+		color="FF3E5A7A"
+		color2="FFB8C4CC"
+		default_party_template="PartyTemplate.kingdom_hero_party_eredluin_template"
+		banner_key="11.200.200.1528.1528.764.764.1.0.0.24000.110.110.700.700.764.764.0.0.0" />
+  <Faction
+		id="clan_eredluin_2"
+		initial_home_settlement="Settlement.town_EL1"
+		name="{=aom_clan_eredluin_2_name}Broadbeams"
+		tier="4"
+		owner="Hero.lord_EL2_1"
+		culture="Culture.eredluin"
+		super_faction="Kingdom.eredluin"
+		is_noble="true"
+		color="FF34495E"
+		color2="FFC8CCD0"
+		default_party_template="PartyTemplate.kingdom_hero_party_eredluin_template"
+		banner_key="11.200.200.1528.1528.764.764.1.0.0.24001.110.110.700.700.764.764.0.0.0" />
+  <Faction
+		id="clan_eredluin_3"
+		initial_home_settlement="Settlement.town_EL2"
+		name="{=aom_clan_eredluin_3_name}Firebeards"
+		tier="4"
+		owner="Hero.lord_EL3_1"
+		culture="Culture.eredluin"
+		super_faction="Kingdom.eredluin"
+		is_noble="true"
+		color="FF6A3A2A"
+		color2="FFE0B080"
+		default_party_template="PartyTemplate.kingdom_hero_party_eredluin_template"
+		banner_key="11.200.200.1528.1528.764.764.1.0.0.24002.110.110.700.700.764.764.0.0.0" />
+  <Faction
+		id="clan_eredluin_4"
+		initial_home_settlement="Settlement.castle_EL2"
+		name="{=aom_clan_eredluin_4_name}Wardens of Dolmed"
+		tier="3"
+		owner="Hero.lord_EL4_1"
+		culture="Culture.eredluin"
+		super_faction="Kingdom.eredluin"
+		is_noble="true"
+		color="FF2C3E50"
+		color2="FFB0B8C0"
+		default_party_template="PartyTemplate.kingdom_hero_party_eredluin_template"
+		banner_key="11.200.200.1528.1528.764.764.1.0.0.24003.110.110.700.700.764.764.0.0.0" />
+  <!-- TAOM-NEWFACTIONS:eredluin:END -->
 </Factions>

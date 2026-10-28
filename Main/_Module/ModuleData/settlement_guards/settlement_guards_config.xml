@@ -58,6 +58,15 @@
     </Guards>
   </Settlement>
 
+  <!-- Thorin's Halls (town_EL3), Ered Luin's capital: the King's Guard and the Wardens of the Halls -->
+  <Settlement id="town_EL3">
+    <Guards>
+      <Guard troop="eredluin_kings_guard" weight="2" spawn_points="sp_guard_castle" />
+      <Guard troop="eredluin_halls_warden" weight="3" spawn_points="sp_guard_castle,sp_guard_with_spear" />
+      <Guard troop="eredluin_veteran_hall_warden" weight="3" spawn_points="sp_guard,sp_guard_patrol" />
+    </Guards>
+  </Settlement>
+
   <!-- Cair Andros (castle_EW4) — Cair Andros wardens -->
   <Settlement id="castle_EW4">
     <Guards>
@@ -159,6 +168,7 @@
     <Spear culture="gondor" item="western_spear_3_t3" />
     <!-- Custom cultures use LOTR names as StringIds -->
     <Spear culture="erebor" item="western_spear_3_t3" />
+    <Spear culture="eredluin" item="western_spear_3_t3" />
     <Spear culture="isengard" item="western_spear_3_t3" />
     <Spear culture="mordor" item="western_spear_3_t3" />
     <Spear culture="lothlorien" item="western_spear_3_t3" />

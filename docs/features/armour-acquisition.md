@@ -92,8 +92,11 @@ engine's own ItemCategory is an absolute tier that ignores TAOM's per-kingdom ca
    in the piece's own tokened line first (`fix_armour_mesh_ladder.split_id`), then among same-slot pieces
    of the same kit line (`rebalance_armor.kingdom_key`, else the Armory folder: the mordor folder holds
    the orc, Uruk and Black Númenórean kits) sharing the longest id prefix; lord is a target only from
-   elite. Armour the table does not list (vanilla pieces, pieces added since the last run) is classed by
-   engine tier at runtime.
+   elite. A candidate below lord that is no better on any armour value (head, body, arm, leg) and
+   worse on one is skipped, so a paid upgrade never only lowers protection. The elite-to-lord forge
+   path is exempt because it buys the lord look, so some lord upgrades lower armour (an open decision
+   in [ered-luin.md](ered-luin.md) "Known gaps"). Armour the table does not list (vanilla pieces,
+   pieces added since the last run) is classed by engine tier at runtime.
 2. **The engine's own switch.** `ItemObject.NotMerchandise` keeps an item out of workshop production
    (`WorkshopsCampaignBehavior.IsProducable`), battle loot (`DefaultBattleRewardModel`), vanilla's
    regular tournament pool, map-event plunder and hideout loot. TAOM's prize pool reads the class
@@ -278,12 +281,13 @@ thamaskene 260. Special resources earn about 14 per battle won, so 150 is roughl
 
 ### `culture_marketplace_config.xml`
 
-Ten `<Culture id armour_from>` rows, the Armourer's Commission mapping: Lindon and Lórien draw on
+Thirteen `<Culture id armour_from>` rows, the Armourer's Commission mapping: Lindon and Lórien draw on
 Rivendell, Abanissa and Shaghana on Harad (`aserai`), Khand (`battania`) on Rhûn (`khuzait`), the
-three orc cultures and Umbar on Mordor, and Arthedain on Gondor (2026-10-07). Those cultures own 26
-of the 82 towns. `armour_from` always names the lord kit, ladder weapon and lord's material donor;
-for the market it only applies to a culture without `<Stock>` rows. Lindon and Arthedain stock their
-markets through `<Stock>` rows instead (#755, [culture marketplace](culture-marketplace.md)). The Animalia moose is
+three orc cultures and Umbar on Mordor, Arthedain (2026-10-07), Cardolan and Rhudaur on Gondor, and
+Ered Luin on Erebor (2026-10-27). Those cultures own 35 of the 92 towns in the live map (counted
+2026-10-27). `armour_from` always names the lord kit, ladder weapon and lord's material donor;
+for the market it only applies to a culture without `<Stock>` rows. Lindon, Arthedain, Cardolan,
+Rhudaur and Ered Luin stock their markets through `<Stock>` rows instead (#755, [culture marketplace](culture-marketplace.md)). The Animalia moose is
 routed to Mirkwood with `min_stock="1"`.
 
 ### MCM: "Armour Acquisition"
@@ -294,7 +298,7 @@ game's gate is on. The ladder has no toggle of its own: it runs while the gate i
 
 ### Data rows elsewhere
 
-- `lotr_issues/taom_lotr_issues.xml`: 18 `lotr_armourer_commission_*` DeliverGoods rows (Artisan giver,
+- `lotr_issues/taom_lotr_issues.xml`: 22 `lotr_armourer_commission_*` DeliverGoods rows (Artisan giver,
   4 steel plus up to 12 by difficulty), one per culture group, each rewarding a heavy (Umbar and
   Mirkwood: elite) chest; and 13 `lotr_deep_seam_*` rows, "The Deep Seam" (Headman giver, 6 hardwood
   plus up to 18 by difficulty), one per culture that owns armour and shared by the cultures that draw on

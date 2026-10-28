@@ -3552,4 +3552,127 @@
   </EquipmentRoster>
 
   <!-- TAOM-NEWCULTURE:rhudaur:END -->
+  <!-- TAOM-NEWCULTURE:eredluin:BEGIN -->
+  <EquipmentRoster id="taom_eredluin_lord_battle_male" culture="Culture.eredluin">
+    <EquipmentSet>
+    			<Equipment slot="Item0" id="Item.sm_dwarf_erebor_1h_axe_a" />
+    			<Equipment slot="Item1" id="Item.sm_dwarf_erebor_shield_metal_a" />
+    			<Equipment slot="Head" id="Item.sk_dwarf_erebor_helmet_plate_heavy_a" />
+    			<Equipment slot="Body" id="Item.sk_dwarf_erebor_chest_plate_heavy_a" />
+    			<Equipment slot="Cape" id="Item.sk_dwarf_erebor_pauldron_plate_cape_heavy_a" />
+    			<Equipment slot="Gloves" id="Item.sk_dwarf_erebor_bracers_heavy_a" />
+    			<Equipment slot="Leg" id="Item.sk_dwarf_erebor_greaves_heavy_a" />
+    		</EquipmentSet>
+    <Flags IsLordTemplate="true" />
+  </EquipmentRoster>
+  <EquipmentRoster id="taom_eredluin_lord_battle_female" culture="Culture.eredluin">
+    <EquipmentSet>
+    			<Equipment slot="Item0" id="Item.sm_dwarf_erebor_1h_axe_a" />
+    			<Equipment slot="Item1" id="Item.sm_dwarf_erebor_shield_metal_a" />
+    			<Equipment slot="Head" id="Item.sk_dwarf_erebor_helmet_plate_heavy_a" />
+    			<Equipment slot="Body" id="Item.sk_dwarf_erebor_chest_plate_heavy_a" />
+    			<Equipment slot="Cape" id="Item.sk_dwarf_erebor_pauldron_plate_cape_heavy_a" />
+    			<Equipment slot="Gloves" id="Item.sk_dwarf_erebor_bracers_heavy_a" />
+    			<Equipment slot="Leg" id="Item.sk_dwarf_erebor_greaves_heavy_a" />
+    		</EquipmentSet>
+    <Flags IsLordTemplate="true" IsFemaleTemplate="true" />
+  </EquipmentRoster>
+  <EquipmentRoster id="taom_eredluin_lord_civilian_male" culture="Culture.eredluin">
+    <EquipmentSet equipmentType="Civilian">
+    			<Equipment slot="Item0" id="Item.sm_dwarf_erebor_1h_axe_a" />
+    			<Equipment slot="Item1" id="Item.sm_dwarf_erebor_shield_metal_a" />
+    			<Equipment slot="Head" id="Item.sk_dwarf_erebor_helmet_plate_heavy_a" />
+    			<Equipment slot="Body" id="Item.sk_dwarf_erebor_chest_plate_heavy_a" />
+    			<Equipment slot="Cape" id="Item.sk_dwarf_erebor_pauldron_plate_cape_heavy_a" />
+    			<Equipment slot="Gloves" id="Item.sk_dwarf_erebor_bracers_heavy_a" />
+    			<Equipment slot="Leg" id="Item.sk_dwarf_erebor_greaves_heavy_a" />
+    		</EquipmentSet>
+    <Flags IsLordTemplate="true" />
+  </EquipmentRoster>
+  <EquipmentRoster id="taom_eredluin_lord_civilian_female" culture="Culture.eredluin">
+    <EquipmentSet equipmentType="Civilian">
+    			<Equipment slot="Item0" id="Item.sm_dwarf_erebor_1h_axe_a" />
+    			<Equipment slot="Item1" id="Item.sm_dwarf_erebor_shield_metal_a" />
+    			<Equipment slot="Head" id="Item.sk_dwarf_erebor_helmet_plate_heavy_a" />
+    			<Equipment slot="Body" id="Item.sk_dwarf_erebor_chest_plate_heavy_a" />
+    			<Equipment slot="Cape" id="Item.sk_dwarf_erebor_pauldron_plate_cape_heavy_a" />
+    			<Equipment slot="Gloves" id="Item.sk_dwarf_erebor_bracers_heavy_a" />
+    			<Equipment slot="Leg" id="Item.sk_dwarf_erebor_greaves_heavy_a" />
+    		</EquipmentSet>
+    <Flags IsLordTemplate="true" IsFemaleTemplate="true" />
+  </EquipmentRoster>
+  <EquipmentRoster id="taom_eredluin_lord_teen_male" culture="Culture.eredluin">
+    <EquipmentSet equipmentType="Civilian">
+    			<Equipment slot="Item0" id="Item.sm_dwarf_erebor_1h_axe_a" />
+    			<Equipment slot="Item1" id="Item.sm_dwarf_erebor_shield_metal_a" />
+    			<Equipment slot="Head" id="Item.sk_dwarf_erebor_helmet_plate_heavy_a" />
+    			<Equipment slot="Body" id="Item.sk_dwarf_erebor_chest_plate_heavy_a" />
+    			<Equipment slot="Cape" id="Item.sk_dwarf_erebor_pauldron_plate_cape_heavy_a" />
+    			<Equipment slot="Gloves" id="Item.sk_dwarf_erebor_bracers_heavy_a" />
+    			<Equipment slot="Leg" id="Item.sk_dwarf_erebor_greaves_heavy_a" />
+    		</EquipmentSet>
+    <Flags IsLordTemplate="true" IsTeenagerEquipmentTemplate="true" />
+  </EquipmentRoster>
+  <EquipmentRoster id="taom_eredluin_lord_teen_female" culture="Culture.eredluin">
+    <EquipmentSet equipmentType="Civilian">
+    			<Equipment slot="Item0" id="Item.sm_dwarf_erebor_1h_axe_a" />
+    			<Equipment slot="Item1" id="Item.sm_dwarf_erebor_shield_metal_a" />
+    			<Equipment slot="Head" id="Item.sk_dwarf_erebor_helmet_plate_heavy_a" />
+    			<Equipment slot="Body" id="Item.sk_dwarf_erebor_chest_plate_heavy_a" />
+    			<Equipment slot="Cape" id="Item.sk_dwarf_erebor_pauldron_plate_cape_heavy_a" />
+    			<Equipment slot="Gloves" id="Item.sk_dwarf_erebor_bracers_heavy_a" />
+    			<Equipment slot="Leg" id="Item.sk_dwarf_erebor_greaves_heavy_a" />
+    		</EquipmentSet>
+    <Flags IsLordTemplate="true" IsTeenagerEquipmentTemplate="true" IsFemaleTemplate="true" />
+  </EquipmentRoster>
+  <EquipmentRoster id="taom_eredluin_ruler_battle_male" culture="Culture.eredluin">
+    <EquipmentSet>
+    			<Equipment slot="Item0" id="Item.sm_dwarf_erebor_1h_axe_a" />
+    			<Equipment slot="Item1" id="Item.sm_dwarf_erebor_shield_metal_a" />
+    			<Equipment slot="Head" id="Item.sk_dwarf_erebor_helmet_plate_heavy_a" />
+    			<Equipment slot="Body" id="Item.sk_dwarf_erebor_chest_plate_heavy_a" />
+    			<Equipment slot="Cape" id="Item.sk_dwarf_erebor_pauldron_plate_cape_heavy_a" />
+    			<Equipment slot="Gloves" id="Item.sk_dwarf_erebor_bracers_heavy_a" />
+    			<Equipment slot="Leg" id="Item.sk_dwarf_erebor_greaves_heavy_a" />
+    		</EquipmentSet>
+    <Flags IsKingdomRulerTemplate="true" />
+  </EquipmentRoster>
+  <EquipmentRoster id="taom_eredluin_ruler_battle_female" culture="Culture.eredluin">
+    <EquipmentSet>
+    			<Equipment slot="Item0" id="Item.sm_dwarf_erebor_1h_axe_a" />
+    			<Equipment slot="Item1" id="Item.sm_dwarf_erebor_shield_metal_a" />
+    			<Equipment slot="Head" id="Item.sk_dwarf_erebor_helmet_plate_heavy_a" />
+    			<Equipment slot="Body" id="Item.sk_dwarf_erebor_chest_plate_heavy_a" />
+    			<Equipment slot="Cape" id="Item.sk_dwarf_erebor_pauldron_plate_cape_heavy_a" />
+    			<Equipment slot="Gloves" id="Item.sk_dwarf_erebor_bracers_heavy_a" />
+    			<Equipment slot="Leg" id="Item.sk_dwarf_erebor_greaves_heavy_a" />
+    		</EquipmentSet>
+    <Flags IsKingdomRulerTemplate="true" IsFemaleTemplate="true" />
+  </EquipmentRoster>
+  <EquipmentRoster id="taom_eredluin_ruler_civilian_male" culture="Culture.eredluin">
+    <EquipmentSet equipmentType="Civilian">
+    			<Equipment slot="Item0" id="Item.sm_dwarf_erebor_1h_axe_a" />
+    			<Equipment slot="Item1" id="Item.sm_dwarf_erebor_shield_metal_a" />
+    			<Equipment slot="Head" id="Item.sk_dwarf_erebor_helmet_plate_heavy_a" />
+    			<Equipment slot="Body" id="Item.sk_dwarf_erebor_chest_plate_heavy_a" />
+    			<Equipment slot="Cape" id="Item.sk_dwarf_erebor_pauldron_plate_cape_heavy_a" />
+    			<Equipment slot="Gloves" id="Item.sk_dwarf_erebor_bracers_heavy_a" />
+    			<Equipment slot="Leg" id="Item.sk_dwarf_erebor_greaves_heavy_a" />
+    		</EquipmentSet>
+    <Flags IsKingdomRulerTemplate="true" />
+  </EquipmentRoster>
+  <EquipmentRoster id="taom_eredluin_ruler_civilian_female" culture="Culture.eredluin">
+    <EquipmentSet equipmentType="Civilian">
+    			<Equipment slot="Item0" id="Item.sm_dwarf_erebor_1h_axe_a" />
+    			<Equipment slot="Item1" id="Item.sm_dwarf_erebor_shield_metal_a" />
+    			<Equipment slot="Head" id="Item.sk_dwarf_erebor_helmet_plate_heavy_a" />
+    			<Equipment slot="Body" id="Item.sk_dwarf_erebor_chest_plate_heavy_a" />
+    			<Equipment slot="Cape" id="Item.sk_dwarf_erebor_pauldron_plate_cape_heavy_a" />
+    			<Equipment slot="Gloves" id="Item.sk_dwarf_erebor_bracers_heavy_a" />
+    			<Equipment slot="Leg" id="Item.sk_dwarf_erebor_greaves_heavy_a" />
+    		</EquipmentSet>
+    <Flags IsKingdomRulerTemplate="true" IsFemaleTemplate="true" />
+  </EquipmentRoster>
+
+  <!-- TAOM-NEWCULTURE:eredluin:END -->
 </EquipmentRosters>

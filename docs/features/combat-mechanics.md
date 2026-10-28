@@ -185,8 +185,9 @@ override and the factor follows the spawn rider (a multiply from `UpdateAgentSta
 on every re-run, which is what the second review caught). The first cut read the mount's own
 `Character` and was a no-op in every battle (RCA `docs/reviews/rca-cavalry-charge-2026-09-17.md`).
 Shipped (Mike, 2026-09-17): elves (`mirkwood`, `lothlorien`, `rivendell`, `lindon`)
-1.6, Rohan (`vlandia`) 1.5, Rhun (`khuzait`) 1.4, `gondor` 1.3, Dale (`sturgia`) 1.2, the orc
-kingdoms and Dunland / Harad / Khand 1.2, `erebor` 1.0. Range 0.1 to 5, a bad row is dropped with
+1.6, Rohan (`vlandia`) 1.5, Rhun (`khuzait`) 1.4, `gondor`, `arthedain` and `cardolan` 1.3, Dale
+(`sturgia`) and `rhudaur` 1.2, the orc kingdoms and Dunland / Harad / Khand 1.2, `erebor` and
+`eredluin` 1.0. Range 0.1 to 5, a bad row is dropped with
 a warning, every key is pinned against the culture registry by `ShippedCombatMechanicsConfigTests`.
 MCM toggle `Culture Charge Damage` (folds the master). Harness `charge_bonus` on per-culture
 barding remains the data lever for elite units on top of this.

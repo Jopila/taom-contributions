@@ -58686,4 +58686,654 @@
         </Equipments>
     </NPCCharacter>
   <!-- TAOM-LINDON-EXPANSION:END -->
+  <!-- TAOM-NEWFACTIONS:eredluin:BEGIN -->
+    <NPCCharacter id="lord_EL1_1" race="dwarf" name="{=aom_lord_EL1_1_name}Farin II" age="33" voice="earnest" is_hero="true" culture="Culture.eredluin" occupation="Lord" default_group="Infantry" face_mesh_cache="true" skill_template="SkillSet.taom_dwarf_lord_skills">
+        <face>
+            <face_key_template value="BodyProperty.fighter_erebor" />
+          </face>
+        <skills>
+            <skill id="OneHanded" value="240" />
+            <skill id="TwoHanded" value="255" />
+            <skill id="Polearm" value="215" />
+            <skill id="Bow" value="110" />
+            <skill id="Crossbow" value="160" />
+            <skill id="Throwing" value="130" />
+            <skill id="Riding" value="130" />
+            <skill id="Athletics" value="225" />
+            <skill id="Crafting" value="240" />
+            <skill id="Scouting" value="170" />
+            <skill id="Tactics" value="355" />
+            <skill id="Roguery" value="70" />
+            <skill id="Charm" value="190" />
+            <skill id="Leadership" value="352" />
+            <skill id="Trade" value="200" />
+            <skill id="Steward" value="293" />
+            <skill id="Medicine" value="150" />
+            <skill id="Engineering" value="240" />
+        </skills>
+        <Traits>
+            <Trait id="Honor" value="2" />
+            <Trait id="Generosity" value="1" />
+            <Trait id="Calculating" value="1" />
+            <Trait id="Mercy" value="1" />
+            <Trait id="Valor" value="2" />
+            <Trait id="Egalitarian" value="0" />
+            <Trait id="Oligarchic" value="2" />
+            <Trait id="Authoritarian" value="1" />
+        </Traits>
+        <Equipments>
+            <EquipmentSet id="eredluin_bat_template_medium_a" />
+            <EquipmentSet id="eredluin_civ_template_default_a" equipmentType="Civilian" />
+        </Equipments>
+    </NPCCharacter>
+    <NPCCharacter id="lord_EL1_2" race="dwarf" name="{=aom_lord_EL1_2_name}Andvari" age="36" voice="earnest" is_hero="true" culture="Culture.eredluin" occupation="Lord" default_group="Infantry" face_mesh_cache="true" skill_template="SkillSet.taom_dwarf_lord_skills">
+        <face>
+            <face_key_template value="BodyProperty.fighter_erebor" />
+          </face>
+        <skills>
+            <skill id="OneHanded" value="240" />
+            <skill id="TwoHanded" value="255" />
+            <skill id="Polearm" value="215" />
+            <skill id="Bow" value="110" />
+            <skill id="Crossbow" value="160" />
+            <skill id="Throwing" value="130" />
+            <skill id="Riding" value="130" />
+            <skill id="Athletics" value="225" />
+            <skill id="Crafting" value="240" />
+            <skill id="Scouting" value="170" />
+            <skill id="Tactics" value="355" />
+            <skill id="Roguery" value="70" />
+            <skill id="Charm" value="190" />
+            <skill id="Leadership" value="352" />
+            <skill id="Trade" value="200" />
+            <skill id="Steward" value="293" />
+            <skill id="Medicine" value="150" />
+            <skill id="Engineering" value="240" />
+        </skills>
+        <Traits>
+            <Trait id="Honor" value="2" />
+            <Trait id="Generosity" value="1" />
+            <Trait id="Calculating" value="1" />
+            <Trait id="Mercy" value="1" />
+            <Trait id="Valor" value="2" />
+            <Trait id="Egalitarian" value="0" />
+            <Trait id="Oligarchic" value="2" />
+            <Trait id="Authoritarian" value="1" />
+        </Traits>
+        <Equipments>
+            <EquipmentSet id="eredluin_bat_template_medium_b" />
+            <EquipmentSet id="eredluin_civ_template_default_b" equipmentType="Civilian" />
+        </Equipments>
+    </NPCCharacter>
+    <NPCCharacter id="lord_EL1_3" race="dwarf" name="{=aom_lord_EL1_3_name}Bryndís" age="25" voice="earnest" is_hero="true" is_female="true" culture="Culture.eredluin" occupation="Lord" default_group="Infantry" face_mesh_cache="true" skill_template="SkillSet.taom_dwarf_lady_skills">
+        <face>
+            <face_key_template value="BodyProperty.fighter_erebor" />
+            <hair_tags>
+                <hair_tag name="TiedAcrossBack" />
+            </hair_tags>
+          </face>
+        <skills>
+            <skill id="OneHanded" value="140" />
+            <skill id="TwoHanded" value="130" />
+            <skill id="Polearm" value="110" />
+            <skill id="Bow" value="80" />
+            <skill id="Crossbow" value="110" />
+            <skill id="Throwing" value="90" />
+            <skill id="Riding" value="100" />
+            <skill id="Athletics" value="170" />
+            <skill id="Crafting" value="255" />
+            <skill id="Scouting" value="140" />
+            <skill id="Tactics" value="310" />
+            <skill id="Roguery" value="70" />
+            <skill id="Charm" value="240" />
+            <skill id="Leadership" value="317" />
+            <skill id="Trade" value="220" />
+            <skill id="Steward" value="333" />
+            <skill id="Medicine" value="220" />
+            <skill id="Engineering" value="200" />
+        </skills>
+        <Traits>
+            <Trait id="Honor" value="2" />
+            <Trait id="Generosity" value="2" />
+            <Trait id="Calculating" value="1" />
+            <Trait id="Mercy" value="2" />
+            <Trait id="Valor" value="1" />
+            <Trait id="Egalitarian" value="1" />
+            <Trait id="Oligarchic" value="1" />
+            <Trait id="Authoritarian" value="0" />
+        </Traits>
+        <Equipments>
+            <EquipmentSet id="eredluin_bat_template_medium_c" />
+            <EquipmentSet id="eredluin_civ_template_default_c" equipmentType="Civilian" />
+        </Equipments>
+    </NPCCharacter>
+    <NPCCharacter id="lord_EL1_4" race="dwarf" name="{=aom_lord_EL1_4_name}Gerda" age="26" voice="earnest" is_hero="true" is_female="true" culture="Culture.eredluin" occupation="Lord" default_group="Infantry" face_mesh_cache="true" skill_template="SkillSet.taom_dwarf_lady_skills">
+        <face>
+            <face_key_template value="BodyProperty.fighter_erebor" />
+            <hair_tags>
+                <hair_tag name="TiedAcrossBack" />
+            </hair_tags>
+          </face>
+        <skills>
+            <skill id="OneHanded" value="140" />
+            <skill id="TwoHanded" value="130" />
+            <skill id="Polearm" value="110" />
+            <skill id="Bow" value="80" />
+            <skill id="Crossbow" value="110" />
+            <skill id="Throwing" value="90" />
+            <skill id="Riding" value="100" />
+            <skill id="Athletics" value="170" />
+            <skill id="Crafting" value="255" />
+            <skill id="Scouting" value="140" />
+            <skill id="Tactics" value="310" />
+            <skill id="Roguery" value="70" />
+            <skill id="Charm" value="240" />
+            <skill id="Leadership" value="317" />
+            <skill id="Trade" value="220" />
+            <skill id="Steward" value="333" />
+            <skill id="Medicine" value="220" />
+            <skill id="Engineering" value="200" />
+        </skills>
+        <Traits>
+            <Trait id="Honor" value="2" />
+            <Trait id="Generosity" value="2" />
+            <Trait id="Calculating" value="1" />
+            <Trait id="Mercy" value="2" />
+            <Trait id="Valor" value="1" />
+            <Trait id="Egalitarian" value="1" />
+            <Trait id="Oligarchic" value="1" />
+            <Trait id="Authoritarian" value="0" />
+        </Traits>
+        <Equipments>
+            <EquipmentSet id="eredluin_bat_template_medium_d" />
+            <EquipmentSet id="eredluin_civ_template_default_d" equipmentType="Civilian" />
+        </Equipments>
+    </NPCCharacter>
+    <NPCCharacter id="lord_EL2_1" race="dwarf" name="{=aom_lord_EL2_1_name}Fjalar" age="33" voice="earnest" is_hero="true" culture="Culture.eredluin" occupation="Lord" default_group="Infantry" face_mesh_cache="true" skill_template="SkillSet.taom_dwarf_lord_skills">
+        <face>
+            <face_key_template value="BodyProperty.fighter_erebor" />
+          </face>
+        <skills>
+            <skill id="OneHanded" value="240" />
+            <skill id="TwoHanded" value="255" />
+            <skill id="Polearm" value="215" />
+            <skill id="Bow" value="110" />
+            <skill id="Crossbow" value="160" />
+            <skill id="Throwing" value="130" />
+            <skill id="Riding" value="130" />
+            <skill id="Athletics" value="225" />
+            <skill id="Crafting" value="240" />
+            <skill id="Scouting" value="170" />
+            <skill id="Tactics" value="355" />
+            <skill id="Roguery" value="70" />
+            <skill id="Charm" value="190" />
+            <skill id="Leadership" value="352" />
+            <skill id="Trade" value="200" />
+            <skill id="Steward" value="293" />
+            <skill id="Medicine" value="150" />
+            <skill id="Engineering" value="240" />
+        </skills>
+        <Traits>
+            <Trait id="Honor" value="2" />
+            <Trait id="Generosity" value="1" />
+            <Trait id="Calculating" value="1" />
+            <Trait id="Mercy" value="1" />
+            <Trait id="Valor" value="2" />
+            <Trait id="Egalitarian" value="0" />
+            <Trait id="Oligarchic" value="2" />
+            <Trait id="Authoritarian" value="1" />
+        </Traits>
+        <Equipments>
+            <EquipmentSet id="eredluin_bat_template_medium_a" />
+            <EquipmentSet id="eredluin_civ_template_default_a" equipmentType="Civilian" />
+        </Equipments>
+    </NPCCharacter>
+    <NPCCharacter id="lord_EL2_2" race="dwarf" name="{=aom_lord_EL2_2_name}Frosti" age="36" voice="earnest" is_hero="true" culture="Culture.eredluin" occupation="Lord" default_group="Infantry" face_mesh_cache="true" skill_template="SkillSet.taom_dwarf_lord_skills">
+        <face>
+            <face_key_template value="BodyProperty.fighter_erebor" />
+          </face>
+        <skills>
+            <skill id="OneHanded" value="240" />
+            <skill id="TwoHanded" value="255" />
+            <skill id="Polearm" value="215" />
+            <skill id="Bow" value="110" />
+            <skill id="Crossbow" value="160" />
+            <skill id="Throwing" value="130" />
+            <skill id="Riding" value="130" />
+            <skill id="Athletics" value="225" />
+            <skill id="Crafting" value="240" />
+            <skill id="Scouting" value="170" />
+            <skill id="Tactics" value="355" />
+            <skill id="Roguery" value="70" />
+            <skill id="Charm" value="190" />
+            <skill id="Leadership" value="352" />
+            <skill id="Trade" value="200" />
+            <skill id="Steward" value="293" />
+            <skill id="Medicine" value="150" />
+            <skill id="Engineering" value="240" />
+        </skills>
+        <Traits>
+            <Trait id="Honor" value="2" />
+            <Trait id="Generosity" value="1" />
+            <Trait id="Calculating" value="1" />
+            <Trait id="Mercy" value="1" />
+            <Trait id="Valor" value="2" />
+            <Trait id="Egalitarian" value="0" />
+            <Trait id="Oligarchic" value="2" />
+            <Trait id="Authoritarian" value="1" />
+        </Traits>
+        <Equipments>
+            <EquipmentSet id="eredluin_bat_template_medium_b" />
+            <EquipmentSet id="eredluin_civ_template_default_b" equipmentType="Civilian" />
+        </Equipments>
+    </NPCCharacter>
+    <NPCCharacter id="lord_EL2_3" race="dwarf" name="{=aom_lord_EL2_3_name}Hlíf" age="25" voice="earnest" is_hero="true" is_female="true" culture="Culture.eredluin" occupation="Lord" default_group="Infantry" face_mesh_cache="true" skill_template="SkillSet.taom_dwarf_lady_skills">
+        <face>
+            <face_key_template value="BodyProperty.fighter_erebor" />
+            <hair_tags>
+                <hair_tag name="TiedAcrossBack" />
+            </hair_tags>
+          </face>
+        <skills>
+            <skill id="OneHanded" value="140" />
+            <skill id="TwoHanded" value="130" />
+            <skill id="Polearm" value="110" />
+            <skill id="Bow" value="80" />
+            <skill id="Crossbow" value="110" />
+            <skill id="Throwing" value="90" />
+            <skill id="Riding" value="100" />
+            <skill id="Athletics" value="170" />
+            <skill id="Crafting" value="255" />
+            <skill id="Scouting" value="140" />
+            <skill id="Tactics" value="310" />
+            <skill id="Roguery" value="70" />
+            <skill id="Charm" value="240" />
+            <skill id="Leadership" value="317" />
+            <skill id="Trade" value="220" />
+            <skill id="Steward" value="333" />
+            <skill id="Medicine" value="220" />
+            <skill id="Engineering" value="200" />
+        </skills>
+        <Traits>
+            <Trait id="Honor" value="2" />
+            <Trait id="Generosity" value="2" />
+            <Trait id="Calculating" value="1" />
+            <Trait id="Mercy" value="2" />
+            <Trait id="Valor" value="1" />
+            <Trait id="Egalitarian" value="1" />
+            <Trait id="Oligarchic" value="1" />
+            <Trait id="Authoritarian" value="0" />
+        </Traits>
+        <Equipments>
+            <EquipmentSet id="eredluin_bat_template_medium_c" />
+            <EquipmentSet id="eredluin_civ_template_default_c" equipmentType="Civilian" />
+        </Equipments>
+    </NPCCharacter>
+    <NPCCharacter id="lord_EL2_4" race="dwarf" name="{=aom_lord_EL2_4_name}Sigrún" age="26" voice="earnest" is_hero="true" is_female="true" culture="Culture.eredluin" occupation="Lord" default_group="Infantry" face_mesh_cache="true" skill_template="SkillSet.taom_dwarf_lady_skills">
+        <face>
+            <face_key_template value="BodyProperty.fighter_erebor" />
+            <hair_tags>
+                <hair_tag name="TiedAcrossBack" />
+            </hair_tags>
+          </face>
+        <skills>
+            <skill id="OneHanded" value="140" />
+            <skill id="TwoHanded" value="130" />
+            <skill id="Polearm" value="110" />
+            <skill id="Bow" value="80" />
+            <skill id="Crossbow" value="110" />
+            <skill id="Throwing" value="90" />
+            <skill id="Riding" value="100" />
+            <skill id="Athletics" value="170" />
+            <skill id="Crafting" value="255" />
+            <skill id="Scouting" value="140" />
+            <skill id="Tactics" value="310" />
+            <skill id="Roguery" value="70" />
+            <skill id="Charm" value="240" />
+            <skill id="Leadership" value="317" />
+            <skill id="Trade" value="220" />
+            <skill id="Steward" value="333" />
+            <skill id="Medicine" value="220" />
+            <skill id="Engineering" value="200" />
+        </skills>
+        <Traits>
+            <Trait id="Honor" value="2" />
+            <Trait id="Generosity" value="2" />
+            <Trait id="Calculating" value="1" />
+            <Trait id="Mercy" value="2" />
+            <Trait id="Valor" value="1" />
+            <Trait id="Egalitarian" value="1" />
+            <Trait id="Oligarchic" value="1" />
+            <Trait id="Authoritarian" value="0" />
+        </Traits>
+        <Equipments>
+            <EquipmentSet id="eredluin_bat_template_medium_d" />
+            <EquipmentSet id="eredluin_civ_template_default_d" equipmentType="Civilian" />
+        </Equipments>
+    </NPCCharacter>
+    <NPCCharacter id="lord_EL3_1" race="dwarf" name="{=aom_lord_EL3_1_name}Ginnar" age="33" voice="earnest" is_hero="true" culture="Culture.eredluin" occupation="Lord" default_group="Infantry" face_mesh_cache="true" skill_template="SkillSet.taom_dwarf_lord_skills">
+        <face>
+            <face_key_template value="BodyProperty.fighter_erebor" />
+          </face>
+        <skills>
+            <skill id="OneHanded" value="240" />
+            <skill id="TwoHanded" value="255" />
+            <skill id="Polearm" value="215" />
+            <skill id="Bow" value="110" />
+            <skill id="Crossbow" value="160" />
+            <skill id="Throwing" value="130" />
+            <skill id="Riding" value="130" />
+            <skill id="Athletics" value="225" />
+            <skill id="Crafting" value="240" />
+            <skill id="Scouting" value="170" />
+            <skill id="Tactics" value="355" />
+            <skill id="Roguery" value="70" />
+            <skill id="Charm" value="190" />
+            <skill id="Leadership" value="352" />
+            <skill id="Trade" value="200" />
+            <skill id="Steward" value="293" />
+            <skill id="Medicine" value="150" />
+            <skill id="Engineering" value="240" />
+        </skills>
+        <Traits>
+            <Trait id="Honor" value="2" />
+            <Trait id="Generosity" value="1" />
+            <Trait id="Calculating" value="1" />
+            <Trait id="Mercy" value="1" />
+            <Trait id="Valor" value="2" />
+            <Trait id="Egalitarian" value="0" />
+            <Trait id="Oligarchic" value="2" />
+            <Trait id="Authoritarian" value="1" />
+        </Traits>
+        <Equipments>
+            <EquipmentSet id="eredluin_bat_template_medium_a" />
+            <EquipmentSet id="eredluin_civ_template_default_a" equipmentType="Civilian" />
+        </Equipments>
+    </NPCCharacter>
+    <NPCCharacter id="lord_EL3_2" race="dwarf" name="{=aom_lord_EL3_2_name}Hepti" age="36" voice="earnest" is_hero="true" culture="Culture.eredluin" occupation="Lord" default_group="Infantry" face_mesh_cache="true" skill_template="SkillSet.taom_dwarf_lord_skills">
+        <face>
+            <face_key_template value="BodyProperty.fighter_erebor" />
+          </face>
+        <skills>
+            <skill id="OneHanded" value="240" />
+            <skill id="TwoHanded" value="255" />
+            <skill id="Polearm" value="215" />
+            <skill id="Bow" value="110" />
+            <skill id="Crossbow" value="160" />
+            <skill id="Throwing" value="130" />
+            <skill id="Riding" value="130" />
+            <skill id="Athletics" value="225" />
+            <skill id="Crafting" value="240" />
+            <skill id="Scouting" value="170" />
+            <skill id="Tactics" value="355" />
+            <skill id="Roguery" value="70" />
+            <skill id="Charm" value="190" />
+            <skill id="Leadership" value="352" />
+            <skill id="Trade" value="200" />
+            <skill id="Steward" value="293" />
+            <skill id="Medicine" value="150" />
+            <skill id="Engineering" value="240" />
+        </skills>
+        <Traits>
+            <Trait id="Honor" value="2" />
+            <Trait id="Generosity" value="1" />
+            <Trait id="Calculating" value="1" />
+            <Trait id="Mercy" value="1" />
+            <Trait id="Valor" value="2" />
+            <Trait id="Egalitarian" value="0" />
+            <Trait id="Oligarchic" value="2" />
+            <Trait id="Authoritarian" value="1" />
+        </Traits>
+        <Equipments>
+            <EquipmentSet id="eredluin_bat_template_medium_b" />
+            <EquipmentSet id="eredluin_civ_template_default_b" equipmentType="Civilian" />
+        </Equipments>
+    </NPCCharacter>
+    <NPCCharacter id="lord_EL3_3" race="dwarf" name="{=aom_lord_EL3_3_name}Ásta" age="25" voice="earnest" is_hero="true" is_female="true" culture="Culture.eredluin" occupation="Lord" default_group="Infantry" face_mesh_cache="true" skill_template="SkillSet.taom_dwarf_lady_skills">
+        <face>
+            <face_key_template value="BodyProperty.fighter_erebor" />
+            <hair_tags>
+                <hair_tag name="TiedAcrossBack" />
+            </hair_tags>
+          </face>
+        <skills>
+            <skill id="OneHanded" value="140" />
+            <skill id="TwoHanded" value="130" />
+            <skill id="Polearm" value="110" />
+            <skill id="Bow" value="80" />
+            <skill id="Crossbow" value="110" />
+            <skill id="Throwing" value="90" />
+            <skill id="Riding" value="100" />
+            <skill id="Athletics" value="170" />
+            <skill id="Crafting" value="255" />
+            <skill id="Scouting" value="140" />
+            <skill id="Tactics" value="310" />
+            <skill id="Roguery" value="70" />
+            <skill id="Charm" value="240" />
+            <skill id="Leadership" value="317" />
+            <skill id="Trade" value="220" />
+            <skill id="Steward" value="333" />
+            <skill id="Medicine" value="220" />
+            <skill id="Engineering" value="200" />
+        </skills>
+        <Traits>
+            <Trait id="Honor" value="2" />
+            <Trait id="Generosity" value="2" />
+            <Trait id="Calculating" value="1" />
+            <Trait id="Mercy" value="2" />
+            <Trait id="Valor" value="1" />
+            <Trait id="Egalitarian" value="1" />
+            <Trait id="Oligarchic" value="1" />
+            <Trait id="Authoritarian" value="0" />
+        </Traits>
+        <Equipments>
+            <EquipmentSet id="eredluin_bat_template_medium_c" />
+            <EquipmentSet id="eredluin_civ_template_default_c" equipmentType="Civilian" />
+        </Equipments>
+    </NPCCharacter>
+    <NPCCharacter id="lord_EL3_4" race="dwarf" name="{=aom_lord_EL3_4_name}Védís" age="26" voice="earnest" is_hero="true" is_female="true" culture="Culture.eredluin" occupation="Lord" default_group="Infantry" face_mesh_cache="true" skill_template="SkillSet.taom_dwarf_lady_skills">
+        <face>
+            <face_key_template value="BodyProperty.fighter_erebor" />
+            <hair_tags>
+                <hair_tag name="TiedAcrossBack" />
+            </hair_tags>
+          </face>
+        <skills>
+            <skill id="OneHanded" value="140" />
+            <skill id="TwoHanded" value="130" />
+            <skill id="Polearm" value="110" />
+            <skill id="Bow" value="80" />
+            <skill id="Crossbow" value="110" />
+            <skill id="Throwing" value="90" />
+            <skill id="Riding" value="100" />
+            <skill id="Athletics" value="170" />
+            <skill id="Crafting" value="255" />
+            <skill id="Scouting" value="140" />
+            <skill id="Tactics" value="310" />
+            <skill id="Roguery" value="70" />
+            <skill id="Charm" value="240" />
+            <skill id="Leadership" value="317" />
+            <skill id="Trade" value="220" />
+            <skill id="Steward" value="333" />
+            <skill id="Medicine" value="220" />
+            <skill id="Engineering" value="200" />
+        </skills>
+        <Traits>
+            <Trait id="Honor" value="2" />
+            <Trait id="Generosity" value="2" />
+            <Trait id="Calculating" value="1" />
+            <Trait id="Mercy" value="2" />
+            <Trait id="Valor" value="1" />
+            <Trait id="Egalitarian" value="1" />
+            <Trait id="Oligarchic" value="1" />
+            <Trait id="Authoritarian" value="0" />
+        </Traits>
+        <Equipments>
+            <EquipmentSet id="eredluin_bat_template_medium_d" />
+            <EquipmentSet id="eredluin_civ_template_default_d" equipmentType="Civilian" />
+        </Equipments>
+    </NPCCharacter>
+    <NPCCharacter id="lord_EL4_1" race="dwarf" name="{=aom_lord_EL4_1_name}Skirfir" age="33" voice="earnest" is_hero="true" culture="Culture.eredluin" occupation="Lord" default_group="Infantry" face_mesh_cache="true" skill_template="SkillSet.taom_dwarf_lord_skills">
+        <face>
+            <face_key_template value="BodyProperty.fighter_erebor" />
+          </face>
+        <skills>
+            <skill id="OneHanded" value="240" />
+            <skill id="TwoHanded" value="255" />
+            <skill id="Polearm" value="215" />
+            <skill id="Bow" value="110" />
+            <skill id="Crossbow" value="160" />
+            <skill id="Throwing" value="130" />
+            <skill id="Riding" value="130" />
+            <skill id="Athletics" value="225" />
+            <skill id="Crafting" value="240" />
+            <skill id="Scouting" value="170" />
+            <skill id="Tactics" value="355" />
+            <skill id="Roguery" value="70" />
+            <skill id="Charm" value="190" />
+            <skill id="Leadership" value="352" />
+            <skill id="Trade" value="200" />
+            <skill id="Steward" value="293" />
+            <skill id="Medicine" value="150" />
+            <skill id="Engineering" value="240" />
+        </skills>
+        <Traits>
+            <Trait id="Honor" value="2" />
+            <Trait id="Generosity" value="1" />
+            <Trait id="Calculating" value="1" />
+            <Trait id="Mercy" value="1" />
+            <Trait id="Valor" value="2" />
+            <Trait id="Egalitarian" value="0" />
+            <Trait id="Oligarchic" value="2" />
+            <Trait id="Authoritarian" value="1" />
+        </Traits>
+        <Equipments>
+            <EquipmentSet id="eredluin_bat_template_medium_a" />
+            <EquipmentSet id="eredluin_civ_template_default_a" equipmentType="Civilian" />
+        </Equipments>
+    </NPCCharacter>
+    <NPCCharacter id="lord_EL4_2" race="dwarf" name="{=aom_lord_EL4_2_name}Virfir" age="36" voice="earnest" is_hero="true" culture="Culture.eredluin" occupation="Lord" default_group="Infantry" face_mesh_cache="true" skill_template="SkillSet.taom_dwarf_lord_skills">
+        <face>
+            <face_key_template value="BodyProperty.fighter_erebor" />
+          </face>
+        <skills>
+            <skill id="OneHanded" value="240" />
+            <skill id="TwoHanded" value="255" />
+            <skill id="Polearm" value="215" />
+            <skill id="Bow" value="110" />
+            <skill id="Crossbow" value="160" />
+            <skill id="Throwing" value="130" />
+            <skill id="Riding" value="130" />
+            <skill id="Athletics" value="225" />
+            <skill id="Crafting" value="240" />
+            <skill id="Scouting" value="170" />
+            <skill id="Tactics" value="355" />
+            <skill id="Roguery" value="70" />
+            <skill id="Charm" value="190" />
+            <skill id="Leadership" value="352" />
+            <skill id="Trade" value="200" />
+            <skill id="Steward" value="293" />
+            <skill id="Medicine" value="150" />
+            <skill id="Engineering" value="240" />
+        </skills>
+        <Traits>
+            <Trait id="Honor" value="2" />
+            <Trait id="Generosity" value="1" />
+            <Trait id="Calculating" value="1" />
+            <Trait id="Mercy" value="1" />
+            <Trait id="Valor" value="2" />
+            <Trait id="Egalitarian" value="0" />
+            <Trait id="Oligarchic" value="2" />
+            <Trait id="Authoritarian" value="1" />
+        </Traits>
+        <Equipments>
+            <EquipmentSet id="eredluin_bat_template_medium_b" />
+            <EquipmentSet id="eredluin_civ_template_default_b" equipmentType="Civilian" />
+        </Equipments>
+    </NPCCharacter>
+    <NPCCharacter id="lord_EL4_3" race="dwarf" name="{=aom_lord_EL4_3_name}Ragna" age="25" voice="earnest" is_hero="true" is_female="true" culture="Culture.eredluin" occupation="Lord" default_group="Infantry" face_mesh_cache="true" skill_template="SkillSet.taom_dwarf_lady_skills">
+        <face>
+            <face_key_template value="BodyProperty.fighter_erebor" />
+            <hair_tags>
+                <hair_tag name="TiedAcrossBack" />
+            </hair_tags>
+          </face>
+        <skills>
+            <skill id="OneHanded" value="140" />
+            <skill id="TwoHanded" value="130" />
+            <skill id="Polearm" value="110" />
+            <skill id="Bow" value="80" />
+            <skill id="Crossbow" value="110" />
+            <skill id="Throwing" value="90" />
+            <skill id="Riding" value="100" />
+            <skill id="Athletics" value="170" />
+            <skill id="Crafting" value="255" />
+            <skill id="Scouting" value="140" />
+            <skill id="Tactics" value="310" />
+            <skill id="Roguery" value="70" />
+            <skill id="Charm" value="240" />
+            <skill id="Leadership" value="317" />
+            <skill id="Trade" value="220" />
+            <skill id="Steward" value="333" />
+            <skill id="Medicine" value="220" />
+            <skill id="Engineering" value="200" />
+        </skills>
+        <Traits>
+            <Trait id="Honor" value="2" />
+            <Trait id="Generosity" value="2" />
+            <Trait id="Calculating" value="1" />
+            <Trait id="Mercy" value="2" />
+            <Trait id="Valor" value="1" />
+            <Trait id="Egalitarian" value="1" />
+            <Trait id="Oligarchic" value="1" />
+            <Trait id="Authoritarian" value="0" />
+        </Traits>
+        <Equipments>
+            <EquipmentSet id="eredluin_bat_template_medium_c" />
+            <EquipmentSet id="eredluin_civ_template_default_c" equipmentType="Civilian" />
+        </Equipments>
+    </NPCCharacter>
+    <NPCCharacter id="lord_EL4_4" race="dwarf" name="{=aom_lord_EL4_4_name}Herdís" age="26" voice="earnest" is_hero="true" is_female="true" culture="Culture.eredluin" occupation="Lord" default_group="Infantry" face_mesh_cache="true" skill_template="SkillSet.taom_dwarf_lady_skills">
+        <face>
+            <face_key_template value="BodyProperty.fighter_erebor" />
+            <hair_tags>
+                <hair_tag name="TiedAcrossBack" />
+            </hair_tags>
+          </face>
+        <skills>
+            <skill id="OneHanded" value="140" />
+            <skill id="TwoHanded" value="130" />
+            <skill id="Polearm" value="110" />
+            <skill id="Bow" value="80" />
+            <skill id="Crossbow" value="110" />
+            <skill id="Throwing" value="90" />
+            <skill id="Riding" value="100" />
+            <skill id="Athletics" value="170" />
+            <skill id="Crafting" value="255" />
+            <skill id="Scouting" value="140" />
+            <skill id="Tactics" value="310" />
+            <skill id="Roguery" value="70" />
+            <skill id="Charm" value="240" />
+            <skill id="Leadership" value="317" />
+            <skill id="Trade" value="220" />
+            <skill id="Steward" value="333" />
+            <skill id="Medicine" value="220" />
+            <skill id="Engineering" value="200" />
+        </skills>
+        <Traits>
+            <Trait id="Honor" value="2" />
+            <Trait id="Generosity" value="2" />
+            <Trait id="Calculating" value="1" />
+            <Trait id="Mercy" value="2" />
+            <Trait id="Valor" value="1" />
+            <Trait id="Egalitarian" value="1" />
+            <Trait id="Oligarchic" value="1" />
+            <Trait id="Authoritarian" value="0" />
+        </Traits>
+        <Equipments>
+            <EquipmentSet id="eredluin_bat_template_medium_d" />
+            <EquipmentSet id="eredluin_civ_template_default_d" equipmentType="Civilian" />
+        </Equipments>
+    </NPCCharacter>
+  <!-- TAOM-NEWFACTIONS:eredluin:END -->
 </NPCCharacters>

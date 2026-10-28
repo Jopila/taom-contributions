@@ -49,6 +49,10 @@
 	<string id="aom_clan_erebor_5_name" text="{=aom_clan_erebor_5_name}Bit Górli" />
 	<string id="aom_clan_erebor_6_name" text="{=aom_clan_erebor_6_name}Bit Róri" />
 	<string id="aom_clan_erebor_7_name" text="{=aom_clan_erebor_7_name}Bit Nórin" />
+	<string id="aom_clan_eredluin_1_name" text="{=aom_clan_eredluin_1_name}House of Borin" />
+	<string id="aom_clan_eredluin_2_name" text="{=aom_clan_eredluin_2_name}Broadbeams" />
+	<string id="aom_clan_eredluin_3_name" text="{=aom_clan_eredluin_3_name}Firebeards" />
+	<string id="aom_clan_eredluin_4_name" text="{=aom_clan_eredluin_4_name}Wardens of Dolmed" />
 	<string id="aom_clan_goblin_1_name" text="{=aom_clan_goblin_1_name}Skrithak" />
 	<string id="aom_clan_goblin_2_name" text="{=aom_clan_goblin_2_name}Yaghûl" />
 	<string id="aom_clan_goblin_3_name" text="{=aom_clan_goblin_3_name}Gorkil" />

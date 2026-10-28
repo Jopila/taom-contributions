@@ -3016,9 +3016,9 @@
 
     <string id="taom_faction_kingdom_of_erebor_weakness_2" text="Peu d'alliés en temps de guerre" />
 
-    <string id="taom_faction_kingdom_of_ered_duin_desc" text="Les demeures naines des Montagnes Bleues, halls ancestraux du Peuple de Durin. Après la perte d'Erebor, de nombreux Nains y trouvèrent refuge avant la quête de Thorin." />
+    <string id="taom_faction_kingdom_of_ered_duin_desc" text="The dwarf-halls of the Blue Mountains at the western edge of Middle-earth. Durin's Folk made Thorin's Halls in their exile, and the Broadbeams and the Firebeards keep Belegost and Nogrod again. They mine iron and sell it to the Elves of Lindon and the Men of Eriador, while the goblins of Blue Craig gnaw at their roads." />
 
-    <string id="taom_faction_kingdom_of_ered_duin_name" text="Royaume d'Ered Duin" />
+    <string id="taom_faction_kingdom_of_ered_duin_name" text="Kingdom of Ered Luin" />
 
     <string id="taom_faction_kingdom_of_ered_duin_trait_0" text="Halls des Montagnes Bleues" />
 
@@ -6548,6 +6548,92 @@
     <string id="taom_str_last_seen_encyclopedia_entry_leading_army" text="Last seen leading an army {?IS_IN_SETTLEMENT}at{?}near{\?} {SETTLEMENT}." />
 
     <string id="taom_str_last_seen_encyclopedia_entry_at_sea_leading_army" text="Last seen leading an army sailing near {SETTLEMENT}." />
+
+    <string id="taom_faction_kingdom_of_ered_duin_bonus_0" text="-30% smithing energy cost (Master Smiths)" />
+
+    <string id="taom_faction_kingdom_of_ered_duin_bonus_1" text="+10% village production (Dwarven Industry)" />
+
+    <string id="taom_faction_kingdom_of_ered_duin_bonus_2" text="+10% party speed on snow (Mountain Folk)" />
+
+    <string id="taom_faction_kingdom_of_ered_duin_bonus_3" text="+5 party morale (Dwarven Stubbornness)" />
+
+    <string id="taom_faction_kingdom_of_ered_duin_bonus_4" text="+1 settlement loyalty per day (Dwarven Honor)" />
+
+    <string id="taom_faction_kingdom_of_ered_duin_bonus_5" text="-15% building construction speed (Dwarven Perfectionism)" />
+
+    <string id="taom_faction_kingdom_of_ered_duin_perk_0_name" text="Master Smiths" />
+
+    <string id="taom_faction_kingdom_of_ered_duin_perk_0_desc" text="-30% smithing energy cost. The forges of Belegost and Nogrod are the oldest in the West." />
+
+    <string id="taom_faction_kingdom_of_ered_duin_perk_1_name" text="Dwarven Stubbornness" />
+
+    <string id="taom_faction_kingdom_of_ered_duin_perk_1_desc" text="+5 party morale and +1 settlement loyalty per day." />
+
+    <string id="taom_faction_kingdom_of_ered_duin_perk_2_name" text="Mountain Folk" />
+
+    <string id="taom_faction_kingdom_of_ered_duin_perk_2_desc" text="+10% party speed on snow and +10% village production from the mines of the Blue Mountains." />
+
+    <string id="taom_faction_kingdom_of_ered_duin_su_0_name" text="King's Guard of Thorin's Halls" />
+
+    <string id="taom_faction_kingdom_of_ered_duin_su_0_desc" text="Tower-shield elite of the Broadbeam line, the King's own guard." />
+
+    <string id="taom_faction_kingdom_of_ered_duin_su_1_name" text="Master Arbalester of Nogrod" />
+
+    <string id="taom_faction_kingdom_of_ered_duin_su_1_desc" text="Veteran Firebeard crossbowman." />
+
+    <string id="taom_faction_kingdom_of_ered_duin_su_2_name" text="Warden of Thorin's Halls" />
+
+    <string id="taom_faction_kingdom_of_ered_duin_su_2_desc" text="Axe and shield guard of the capital's gates." />
+
+    <string id="taom_faction_kingdom_of_ered_duin_strength_0" text="Stubborn heavy infantry and steady crossbows" />
+
+    <string id="taom_faction_kingdom_of_ered_duin_strength_1" text="Fast forges and rich mines" />
+
+    <string id="taom_faction_kingdom_of_ered_duin_strength_2" text="Loyal halls and steady morale" />
+
+    <string id="taom_faction_kingdom_of_ered_duin_weakness_0" text="No cavalry at all" />
+
+    <string id="taom_faction_kingdom_of_ered_duin_weakness_1" text="Slow to build" />
+
+    <string id="taom_faction_kingdom_of_ered_duin_weakness_2" text="Few lords, with goblins at the door" />
+
+    <string id="taom_str_liege_title.eredluin" text="King of Ered Luin" />
+
+    <string id="taom_str_liege_title_female.eredluin" text="Queen of Ered Luin" />
+
+    <string id="taom_round_drink_eredluin" text="blue-mountain stout" />
+
+    <string id="taom_str_culture_description.eredluin" text="The dwarves of Ered Luin dwell in the Blue Mountains at the western edge of Middle-earth. Durin's Folk came there in exile and made Thorin's Halls, and in this age the Broadbeams and the Firebeards keep Belegost and Nogrod again, the oldest dwarf-cities of the West. They are miners and smiths, poorer than their kin in the east, and they trade iron with the Elves of Lindon and the Men of Eriador while the goblins of Blue Craig gnaw at their roads." />
+
+    <string id="taom_str_culture_rich_name.eredluin" text="Dwarves of the Blue Mountains" />
+
+    <string id="taom_str_adjective_for_culture.eredluin" text="Ered Luin" />
+
+    <string id="taom_str_player_father_name.eredluin" text="Farin" />
+
+    <string id="taom_str_player_mother_name.eredluin" text="Dísa" />
+
+    <string id="taom_str_faction_official.eredluin" text="a noble dwarf" />
+
+    <string id="taom_str_faction_official.eredluin_f" text="a lady dwarf" />
+
+    <string id="taom_str_faction_ruler.eredluin" text="King" />
+
+    <string id="taom_str_faction_ruler.eredluin_f" text="Queen" />
+
+    <string id="taom_str_faction_ruler_term_in_speech.eredluin" text="{?RULER.GENDER}the Queen{?}the King{\?} {RULER.NAME}" />
+
+    <string id="taom_str_faction_ruler_name_with_title.eredluin" text="{?RULER.GENDER}Queen{?}King{\?} {RULER.NAME}" />
+
+    <string id="taom_str_faction_noble_name_with_title.eredluin" text="{?RULER.GENDER}Lady{?}Lord{\?} {RULER.NAME}" />
+
+    <string id="taom_str_faction_formal_name_for_culture.eredluin" text="Kingdom of Ered Luin" />
+
+    <string id="taom_str_faction_informal_name_for_culture.eredluin" text="Ered Luin" />
+
+    <string id="taom_str_neutral_term_for_culture.eredluin" text="Dwarves of Ered Luin" />
+
+    <string id="taom_aso_kingdom.eredluin" text="Ered Luin" />
 
   </strings>
 

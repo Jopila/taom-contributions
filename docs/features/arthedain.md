@@ -34,7 +34,7 @@ Data only, no new `Main/Features/` module. The pieces, in the order they must be
 
 | Step | Tool | Writes |
 |------|------|--------|
-| Troop tree and the 9 soldier party templates | `tools/generate_arthedain_troops.py` (the design; the machinery is `tools/realm_troops.py`, shared with Cardolan and Rhudaur since #978) | `troops/troops_arthedain.xml`, a `TAOM-ARTHEDAIN-PT` region of `taom_partyTemplates.xml` |
+| Troop tree and the 9 soldier party templates | `tools/generate_arthedain_troops.py` (the design; the machinery is `tools/realm_troops.py`, shared with Cardolan and Rhudaur since #978 and with Ered Luin since 2026-10-27) | `troops/troops_arthedain.xml`, a `TAOM-ARTHEDAIN-PT` region of `taom_partyTemplates.xml` |
 | Ranger bow ladder | `tools/ranged_ladders.json` line `arthedain`, `tools/generate_ranged_ladder_items.py` | live `LOTRLOME_items/arnor/ranged_ladder.xml` |
 | Culture, townsfolk, notables, wanderers, villager and caravan templates, education templates, lord and child rosters | `tools/promote_borrowed_cultures.py --only arthedain` (Gondor as the scaffold) | `taom_spcultures.xml`, `characters/npcs_arthedain.xml`, `equipmentsets/taom_equipment_sets_arthedain.xml`, shared files |
 | Towns and castles | `tools/add_map_fortifications.py` | live `TAOM_Map/ModuleData/settlements.xml` and 12 `loc_settlements.xml` |

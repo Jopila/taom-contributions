@@ -146,7 +146,7 @@ def parse_rosters():
 
 
 def build_armory_index():
-    """Return item_id -> {folder, slot, primary, weight, name}."""
+    """Return item_id -> {folder, slot, primary, armour, weight, name, type}."""
     index = {}
     armory_dir = ra.ARMORY_DIR
     if not os.path.isdir(armory_dir):
@@ -177,6 +177,8 @@ def build_armory_index():
                     'folder': folder,
                     'slot': slot_type,
                     'primary': ra._get_primary_stat(values, slot_type),
+                    # (head, body, arm, leg): generate_armour_classes.py never offers an upgrade that only lowers them
+                    'armour': tuple(values.get(k, 0) for k in ('head_armor', 'body_armor', 'arm_armor', 'leg_armor')) if values else None,
                     'weight': weight,
                     'name': ra.get_display_name(item.get('name', '')),
                     # the item's own Type, kept for the shipped-table test
@@ -229,6 +231,7 @@ def derive():
             'slot': slot,
             'name': info['name'],
             'current': current,
+            'armour': info.get('armour'),
             'weight': info['weight'],
             'anchorLevel': anchor,
             'maxLevel': max(levels) if levels else None,

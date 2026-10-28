@@ -155,6 +155,9 @@ Since 2026-10-15 the two Harad riders are Emissary-only: neither is in any volun
 
 Omitted (no L36+ elites): Dale (sturgia), Dunland (empire), Umbar, Khand (battania), Lothlorien.
 Omitted (no special-resource mapping): goblin, mistymountainorcs.
+Omitted (no `<Culture>` row here, and no troop with a `troop_resource_costs.xml` row to price an offer):
+arthedain, cardolan, rhudaur, eredluin (Ered Luin). Erebor's offers other than its war rams start at
+level 41, above Ered Luin's level 36 King's Guard, and Ered Luin fields no rams.
 
 ### MCM — group "Elite Emissary"
 
