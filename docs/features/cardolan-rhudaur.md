@@ -132,7 +132,7 @@ Every table that names `arthedain` was decided for both. Four keep no row for ei
 | `startup_resources_config.xml` gold | 90,000 | 80,000 |
 | `lotr_issues` | own Armourer's Commission; on Gondor's Deep Seam row | the same |
 | `configs/army_targeting.json` | theater `north` | theater `north` |
-| `realm_borders/palette.json` and MCM | `#E8B89A`, `RealmColourCardolan` | `#E0735A`, `RealmColourRhudaur` |
+| `realm_borders/palette.json` and MCM | `#28745C` (the banner green), `RealmColourCardolan` | `#E0735A`, `RealmColourRhudaur` |
 | Careers | Bowman of Minhiriath, Warden of Tyrn Gorthad, Knight of Cardolan | Ranger of the Angle, Captain of Cameth Brin, Rider of the Fells |
 | Faction card | playable, Neutral, difficulty 5 | playable, Neutral, difficulty 6 |
 

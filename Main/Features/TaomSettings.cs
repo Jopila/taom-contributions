@@ -2275,7 +2275,7 @@ public class TaomSettings : AttributeGlobalSettings<TaomSettings>
 
     [SettingPropertyGroup("Realm Borders/Realm Colours")]
     [SettingPropertyText("Cardolan", Order = 23, RequireRestart = false,
-        HintText = "Cardolan's colour on the map, written #RRGGBB. Blank uses the default, #E8B89A.")]
+        HintText = "Cardolan's colour on the map, written #RRGGBB. Blank uses the default, #28745C.")]
     public string RealmColourCardolan { get; set; } = string.Empty;
 
     [SettingPropertyGroup("Realm Borders/Realm Colours")]
