@@ -47,6 +47,12 @@ release writes a `[FactionUI] front-end images loaded:` or `released:` line with
 size; faction art joins its group one image at a time without a line of its own, and loading paintings
 are not logged.
 
+**Emblems.** The top strip draws `fs_emblem_<faction key>` and falls back to `fs_emblem_default` (a
+star) when that file is missing. Each emblem is one flat colour on alpha: cream `#ECE4CE` for the free
+peoples, gold `#D6BA70` for neutral factions, red `#CE5E52` for evil ones. The Lindon, Arthedain,
+Cardolan, Rhudaur and Ered Luin emblems are generated from the sigil of each kingdom's `banner_key`
+by `python tools/make_faction_emblems.py --apply` (`--check` gates them); the other emblems are drawn by hand.
+
 Release needs no patch. A screen's layer releases its movies through `GauntletLayer.OnFinalize` ->
 `ClearContext` -> `movie.Release()`, never through the public `ReleaseMovie`, so the first build's
 `ReleaseMovie` prefix never saw a themed screen close and freed nothing. `FrontEndMovieService` records
