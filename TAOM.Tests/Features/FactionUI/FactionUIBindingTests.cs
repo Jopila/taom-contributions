@@ -150,6 +150,25 @@ public class FactionUIBindingTests
         AssertParameterNames(AccessTools.Method(view, "InitCamera"), "BodyGeneratorView.InitCamera", "camera", "cameraPosition");
     }
 
+    // BodyGeneratorViewOnTickPatch re-requests the resources of every model still in this list; a renamed
+    // field or changed element type would leave a lost load request unrecovered again.
+    [TestMethod]
+    [TestCategory("BindingVerification")]
+    public void BodyGeneratorViewPreparingVisuals_KeepsTheShapeTheReRequestReads()
+    {
+        RequireGame();
+        var view = AccessTools.TypeByName("TaleWorlds.MountAndBlade.GauntletUI.BodyGenerator.BodyGeneratorView");
+        var visuals = AccessTools.TypeByName("TaleWorlds.MountAndBlade.View.AgentVisuals");
+        var field = AccessTools.Field(view, "_visualsBeingPrepared");
+        Assert.IsNotNull(field, "BodyGeneratorView._visualsBeingPrepared");
+        Assert.AreEqual(
+            typeof(System.Collections.Generic.List<>).MakeGenericType(
+                typeof(System.Collections.Generic.KeyValuePair<,>).MakeGenericType(visuals, typeof(int))),
+            field!.FieldType,
+            "BodyGeneratorView._visualsBeingPrepared is no longer List<KeyValuePair<AgentVisuals, int>>");
+        AssertParameterNames(AccessTools.Method(view, "OnTick"), "BodyGeneratorView.OnTick", "dt");
+    }
+
     [TestMethod]
     [TestCategory("BindingVerification")]
     public void ReflectedCharacterCreationMembers_Resolve()
@@ -232,10 +251,10 @@ public class FactionUIBindingTests
                         && t.GetCustomAttributes(typeof(HarmonyPatch), false).Length > 0)
             .ToList();
 
-        // Ten while the TEMPORARY diagnostic FaceGenFirstOpenDiagnosticPatch and its nested TickWatch ship
-        // (d5522c9f5). Removing them: put this back to eight and regenerate the API snapshot
+        // Eleven while the TEMPORARY diagnostic FaceGenFirstOpenDiagnosticPatch and its nested TickWatch ship
+        // (d5522c9f5). Removing them: put this to nine and regenerate the API snapshot
         // (pwsh tools/snapshot_api_surface.ps1).
-        Assert.AreEqual(10, patchClasses.Count, "Patch95 has ten patch classes: " + string.Join(", ", patchClasses.Select(t => t.Name)));
+        Assert.AreEqual(11, patchClasses.Count, "Patch95 has eleven patch classes: " + string.Join(", ", patchClasses.Select(t => t.Name)));
         foreach (var patch in patchClasses)
         {
             var category = patch.GetCustomAttribute<HarmonyPatchCategory>();
