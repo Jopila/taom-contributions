@@ -1,7 +1,7 @@
 {
   "high_kingdom_of_lindon": {
     "name": "{=taom_faction_high_kingdom_of_lindon_name}High Kingdom of Lindon",
-    "color": "#50A090FF",
+    "color": "#7FAFC9FF",
     "playable": true,
     "game_faction": "lindon",
     "side": "free",
@@ -430,7 +430,7 @@
   },
   "kingdom_of_cardolan": {
     "name": "{=taom_faction_kingdom_of_cardolan_name}Kingdom of Cardolan",
-    "color": "#885040FF",
+    "color": "#28745CFF",
     "playable": true,
     "game_faction": "cardolan",
     "side": "neutral",

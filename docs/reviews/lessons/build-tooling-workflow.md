@@ -4627,3 +4627,9 @@ The two-handed kit's throwing slot found no candidate in Ered Luin's troops, so 
 - **Why missed:** the borrow was designed to make the kit pass; nothing reports a pick made by a fallback.
 - **Prevent:** when a kit layout gains a slot class, first check that every culture using it has a troop that carries that class. If one has none, that is a design question for Mike (give a troop the item, or accept the exception in the docs), not a borrow.
 - **Source:** [rca-ered-luin-two-handed-career-2026-10-28.md](../rca-ered-luin-two-handed-career-2026-10-28.md) finding 8.
+
+### A tool the docs tell people to run again is a standing tool: give it re-run safety on day one (banner packing, 2026-10-28)
+`pack_banner_sheets.py` was written for one merge. Its doc already said the next emblem goes into a free packed cell, yet a second `--apply` reused the packed sheet names, wrote over two full sheets and moved 70 rows onto used cells. Its gate predicate disagreed with its own planner, and no test drove a finding red.
+- **Why missed:** the tool, its refusals and its gate were judged on the one fresh tree they first ran on.
+- **Prevent:** when a doc describes a repeat use, test that use before the first run: the second run on the tool's own output must be a no-op, the gate's "something to do" must be the fixer's own plan, and each finding kind needs a test that turns it red.
+- **Source:** [rca-banner-packing-2026-10-28.md](../rca-banner-packing-2026-10-28.md) findings 1 to 3.

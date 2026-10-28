@@ -142,8 +142,8 @@ Erebor's key is 90 numbers, so 9 layers:
 | 0 | `11` | 100, 75 | 4345 x 4345 | 764, 764 | 1, 0, 0 | Native's base cloth `banner_background_test_11`, scaled well past the canvas, in a dark blue and a pale blue |
 | 1 to 3 | `521` | 172, 100 | 62, 54, 42 | left of centre | 0, 0, 268 | Native's shape icon 521, three sizes running down the left |
 | 4 to 6 | `521` | 172, 100 | 62, 54, 42 | right of centre | 0, 1, 88 | the same three, mirrored and rotated to match |
-| 7 | `24019` | 31, 240 | 400 x 400 | 765, 873 | 1, 0, 0 | TAOM icon 24019, group 241, cell 3 of `taom_banners_dwarves_alpha_02` |
-| 8 | `24510` | 31, 240 | 200 x 200 | 765, 556 | 1, 0, 0 | TAOM icon 24510, group 245, cell 10 of `taom_banners_dwarves_ornaments_01` |
+| 7 | `24019` | 31, 240 | 400 x 400 | 765, 873 | 1, 0, 0 | TAOM icon 24019, group 241, cell 3 of `taom_banners_packed_alpha_01` (on `taom_banners_dwarves_alpha_02` before #1047) |
+| 8 | `24510` | 31, 240 | 200 x 200 | 765, 556 | 1, 0, 0 | TAOM icon 24510, group 245, cell 10 of `taom_banners_packed_alpha_04` (of `taom_banners_dwarves_ornaments_01` before #1047) |
 
 Colour 240 in layers 7 and 8 is one of the 46 ids TAOM redefines over Native. Native declares 240 as `0xff5c6868`, a grey; TAOM declares it as `0xffd48806`, an amber, and TAOM's is the one that renders. Change TAOM's row and you have changed the outline of both dwarf sigils here and of every other key that names 240.
 

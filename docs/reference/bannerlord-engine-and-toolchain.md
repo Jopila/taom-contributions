@@ -78,10 +78,12 @@ All four targets run `AfterTargets="PostBuildCopyToModules"`, gated on `$(Disabl
 and on the assembled client folder existing. **Mirroring the assembled folder rather than the build output
 is deliberate**: it picks up the NuGet
 companions that only exist after `PostBuildCopyToModules`. The Dependencies editor mirror is required:
-the Kit loads each submodule's DLL from its own `Win64_Shipping_wEditor` folder only, and with that folder
-empty TAOM fails in the Kit with `Could not load file or assembly '0Harmony'` (and `MCMv5`,
-`Bannerlord.UIExtenderEx`) behind a "missing or conflicting dependency" box. Before 2026-10-28 the
-standalone `Bannerlord.*` community modules supplied those assemblies; installs no longer carry them.
+the Kit looks for each submodule's DLL in the module's `Win64_Shipping_wEditor` folder, then in its own
+managed folder, which holds none of these. With that folder empty the Kit shows a "Cannot find" box per
+submodule, then TAOM fails with `Could not load file or assembly '0Harmony'` (and `MCMv5`,
+`Bannerlord.UIExtenderEx`) behind a "missing or conflicting dependency" box, and the Kit aborts the launch.
+Before 2026-10-28 the standalone `Bannerlord.*` community modules supplied those assemblies; installs now
+keep those ids only as one-file stubs with no DLL.
 
 Two caveats on the server mirror. A spike build of TAOM has booted on the co-op dedicated server to
 SERVING (2026-10-22, 2026-10-23), and the committed build `0fb0e6c13` did too on 2026-10-23, with one

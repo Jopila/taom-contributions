@@ -116,6 +116,13 @@ class BannerTests(unittest.TestCase):
         self.assertIn(".11000.2004.2004.", gen.clan_banner(k, 2))
         self.assertIn(".11001.2004.2004.", gen.clan_banner(k, 3))
 
+    def test_cardolan_houses_dress_in_the_banner_green_and_white(self):
+        # Patch23 tints troops, portraits and map parties from the clan colours, so they follow the banner
+        for color, color2 in gen.KINGDOMS["cardolan"]["clan_colors"]:
+            r, g, b = (int(color[i:i + 2], 16) for i in (2, 4, 6))
+            self.assertTrue(g > r and g > b, color)
+            self.assertTrue(all(int(color2[i:i + 2], 16) >= 0xE0 for i in (2, 4, 6)), color2)
+
     def test_a_realm_without_the_slot_keeps_its_one_emblem_colour(self):
         k = gen.KINGDOMS["arthedain"]
         self.assertEqual(gen.kingdom_banner(k), "11.190.190.1528.1528.764.764.1.0.0.11004.110.110.700.700.764.764.0.0.0")

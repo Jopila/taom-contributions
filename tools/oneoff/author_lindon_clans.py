@@ -82,8 +82,7 @@ CLANS_NEW = [
     ("clan_lindon_5", "Wardens of Ered Luin", 3, "lord_LN5_1", "castle_LN2", "FF5E7FA6", "FF1B2A4A", "lindon house 5 - Barad Luin"),
     ("clan_lindon_6", "Nos Eglarest", 2, "lord_LN6_1", "castle_LN3", "FF7C9CB4", "FF23365A", "lindon house 6 - Tirith Aear"),
 ]
-# One sigil per house from the Noldor and Sindar sheets (banner_icons.xml), gold (171) on light blue (286),
-# Mike's recommendation of 2026-10-28; clan_lindon_1 and _2 (outside this block) carry 15000 and 15003 in the same form.
+# clan_lindon_1 and _2 sit outside this block and fly 15000 and 31000 in the same form.
 # Lindon's own emblems (31001-31004) in Mike's palette (banner_icons.xml 2016-2023, #1047):
 # field, emblem, icon. Sea Mist 2017, Pine 2021, Pearl field 2023; Sea Mist 2016, Pine 2020, Pearl 2022.
 BANNER = "11.{bg}.{bg}.1528.1528.764.764.1.0.0.{icon}.{fg}.{fg}.483.483.764.764.0.0.0"

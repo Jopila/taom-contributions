@@ -127,7 +127,7 @@ ENTRIES = {
     },
     "high_kingdom_of_lindon": {
         "name": K("high_kingdom_of_lindon", "name", "High Kingdom of Lindon"),
-        "color": "#50A090FF", "playable": True, "game_faction": "rivendell", "side": "free",
+        "color": "#7FAFC9FF", "playable": True, "game_faction": "rivendell", "side": "free",
         "description": K("high_kingdom_of_lindon", "desc",
             "The green land west of the Blue Mountains, last realm of the High Elves on the shores of Middle-earth. From the Grey Havens of Mithlond the white ships sail into the West. Círdan the Shipwright, eldest of the Eldar, keeps the fading light of the Noldor — wise, few, and each blade irreplaceable. Lindon shares the Noldor strength of Imladris."),
         "image": "faction_high_kingdom_of_lindon",

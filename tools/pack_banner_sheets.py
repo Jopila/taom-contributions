@@ -2,80 +2,138 @@
 """Pack the partly used banner icon sheets into as few sheets as they fit, and audit the result (#1047).
 
 A banner key names an icon id. Main/_Module/ModuleData/banner_icons.xml maps each id to a material
-(one 4096 x 4096 green-on-black sheet of 16 cells, source in Main/_Module/AssetSources/BannerIcons)
-and a texture_index. Keys, saved banners and the UI sprites (named by icon id) never name a sheet,
-so moving an icon to another sheet changes only its <Icon> row. All TAOM banner materials share one
-shader (their _mtl.tpac files differ only in GUIDs, name and checksum, measured 2026-10-28).
+(one 4096 x 4096 green-on-black sheet of 16 cells, source in AssetSources/BannerIcons) and a
+texture_index. Keys, saved banners and the UI sprites (named by icon id) never name a sheet, so moving
+an icon to another sheet changes only its <Icon> row. All TAOM banner materials share one shader
+(their _mtl.tpac files differ only in GUIDs, name and checksum, measured 2026-10-28).
 
-Full sheets stay. The partly used ones are packed whole, first fit decreasing, into
-taom_banners_packed_alpha_NN; cells are copied verbatim (two-colour cells keep their red ink) and
-free cells get the red and green placeholder checkerboard of the existing sheets.
+Packed sheets (taom_banners_packed_alpha_NN) stay where they are. Every other sheet that uses fewer
+than 16 cells is moved whole, largest first, into the free cells of an existing packed sheet, or into
+a new packed sheet (the first taom_banners_packed_alpha_NN no file or row uses) when it shares that
+sheet with another moved sheet. A sheet that would sit alone stays put, so a second run is a no-op.
+Cells are copied verbatim (two-colour cells keep their red ink); free cells keep the red and green
+placeholder checkerboard.
 
 Usage:
-    python tools/pack_banner_sheets.py            # dry run: the plan
-    python tools/pack_banner_sheets.py --apply    # write the packed sources (repo and install) and the <Icon> rows
-    python tools/pack_banner_sheets.py --audit    # the gate: exit 1 on any finding
-    python tools/pack_banner_sheets.py --prune --backup-dir <dir>
-        # after the Modding Kit saved the packed materials: delete the sheets no icon names, in the repo
-        # (source, _mtl/_tex.tpac) and the install (the same, plus the texture's RuntimeDataCache .rdc),
-        # each copied to <dir> first
+    python tools/pack_banner_sheets.py                 # dry run: the plan and the free packed cells
+    python tools/pack_banner_sheets.py --apply         # write the packed sources (repo and install) and rows
+    python tools/pack_banner_sheets.py --audit         # the gate: exit 1 on any finding
+    python tools/pack_banner_sheets.py --prune         # list the sheets no icon names
+    python tools/pack_banner_sheets.py --prune --apply --backup-dir <dir>   # delete them, backed up first
 
-Kit steps between --apply and --prune: import each packed sheet (Albedo DXT1, Do Not Generate Mips),
-make a banner material of the same name, save, copy both .tpac into Main/_Module/Assets/BannerIcons
-(docs/reference/banner-icon-generation.md).
+Steps (docs/reference/banner-icon-generation.md "Packing partly used sheets"):
+  1. --apply. It refuses while the audit reports a missing sheet, an empty or shared cell, or unnamed
+     art, because it copies only the cells an icon row names.
+  2. Modding Kit: import each new or changed packed sheet (Albedo DXT1, Do Not Generate Mips), make a
+     banner material of the same name for a new one, save, copy both .tpac into Main/_Module/Assets/BannerIcons.
+  3. ./build.ps1 with the game and the Kit closed, so the install's banner_icons.xml names the packed sheets.
+  4. --prune, then --prune --apply --backup-dir <dir>: deletes, in the repo and the install, every sheet
+     that neither banner_icons.xml names (source, _mtl/_tex.tpac, and the texture's RuntimeDataCache .rdc).
+     It refuses while the audit has any finding other than the unused sheets, and while the game or Kit runs.
+
+Exit codes: 0 clean or done, 1 findings or a refusal, 2 the tool cannot run (a missing dependency, no rows).
 """
 import argparse
-import os
+import itertools
 import re
 import shutil
 import sys
-import uuid
 import xml.etree.ElementTree as ET
+from collections import Counter, defaultdict
 from pathlib import Path
 
-import numpy as np
-from PIL import Image
+try:
+    import numpy as np
+    import xxhash
+    from PIL import Image
+    MISSING = None
+except ImportError as exc:  # main() reports it; the test module skips
+    MISSING = exc
 
-REPO = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from _gamedir import DEFAULT_GAME_ROOT, game_modules, game_or_kit_running  # noqa: E402
+from check_rdc_entries import package_guid  # noqa: E402
+
+REPO_MODULE = Path(__file__).resolve().parent.parent / "Main" / "_Module"
+# The repo's module and the install's share this layout; every function takes a module root.
+XML = Path("ModuleData", "banner_icons.xml")
+SOURCES = Path("AssetSources", "BannerIcons")
+PACKAGES = Path("Assets", "BannerIcons")
+SPRITE_DATA = Path("GUI", "TAOMSpriteData.xml")
+SPRITE_PNGS = Path("GUI", "SpriteParts", "ui_taom_bannericons")
+CACHE = Path("RuntimeDataCache")
+SPRITE_CATEGORY = "ui_taom_bannericons"
+
 CELLS, GRID = 16, 4
+SHEET_PX = 4096  # read at call time, so tests can patch a small sheet
 PACKED = "taom_banners_packed_alpha_{:02d}"
+PACKED_RE = re.compile(r"taom_banners_packed_alpha_\d+")
 ICON = re.compile(r'(<Icon id=")(\d+)(" material_name=")([^"]+)(" texture_index=")(\d+)(" />)')
 RED, GREEN = (255, 0, 0), (0, 255, 0)
+# Bytes 0x34-0x43 of a _tex.tpac are its texture GUID, which its _mtl.tpac names; the source path the
+# Kit imported is followed by the xxh64 of the source file (measured on all 24 sheets, 2026-10-28).
+TEX_GUID = slice(0x34, 0x44)
+SOURCE_PATH = re.compile(rb"\$BASE/Modules/[^/\x00]+/(AssetSources/BannerIcons/[^\x00]*?\.(?:png|psd))")
+BLOCKING = ("missing_sheet", "empty_cell", "shared_cell", "unnamed_art", "duplicate_id")
 
 
-def module(repo):
-    return Path(repo) / "Main" / "_Module"
+def read_icons(data):
+    """[(id, material, texture_index)] of every <Icon> row; raises ValueError on no rows or an incomplete
+    row, so an unreadable file never looks like a module with nothing to pack, audit or keep."""
+    rows = []
+    for e in ET.fromstring(data).iter("Icon"):
+        i, m, t = e.get("id"), e.get("material_name"), e.get("texture_index")
+        if not (i and m and t and t.isdigit()):
+            raise ValueError(f"<Icon> row without a usable id, material_name or texture_index: {e.attrib}")
+        rows.append((i, m, int(t)))
+    if not rows:
+        raise ValueError("banner_icons.xml holds no <Icon> row")
+    return rows
 
 
-def read_icons(text):
-    """[(id, material, texture_index)] in file order."""
-    return [(m.group(2), m.group(4), int(m.group(6))) for m in ICON.finditer(text)]
+def sheet_files(root):
+    if root is None:
+        return []
+    return sorted([*(root / SOURCES).glob("taom_banners_*.*"), *(root / PACKAGES).glob("taom_banners_*.tpac")])
 
 
-def plan(counts):
-    """{material: (packed sheet, first cell)} for every sheet using fewer than 16 cells.
-
-    First fit decreasing over whole sheets, ties by name, so the plan does not depend on input order."""
-    bins, out = [], {}
-    for mat, n in sorted(((m, n) for m, n in counts.items() if n < CELLS), key=lambda x: (-x[1], x[0])):
-        for i, used in enumerate(bins):
-            if used + n <= CELLS:
-                out[mat] = (PACKED.format(i + 1), used)
-                bins[i] += n
-                break
-        else:
-            out[mat] = (PACKED.format(len(bins) + 1), 0)
-            bins.append(n)
-    return out
+def sheet_name(p):
+    """The material a file belongs to: x for x.png, x.psd, x_mtl.tpac and x_tex.tpac."""
+    return p.stem[:-4] if p.suffix.lower() == ".tpac" else p.stem
 
 
-def icon_moves(icons, sheet_plan):
-    """{icon id: (packed sheet, new index, old index)}: a moved sheet's icons keep their order."""
+def sources(root):
+    return {sheet_name(p): p for p in sheet_files(root) if p.suffix.lower() in (".png", ".psd")}
+
+
+def plan(icons, taken=frozenset()):
+    """{icon id: (old material, old index, sheet, cell)} for every icon to move; {} when nothing saves a sheet.
+
+    Sheets that are not packed and use fewer than 16 cells move whole, largest first (ties by name), into
+    the free cells of the first packed sheet with room, else into a new packed sheet: the first
+    taom_banners_packed_alpha_NN that no file or row uses (`taken` and the rows, casefolded). A new sheet
+    that would hold one sheet alone is only a rename, so that sheet stays put. Packed sheets never move,
+    so their textures stay valid. Ids are assumed unique (the audit's duplicate_id blocks packing)."""
+    cells = defaultdict(dict)
+    for i, m, t in icons:
+        cells[m][t] = i
+    packed = sorted(m for m in cells if PACKED_RE.fullmatch(m))
+    bins = [[m, sorted(set(range(CELLS)) - set(cells[m])), []] for m in packed]
+    movers = sorted((m for m in cells if m not in packed and len(cells[m]) < CELLS),
+                    key=lambda m: (-len(cells[m]), m))
+    used = {n.casefold() for n in taken} | {m.casefold() for m in cells}
+    fresh = (n for n in map(PACKED.format, itertools.count(1)) if n.casefold() not in used)
+    for m in movers:
+        b = next((b for b in bins if len(b[1]) >= len(cells[m])), None)
+        if b is None:
+            b = [next(fresh), list(range(CELLS)), []]
+            bins.append(b)
+        b[2] += [(cells[m][t], m, t, b[1].pop(0)) for t in sorted(cells[m])]
     moves = {}
-    for mat, (packed, start) in sheet_plan.items():
-        own = sorted((t, i) for i, m, t in icons if m == mat)
-        for k, (t, i) in enumerate(own):
-            moves[i] = (packed, start + k, t)
+    for name, _, placed in bins:
+        if name not in packed and len({m for _, m, _, _ in placed}) < 2:
+            continue
+        moves.update({i: (m, t, name, c) for i, m, t, c in placed})
     return moves
 
 
@@ -87,13 +145,13 @@ def rewrite_icons(text, moves):
         if m.group(2) not in moves:
             return m.group(0)
         seen.add(m.group(2))
-        packed, idx, _ = moves[m.group(2)]
-        return f"{m.group(1)}{m.group(2)}{m.group(3)}{packed}{m.group(5)}{idx}{m.group(7)}"
+        _, _, sheet, cell = moves[m.group(2)]
+        return f"{m.group(1)}{m.group(2)}{m.group(3)}{sheet}{m.group(5)}{cell}{m.group(7)}"
 
     out = ICON.sub(sub, text)
     missing = set(moves) - seen
     if missing:
-        raise KeyError(f"no <Icon> row for {sorted(missing)}")
+        raise ValueError(f"no <Icon> row the rewrite can match for {sorted(missing)}")
     ET.fromstring(out.encode("utf-8"))
     return out
 
@@ -103,22 +161,19 @@ def checker(i):
     return RED if (r + c) % 2 == 0 else GREEN
 
 
-def assemble(cells, size=4096):
-    """A sheet holding `cells` in order from cell 0, the rest the placeholder checkerboard."""
-    c = size // GRID
-    sheet = np.zeros((size, size, 3), dtype=np.uint8)
-    for i in range(CELLS):
+def assemble(slots):
+    """A SHEET_PX sheet from 16 slots (an array, or None for the placeholder checkerboard)."""
+    c = SHEET_PX // GRID
+    sheet = np.zeros((SHEET_PX, SHEET_PX, 3), dtype=np.uint8)
+    for i, cell in enumerate(slots):
         r, k = divmod(i, GRID)
-        if i < len(cells):
-            sheet[r * c:(r + 1) * c, k * c:(k + 1) * c] = cells[i]
-        else:
-            sheet[r * c:(r + 1) * c, k * c:(k + 1) * c] = checker(i)
+        sheet[r * c:(r + 1) * c, k * c:(k + 1) * c] = checker(i) if cell is None else cell
     return sheet
 
 
 def is_art(cell):
     """False for a placeholder (red, green or black) cell: art is at least 32 pixels more than 16 levels
-    off the cell's corner colour, so a placeholder's stray near-colour pixels (Rohan cell 11) do not count."""
+    off the cell's corner colour, so stray near-colour pixels (Rohan cell 11 had 8, one level off) don't count."""
     flat = cell.reshape(-1, 3).astype(np.int16)
     off = (np.abs(flat - flat[0]) > 16).any(axis=1)
     return int(off.sum()) >= 32
@@ -126,160 +181,212 @@ def is_art(cell):
 
 def load_cells(path):
     a = np.asarray(Image.open(path).convert("RGB"))
-    if a.shape[:2] != (4096, 4096):
-        raise ValueError(f"{path}: {a.shape[1]}x{a.shape[0]}, expected 4096x4096")
-    c = 4096 // GRID
+    if a.shape[:2] != (SHEET_PX, SHEET_PX):
+        raise ValueError(f"{path}: {a.shape[1]}x{a.shape[0]}, expected {SHEET_PX}x{SHEET_PX}")
+    c = SHEET_PX // GRID
     return [a[r * c:(r + 1) * c, k * c:(k + 1) * c] for r in range(GRID) for k in range(GRID)]
 
 
-def sources(mod):
-    return {p.stem: p for p in (mod / "AssetSources" / "BannerIcons").glob("taom_banners_*.*")
-            if p.suffix.lower() in (".psd", ".png")}
+def build_sheets(moves, srcs):
+    """Each target sheet built from the moves themselves, so its cells sit where the rewritten rows point.
+    An existing packed sheet keeps its art; a new one starts as the checkerboard."""
+    by_sheet = defaultdict(list)
+    for mat, old, sheet, new in moves.values():
+        by_sheet[sheet].append((new, mat, old))
+    out = {}
+    for sheet, moved in sorted(by_sheet.items()):
+        if sheet in srcs:
+            base = load_cells(srcs[sheet])
+            slots = [cell if is_art(cell) else None for cell in base]
+        else:
+            slots = [None] * CELLS
+        decoded = {m: load_cells(srcs[m]) for m in {m for _, m, _ in moved}}
+        for new, mat, old in moved:
+            slots[new] = decoded[mat][old]
+        out[sheet] = assemble(slots)
+    return out
 
 
-def audit(repo):
-    """Findings for the gate, keyed by kind; partial_counts maps each partly used material to its icon count."""
-    mod = module(repo)
-    icons = read_icons((mod / "ModuleData" / "banner_icons.xml").read_bytes().decode("utf-8-sig"))
-    srcs = sources(mod)
-    rep = {k: [] for k in ("missing_sheet", "empty_cell", "shared_cell", "unnamed_art", "missing_sprite",
-                           "missing_package", "unused_sheet")}
-    by_mat = {}
+def sprite_parts(root):
+    path = root / SPRITE_DATA
+    if not path.exists():
+        return set()
+    return {p.findtext("Name") for p in ET.parse(path).getroot().iter("SpritePart")
+            if p.findtext("CategoryName") == SPRITE_CATEGORY}
+
+
+def package_problems(root, mat, srcs):
+    """Why the Kit packages of `mat` do not match its source: [] when they do."""
+    tex, mtl = root / PACKAGES / f"{mat}_tex.tpac", root / PACKAGES / f"{mat}_mtl.tpac"
+    t = tex.read_bytes()
+    out = []
+    if t[TEX_GUID] not in mtl.read_bytes():
+        out.append(f"{mat}_mtl.tpac does not name {mat}_tex.tpac")
+    m = SOURCE_PATH.search(t)
+    if not m:
+        return out + [f"{mat}_tex.tpac names no AssetSources/BannerIcons source"]
+    src = root / m.group(1).decode("utf-8")
+    if mat in srcs and src.name != srcs[mat].name:
+        out.append(f"{mat}_tex.tpac was imported from {src.name}, the source on disk is {srcs[mat].name}")
+    elif not src.exists() or xxhash.xxh64(src.read_bytes()).intdigest().to_bytes(8, "little") != t[m.end():m.end() + 8]:
+        out.append(f"{mat}_tex.tpac is older than {src.name}: re-import it in the Kit and copy it back")
+    return out
+
+
+def audit(root):
+    """Findings for the gate, by kind (empty lists when clean)."""
+    icons = read_icons((root / XML).read_bytes())
+    srcs = sources(root)
+    names = {p.name for p in sheet_files(root)}
+    parts = sprite_parts(root)
+    rep = {k: [] for k in ("missing_sheet", "empty_cell", "shared_cell", "unnamed_art", "duplicate_id",
+                           "missing_sprite", "missing_package", "stale_package", "unused_sheet", "mergeable")}
+    rep["duplicate_id"] = sorted(i for i, n in Counter(i for i, _, _ in icons).items() if n > 1)
+    by_mat = defaultdict(lambda: defaultdict(list))
     for i, m, t in icons:
-        by_mat.setdefault(m, {}).setdefault(t, []).append(i)
-        if not (mod / "GUI" / "SpriteParts" / "ui_taom_bannericons" / f"{i}.png").exists():
+        by_mat[m][t].append(i)
+        if i not in parts or not (root / SPRITE_PNGS / f"{i}.png").exists():
             rep["missing_sprite"].append(i)
-    for mat, cells_used in sorted(by_mat.items()):
-        for t, ids in cells_used.items():
-            if len(ids) > 1:
-                rep["shared_cell"].append((mat, t, ids))
-        for kind in ("mtl", "tex"):
-            if not (mod / "Assets" / "BannerIcons" / f"{mat}_{kind}.tpac").exists():
-                rep["missing_package"].append(f"{mat}_{kind}.tpac")
+    for mat, used in sorted(by_mat.items()):
+        rep["shared_cell"] += [(mat, t, ids) for t, ids in sorted(used.items()) if len(ids) > 1]
+        missing = [f"{mat}_{k}.tpac" for k in ("mtl", "tex") if f"{mat}_{k}.tpac" not in names]
+        rep["missing_package"] += missing
         if mat not in srcs:
             rep["missing_sheet"].append(mat)
             continue
+        if not missing:
+            rep["stale_package"] += package_problems(root, mat, srcs)
         cells = load_cells(srcs[mat])
-        for t, ids in cells_used.items():
-            if not 0 <= t < CELLS or not is_art(cells[t]):
-                rep["empty_cell"].append((mat, t, ids))
-        for t, cell in enumerate(cells):
-            if t not in cells_used and is_art(cell):
-                rep["unnamed_art"].append((mat, t))
-    rep["unused_sheet"] = sorted(set(srcs) - set(by_mat))
-    rep["partial_counts"] = {m: len(c) for m, c in by_mat.items() if len(c) < CELLS}
+        rep["empty_cell"] += [(mat, t, ids) for t, ids in sorted(used.items())
+                              if not 0 <= t < CELLS or not is_art(cells[t])]
+        rep["unnamed_art"] += [(mat, t) for t, cell in enumerate(cells) if t not in used and is_art(cell)]
+    rep["unused_sheet"] = sorted({sheet_name(p) for p in sheet_files(root)} - set(by_mat))
+    rep["mergeable"] = sorted({m for m, _, _, _ in plan(icons, {sheet_name(p) for p in sheet_files(root)}).values()})
     return rep
 
 
-def game_module():
-    sys.path.insert(0, str(Path(__file__).resolve().parent))
-    from _gamedir import game_dir
-    return Path(game_dir(r"E:\Steam\steamapps\common\Mount & Blade II Bannerlord")) / "Modules" / "TAOM"
+def free_cells(icons):
+    """{packed sheet: [free cell indices]}, where a new emblem goes before any new sheet is started."""
+    used = defaultdict(set)
+    for _, m, t in icons:
+        used[m].add(t)
+    return {m: sorted(set(range(CELLS)) - u) for m, u in sorted(used.items())
+            if PACKED_RE.fullmatch(m) and len(u) < CELLS}
 
 
-def apply(repo, write):
-    mod = module(repo)
-    xml_path = mod / "ModuleData" / "banner_icons.xml"
-    text = xml_path.read_bytes().decode("utf-8")  # binary round trip keeps BOM and CRLF
-    icons = read_icons(text)
-    counts = {}
-    for _, m, _ in icons:
-        counts[m] = counts.get(m, 0) + 1
-    sheet_plan = plan(counts)
-    moves = icon_moves(icons, sheet_plan)
-    packed = sorted({p for p, _ in sheet_plan.values()})
-    for p in packed:
-        members = sorted(((s, m) for m, (q, s) in sheet_plan.items() if q == p))
-        print(f"{p}: " + ", ".join(f"{m} ({counts[m]}) at {s}" for s, m in members))
-    print(f"{len(sheet_plan)} partly used sheets -> {len(packed)} packed; {len(moves)} icons move")
+def findings(rep):
+    return {k: v for k, v in rep.items() if v}
+
+
+def pack(root, install, write):
+    text = (root / XML).read_bytes().decode("utf-8")  # binary round trip keeps BOM and CRLF
+    icons = read_icons(text.encode("utf-8"))
+    taken = {sheet_name(p) for r in (root, install) for p in sheet_files(r)}
+    moves = plan(icons, taken)
+    print("free packed cells: " + (", ".join(f"{m} {c}" for m, c in free_cells(icons).items()) or "none"))
+    if not moves:
+        print("nothing to pack: moving the partly used sheets would not save a sheet")
+        return 0
+    targets = defaultdict(set)
+    for mat, _, sheet, _ in moves.values():
+        targets[sheet].add(mat)
+    srcs = sources(root)
+    for sheet, mats in sorted(targets.items()):
+        print(f"{sheet} ({'re-import' if sheet in srcs else 'new'}): " + ", ".join(sorted(mats)))
+    print(f"{len(moves)} icons move")
+    blocking = {k: v for k, v in findings(audit(root)).items() if k in BLOCKING}
+    if blocking:
+        print(f"refusing: packing copies only the named cells of sheets it can read: {blocking}")
+        return 1
     if not write:
         print("dry run: nothing written (--apply to write)")
         return 0
-    srcs = sources(mod)
-    new_sheets = {}
-    for p in packed:
-        cells = []
-        for s, m in sorted((s, m) for m, (q, s) in sheet_plan.items() if q == p):
-            src_cells = load_cells(srcs[m])
-            cells += [src_cells[t] for t in sorted(t for _, mm, t in icons if mm == m)]
-        new_sheets[p] = assemble(cells)
-    for i, (p, idx, old) in moves.items():  # verify every moved cell before anything is written
-        mat = next(m for ii, m, _ in icons if ii == i)
-        if not np.array_equal(new_sheets[p][(idx // GRID) * 1024:(idx // GRID + 1) * 1024,
-                                            (idx % GRID) * 1024:(idx % GRID + 1) * 1024],
-                              load_cells(srcs[mat])[old]):
-            raise RuntimeError(f"icon {i}: packed cell differs from its source")
+    sheets = build_sheets(moves, srcs)
     out_text = rewrite_icons(text, moves)
-    targets = [mod / "AssetSources" / "BannerIcons"]
-    gm = game_module()
-    if (gm / "AssetSources" / "BannerIcons").is_dir():
-        targets.append(gm / "AssetSources" / "BannerIcons")
-    for p, a in new_sheets.items():
-        for d in targets:
-            Image.fromarray(a, "RGB").save(d / f"{p}.png")
-    xml_path.write_bytes(out_text.encode("utf-8"))
-    print(f"wrote {len(new_sheets)} sheets to {', '.join(map(str, targets))} and {xml_path}")
+    dirs = [root / SOURCES] + ([install / SOURCES] if install and (install / SOURCES).is_dir() else [])
+    for sheet, a in sheets.items():
+        for d in dirs:
+            Image.fromarray(a, "RGB").save(d / f"{sheet}.png")
+    (root / XML).write_bytes(out_text.encode("utf-8"))
+    print(f"wrote {len(sheets)} sheets to {', '.join(map(str, dirs))} and {root / XML}")
+    if install is None:
+        print("no install found: copy the new sheets into the install's AssetSources/BannerIcons before the Kit import")
     return 0
 
 
-def prune(repo, backup_dir):
-    mod = module(repo)
-    icons = read_icons((mod / "ModuleData" / "banner_icons.xml").read_bytes().decode("utf-8-sig"))
-    named = {m for _, m, _ in icons}
-    missing = [f"{m}_{k}.tpac" for m in sorted(named) for k in ("mtl", "tex")
-               if not (mod / "Assets" / "BannerIcons" / f"{m}_{k}.tpac").exists()]
-    if missing:
-        print("refusing: the Kit has not saved every named material into the repo: " + ", ".join(missing))
+def prune(root, install, backup, write):
+    rep = findings(audit(root))
+    if set(rep) - {"unused_sheet"}:
+        print(f"refusing: prune runs only when the unused sheets are the audit's only finding: {rep}")
         return 1
-    gm = game_module()
-    roots = [mod] + ([gm] if gm.is_dir() else [])
-    backup = Path(backup_dir)
-    doomed = []
-    for root in roots:
-        for p in sorted((root / "AssetSources" / "BannerIcons").glob("taom_banners_*.*")):
-            if p.stem not in named:
-                doomed.append(p)
-        for p in sorted((root / "Assets" / "BannerIcons").glob("taom_banners_*_???.tpac")):
-            if p.stem[:-4] not in named:
-                doomed.append(p)
-                if root != mod and p.stem.endswith("_tex"):
-                    rdc = root / "RuntimeDataCache" / f"{str(uuid.UUID(bytes_le=p.read_bytes()[8:24])).upper()}.rdc"
-                    if rdc.exists():
-                        doomed.append(rdc)
-    for p in doomed:
-        dest = backup / ("repo" if p.is_relative_to(mod) else "install") / p.relative_to(mod if p.is_relative_to(mod) else gm)
-        dest.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(p, dest)
-    for p in doomed:
-        os.remove(p)
-        print(f"deleted {p}")
-    print(f"{len(doomed)} files deleted; backups in {backup}")
+    named = {m for _, m, _ in read_icons((root / XML).read_bytes())}
+    deployed = set()
+    if install and (install / XML).exists():
+        deployed = {m for _, m, _ in read_icons((install / XML).read_bytes())}
+    keep = {m.casefold() for m in named | deployed}
+    doomed = []  # (label, root, file) in deletion order: each .rdc before the _tex.tpac that names it
+    for label, r in (("repo", root), ("install", install)):
+        for p in sheet_files(r):
+            if sheet_name(p).casefold() in keep:
+                continue
+            if p.name.lower().endswith("_tex.tpac") and (guid := package_guid(str(p))):
+                rdc = r / CACHE / f"{guid.upper()}.rdc"
+                if rdc.exists():
+                    doomed.append((label, r, rdc))
+            doomed.append((label, r, p))
+    if held := sorted(deployed - named):
+        print(f"kept: the install's banner_icons.xml still names {held}; build, then prune again")
+    for _, _, p in doomed:
+        print(f"{'delete' if write else 'would delete'} {p}")
+    if write and doomed:
+        for label, r, p in doomed:
+            dest = backup / label / p.relative_to(r)
+            dest.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(p, dest)
+        for _, _, p in doomed:
+            p.unlink()
+        print(f"{len(doomed)} files deleted; backups in {backup}")
+    elif not write:
+        print("dry run: nothing deleted (--prune --apply --backup-dir <dir> to delete)")
     return 0
 
 
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     mode = ap.add_mutually_exclusive_group()
-    mode.add_argument("--apply", action="store_true")
     mode.add_argument("--audit", action="store_true")
     mode.add_argument("--prune", action="store_true")
-    ap.add_argument("--backup-dir")
+    ap.add_argument("--apply", action="store_true", help="write (pack) or delete (--prune); default dry run")
+    ap.add_argument("--backup-dir", type=Path)
     args = ap.parse_args(argv)
-    if args.audit:
-        rep = audit(REPO)
-        bad = {k: v for k, v in rep.items() if k != "partial_counts" and v}
-        partial = rep["partial_counts"]
-        if len(partial) > -(-sum(partial.values()) // CELLS):
-            bad["mergeable"] = partial
-        for k, v in bad.items():
-            print(f"{k}: {v}")
-        print("clean" if not bad else f"{len(bad)} finding kinds")
-        return 1 if bad else 0
-    if args.prune:
-        if not args.backup_dir:
-            ap.error("--prune needs --backup-dir")
-        return prune(REPO, args.backup_dir)
-    return apply(REPO, args.apply)
+    if args.audit and args.apply:
+        ap.error("--audit writes nothing; drop --apply")
+    if args.backup_dir and not (args.prune and args.apply):
+        ap.error("--backup-dir goes with --prune --apply")
+    if args.prune and args.apply and not args.backup_dir:
+        ap.error("--prune --apply needs --backup-dir")
+    if MISSING:
+        print(f"cannot run: {MISSING} (needs numpy, Pillow and xxhash)", file=sys.stderr)
+        return 2
+    install = game_modules(DEFAULT_GAME_ROOT) / "TAOM"
+    install = install if install.is_dir() else None
+    try:
+        if args.audit:
+            rep = findings(audit(REPO_MODULE))
+            for k, v in rep.items():
+                print(f"{k}: {v}")
+            print("clean" if not rep else f"{len(rep)} finding kinds")
+            return 1 if rep else 0
+        if args.apply and install and game_or_kit_running():
+            print("refusing: Bannerlord or the Modding Kit is running; close it before writing the install",
+                  file=sys.stderr)
+            return 1
+        if args.prune:
+            return prune(REPO_MODULE, install, args.backup_dir, args.apply)
+        return pack(REPO_MODULE, install, args.apply)
+    except (ValueError, OSError, ET.ParseError) as e:  # bad input or files: the tool cannot judge, exit 2
+        print(f"cannot run: {e}", file=sys.stderr)
+        return 2
 
 
 if __name__ == "__main__":

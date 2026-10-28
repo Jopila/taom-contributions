@@ -141,8 +141,9 @@ KINGDOMS = {
         banner="11.2027.2027.1528.1528.764.764.1.0.0.{icon}.{fg}.{fg}.700.700.764.764.0.0.0",
         kingdom_icon=31005, clan_icons=[31005, 11006, 11000, 11001],
         sigil=2004, clan_sigils=[2004, 238, 2004, 2004],
-        clan_colors=[("FF885040", "FFD8C8A0"), ("FF7A4A3A", "FFD8C8A0"), ("FF94603F", "FFE0D4B8"),
-                     ("FF6E4632", "FFCACCCB")],
+        # Shades of the banner green with white: Patch23 dresses troops and map parties in these.
+        clan_colors=[("FF28745C", "FFF2F4F2"), ("FF22664F", "FFE8ECE8"), ("FF2F8068", "FFF2F4F2"),
+                     ("FF1E5A48", "FFE2E8E4")],
         relationships={"gundabad": (0, False), "empire": (0, False), "isengard": (0, False),
                        "rivendell": (0, False), "lindon": (0, False), "empire_w": (0, False),
                        "arthedain": (0, False), "rhudaur": (0, False)},

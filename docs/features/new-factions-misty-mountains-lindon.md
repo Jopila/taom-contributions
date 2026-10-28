@@ -222,7 +222,8 @@ bluecraig has its own `Culture.bluecraig` ones since its promotion (`child_templ
   on Sea Mist Blue; Edhil Mithlond 31000 (wings and star) and Nos Galdor 31001 (crescent and star), white on Sea
   Mist; Nos Brithombar 31002 (swan and wave), Pine on white; Wardens of Ered Luin 31003 (twin towers), white on
   Pine; Nos Eglarest 31004 (twin swans), Sea Mist on white. The kingdom flies the Falathrim key, and its banner
-  and map colours are Sea Mist `0xFF7FAFC9` and Silver `0xFFC9CED4`, so Mithlond and the ruling house show the
+  and map colours are Sea Mist `0xFF7FAFC9` and Silver `0xFFC9CED4` (the Lindon culture and its
+  `factionmap/factions.json` entry use the same pair), so Mithlond and the ruling house show the
   lozenge of stars (a ruling clan shows its kingdom's banner). Banner Injection applies the keys to kingdoms and non-ruling
   clans in existing saves at the next session ([banner-injection.md](banner-injection.md)); the deployed module
   needs a build first. Known limitation: in an older save, the clans keep the Gundabad banner colours they

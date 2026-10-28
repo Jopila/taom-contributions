@@ -2248,3 +2248,9 @@ Arthedain, Cardolan, Rhudaur and Ered Luin shipped as "Kingdom of X" in the king
 - **Why missed:** each realm was built from the previous one's table row, and no check compared one kingdom's `name` with the others.
 - **Prevent:** `KingdomNameTests` (`tools/tests/test_generate_new_faction_kingdoms.py`) fails a "Kingdom of" `name` in the generator table and the shipped XML or XSLT, and a language row of a bare name that adds its language's word for kingdom. Rename through the generator, then change each language row and its `translation_cache` entry together ([recipe-add-a-kingdom.md](../../modding/recipe-add-a-kingdom.md) "Gotchas").
 - **Source:** #1050.
+
+### A realm's look has five owners: change them together (banner packing, 2026-10-28)
+Cardolan's banner went green and white while its clans kept brown `color`/`color2`, so Patch23 dressed its troops brown; `factions.json` and the culture colours kept the old Lindon and Cardolan colours, and two tool tables would have written them back.
+- **Why missed:** the change was made and reviewed where banners are defined.
+- **Prevent:** when a realm's banner or colours change, update in one change the kingdom banner key and colours, the clans' `color`/`color2` (Patch23 tint), the culture `color`/`color2`, the `factionmap/factions.json` colour, and every tool table that writes them (`generate_new_faction_kingdoms.py`, `promote_borrowed_cultures.py`, `make_new_factions_playable.py`).
+- **Source:** [rca-banner-packing-2026-10-28.md](../rca-banner-packing-2026-10-28.md) findings 4 and 5.

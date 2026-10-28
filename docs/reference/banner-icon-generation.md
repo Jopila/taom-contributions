@@ -94,41 +94,71 @@ The flag draws from the **material** (`_mtl.tpac`), which references the **textu
 ## Packing partly used sheets (#1047)
 
 A banner key, a saved banner and a UI sprite name only the icon id, so an icon can move to another
-sheet by changing its `<Icon>` row alone. `python tools/pack_banner_sheets.py` packs every sheet that
-uses fewer than 16 cells into `taom_banners_packed_alpha_NN` (first fit decreasing, cells copied
-verbatim, free cells in the red and green checkerboard). On 2026-10-28 it packed 20 sheets (150
-icons) into 10. All TAOM banner materials share one shader (their `_mtl.tpac` files differ only in
-GUIDs, name and checksum), so an ornament sheet and an alpha sheet can share a texture.
+sheet by changing its `<Icon>` row alone. On 2026-10-28 `python tools/pack_banner_sheets.py` packed
+20 partly used sheets (150 icons) into `taom_banners_packed_alpha_01` to `_10`. All TAOM banner
+materials share one shader (their `_mtl.tpac` files differ only in GUIDs, name and checksum), so an
+ornament sheet and an alpha sheet can share a texture.
 
-1. `python tools/pack_banner_sheets.py`, read the plan, then `--apply`: it writes the packed sources
-   (repo and install) and repoints the `<Icon>` rows.
-2. Modding Kit: Step 4a for each packed sheet, then copy both `.tpac` into `Main/_Module/Assets/BannerIcons/`.
-3. `python tools/pack_banner_sheets.py --prune --backup-dir <dir>`: deletes every sheet no icon names,
-   in the repo (source, `.tpac`) and the install (the same, plus the texture's
-   `RuntimeDataCache/<GUID>.rdc`, read from bytes 8 to 23 of its `_tex.tpac`). It refuses while a
-   named material lacks its packages.
+**Adding emblems.** Draw them on a new sheet (Step 2), add their `<Icon>` rows (Step 3) and the
+sprites (Step 4b). The tool then moves a sheet that uses fewer than 16 cells, whole and largest first,
+into the free cells of an existing packed sheet. Only when none has room does it start a new packed
+sheet (the first `taom_banners_packed_alpha_NN` no file or row uses), and only for two or more sheets
+that share it; a sheet that would sit alone stays put. Packed sheets never move, so a second run is a
+no-op. It refuses duplicate icon ids. The dry run lists the free packed cells.
+
+1. `python tools/pack_banner_sheets.py`, read the plan, then `--apply`. It writes the packed sources
+   (repo and install) and repoints the moved `<Icon>` rows. It refuses while the audit reports a
+   missing sheet, an empty or shared cell, or unnamed art, because it copies only the cells a row names.
+2. Modding Kit: Step 4a for each sheet the plan names (re-import a changed packed sheet; for a new one
+   also make its material), save, then copy both `.tpac` into `Main/_Module/Assets/BannerIcons/`.
+3. `./build.ps1` with the game and the Kit closed, so the install's `banner_icons.xml` names the
+   packed sheets.
+4. `python tools/pack_banner_sheets.py --prune` lists every sheet that neither `banner_icons.xml`
+   names, in the repo (source, `.tpac`) and the install (the same, plus the texture's
+   `RuntimeDataCache/<GUID>.rdc`, read from bytes 8 to 23 of its `_tex.tpac`, deleted before the
+   texture). `--prune --apply --backup-dir <dir>` deletes them, each backed up first. It refuses
+   while the audit has any other finding and while the game or the Kit runs.
 
 `python tools/pack_banner_sheets.py --audit` is the gate (`tools/tests/test_pack_banner_sheets.py`):
 every icon names a sheet that exists and a cell that holds art, no two icons share a cell, no art
-cell is unnamed, every icon has its sprite and every material its packages, no source sheet is
-unused, and the partly used sheets cannot be merged into fewer. A new emblem goes into a free
-packed cell before a new sheet is started.
+cell is unnamed, every icon has a `ui_taom_bannericons` sprite part in `TAOMSpriteData.xml` and its
+PNG, every material has both packages, each `_mtl.tpac` names its `_tex.tpac` and each `_tex.tpac`
+holds the hash of its current source (so a sheet changed after its Kit import is a finding), no
+sheet file is unused, and no packing plan would save a sheet.
 
-## Current inventory (2026-06 batch)
+## Current inventory (2026-10-28, #1047)
 
-| Sheet | material_name (Step 4a) | group | Icon ids / sprite `<id>.png` (Step 4b) |
-|---|---|---|---|
-| MM Orcs #1 | `taom_banners_mistymountainorcs_alpha_01` | 280 | 28000–28015 |
-| MM Orcs #2 | `taom_banners_mistymountainorcs_alpha_02` | 281 | 28100–28115 |
-| Goblin | `taom_banners_goblin_alpha_01` | 290 | 29000–29015 |
-| Isengard #2 | `taom_banners_isengard_alpha_02` | 231 | 23100–23115 |
-| Mordor #2 | `taom_banners_mordor_alpha_02` | 191 | 19100–19115 |
-| Gundabad #2 | `taom_banners_gundabad_alpha_02` | 221 | 22100–22115 |
-| Dol Guldur #2 | `taom_banners_dolguldur_alpha_02` | 181 | 18100–18115 |
-| Dunland #2 | `taom_banners_dunland_alpha_02` | 261 | 26100–26115 |
-| Misc (Rohan/Rhûn/Lindon/Dale/Goblin-King/MM-antlers/…) | `taom_banners_misc_alpha_01` | 300 | 30000–30015 |
+24 sheets: 14 full per-culture sheets and 10 packed ones. `banner_icons.xml` is the authority; the
+dry run of `pack_banner_sheets.py` lists the free packed cells.
 
-Status: `banner_icons.xml` wired ✅; green material sources placed in `AssetSources/BannerIcons/` ✅; per-icon sprite sources sliced into `GUI/SpriteParts/ui_taom_bannericons/` ✅. **Remaining:** Step 4a Kit material compile (×9) + Step 4b sprite-generation run + game restart. Green sources / previews / assembled sheets archived under `AssetSources/GauntletUI/_taom_new_banners/`.
+| material_name | Icons | Groups and icon ids |
+|---|---|---|
+| `taom_banners_abanissa_alpha_01` | 16 | Abanissa 25000-25015 |
+| `taom_banners_dolguldur_alpha_02` | 16 | Dol Guldur 18100-18115 |
+| `taom_banners_dunland_alpha_02` | 16 | Dunland 26100-26115 |
+| `taom_banners_dwarves_alpha_01` | 16 | Dwarves 24000-24015 |
+| `taom_banners_goblin_alpha_01` | 16 | Goblin 29000-29015 |
+| `taom_banners_gondor_alpha_01` | 16 | Gondor 10000-10015 |
+| `taom_banners_gundabad_alpha_02` | 16 | Gundabad 22100-22115 |
+| `taom_banners_isengard_alpha_02` | 16 | Isengard 23100-23115 |
+| `taom_banners_misc_alpha_01` | 16 | Misc 30000-30015 |
+| `taom_banners_mistymountainorcs_alpha_01` | 16 | Misty Mountain Orcs 28000-28015 |
+| `taom_banners_mistymountainorcs_alpha_02` | 16 | Misty Mountain Orcs 28100-28115 |
+| `taom_banners_mordor_alpha_01` | 16 | Mordor 19000-19015 |
+| `taom_banners_mordor_alpha_02` | 16 | Mordor 19100-19115 |
+| `taom_banners_rhun_alpha_01` | 16 | Rhûn 14000-14015 |
+| `taom_banners_packed_alpha_01` | 16 | Dwarves 24016-24030; Dale Ornaments 27500 |
+| `taom_banners_packed_alpha_02` | 15 | Gondor 10016-10030 |
+| `taom_banners_packed_alpha_03` | 16 | Harad 13000-13004; Dunland 26000-26010 |
+| `taom_banners_packed_alpha_04` | 15 | Dol Guldur 18000-18003; Dwarves Ornaments 24500-24510 |
+| `taom_banners_packed_alpha_05` | 15 | Rohan 21000-21010; Gundabad 22000-22003 |
+| `taom_banners_packed_alpha_06` | 16 | Noldor 15000-15009; Lindon 31000-31005 |
+| `taom_banners_packed_alpha_07` | 16 | Sindar 16000-16009; Isengard 23000-23003; Dale 27000-27001 |
+| `taom_banners_packed_alpha_08` | 16 | Silvan 17000-17008; Anduin Vale 20000-20006 |
+| `taom_banners_packed_alpha_09` | 14 | Gondor Ornaments 10500-10506; Arnor 11000-11006 |
+| `taom_banners_packed_alpha_10` | 11 | Umbar 12000-12006; Rhûn Ornaments 14500-14503 |
+
+Group 310 ("Lindon") also holds Cardolan's emblem, 31005.
 
 ## Related
 

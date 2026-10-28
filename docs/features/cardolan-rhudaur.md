@@ -96,7 +96,9 @@ generator's `female_hair_tag` and pinned by `FemaleLordHairDataTests`. Banners: 
 (group 110) in silver on palette 99. Cardolan (#1047) flies green (palette 2027, `0xFF28745C`, also its realm
 colour) with white emblems; the realm and the House of Tyrn Gorthad fly 31005 (an interlace ring around a
 lozenge, with seven stars), the House of Tharbad flies its icon in gold (238). The generator's `sigil` and
-`clan_sigils` fill the `{fg}` slot of the realm's banner template.
+`clan_sigils` fill the `{fg}` slot of the realm's banner template. The clans' `color`/`color2`, which
+Patch23 uses to dress troops and map parties, are shades of the same green with white, and the culture
+and faction-map colours match (`0xFF28745C`).
 
 ### Troop trees
 

@@ -168,7 +168,7 @@ public class ReflectionSiteBindingTests
     // --- Dependencies foundation probes, resolved by string through Type.GetMethod. A GetActiveModules
     // miss sends IncompatibleModDetector to a directory scan but makes CoopPresence read co-op as absent
     // (a live co-op session then desyncs); a FromParametersFile miss leaves the game version undetected.
-    [DataRow("TaleWorlds.ModuleManager.ModuleHelper", "ModuleHelper", "GetActiveModules", "Method", "IncompatibleModDetector.cs:210")]
+    [DataRow("TaleWorlds.ModuleManager.ModuleHelper", "ModuleHelper", "GetActiveModules", "Method", "IncompatibleModDetector.cs:226")]
     [DataRow("TaleWorlds.Library.ApplicationVersion", "ApplicationVersion", "FromParametersFile", "Method", "VersionProbe.cs:78")]
     // --- NameplateCull (Patch104): the three private fields the adapter binds with AccessTools.FieldRefAccess.
     // A miss makes Initialize return a reason, the cull stays off and the vanilla nameplate update runs (one WARNING line).

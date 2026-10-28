@@ -63,8 +63,8 @@ TARGETS = {
         "adjective": "Lindon",
         "tag": "Lindon",
         "short": "lin",
-        "color": "0xFF50A090",
-        "color2": "0xFF7FC4B4",
+        "color": "0xFF7FAFC9",  # Sea Mist and Grey Havens Silver, the realm's banner (#1047)
+        "color2": "0xFFC9CED4",
         "orc_remap": False,
         "subs": [
             # Rivendell's culture is named for the Ñoldor of Imladris. Lindon is Círdan's realm —
@@ -304,7 +304,7 @@ def _ruler_strings(c, formal, informal, neutral, rich, adjective, father, mother
 TARGETS["cardolan"] = _arnor_successor(
     capital="town_CA2",  # Caras Gorthad (Mike, 2026-10-23)
     adjective="Cardolan", tag="Cardolan", short="card",
-    color="0xFF885040", color2="0xFFD8C8A0",
+    color="0xFF28745C", color2="0xFFFFFFFF",  # the realm's banner green and white (#1047)
     subs=[
         ("Minas Tirith", "Caras Gorthad"),
         ("Pelargir", "Tharbad"),

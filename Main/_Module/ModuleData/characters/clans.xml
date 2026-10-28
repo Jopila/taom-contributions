@@ -2288,8 +2288,8 @@
 		culture="Culture.cardolan"
 		super_faction="Kingdom.cardolan"
 		is_noble="true"
-		color="FF885040"
-		color2="FFD8C8A0"
+		color="FF28745C"
+		color2="FFF2F4F2"
 		default_party_template="PartyTemplate.kingdom_hero_party_cardolan_template"
 		banner_key="11.2027.2027.1528.1528.764.764.1.0.0.31005.2004.2004.700.700.764.764.0.0.0" />
   <Faction
@@ -2301,8 +2301,8 @@
 		culture="Culture.cardolan"
 		super_faction="Kingdom.cardolan"
 		is_noble="true"
-		color="FF7A4A3A"
-		color2="FFD8C8A0"
+		color="FF22664F"
+		color2="FFE8ECE8"
 		default_party_template="PartyTemplate.kingdom_hero_party_cardolan_template"
 		banner_key="11.2027.2027.1528.1528.764.764.1.0.0.11006.238.238.700.700.764.764.0.0.0" />
   <Faction
@@ -2314,8 +2314,8 @@
 		culture="Culture.cardolan"
 		super_faction="Kingdom.cardolan"
 		is_noble="true"
-		color="FF94603F"
-		color2="FFE0D4B8"
+		color="FF2F8068"
+		color2="FFF2F4F2"
 		default_party_template="PartyTemplate.kingdom_hero_party_cardolan_template"
 		banner_key="11.2027.2027.1528.1528.764.764.1.0.0.11000.2004.2004.700.700.764.764.0.0.0" />
   <Faction
@@ -2327,8 +2327,8 @@
 		culture="Culture.cardolan"
 		super_faction="Kingdom.cardolan"
 		is_noble="true"
-		color="FF6E4632"
-		color2="FFCACCCB"
+		color="FF1E5A48"
+		color2="FFE2E8E4"
 		default_party_template="PartyTemplate.kingdom_hero_party_cardolan_template"
 		banner_key="11.2027.2027.1528.1528.764.764.1.0.0.11001.2004.2004.700.700.764.764.0.0.0" />
   <!-- TAOM-NEWFACTIONS:cardolan:END -->
