@@ -53,31 +53,61 @@ public class PrefabCloneWidgetReferenceTests
         var widgetTypes = WidgetTypesByName();
         Assert.IsTrue(widgetTypes.ContainsKey("Widget"), "The widget type index is missing the Gauntlet base type; the assembly scan is wrong.");
 
-        var repoDir = RepoPrefabsDir();
-        var vanillaByBasename = VanillaPrefabsByBasename();
-        var pairs = 0;
-        var offenders = new List<string>();
+        var pairs = ShadowPairs();
+        var offenders = pairs
+            .SelectMany(p => MissingWidgetReferences(p.vanilla, p.clone, widgetTypes).Select(gap => $"{p.relative} (shadows {p.module}): {gap}"))
+            .ToList();
 
-        // Gauntlet resolves a prefab by basename across every module's GUI/Prefabs tree, so a clone
-        // shadows the vanilla file of the same name wherever either of them sits.
-        foreach (var clone in Directory.GetFiles(repoDir, "*.xml", SearchOption.AllDirectories))
-        {
-            var relative = clone.Substring(repoDir.Length + 1);
-            if (!vanillaByBasename.TryGetValue(Path.GetFileName(clone), out var shadowed)) continue;
-            foreach (var (module, vanilla) in shadowed)
-            {
-                pairs++;
-                foreach (var gap in MissingWidgetReferences(vanilla, clone, widgetTypes))
-                    offenders.Add($"{relative} (shadows {module}): {gap}");
-            }
-        }
-
-        Assert.IsTrue(pairs > 0, "No TAOM prefab shadows a vanilla prefab; the pairing walk found nothing.");
         Assert.AreEqual(0, offenders.Count,
             "TAOM prefab clones drop widget references the vanilla prefab declares; the widget's own update "
             + "code dereferences those properties unguarded, so the clone throws where the vanilla file did not. "
-            + "Re-base the clone on the installed vanilla file and re-apply TAOM's edits:"
+            + "Re-base the clone on the installed vanilla file and re-apply TAOM's edits (a clone with no TAOM edit is deleted instead):"
             + Environment.NewLine + string.Join(Environment.NewLine, offenders));
+    }
+
+    // A copy with no TAOM change still replaces the vanilla file by name, so it only hides what a later engine update
+    // changes there (#1031, #1051): delete it and let vanilla load.
+    [TestMethod]
+    [TestCategory("LiveInstall")]
+    [TestCategory("RequiresGameIL")]
+    [TestCategory("BindingVerification")]
+    public void NoTaomPrefab_IsAnUnchangedCopyOfTheVanillaFileItShadows()
+    {
+        if (!_gameLoaded) Assert.Inconclusive("Game install unavailable: " + string.Join("; ", GameAssemblies.Diagnostics));
+
+        var pairs = ShadowPairs();
+        var copies = pairs
+            .Where(p => XNode.DeepEquals(AsTheEngineReadsIt(p.clone), AsTheEngineReadsIt(p.vanilla)))
+            .Select(p => $"{p.relative} (same as {p.module})")
+            .ToList();
+
+        Assert.AreEqual(0, copies.Count,
+            "TAOM prefabs identical to the vanilla file they replace; delete them:" + Environment.NewLine + string.Join(Environment.NewLine, copies));
+    }
+
+    // Gauntlet resolves a prefab by basename across every module's GUI/Prefabs tree, so a clone shadows the vanilla file
+    // of the same name wherever either of them sits.
+    private static List<(string clone, string relative, string module, string vanilla)> ShadowPairs()
+    {
+        var repoDir = RepoPrefabsDir();
+        var vanillaByBasename = VanillaPrefabsByBasename();
+        var pairs = new List<(string, string, string, string)>();
+        foreach (var clone in Directory.GetFiles(repoDir, "*.xml", SearchOption.AllDirectories))
+        {
+            if (!vanillaByBasename.TryGetValue(Path.GetFileName(clone), out var shadowed)) continue;
+            foreach (var (module, vanilla) in shadowed)
+                pairs.Add((clone, clone.Substring(repoDir.Length + 1), module, vanilla));
+        }
+        Assert.IsTrue(pairs.Count > 0, "No TAOM prefab shadows a vanilla prefab; the pairing walk found nothing.");
+        return pairs;
+    }
+
+    // The engine's prefab reader ignores comments and layout whitespace and keeps attribute values exactly (WidgetPrefab.LoadFrom).
+    private static XDocument AsTheEngineReadsIt(string path)
+    {
+        var doc = XDocument.Load(path, LoadOptions.None);
+        doc.DescendantNodes().OfType<XComment>().Remove();
+        return doc;
     }
 
     private static IEnumerable<string> MissingWidgetReferences(string vanillaPath, string clonePath, IReadOnlyDictionary<string, Type> widgetTypes)

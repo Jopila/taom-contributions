@@ -178,7 +178,7 @@ first target only, so diff its other targets by hand (#1038): `grep -rlE 'IEnume
    in the same category. `PrefabCloneWidgetReferenceTests` is the one to read when a vanilla prefab
    moved: a TAOM clone REPLACES the vanilla file, so a widget reference the engine adds (v1.5.0
    `BloodFeudIconWidget`, v1.5.3 the ship banners) is a null the widget dereferences on frame one.
-   Re-base the clone on the installed file, re-apply TAOM's edits. Two things about the
+   Re-base the clone on the installed file, re-apply TAOM's edits; a clone with no TAOM edit is deleted, in the repo and in the deployed `Modules/TAOM/GUI/Prefabs/` (a deploy never deletes, and Phase 5 runs the installed module). Two things about the
    snapshot half (`pwsh tools/snapshot_api_surface.ps1`): it reads `TAOM.dll` out of
    `TAOM.Tests/bin/{Debug,Release}/net472` and **throws if TAOM.Tests has not been built**, so build
    first; and `-Check` reports **DRIFT against the committed files by design** — the generator emits
