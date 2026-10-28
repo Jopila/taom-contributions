@@ -105,6 +105,18 @@ class AddMapVillagesMainTests(unittest.TestCase):
             self.assertEqual(code, 0)
             self.assertNotIn("village_X_1", tree.loc("BR"))
 
+    def test_main_Apply_NameAnotherSettlementCarries_RefusesAndWritesNothing(self):
+        master = self.MASTER.replace('id="town_A" ', 'id="town_A" name="{=Settlements.Settlement.name.town_A}Aldeia X" ')
+        err = io.StringIO()
+        with tempfile.TemporaryDirectory() as td:
+            tree = Tree(td, master, "<scene></scene>", self.LOC, table())
+            code = tree.run(amv, "add_map_villages.py", ["--apply"],
+                            [mock.patch.object(amv, "VILLAGES", [self.VILLAGE]), mock.patch("sys.stderr", err)])
+            self.assertEqual(code, 1)
+            self.assertIn("is already on the map (town_A)", err.getvalue())
+            self.assertNotIn("village_X_1", Path(tree.live).read_text(encoding="utf-8"))
+            self.assertNotIn("village_X_1", tree.loc("DE"))
+
     def test_main_Apply_LoadsTheTableOnce(self):
         with tempfile.TemporaryDirectory() as td:
             tree = Tree(td, self.MASTER, "<scene></scene>", self.LOC, table())

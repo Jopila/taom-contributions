@@ -38,8 +38,8 @@ tables hold every name). `village_LN1_1` became Eryn Lhûn then, because the tow
 † `town_GBC1` (Blue Craig) has been **placed in the map editor** (≈250.97, 1270.66 — far NW by the
 Grey Havens). **Blue Craig is the SECOND, separate goblin kingdom** — a western realm distinct from
 the Misty Mountains goblins of Goblin Town (its clans are `clan_bluecraig_*` in `Kingdom.bluecraig`,
-lords `lord_BC*` — no overlap with `clan_goblin_*`). Its castles/villages are still to be added by the
-map author (drop them into `tools/taom_new_factions_layout.json` + re-run the settlements generator).
+lords `lord_BC*`, no overlap with `clan_goblin_*`). New castles and villages for it go through
+`tools/add_map_fortifications.py` and `tools/add_map_villages.py`; the settlements generator is retired (#1042).
 
 ### Village economy (orc/goblin)
 
@@ -49,8 +49,8 @@ villages** add a **lumberjack** for variety. (1 village → animal; 2-3 → (n-1
 (n-2) animal + 1 mine + lumberjack; mine alternates iron/silver across fiefs.) VillageType stringIds
 are code-registered (DefaultVillageTypes) — the rule uses only verified-valid ids (`cattle_farm`, NOT
 `cattle_range`), guarded by a `VALID_VILLAGE_TYPES` check. Lindon villages keep an elven economy
-(lumberjack / fisherman / wheat / vineyard). The settlements generator now applies the same rule, so
-re-running it reproduces the live file exactly (positions + types) without clobbering editor work.
+(lumberjack / fisherman / wheat / vineyard). The settlements generator applied the same rule; it is
+retired now (#1042) and never rewrites a live row, so later edits on the map are kept.
 
 ### Clan → fief ownership
 
@@ -170,7 +170,7 @@ troops; clans 2 to 6 share the second template.
 | `tools/generate_new_factions.py` | `troops_{c}.xml`, `npcs_{c}.xml`, `taom_equipment_sets_{c}.xml` (orc cultures) |
 | `tools/insert_new_factions.py` | Inserts wanderers, wanderer-equipment, party templates, culture blocks, SubModule regs, culture loc-strings (marker-wrapped, idempotent) |
 | `tools/generate_new_faction_kingdoms.py` | 4 kingdoms + clans + ~130 lords + heroes (templates read by id, parametrized) |
-| `tools/generate_new_faction_settlements.py` | `<Settlement>` blocks; `--apply` appends only the layout ids the live `TAOM_Map/settlements.xml` lacks (+ backup) and never rewrites a row; all 49 are on the map, so a run does nothing (#1042) |
+| `tools/generate_new_faction_settlements.py` | Retired (#1042): refuses to run without `--rerun-retired`. `<Settlement>` blocks; appends only the layout ids the live `TAOM_Map/settlements.xml` lacks (+ backup), never rewrites a row, and refuses a castle at the head of the new rows or a name already on the map; all 49 are on the map |
 | `tools/assign_orc_village_types.py` | Per-fief orc/goblin village economy (animal food + 1 mine; `VALID_VILLAGE_TYPES` guard); `--apply` edits the live settlements.xml in place |
 | `tools/make_new_factions_playable.py` | The 4 CC faction-map cards in `factions.json` (`--apply` dry-run guard); then `tools/harvest_factionmap_strings.py` propagates the card strings into `taom_module_strings.xml` |
 | `tools/insert_new_faction_cc_menus.py` | Clones gundabad's CC narrative menu entries → goblin/mistymountainorcs (parents/youth/adulthood/education); childhood is culture-independent. Fixes blank CC stages. |
@@ -180,7 +180,7 @@ Re-run order: `generate_new_factions.py` → `insert_new_factions.py` → `gener
 (it takes `--only`, offers only `arthedain`, `cardolan` and `rhudaur`, and writes only with
 `--apply`: this doc's four realms have drifted from
 their table entries, Lindon retagged to `Culture.lindon`, so a regeneration would revert them)
-→ `generate_new_faction_settlements.py --apply`. All inserts are idempotent
+(the settlements generator is retired: `--rerun-retired`, #1042). All inserts are idempotent
 (`<!-- TAOM-NEWFACTIONS:… -->` markers; each ModuleData region is replaced where it stands, and a
 damaged file refused, through `tools/_marker_region.py` since #947 and #976; the `SubModule.xml`
 registration block of `insert_new_factions.py` is still stripped and re-inserted after its anchor).

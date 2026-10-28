@@ -25,8 +25,10 @@ Properties:
   - Dry run by default; --apply writes a non-.xml backup of each changed file, and every output is
     parsed before any file is written
   - UTF-8 + CRLF preserved (UTF-8 round-trip via bytes); settlement ids untouched (save compatibility)
-  - Validates uniqueness before applying (aborts on dup names within the dict); the map writers
-    tools/add_map_villages.py and add_map_fortifications.py also refuse a name already on the map
+  - Validates uniqueness before applying (aborts on dup names within the dict), and refuses (exit 1) a new
+    name another settlement already carries, checked against the renamed master so two ids can swap
+  - Writes the cache first, then the 12 loc files, and the master LAST: a run that fails part-way is
+    finished by running it again. Exit 2 when the files are missing or none of its ids is in the master
 
 Usage:
   Edit the NAMES dict, then run:
@@ -585,12 +587,19 @@ def main(argv=None, cache_dir=amv.CACHE_DIR):
     master_path = os.path.join(ROOT, "settlements.xml")
     paths = {None: master_path}
     paths.update({lang: os.path.join(ROOT, "Languages", lang, "loc_settlements.xml") for lang in LANGS})
+    absent = [path for path in paths.values() if not os.path.isfile(path)]
+    if absent:
+        print("ERROR: not found (set BANNERLORD_GAME_DIR, see tools/_gamedir.py):\n  " + "\n  ".join(absent), file=sys.stderr)
+        return 2
     texts = {key: open(path, "rb").read().decode("utf-8") for key, path in paths.items()}
     ids, missing = renamed_ids(texts[None])
+    if len(missing) == len(NAMES):
+        print(f"ERROR: none of the {len(NAMES)} table ids is in {master_path}; is it the TAOM_Map master?", file=sys.stderr)
+        return 2
     for sid in missing:
         print(f"  not in settlements.xml, skipped: {sid}")
     if not ids:
-        print("Every table name already matches settlements.xml; nothing to do.")
+        print(f"All {len(NAMES) - len(missing)} table names found in settlements.xml already match; nothing to do.")
         return 0
     for sid in ids:
         print(f"  rename {sid} -> {NAMES[sid]}")
@@ -599,19 +608,30 @@ def main(argv=None, cache_dir=amv.CACHE_DIR):
     out = {}
     for key, text in texts.items():
         new, n = patch(text, ids, "master" if key is None else "loc", table, key)
-        ET.fromstring(new.encode("utf-8"))  # every output parses before any file is written
+        try:
+            ET.fromstring(new.encode("utf-8"))  # every output parses before any file is written
+        except ET.ParseError as e:
+            print(f"REFUSING: {paths[key]} does not parse after the rename ({e}); nothing written.", file=sys.stderr)
+            return 1
         out[key] = new
         print(f"{key or 'settlements.xml'}: {n} replacement(s)")
+    # Against the RENAMED master, so two table ids that swap names are not a clash.
+    clashes = amv.name_collisions([(sid, NAMES[sid]) for sid in ids], out[None])
+    if clashes:
+        print("REFUSING: a new name is already on the map:\n  " + "\n  ".join(clashes), file=sys.stderr)
+        return 1
     if not args.apply:
         print("\nDRY RUN: re-run with --apply to write the live files and remove the renamed ids from the cache.")
         return 0
 
-    tag = "bak_villagenames_" + datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-    for key, path in paths.items():
-        if out[key] != texts[key]:
-            open(f"{path}.{tag}", "wb").write(texts[key].encode("utf-8"))
-            open(path, "wb").write(out[key].encode("utf-8"))
+    # The master decides what a run renames, so it is written LAST, after the cache and the 12 loc
+    # files: a run that fails part-way leaves the old English in the master, and a re-run finishes it.
     removed = amv.evict_cached_names({lang: ids for lang in LANGS}, cache_dir)
+    tag = "bak_villagenames_" + datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    for key in LANGS + [None]:
+        if out[key] != texts[key]:
+            open(f"{paths[key]}.{tag}", "wb").write(texts[key].encode("utf-8"))
+            open(paths[key], "wb").write(out[key].encode("utf-8"))
     print(f"\nApplied: {len(ids)} rename(s); backups *.{tag}; "
           f"{sum(removed.values())} cache row(s) removed, so the next translator run translates the new names (#763).")
     print("Then run python tools/generate_name_tags.py --write: a BR or IT head noun may have changed.")

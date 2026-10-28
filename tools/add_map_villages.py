@@ -424,6 +424,9 @@ def evict_cached_names(ids_by_lang, cache_dir=CACHE_DIR, field="name"):
     removed = {}
     for lang, ids in ids_by_lang.items():
         path = os.path.join(cache_dir, f"{lang.lower()}.json")
+        if not os.path.isfile(path):  # translate_with_claude.load_cache reads a missing file as an empty cache
+            removed[lang] = 0
+            continue
         raw = open(path, "rb").read().decode("utf-8")
         cache = json.loads(raw)
         keys = [k for k in (f"Settlements.Settlement.{field}.{sid}" for sid in ids) if k in cache]

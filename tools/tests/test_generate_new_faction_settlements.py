@@ -54,5 +54,53 @@ class MissingBlocksTests(unittest.TestCase):
         self.assertTrue(out.rstrip().endswith("</Settlements>"))
 
 
+class MainTests(unittest.TestCase):
+    """main() on a temp master: the generator is retired, and a run that is allowed keeps the save-order rule."""
+
+    def _run(self, master_text, argv, layout=LAYOUT):
+        import contextlib
+        import io
+        import json
+        import tempfile
+        from unittest import mock
+        with tempfile.TemporaryDirectory() as td:
+            live = os.path.join(td, "settlements.xml")
+            lay = os.path.join(td, "layout.json")
+            with open(live, "wb") as f:
+                f.write(master_text.encode("utf-8"))
+            with open(lay, "w", encoding="utf-8") as f:
+                json.dump(layout, f)
+            with mock.patch.object(g, "LIVE", live), mock.patch.object(g, "LAYOUT", lay), \
+                    contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+                code = g.main(argv)
+            return code, open(live, "rb").read().decode("utf-8")
+
+    def test_without_rerun_retired_it_refuses_before_reading_anything(self):
+        from unittest import mock
+        with mock.patch.object(g.amv, "_read", side_effect=AssertionError("read a file")):
+            with self.assertRaises(SystemExit):
+                g.main(["--apply"])
+
+    def test_every_id_present_writes_nothing(self):
+        before = master("town_LN1", "village_LN1_1", "town_GBC1", "town_GT1")
+        code, after = self._run(before, ["--rerun-retired", "--apply"])
+        self.assertEqual(code, 0)
+        self.assertEqual(after, before)
+
+    def test_a_missing_town_is_appended_once(self):
+        code, after = self._run(master("village_LN1_1", "town_GBC1", "town_GT1"), ["--rerun-retired", "--apply"])
+        self.assertEqual(code, 0)
+        self.assertEqual(after.count('<Settlement id="town_LN1"'), 1)
+        self.assertEqual(after.count('<Settlement id="town_GT1"'), 1)
+
+    def test_a_tail_a_castle_would_head_is_refused(self):
+        # A castle has no <CommonAreas>, so a save made before the batch would load it without its owner.
+        layout = {"settlements": [
+            {"id": "castle_MM5", "type": "castle", "culture": "mistymountainorcs", "owner": "clan_mm_1", "posX": 1.0, "posY": 2.0}]}
+        before = master("town_GT1")
+        code, after = self._run(before, ["--rerun-retired", "--apply"], layout)
+        self.assertEqual(code, 1)
+        self.assertEqual(after, before)
+
 if __name__ == "__main__":
     unittest.main()

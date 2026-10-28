@@ -192,6 +192,8 @@ must print nothing.
 
 **TAOM_Map must not name Dale's new clans before the TAOM build that defines them.** `clan_sturgia_10` to `clan_sturgia_14` (the Dale lord expansion, [dale-lord-expansion.md](../features/dale-lord-expansion.md)) exist only in the TAOM build's `characters/clans.xml`, while the live `TAOM_Map/ModuleData/settlements.xml` seats castles to `clan_sturgia_10`, `_11` and `_12` through `Assign-SettlementOwners.py`. A map that names them beside an older TAOM build points castles at undefined clans. Check each channel before publishing: `grep -c 'owner="Faction.clan_sturgia_1[0-2]"'` on `E:/LOTRAOM_Releases/<channel>/Modules/TAOM_Map/ModuleData/settlements.xml` must be nonzero only when `grep -c 'id="clan_sturgia_1[0-4]"'` on that channel's `Modules/TAOM/ModuleData/characters/clans.xml` prints 5.
 
+**TAOM_Map must carry the #1042 name and description repair.** The 4,633 language rows reset from pre-rename names (DE "Dorf E2_1" for Linenhold) and the 109 new village descriptions exist only in the live `TAOM_Map` until a package carries them; on 2026-10-27 all three channels still showed "Usanc" for Mearhtun and none of the descriptions. Check each channel before publishing: `BANNERLORD_GAME_DIR=E:/LOTRAOM_Releases/<channel> python tools/oneoff/write_village_descriptions.py --check` exits 0, and `grep -cE 'text="(Usanc|Epicrotea)"' E:/LOTRAOM_Releases/<channel>/Modules/TAOM_Map/ModuleData/Languages/DE/loc_settlements.xml` prints 0 (the `--check` does not read the name rows).
+
 **Step 8 is the one that gets skipped**, which is why
 [`check-version-tagged.sh`](../../.claude/hooks/check-version-tagged.sh) reminds at turn end
 whenever the version in `SubModule.xml` has no tag pointing at any commit. That single condition

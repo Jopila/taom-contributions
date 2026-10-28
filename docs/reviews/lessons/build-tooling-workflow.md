@@ -4576,3 +4576,18 @@ never re-checks the installed file, so it kept listing "v1.5.5 wEditor ... map=o
   checks virtual overrides, abstract members and interface members), a `STALE` mark in `status()`, and every
   `TargetMethods()` target in `patch-targets.md`.
 - **Source:** v1.5.6 engine bump, [v1.5.6-impact.md](../../migration/v1.5.6-impact.md); #1036, #1038.
+### Write last the file a re-run reads to decide what is left (map-tool follow-ups, 2026-10-27)
+`Apply-MapVillageNames.py` decided what to rename from the master alone, wrote the master first and evicted the
+translation cache last. A run that failed on the fourth language left a master that matched its table, so the re-run
+printed "nothing to do" with nine languages and the whole cache still stale; the reset one-off did the same with
+its German witness file. Separately, both new one-offs called themselves idempotent, but a re-run after the
+translation backlog (#763) would turn every translated row back into English, the same missing `--rerun-retired`
+guard the Lindon RCA named that morning. And the map-wide name check went to the two writers the issue named, not
+to the renamer, the third writer of settlement names.
+- **Why missed:** each writer was checked against the state right after its own first run, not against a failed
+  run, a later legitimate writer or a reinstall; and the check was scoped by the issue title, not by the field.
+- **Prevent:** write the decision file last and evict caches first, and test it by making one output read-only and
+  proving the re-run finishes; a finished one-off whose re-run would undo later work refuses without
+  `--rerun-retired` from its first commit, with a test that it refuses before reading anything; before adding a
+  check to one writer, grep every writer of that field and add it to each.
+- **Source:** `docs/reviews/rca-map-tool-followups-2026-10-27.md` findings 1 to 4; #1042.

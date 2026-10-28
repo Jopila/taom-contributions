@@ -14,14 +14,22 @@ English was translated after its rename (the 17 ids tools/add_map_villages.py an
 batch wrote), so every language's row for it stands, transliterations included. For any other id,
 a row that differs from the English holds pre-rename text, except the pairs in KEEP. Measured with
 the witness on 2026-10-27: 4,633 rows (421 in each of BR, CNs, CNt, DE, FR, IT, JP, KO, RU, SP and
-TR, 2 in PL). The repair is idempotent: once the German rows equal the English, nothing is stale.
+TR, 2 in PL). EXTRA_IDS adds four Dunland fortifications outside that table with the same fault
+(town_EN1 Galtrev showed "Epicrotea"; review of #1042).
 
-Byte discipline: binary read and write, each file's BOM and CR CR LF kept, every output parsed
-before any file is written, a non-.xml backup of each file it changes.
+RETIRED: it refuses to run without --rerun-retired. Once the translation backlog (#763) translates
+these names, a German row that differs from the English is a translation, and a re-run would turn
+every language's row back into English. Run it again only to repair a reinstall of an older
+TAOM_Map package (tools/oneoff/write_village_descriptions.py --check detects one).
+
+Write order: the cache rows go first and the German witness file last, so a run that fails part-way
+leaves the witness stale and a re-run finishes the other languages. Byte discipline: binary read and
+write, each file's BOM and CR CR LF kept, every output parsed before any file is written, a non-.xml
+backup of each file it changes.
 
 Usage:
-  python tools/oneoff/reset_stale_village_loc_rows.py            # dry run: counts per language
-  python tools/oneoff/reset_stale_village_loc_rows.py --apply    # writes the 12 loc files and the cache
+  python tools/oneoff/reset_stale_village_loc_rows.py --rerun-retired            # dry run: counts per language
+  python tools/oneoff/reset_stale_village_loc_rows.py --rerun-retired --apply    # writes the 12 loc files and the cache
 """
 import argparse
 import datetime
@@ -43,7 +51,14 @@ KEEP = {
     ("PL", "castle_village_E1_2"),  # Gliniana Warownia, "clay stronghold": Cleyhold
     ("PL", "castle_village_E1_3"),  # Solne Sioło, "salt hamlet": Saltstead
 }
+# Renamed by an older tool, outside Apply-MapVillageNames.py's NAMES, with the same stale rows.
+EXTRA_IDS = ["town_EN1", "town_EN2", "town_EN3", "castle_EN5"]
 ROW = re.compile(r'id="Settlements\.Settlement\.name\.([^"]+)"\s+text="([^"]*)"')
+
+
+def target_ids(names):
+    """The ids the repair looks at: the renamer's table, then EXTRA_IDS."""
+    return list(names) + [sid for sid in EXTRA_IDS if sid not in names]
 
 
 def bare(text):
@@ -70,14 +85,18 @@ def reset_rows(loc_text, lang, names, table):
     return loc_text, count
 
 
-def main(argv=None):
+def main(argv=None, cache_dir=amv.CACHE_DIR):
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--apply", action="store_true", help="write the 12 loc files and the cache (default: dry run)")
+    ap.add_argument("--rerun-retired", action="store_true", help="run this finished one-off anyway (see RETIRED)")
     args = ap.parse_args(argv)
+    if not args.rerun_retired:
+        raise SystemExit("reset_stale_village_loc_rows.py is a finished one-off: a re-run after #763 would turn "
+                         "translated names back into English. Pass --rerun-retired to run it anyway.")
 
-    ids = list(runpy.run_path(os.path.join(TOOLS, "Apply-MapVillageNames.py"), run_name="names_only")["NAMES"])
+    ids = target_ids(runpy.run_path(os.path.join(TOOLS, "Apply-MapVillageNames.py"), run_name="names_only")["NAMES"])
     _, master_text = amv._read(amv.LIVE)
     master = amv.master_names(master_text)
     ids = [sid for sid in ids if sid in master]
@@ -97,14 +116,14 @@ def main(argv=None):
         print(f"  {lang:3}: {n} row(s) to reset" + (f", e.g. {plan[lang][0]} -> {master[plan[lang][0]]}" if n else ""))
     print(f"Total: {sum(len(v) for v in plan.values())} row(s) across {sum(1 for v in plan.values() if v)} language(s).")
     if not args.apply:
-        print("\nDRY RUN: re-run with --apply to write the live loc files and remove those rows from the cache.")
+        print("\nDRY RUN: re-run with --rerun-retired --apply to write the live loc files and remove those rows from the cache.")
         return 0
 
+    removed = amv.evict_cached_names(plan, cache_dir)
     tag = "reset_stale_" + datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-    for lang, (bom, text) in locs.items():
+    for lang in [lang for lang in locs if lang != WITNESS] + [WITNESS]:
         if plan[lang]:
-            amv._write(amv._loc_path(lang), bom, out[lang], tag)
-    removed = amv.evict_cached_names(plan)
+            amv._write(amv._loc_path(lang), locs[lang][0], out[lang], tag)
     print(f"\nApplied; backups *.bak_{tag}; {sum(removed.values())} cache row(s) removed. "
           "Then run python tools/generate_name_tags.py --check and python tools/check_external_loc_coverage.py.")
     return 0

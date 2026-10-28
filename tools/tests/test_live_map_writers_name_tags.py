@@ -44,34 +44,44 @@ class ApplyMapVillageNamesTests(unittest.TestCase):
               f'<Settlement id="village_RU8_2" name="{{={P}village_RU8_2}}Iôrig-Vargh" /></S>')
     ROWS = [("village_RU8_4", "Old"), ("village_RU8_2", "Ыыы")]
 
-    def _run(self, td, rows_by_lang, argv=("--apply",)):
+    def _tree(self, td, rows_by_lang, master=None):
         data = Path(td) / "Modules" / "TAOM_Map" / "ModuleData"
         cache = Path(td) / "cache"
-        if not data.exists():
-            data.mkdir(parents=True)
-            cache.mkdir()
-            (data / "settlements.xml").write_bytes(self.MASTER.encode("utf-8"))
-            for lang in LANGS:
-                f = data / "Languages" / lang / "loc_settlements.xml"
-                f.parent.mkdir(parents=True)
-                f.write_bytes(loc_xml(rows_by_lang.get(lang, self.ROWS)).encode("utf-8"))
-                (cache / f"{lang.lower()}.json").write_bytes(
-                    ('{\n  "' + P + 'village_RU8_2": "Ыыы",\n  "' + P + 'village_RU8_4": "Altes"\n}').encode("utf-8"))
+        data.mkdir(parents=True)
+        cache.mkdir()
+        if master is not False:
+            (data / "settlements.xml").write_bytes((self.MASTER if master is None else master).encode("utf-8"))
+        for lang in LANGS:
+            f = data / "Languages" / lang / "loc_settlements.xml"
+            f.parent.mkdir(parents=True)
+            f.write_bytes(loc_xml(rows_by_lang.get(lang, self.ROWS)).encode("utf-8"))
+            (cache / f"{lang.lower()}.json").write_bytes(
+                ('{\n  "' + P + 'village_RU8_2": "Ыыы",\n  "' + P + 'village_RU8_4": "Altes"\n}').encode("utf-8"))
+        return data, cache
+
+    def _main(self, td, argv=("--apply",)):
         old = os.environ.get("BANNERLORD_GAME_DIR")
         os.environ["BANNERLORD_GAME_DIR"] = td
         try:
-            with mock.patch.object(nt, "load_table", return_value=TABLE), contextlib.redirect_stdout(io.StringIO()):
+            with mock.patch.object(nt, "load_table", return_value=TABLE), \
+                    contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
                 ns = runpy.run_path(str(APPLY), run_name="apply_map_village_names")
-                code = ns["main"](list(argv), cache_dir=str(cache))
+                return ns["main"](list(argv), cache_dir=str(Path(td) / "cache"))
         finally:
             if old is None:
                 del os.environ["BANNERLORD_GAME_DIR"]
             else:
                 os.environ["BANNERLORD_GAME_DIR"] = old
-        self.assertEqual(code, 0)
+
+    def _read(self, data, cache):
         self.master_after = (data / "settlements.xml").read_text(encoding="utf-8")
         self.cache_after = {lang: (cache / f"{lang.lower()}.json").read_text(encoding="utf-8") for lang in LANGS}
         return {lang: (data / "Languages" / lang / "loc_settlements.xml").read_text(encoding="utf-8") for lang in LANGS}
+
+    def _run(self, td, rows_by_lang, argv=("--apply",), master=None):
+        data, cache = self._tree(td, rows_by_lang, master)
+        self.assertEqual(self._main(td, argv), 0)
+        return self._read(data, cache)
 
     def test_script_TableIdInBrazilianAndItalian_KeepsTheTableTag(self):
         with tempfile.TemporaryDirectory() as td:
@@ -113,10 +123,89 @@ class ApplyMapVillageNamesTests(unittest.TestCase):
 
     def test_script_SecondRun_ChangesNothing(self):
         with tempfile.TemporaryDirectory() as td:
-            first = self._run(td, {})
-            second = self._run(td, {})
+            data, cache = self._tree(td, {})
+            self.assertEqual(self._main(td), 0)
+            first = self._read(data, cache)
+            self.assertEqual(self._main(td), 0)
+            second = self._read(data, cache)
         self.assertEqual(first["BR"], second["BR"])
         self.assertEqual(second["BR"].count("{.NS}"), 1)
+
+    def test_script_MasterWithABom_KeepsExactlyOneBom(self):
+        # The live master carries a UTF-8 BOM; the other fixtures do not.
+        with tempfile.TemporaryDirectory() as td:
+            self._run(td, {}, master="﻿" + self.MASTER)
+            raw = (Path(td) / "Modules" / "TAOM_Map" / "ModuleData" / "settlements.xml").read_bytes()
+        self.assertTrue(raw.startswith(b"\xef\xbb\xbf<S>"))
+
+    def test_script_Apply_BacksUpEachChangedFileOutsideTheXmlGlob(self):
+        with tempfile.TemporaryDirectory() as td:
+            self._run(td, {})
+            data = Path(td) / "Modules" / "TAOM_Map" / "ModuleData"
+            master_baks = list(data.glob("settlements.xml.bak_villagenames_*"))
+            de_baks = list((data / "Languages" / "DE").glob("loc_settlements.xml.bak_villagenames_*"))
+            self.assertEqual(len(master_baks), 1)
+            self.assertIn('village_RU8_4}Old"', master_baks[0].read_text(encoding="utf-8"))
+            self.assertEqual(len(de_baks), 1)
+
+    def test_script_LocFileThatDoesNotParse_RefusesAndWritesNothing(self):
+        with tempfile.TemporaryDirectory() as td:
+            data, cache = self._tree(td, {})
+            (data / "Languages" / "DE" / "loc_settlements.xml").write_bytes(b'<base><strings><string id="x" text="Old" />')
+            self.assertEqual(self._main(td), 1)
+            out = self._read(data, cache)
+        self.assertIn('village_RU8_4}Old"', self.master_after)
+        self.assertIn('text="Old"', out["FR"])
+        self.assertIn("village_RU8_4", self.cache_after["FR"])
+
+    def test_script_AWriteThatFails_IsFinishedByARerun(self):
+        # The master decides what a run renames, so it is written last: a run that fails part-way
+        # leaves the master on the old name and the next run finishes every language and the cache.
+        import stat
+        with tempfile.TemporaryDirectory() as td:
+            data, cache = self._tree(td, {})
+            de = data / "Languages" / "DE" / "loc_settlements.xml"
+            os.chmod(de, stat.S_IREAD)
+            try:
+                with self.assertRaises(PermissionError):
+                    self._main(td)
+            finally:
+                os.chmod(de, stat.S_IREAD | stat.S_IWRITE)
+            self.assertIn('village_RU8_4}Old"', (data / "settlements.xml").read_text(encoding="utf-8"))
+            self.assertEqual(self._main(td), 0)
+            out = self._read(data, cache)
+        self.assertIn('}Iôrig-Mukh"', self.master_after)
+        for lang in LANGS:
+            self.assertIn("Iôrig-Mukh", out[lang], lang)
+            self.assertNotIn("village_RU8_4", self.cache_after[lang], lang)
+
+    def test_script_NewNameAnotherSettlementCarries_RefusesAndWritesNothing(self):
+        master = self.MASTER.replace("</S>", f'<Settlement id="castle_Z1" name="{{={P}castle_Z1}}Iôrig-Mukh" /></S>')
+        with tempfile.TemporaryDirectory() as td:
+            data, cache = self._tree(td, {}, master)
+            self.assertEqual(self._main(td), 1)
+            out = self._read(data, cache)
+        self.assertIn('village_RU8_4}Old"', self.master_after)
+        self.assertIn('text="Old"', out["DE"])
+        self.assertIn("village_RU8_4", self.cache_after["DE"])
+
+    def test_script_TwoTableIdsSwappingNames_IsNotAClash(self):
+        swapped = (f'<S><Settlement id="village_RU8_4" name="{{={P}village_RU8_4}}Iôrig-Tün" />'
+                   f'<Settlement id="village_RU8_3" name="{{={P}village_RU8_3}}Iôrig-Mukh" /></S>')
+        with tempfile.TemporaryDirectory() as td:
+            self._run(td, {}, master=swapped)
+        self.assertIn('village_RU8_4}Iôrig-Mukh"', self.master_after)
+        self.assertIn('village_RU8_3}Iôrig-Tün"', self.master_after)
+
+    def test_script_MasterWithNoTableId_Exits2(self):
+        with tempfile.TemporaryDirectory() as td:
+            self._tree(td, {}, master=f'<S><Settlement id="town_Q1" name="{{={P}town_Q1}}Q" /></S>')
+            self.assertEqual(self._main(td), 2)
+
+    def test_script_MissingMaster_Exits2(self):
+        with tempfile.TemporaryDirectory() as td:
+            self._tree(td, {}, master=False)
+            self.assertEqual(self._main(td), 2)
 
 
 class AddMapVillagesTests(unittest.TestCase):

@@ -1438,3 +1438,16 @@ master file, and this session first misread those rows as good translations.
   every output file a writer touches before calling it safe or unsafe.
 - **Source:** #1039.
 - **Fixed (#1042):** the renamer now writes only the ids whose English changed and evicts them from the cache; `tools/oneoff/reset_stale_village_loc_rows.py` reset the 4,633 stale rows to the English for #763.
+### List a shared key's readers before re-keying it (map-tool follow-ups, 2026-10-27)
+16 villages borrowed another village's description key (`castle_village_EN3_2` read
+`Settlements.Settlement.text.village_EN1_4`). The #1042 one-off gave each its own key and left the borrowed rows "for
+the village that owns them", but 15 of the 16 owners either were not on the map or had no `text=`, so 180 rows in 12
+languages lost their last reader and would have been paid for in the translation backlog. Four Dunland fortifications
+outside the renamer's table had the same stale names as the villages and were left out because the repair took its
+ids from that table.
+- **Why missed:** the owner of a borrowed key was assumed, and the repair was scoped by the tool that caused most of
+  the defect rather than by the defect's signature across the whole file.
+- **Prevent:** before moving a settlement off a shared key, list every master row that reads the key and every row
+  that defines it; delete the rows no settlement reads (and refuse while one still does). Scope a data repair by
+  scanning every row for the defect, then name the extra ids in the tool.
+- **Source:** `docs/reviews/rca-map-tool-followups-2026-10-27.md` findings 6 and 7; #1042.

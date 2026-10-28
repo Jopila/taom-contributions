@@ -337,14 +337,46 @@ class CacheEvictionTests(unittest.TestCase):
         self.assertEqual(untouched, self.CACHE)
 
     def test_an_id_not_in_the_cache_writes_nothing(self):
+        # mtime set to 0 first: two writes in the same clock tick can share an mtime, which would hide a rewrite.
         import tempfile
         with tempfile.TemporaryDirectory() as td:
             path = os.path.join(self._cache_dir(td), "de.json")
-            before = os.path.getmtime(path)
+            os.utime(path, ns=(0, 0))
             removed = amv.evict_cached_names({"DE": ["village_Y_9"]}, td)
-            after = os.path.getmtime(path)
+            after = os.stat(path).st_mtime_ns
         self.assertEqual(removed, {"DE": 0})
-        self.assertEqual(before, after)
+        self.assertEqual(after, 0)
+
+    def test_a_missing_cache_file_counts_as_empty(self):
+        # translate_with_claude.load_cache reads a missing file as an empty cache, so there is nothing to evict.
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            self.assertEqual(amv.evict_cached_names({"FR": ["village_X_1"]}, td), {"FR": 0})
+            self.assertFalse(os.path.exists(os.path.join(td, "fr.json")))
+
+    def test_a_file_with_lf_and_no_final_newline_keeps_that_shape(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            path = os.path.join(td, "de.json")
+            with open(path, "wb") as f:
+                f.write(self.CACHE.replace("\r\n", "\n").rstrip("\n").encode("utf-8"))
+            amv.evict_cached_names({"DE": ["village_X_1"]}, td)
+            text = open(path, "rb").read().decode("utf-8")
+        self.assertEqual(text, '{\n  "Settlements.Settlement.name.village_X_2": "Zweites",\n  "abc": "Text"\n}')
+
+    def test_field_text_evicts_the_description_row_and_keeps_the_name_row(self):
+        import tempfile
+        cache = ('{\r\n  "Settlements.Settlement.name.village_X_1": "Dorf",\r\n'
+                 '  "Settlements.Settlement.text.village_X_1": "Alter Text."\r\n}\r\n')
+        with tempfile.TemporaryDirectory() as td:
+            path = os.path.join(td, "de.json")
+            with open(path, "wb") as f:
+                f.write(cache.encode("utf-8"))
+            removed = amv.evict_cached_names({"DE": ["village_X_1"]}, td, field="text")
+            text = open(path, "rb").read().decode("utf-8")
+        self.assertEqual(removed, {"DE": 1})
+        self.assertIn("name.village_X_1", text)
+        self.assertNotIn("text.village_X_1", text)
 
 
 class BatchGeneralisationTests(unittest.TestCase):

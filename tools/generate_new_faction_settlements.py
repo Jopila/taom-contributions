@@ -20,9 +20,14 @@ castle) and hearth (300), so run python tools/validate_moduledata.py afterwards
 binary read, BOM and newline kept, the output parsed before the write, a non-.xml backup first.
 New settlements for these kingdoms go through tools/add_map_fortifications.py and add_map_villages.py.
 
+RETIRED (review of #1042): it refuses to run without --rerun-retired, since its only remaining effect
+is re-adding a row someone removed. A run that is allowed still refuses an append the save-order
+rule forbids (a castle at the head of the new rows, add_map_villages.save_order_findings) and a name
+another settlement already carries (add_map_villages.name_collisions).
+
 Usage:
-  python tools/generate_new_faction_settlements.py            # dry run: lists the ids it would add
-  python tools/generate_new_faction_settlements.py --apply    # appends them to the live file (+ backup)
+  python tools/generate_new_faction_settlements.py --rerun-retired            # dry run: the ids it would add
+  python tools/generate_new_faction_settlements.py --rerun-retired --apply    # appends them to the live file (+ backup)
 """
 import argparse, datetime, json, os, re, sys
 
@@ -242,30 +247,42 @@ def append_blocks(master_text, blocks):
     return amv.append_settlements(master_text, [block.replace("\n", nl) for _, block in blocks])
 
 
-def main():
+def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--apply", action="store_true")
-    args = ap.parse_args()
+    ap.add_argument("--rerun-retired", action="store_true", help="run this finished generator anyway (see RETIRED)")
+    args = ap.parse_args(argv)
+    if not args.rerun_retired:
+        raise SystemExit("generate_new_faction_settlements.py is retired: all 49 layout ids are on the map, and new "
+                         "settlements go through add_map_fortifications.py and add_map_villages.py. "
+                         "Pass --rerun-retired to run it anyway.")
     layout = json.load(open(LAYOUT, encoding="utf-8"))
     if not os.path.exists(LIVE):
-        sys.exit(f"LIVE settlements.xml not found: {LIVE}")
+        print(f"ERROR: LIVE settlements.xml not found: {LIVE}", file=sys.stderr)
+        return 2
     had_bom, src = amv._read(LIVE)
     blocks = missing_blocks(layout, src)
     print(f"{len(layout['settlements'])} layout ids, {len(layout['settlements']) - len(blocks)} already on the map "
           f"(never rewritten), {len(blocks)} missing.")
     if not blocks:
         print("Nothing to do.")
-        return
+        return 0
     for sid, _ in blocks:
         print(f"  + {sid}")
     out = append_blocks(src, blocks)
+    names = [(sid, re.search(r'name="\{=[^}]*\}([^"]*)"', block).group(1)) for sid, block in blocks]
+    refusals = amv.save_order_findings(out, {sid for sid, _ in blocks}) + amv.name_collisions(names, src)
+    if refusals:
+        print("REFUSING:\n  " + "\n  ".join(refusals), file=sys.stderr)
+        return 1
     if not args.apply:
         print("\nDRY RUN: re-run with --apply to append them to the live file.")
-        return
+        return 0
     amv._write(LIVE, had_bom, out, "newfactions_" + datetime.datetime.now().strftime("%Y%m%d_%H%M%S"))
     print(f"Appended {len(blocks)} settlement(s); the file parses. Run python tools/validate_moduledata.py next "
           "(SETTLEMENT_ECONOMY_FLOOR). This tool writes no loc rows: add the 12 as add_map_villages.py does.")
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

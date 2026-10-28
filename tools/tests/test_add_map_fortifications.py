@@ -230,5 +230,32 @@ class SaveOrderTests(unittest.TestCase):
         self.assertEqual(amf.check([fort], master(row("village_A1_1", True), block), scene, loc), [])
 
 
+class MainNameCollisionTests(unittest.TestCase):
+    """--apply refuses a fort whose name another settlement already carries, and writes nothing (#1042)."""
+
+    def test_main_Apply_NameAnotherSettlementCarries_RefusesAndWritesNothing(self):
+        import io
+        import tempfile
+        from pathlib import Path
+        from unittest import mock
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        import test_live_map_writers_main as lw
+        old = amf.Fort("town_X1", "Checkton", "clan_x_1", "arthedain", "town", "empire_town_c", 3000, "a")
+        new = amf.Fort("town_X5", "Checkton", "clan_x_2", "arthedain", "town", "empire_town_c", 3000, "town_X1")
+        live = '<Settlements>\n' + amf.fort_block(old, ("10", "20"), (11.0, 20.0), "\n") + '</Settlements>\n'
+        scene = ('<scene>' + entity("town_X1", "10, 20, 0", children=GATE("1, 0, 0"))
+                 + entity("town_X5", "30, 40, 0", children=GATE("1, 0, 0")) + '</scene>')
+        loc = '<base><strings>\n    <string id="Settlements.Settlement.name.town_X1" text="Checkton" />\n  </strings></base>\n'
+        err = io.StringIO()
+        with tempfile.TemporaryDirectory() as td:
+            tree = lw.Tree(td, live, scene, loc, lw.table())
+            code = tree.run(amf, "add_map_fortifications.py", ["--apply"],
+                            [mock.patch.object(amf, "FORTS", [new]), mock.patch("sys.stderr", err)])
+            self.assertEqual(code, 1)
+            self.assertIn("town_X5: the name 'Checkton' is already on the map (town_X1)", err.getvalue())
+            self.assertNotIn("town_X5", Path(tree.live).read_text(encoding="utf-8"))
+            self.assertNotIn("town_X5", tree.loc("DE"))
+
+
 if __name__ == "__main__":
     unittest.main()
