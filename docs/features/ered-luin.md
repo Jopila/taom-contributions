@@ -443,13 +443,11 @@ Restart Bannerlord fully, then start a new campaign.
 - The six age-8 education tutors (`child_education_templates_stage_2_page_0_branch_0_eredluin` to
   `_5`) have no `race` and render as humans in human clothes, cloned from Erebor's identical gap. The
   fix is an engine-side patch that passes the race through the education screen, not data.
-- Translations owed to the paid run (#763): the 536 ids seeded with English into each of the 12
+- Translations owed to the paid run (#763, row added 2026-10-28): the 536 ids seeded with English into each of the 12
   languages, the 2 faction-card keys whose English changed (`taom_faction_kingdom_of_ered_duin_name`
   and `_desc`, reset to English and evicted from the 12 translation caches), and the 31 Ered Luin
   settlement names in each language of the live TAOM_Map (each `taom_map` count in
   `tools/external-loc-coverage-baseline.json` rose by 31).
-- The GitHub issue for this feature is not created yet: the overnight session's auto mode refused
-  the `gh issue create` call. The drafted body is in the session's morning report.
 
 ## Changelog
 
@@ -471,7 +469,7 @@ Restart Bannerlord fully, then start a new campaign.
 
 ## GitHub Issue
 
-- **Issue:** not created yet (see Known gaps).
+- **Issue:** #1044.
 - **Status:** built in data; in-game check owed ("How to verify in game").
 
 ---
