@@ -20,15 +20,19 @@ namespace TAOM.Features.FactionUI.Hooks;
 [ClientOnly]
 public static class FaceGenFirstOpenDiagnosticPatch
 {
-    private const int GiveUpTicks = 300;
-    private static readonly AccessTools.FieldRef<BodyGeneratorView, object> VisualToShow =
-        AccessTools.FieldRefAccess<BodyGeneratorView, object>("_visualToShow");
-    private static readonly AccessTools.FieldRef<BodyGeneratorView, Equipment> DressedEquipment =
-        AccessTools.FieldRefAccess<BodyGeneratorView, Equipment>("_dressedEquipment");
+    // Still-hidden reminder; the watch never gives up, so a slow load is not misread as a failed one.
+    private const int StillHiddenTicks = 600;
+
+    // Resolved lazily inside the try blocks, never in a static initializer: a renamed engine field
+    // would otherwise make every later touch of this class throw TypeInitializationException out of
+    // BodyGeneratorView.OnTick each frame.
+    private static FieldInfo? _visualToShowField;
+    private static FieldInfo? _dressedEquipmentField;
 
     private static BodyGeneratorView? _watched;
     private static int _ticks;
     private static int _opens;
+    private static bool _shown;
 
     static bool Prepare() => typeof(BodyGeneratorView).GetConstructors().Length == 1;
 
@@ -38,16 +42,21 @@ public static class FaceGenFirstOpenDiagnosticPatch
     {
         try
         {
+            if (_watched != null && !_shown)
+                TableauDiagnostics.LogAlways(
+                    $"[FaceGenOpen #{_opens}] closed after {_ticks} tick(s) with the model NEVER visible.");
             _opens++;
             _watched = __instance;
             _ticks = 0;
+            _shown = false;
+            _dressedEquipmentField ??= AccessTools.Field(typeof(BodyGeneratorView), "_dressedEquipment");
             var player = CharacterObject.PlayerCharacter;
             var bodyGen = __instance.BodyGen;
             TableauDiagnostics.LogAlways(
                 $"[FaceGenOpen #{_opens}] playerCulture='{player?.Culture?.StringId}' " +
                 $"char='{bodyGen?.Character?.StringId}' race={bodyGen?.Race} female={bodyGen?.IsFemale} " +
                 $"characterGear=[{Describe(bodyGen?.Character?.Equipment)}] " +
-                $"dressedGear=[{Describe(DressedEquipment(__instance))}]");
+                $"dressedGear=[{Describe(_dressedEquipmentField?.GetValue(__instance) as Equipment)}]");
         }
         catch (Exception ex)
         {
@@ -64,19 +73,19 @@ public static class FaceGenFirstOpenDiagnosticPatch
         {
             try
             {
-                if (!ReferenceEquals(__instance, _watched))
+                if (_shown || !ReferenceEquals(__instance, _watched))
                     return;
                 _ticks++;
-                if (VisualToShow(__instance) != null)
+                _visualToShowField ??= AccessTools.Field(typeof(BodyGeneratorView), "_visualToShow");
+                if (_visualToShowField?.GetValue(__instance) != null)
                 {
+                    _shown = true;
                     TableauDiagnostics.LogAlways($"[FaceGenOpen #{_opens}] model visible after {_ticks} tick(s).");
-                    _watched = null;
                 }
-                else if (_ticks >= GiveUpTicks)
+                else if (_ticks == StillHiddenTicks)
                 {
                     TableauDiagnostics.LogAlways(
-                        $"[FaceGenOpen #{_opens}] model NEVER visible after {_ticks} ticks: a resource never loaded.");
-                    _watched = null;
+                        $"[FaceGenOpen #{_opens}] model still hidden after {_ticks} ticks; still watching.");
                 }
             }
             catch (Exception ex)
