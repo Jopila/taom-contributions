@@ -16,16 +16,20 @@ namespace TAOM.Tests.Migration;
 /// several patch <c>TargetMethod()</c> bodies only resolve types from *loaded* assemblies, so without
 /// this pre-load they would return null in tests and produce false binding failures.
 ///
-/// Game dir resolution: BANNERLORD_OVERRIDE_DIR (if its bin holds Bannerlord.exe), else
-/// BANNERLORD_GAME_DIR (if the folder exists), else the GameFolder this assembly was compiled
-/// against (the TaomGameFolder assembly metadata TAOM.Tests.csproj emits). The last step lets a
-/// test process started without the variables (an IDE runner, dotnet test --no-build from a fresh
-/// shell) load the install the build used instead of skipping. A variable set in the test process
-/// still wins over the build's folder, even when the build took its folder from a -p: property.
-/// If nothing resolves, or the resolved folder has no bin folder holding Bannerlord.exe,
-/// <see cref="EnsureLoaded"/> returns false and the binding tests Assert.Inconclusive (e.g. CI
-/// without a game install): Skipped in the default suite, a failure under
-/// TAOM.Tests/binding-gate.runsettings.
+/// Game dir resolution for an Install build: BANNERLORD_OVERRIDE_DIR (if its bin holds
+/// Bannerlord.exe), else BANNERLORD_GAME_DIR (if the folder exists), else the GameFolder this
+/// assembly was compiled against (the TaomGameFolder assembly metadata TAOM.Tests.csproj emits).
+/// The last step lets a test process started without the variables (an IDE runner, dotnet test
+/// --no-build from a fresh shell) load the install the build used instead of skipping. A variable
+/// set in the test process still wins over the build's folder, even when the build took its folder
+/// from a -p: property. A RefAsm build (TaomGameRefs metadata) stamps the refasm-game folder of
+/// BUTR's stub module assemblies that GameReferences.targets writes beside the DLL, and loads only
+/// that folder, whatever the variables say. If nothing resolves, or the resolved folder has no bin
+/// folder holding Bannerlord.exe, <see cref="EnsureLoaded"/> returns false and the binding tests
+/// Assert.Inconclusive: Skipped in the default suite, a failure under
+/// TAOM.Tests/binding-gate.runsettings. On the stubs it returns true, so its guard does not keep a
+/// test that runs engine code off them; such a test carries RequiresGame, or RequiresGameIL when it
+/// is a BindingVerification test (.claude/rules/tests.md).
 /// </summary>
 internal static class GameAssemblies
 {
@@ -50,7 +54,9 @@ internal static class GameAssemblies
             GameDir = ResolveGameDir();
             if (GameDir == null)
             {
-                Diagnostics.Add("Game dir unresolved: BANNERLORD_OVERRIDE_DIR/BANNERLORD_GAME_DIR unset or invalid, and the build's TaomGameFolder is missing or not on disk.");
+                Diagnostics.Add(BuiltAgainstReferenceAssemblies
+                    ? $"Game dir unresolved: a RefAsm build loads only its stub folder, and the build's TaomGameFolder '{BuiltGameFolder}' is missing or not on disk."
+                    : "Game dir unresolved: BANNERLORD_OVERRIDE_DIR/BANNERLORD_GAME_DIR unset or invalid, and the build's TaomGameFolder is missing or not on disk.");
                 return false;
             }
 
@@ -116,22 +122,37 @@ internal static class GameAssemblies
     }
 
     /// <summary>
-    /// The GameFolder TAOM.Tests.csproj compiled this assembly against, from its
-    /// <c>TaomGameFolder</c> assembly metadata. Null when the attribute is missing; empty when the
-    /// build had no GameFolder.
+    /// The game folder TAOM.Tests.csproj compiled this assembly against, from its
+    /// <c>TaomGameFolder</c> assembly metadata: the install for an Install build, the refasm-game
+    /// stub folder for a RefAsm build. Null when the attribute is missing.
     /// </summary>
-    internal static string? BuiltGameFolder =>
+    internal static string? BuiltGameFolder => BuildMetadata("TaomGameFolder");
+
+    /// <summary>The <c>TaomGameRefs</c> mode the build used: <c>Install</c> or <c>RefAsm</c>. Null when missing.</summary>
+    internal static string? BuiltGameRefs => BuildMetadata("TaomGameRefs");
+
+    private static string? BuildMetadata(string key) =>
         typeof(GameAssemblies).Assembly
             .GetCustomAttributes<AssemblyMetadataAttribute>()
-            .FirstOrDefault(a => a.Key == "TaomGameFolder")?.Value;
+            .FirstOrDefault(a => a.Key == key)?.Value;
+
+    private static bool BuiltAgainstReferenceAssemblies =>
+        string.Equals(BuiltGameRefs, "RefAsm", StringComparison.OrdinalIgnoreCase);
 
     private static string? ResolveGameDir() => ResolveGameDir(
         Environment.GetEnvironmentVariable("BANNERLORD_OVERRIDE_DIR"),
         Environment.GetEnvironmentVariable("BANNERLORD_GAME_DIR"),
-        BuiltGameFolder);
+        BuiltGameFolder,
+        BuiltAgainstReferenceAssemblies);
 
-    internal static string? ResolveGameDir(string? overrideDir, string? gameDir, string? builtGameFolder)
+    internal static string? ResolveGameDir(string? overrideDir, string? gameDir, string? builtGameFolder,
+        bool builtAgainstReferenceAssemblies = false)
     {
+        // A RefAsm test DLL loads only its own stub folder: an install named by a variable would put
+        // the real module DLLs beside the stub TaleWorlds DLLs, a mix no result can be quoted from.
+        if (builtAgainstReferenceAssemblies)
+            return !string.IsNullOrEmpty(builtGameFolder) && Directory.Exists(builtGameFolder) ? builtGameFolder : null;
+
         if (!string.IsNullOrEmpty(overrideDir) &&
             File.Exists(Path.Combine(overrideDir, "bin", "Win64_Shipping_Client", "Bannerlord.exe")))
             return overrideDir;

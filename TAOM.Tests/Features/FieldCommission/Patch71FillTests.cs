@@ -14,6 +14,7 @@ namespace TAOM.Tests.Features.FieldCommission;
 /// left to the in-game smoke: the shared-singleton guard, and the equipment-type flag.
 /// </summary>
 [TestClass]
+[TestCategory("RequiresGame")]
 public class Patch71FillTests
 {
     private static bool _gameLoaded;

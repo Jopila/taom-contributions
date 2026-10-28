@@ -46,11 +46,21 @@
 
 	<!-- The game folder this test DLL was compiled against. GameAssemblies falls back to it when the
 	     test process has neither BANNERLORD_OVERRIDE_DIR nor BANNERLORD_GAME_DIR, so the binding
-	     gate loads the install the build referenced instead of skipping. -->
+	     gate loads the install the build referenced instead of skipping. A RefAsm build compiles
+	     against BUTR's stubs, so it stamps the refasm-game folder that GameReferences.targets
+	     (TaomWriteRefAsmGameFolder) lays out beside this DLL, never the install, and stamps its
+	     TaomGameRefs mode, so GameAssemblies loads only that folder whatever the variables say.
+	     Item metadata is evaluated after every property, so TaomGameRefs and TargetDir are final
+	     here. -->
 	<ItemGroup>
 		<AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
 			<_Parameter1>TaomGameFolder</_Parameter1>
-			<_Parameter2>$(GameFolder)</_Parameter2>
+			<_Parameter2 Condition="'$(TaomGameRefs)' != 'RefAsm'">$(GameFolder)</_Parameter2>
+			<_Parameter2 Condition="'$(TaomGameRefs)' == 'RefAsm'">$(TargetDir)refasm-game</_Parameter2>
+		</AssemblyAttribute>
+		<AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+			<_Parameter1>TaomGameRefs</_Parameter1>
+			<_Parameter2>$(TaomGameRefs)</_Parameter2>
 		</AssemblyAttribute>
 	</ItemGroup>
 

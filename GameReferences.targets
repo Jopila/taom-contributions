@@ -83,8 +83,10 @@
 
   <!-- RefAsm, test project only: lay the BUTR module assemblies out the way GameAssemblies expects
        a game folder (bin\Win64_Shipping_Client\Bannerlord.exe, which may be empty, plus
-       Modules\<module>\bin\Win64_Shipping_Client), so the binding gate can run with no game. Point
-       BANNERLORD_GAME_DIR at this folder for that one run. -->
+       Modules\<module>\bin\Win64_Shipping_Client), so the binding gate can run with no game. A
+       RefAsm build stamps this folder as the test DLL's TaomGameFolder, with its TaomGameRefs mode
+       (TAOM.Tests.csproj), so GameAssemblies loads this folder and only this folder, whatever
+       BANNERLORD_OVERRIDE_DIR and BANNERLORD_GAME_DIR say. -->
   <Target Name="TaomWriteRefAsmGameFolder" AfterTargets="Build"
           Condition="'$(TaomGameRefs)' == 'RefAsm' AND '$(MSBuildProjectName)' == 'TAOM.Tests'">
     <PropertyGroup>

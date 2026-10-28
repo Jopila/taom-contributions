@@ -109,6 +109,10 @@ constructor run by `GetCustomAttributes` included), a `TypeInitializationExcepti
 `TaleWorlds.MountAndBlade.View`) or a game-bin dependency (`System.Management`, `Steamworks.NET`,
 `GalaxyCSharp`, `StbSharp`), or a `ReflectionTypeLoadException` from `Assembly.GetTypes()` on TAOM's
 assembly (the test output does not print its `LoaderExceptions`): tag it, never catch the exception.
+A RefAsm build points `GameAssemblies` at its stub `refasm-game` folder, so `EnsureLoaded()` returns
+true there: an `if (!EnsureLoaded()) Assert.Inconclusive` guard does not keep a test off the stubs.
+`RequiresGameIL` removes a test only from the gate, so a test outside `BindingVerification` that
+reads vanilla IL or vanilla data carries `RequiresGame`.
 
 ## Test Organization
 Mirror source structure: `TAOM.Tests/Features/{FeatureName}/{ServiceName}Tests.cs`

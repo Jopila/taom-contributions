@@ -1,14 +1,16 @@
+using System;
 using System.IO;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace TAOM.Tests.Migration;
 
 /// <summary>
-/// How the binding gate finds the game. The two environment variables win, in the order
-/// Directory.Build.props uses; when neither names a usable folder in the test process (the
-/// override needs Bannerlord.exe, the game dir only needs to exist), the gate falls back to
+/// How the binding gate finds the game. For an Install build the two environment variables win,
+/// in the order Directory.Build.props uses; when neither names a usable folder in the test process
+/// (the override needs Bannerlord.exe, the game dir only needs to exist), the gate falls back to
 /// the GameFolder this test assembly was compiled against, so a test DLL built against the game
-/// never skips the binding suite just because its runner lacks the variables.
+/// never skips the binding suite just because its runner lacks the variables. A RefAsm build loads
+/// only its own refasm-game stub folder, so a variable can never mix the install into a no-game run.
 /// </summary>
 [TestClass]
 public class GameAssembliesResolutionTests
@@ -138,14 +140,59 @@ public class GameAssembliesResolutionTests
     }
 
     [TestMethod]
-    public void BuiltGameFolder_TestAssemblyAsCompiled_CarriesTheTaomGameFolderMetadata()
+    public void ResolveGameDir_RefAsmBuild_ItsStubFolderWinsOverBothVariables()
     {
-        // Arrange (none: the attribute comes from TAOM.Tests.csproj at build time)
+        // Arrange
+        var over = MakeDir("over");
+        var overBin = Path.Combine(over, "bin", "Win64_Shipping_Client");
+        Directory.CreateDirectory(overBin);
+        File.WriteAllText(Path.Combine(overBin, "Bannerlord.exe"), "");
+        var game = MakeDir("game");
+        var stubs = MakeDir("refasm-game");
+
+        // Act
+        var result = GameAssemblies.ResolveGameDir(over, game, stubs, builtAgainstReferenceAssemblies: true);
+
+        // Assert
+        Assert.AreEqual(stubs, result);
+    }
+
+    [TestMethod]
+    public void ResolveGameDir_RefAsmBuildWithoutItsStubFolder_ReturnsNull_NeverTheInstall()
+    {
+        // Arrange (a variable naming the install would load real module DLLs beside the stubs)
+        var game = MakeDir("game");
+        var missing = Path.Combine(_root, "refasm-game");
+
+        // Act
+        var result = GameAssemblies.ResolveGameDir(null, game, missing, builtAgainstReferenceAssemblies: true);
+
+        // Assert
+        Assert.IsNull(result);
+    }
+
+    [TestMethod]
+    public void BuiltGameFolder_TestAssemblyAsCompiled_IsTheGameItsReferenceModeNeeds()
+    {
+        // Arrange (TAOM.Tests.csproj stamps both values at build time. An Install build
+        // stamps its GameFolder; a RefAsm build stamps the refasm-game folder that
+        // GameReferences.targets writes beside this DLL, so the no-game gate needs no variable)
+        var stubFolder = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "refasm-game");
 
         // Act
         var folder = GameAssemblies.BuiltGameFolder;
+        var mode = GameAssemblies.BuiltGameRefs;
 
         // Assert
-        Assert.IsNotNull(folder, "TAOM.Tests.csproj must emit [assembly: AssemblyMetadata(\"TaomGameFolder\", \"$(GameFolder)\")] so the binding gate can find the game the build used.");
+        Assert.IsTrue(mode == "Install" || mode == "RefAsm", $"TaomGameRefs metadata is '{mode ?? "missing"}', not Install or RefAsm.");
+        Assert.IsFalse(string.IsNullOrEmpty(folder), "TaomGameFolder metadata is missing or empty, so GameAssemblies cannot find a game.");
+        Assert.IsTrue(
+            File.Exists(Path.Combine(folder!, "bin", "Win64_Shipping_Client", "Bannerlord.exe")) ||
+            File.Exists(Path.Combine(folder!, "bin", "Gaming.Desktop.x64_Shipping_Client", "Bannerlord.exe")),
+            $"TaomGameFolder '{folder}' holds no bin\\<platform>\\Bannerlord.exe, so GameAssemblies.EnsureLoaded would reject it.");
+        Assert.AreEqual(
+            mode == "RefAsm",
+            string.Equals(Path.GetFullPath(folder!).TrimEnd('\\', '/'), Path.GetFullPath(stubFolder).TrimEnd('\\', '/'), StringComparison.OrdinalIgnoreCase),
+            $"A {mode} build stamped TaomGameFolder '{folder}': only a RefAsm build stamps its own refasm-game folder.");
     }
 }

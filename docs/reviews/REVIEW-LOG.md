@@ -5508,3 +5508,15 @@ Scope: the uncommitted v1.5.6 bump on base `59251a28d`. Two Codex passes: an `ul
 | 13 | "Every turbo click" and icon-cost wording (LOW) | Wording | Text written from the plan | Fixed |
 
 Findings 2 to 6, 8 and 9 are in the RCA. Missed by Codex, found by Claude: the Ctrl click scope (finding 2, the engine-compatibility lens). Codex also found that the server index drops ClientOnly classes before reading their attributes.
+
+## Review (number assigned at merge): no-game binding gate and its RefAsm stamp (#1038 item 14), tier-2 deep review (Data flow, XML on MSBuild) + convergence (2026-10-28)
+
+Scope: the fix on base `7bac0c9d4` in `E:\repos\taom-nogame-gate`. Codex skipped on the maintainer's word. The two lenses found no gap; five LOW items and one process point (the stamp reverses plan 010's empty stamp), which the maintainer decided: keep the stub stamp, and let it outrank the game variables in a RefAsm build. Full RCA: `docs/reviews/rca-nogame-gate-2026-10-28.md`.
+
+| # | Bug | Category | Why missed | Preventive action |
+|---|---|---|---|---|
+| 1 | The metadata test asserted only `IsNotNull`, so an empty RefAsm stamp passed (LOW) | A test that passes against the trivial value | Plan 010 wanted an empty stamp, and review 008 ruled a non-empty assert a false positive | Fixed: one test pins the mode and the folder per mode, shown red first |
+| 2 | Verification text said a no-game run cannot execute `RequiresGameIL` tests; it runs 4 (LOW) | Doc rot | Only the changed sentences were rewritten | Fixed |
+| 3 | `RequiresGameIL` alone keeps no test off the unit step (LOW) | Tag contract gap | Nothing enforced the tag's scope | Fixed: a `tests.md` sentence |
+| 4 | #1038 named `ManyHammersWiringTests` for `Patch109WiringTests` (LOW) | Record error | Failure list printed method names only | Fixed: failures listed with their class |
+| 5 | Two comments said a set variable still wins (LOW) | Doc rot | The decision came after the text | Fixed |

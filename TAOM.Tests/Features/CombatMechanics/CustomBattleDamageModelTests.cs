@@ -302,8 +302,10 @@ public class CustomBattleDamageModelTests
         return (Activator.CreateInstance(Twin, hooks, null, null)!, settings, creature);
     }
 
+    // RequiresGameIL: BuildTwin runs the engine's CustomAgentApplyDamageModel constructor, which throws on the stubs.
     [TestMethod]
     [TestCategory("BindingVerification")]
+    [TestCategory("RequiresGameIL")]
     public void HorseChargePenetration_FeatureOn_IsTheSetting_AndOff_IsCustomBattlesOwn0Point4()
     {
         RequireGameAssemblies();
@@ -320,6 +322,7 @@ public class CustomBattleDamageModelTests
 
     [TestMethod]
     [TestCategory("BindingVerification")]
+    [TestCategory("RequiresGameIL")]
     public void RemainingMomentum_WhenTheCreatureServiceAnswers_IsThatAnswer()
     {
         RequireGameAssemblies();

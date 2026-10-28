@@ -53,7 +53,7 @@ dotnet test TAOM.Tests/TAOM.Tests.csproj -p:DisableModuleCopy=true -p:ModuleId= 
 
 The classes are in `TAOM.Tests/Migration/`: `HarmonyPatchBindingTests`, `GameModelOverrideBindingTests`, `ReflectionSiteBindingTests` and `ViewModelMixinBindingTests`.
 
-**Skipped is never green.** `BANNERLORD_GAME_DIR` (or `BANNERLORD_OVERRIDE_DIR`) points the gate at the install. With no usable install, the tests that need the module DLLs call `Assert.Inconclusive`, and `binding-gate.runsettings` turns each one into a failure. Without that file MSTest reports them as Skipped and exits 0: never quote such a run, or any run with a non-zero `Skipped:` count, as a green gate. A missing install is an environment fact to report, not to fix.
+**Skipped is never green.** `BANNERLORD_GAME_DIR` (or `BANNERLORD_OVERRIDE_DIR`) points the gate at the install; with neither set, the gate uses the folder the build recorded. A no-game RefAsm build records its stub `refasm-game` folder and loads only that, whatever the variables say ([verification](../../../.ai/verification.md)). With no usable install, the tests that need the module DLLs call `Assert.Inconclusive`, and `binding-gate.runsettings` turns each one into a failure. Without that file MSTest reports them as Skipped and exits 0: never quote such a run, or any run with a non-zero `Skipped:` count, as a green gate. A missing install is an environment fact to report, not to fix.
 
 **Reading a failure (do not just rerun):**
 

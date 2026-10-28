@@ -2313,3 +2313,27 @@ against a getter that always returns false.
   open state first, and is shown red once against a constant stub.
 - **Source:** [rca-engine-bump-v1-5-6-2026-10-27.md](../rca-engine-bump-v1-5-6-2026-10-27.md) findings 1 and 8;
   Codex pre-review F1; #1037, #1040.
+
+### A skip on the no-game path is not proof that a test runs without the game (#1038, 2026-10-28)
+Twenty-two tests constructed engine types (`TextObject`, `Equipment`, `BasicCultureObject`) or built a patch index
+that constructs engine attributes, and carried no `RequiresGame` tag. They passed the RefAsm unit step only because
+a RefAsm build stamped an empty `TaomGameFolder`, so `GameAssemblies.EnsureLoaded()` returned false and their guard
+called `Assert.Inconclusive`. The same empty stamp made the documented no-game binding gate fail 509 of 593. D46
+measured 10 of these failures on 2026-09-24 and reverted rather than tag them.
+- **Why missed:** a skip reads as coverage that is only absent, and no gate has run the RefAsm path since the hosted
+  CI went (`c8d69a0dc`). The guard hid the missing tag.
+- **Prevent:** a RefAsm build stamps its stub `refasm-game` folder, so the guard no longer hides a missing tag, and
+  `tests.md` says so. Plan 044 hands off the last 7 failures and proposes a `/verify` row for the RefAsm unit step.
+- **Source:** [rca-nogame-gate-2026-10-28.md](../rca-nogame-gate-2026-10-28.md); #1038 item 14.
+
+### Quote a no-game count only from a run that cannot load the install (#1038, 2026-10-28)
+The RefAsm unit step was first recorded as 29 failures (12 at the v2.0.35 tag). Both runs kept `BANNERLORD_GAME_DIR`
+set to the install, which outranked the stamp, so the tests loaded the real module assemblies beside BUTR's stub
+TaleWorlds DLLs. A clean run gave 9, and the record also named the wrong class for one of them
+(`ManyHammersWiringTests` for `Patch109WiringTests`, which share a method name).
+- **Why missed:** the scripts ran in a shell where the variable is set machine-wide; `.ai/verification.md` said to
+  unset it, nothing in the output shows which folder loaded, and the failure list printed method names only.
+- **Prevent:** a RefAsm test DLL now loads only its stub folder, whatever the variables say
+  (`GameAssembliesResolutionTests`), so the run cannot mix. List failures with their class (the trx, or the stack
+  frame), never a method name alone.
+- **Source:** [rca-nogame-gate-2026-10-28.md](../rca-nogame-gate-2026-10-28.md) finding 4; #1038 item 14.

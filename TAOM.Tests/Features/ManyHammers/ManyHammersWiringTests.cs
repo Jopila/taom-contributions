@@ -120,6 +120,7 @@ public class ManyHammersWiringTests
     // assembly. The category pass builds its index from the loaded TAOM assemblies, so on a client the category holds them;
     // on a server (no client) it holds none and applies nothing.
     [TestMethod]
+    [TestCategory("RequiresGame")]
     public void Index_FromTheLoadedTaomAssemblies_HoldsTheThreeClientClasses()
     {
         // Classes that name SandBox.View types only load once the game assemblies resolve; alone, the index skips them.

@@ -50,6 +50,7 @@ public class EncyclopediaHeroFilterPatchTests
     }
 
     [TestMethod]
+    [TestCategory("RequiresGame")]
     public void Postfix_KeepsALazyConcatInputInOrder_AndAppendsTwo()
     {
         if (!_gameLoaded) Assert.Inconclusive("Game assemblies unavailable.");
@@ -65,6 +66,7 @@ public class EncyclopediaHeroFilterPatchTests
     }
 
     [TestMethod]
+    [TestCategory("RequiresGame")]
     public void Postfix_NullResult_StillAppendsTheTwoGroups()
     {
         if (!_gameLoaded) Assert.Inconclusive("Game assemblies unavailable.");
@@ -77,6 +79,7 @@ public class EncyclopediaHeroFilterPatchTests
     }
 
     [TestMethod]
+    [TestCategory("RequiresGame")]
     public void Postfix_WhenTheSourceThrows_LeavesTheResultUntouched()
     {
         if (!_gameLoaded) Assert.Inconclusive("Game assemblies unavailable.");
@@ -92,6 +95,7 @@ public class EncyclopediaHeroFilterPatchTests
     }
 
     [TestMethod]
+    [TestCategory("RequiresGame")]
     public void Postfix_WhenTheAdapterThrows_LeavesTheResultUntouched()
     {
         if (!_gameLoaded) Assert.Inconclusive("Game assemblies unavailable.");
@@ -107,6 +111,7 @@ public class EncyclopediaHeroFilterPatchTests
     }
 
     [TestMethod]
+    [TestCategory("RequiresGame")]
     public void Postfix_WithNoAdapter_LeavesTheResultUntouched()
     {
         if (!_gameLoaded) Assert.Inconclusive("Game assemblies unavailable.");

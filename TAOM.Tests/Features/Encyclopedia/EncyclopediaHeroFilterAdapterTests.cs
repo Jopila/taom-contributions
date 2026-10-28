@@ -40,6 +40,7 @@ public class EncyclopediaHeroFilterAdapterTests
     }
 
     [TestMethod]
+    [TestCategory("RequiresGame")]
     public void BuildGroups_ReturnsRaceThenAge_WithEightAndFiveItems()
     {
         if (!_gameLoaded) Assert.Inconclusive("Game assemblies unavailable.");
@@ -75,6 +76,7 @@ public class EncyclopediaHeroFilterAdapterTests
     }
 
     [TestMethod]
+    [TestCategory("RequiresGame")]
     public void Predicates_OnANonHero_LogOnceAndReturnTrue()
     {
         if (!_gameLoaded) Assert.Inconclusive("Game assemblies unavailable.");
@@ -108,6 +110,7 @@ public class EncyclopediaHeroFilterAdapterTests
     }
 
     [TestMethod]
+    [TestCategory("RequiresGame")]
     public void AgePredicates_HeroWhoseDetailsAreUnknown_MatchNoStage_AndDoNotLog()
     {
         if (!_gameLoaded) Assert.Inconclusive("Game assemblies unavailable.");
@@ -122,6 +125,7 @@ public class EncyclopediaHeroFilterAdapterTests
     }
 
     [TestMethod]
+    [TestCategory("RequiresGame")]
     public void AgePredicates_HeroWhoseDetailsAreKnown_ReachTheStageRule()
     {
         if (!_gameLoaded) Assert.Inconclusive("Game assemblies unavailable.");

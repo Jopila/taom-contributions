@@ -16,6 +16,7 @@ namespace TAOM.Tests.Features.CultureDoctrine;
 /// the fakes need the game assemblies on this machine.
 /// </summary>
 [TestClass]
+[TestCategory("RequiresGame")]
 public class TeamCombatantSelectorTests
 {
     private static bool _gameLoaded;

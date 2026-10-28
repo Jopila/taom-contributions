@@ -16,6 +16,7 @@ namespace TAOM.Tests.Adapters;
 /// standalone and the indexer setter only calls <c>IsItemFitsToSlot</c>, whose result it ignores.
 /// </summary>
 [TestClass]
+[TestCategory("RequiresGame")]
 public class HeroCombatAdapterTests
 {
     private static bool _gameLoaded;

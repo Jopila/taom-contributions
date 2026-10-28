@@ -25,27 +25,23 @@ Do not use the deploying default of `build.ps1` as a review-time check. Without
 the game, skip the `managed-build` and `managed-tests` rows and run these three
 commands in order, from the repository root: `dotnet build TAOM.Tests -p:TaomGameRefs=RefAsm -p:DisableModuleCopy=true -p:ModuleId=`;
 `dotnet test TAOM.Tests --no-build -p:TaomGameRefs=RefAsm -p:DisableModuleCopy=true -p:ModuleId= --filter
-"TestCategory!=RequiresGame&TestCategory!=LiveInstall&TestCategory!=BindingVerification"`; and,
-with `BANNERLORD_GAME_DIR` set to the absolute path of
-`TAOM.Tests/bin/Debug/net472/refasm-game` for that one command only,
+"TestCategory!=RequiresGame&TestCategory!=LiveInstall&TestCategory!=BindingVerification"`; and
 `dotnet test TAOM.Tests --no-build -p:TaomGameRefs=RefAsm -p:DisableModuleCopy=true -p:ModuleId= --settings
 TAOM.Tests/binding-gate.runsettings --filter
 "TestCategory=BindingVerification&TestCategory!=RequiresGameIL&TestCategory!=LiveInstall"`. The build (its implicit restore
 passes `-p:TaomGameRefs=RefAsm`, so BUTR's metadata-only reference assemblies
 from `GameReferences.targets` are downloaded; a restore without it downloads
 none), the unit tests and the binding gate. All three use the Debug
-configuration, and the gate reads `TAOM.Tests/bin/Debug/net472/refasm-game`,
-which only a Debug RefAsm build writes; adding `-c Release` to one step and not
-the others tests a stale or missing DLL. `GameAssemblies` reads that folder only
-through the variable: without it the gate loads no module assembly and fails
-most of its tests (509 of 593 on 2026-10-28). An unfiltered run executes the tests
-tagged `RequiresGame` on stubs and fails. On a machine that has the game, unset
-`BANNERLORD_GAME_DIR` and `BANNERLORD_OVERRIDE_DIR` before the build and the unit
-tests, not only before the tests: the build records the install as the test DLL's
-`TaomGameFolder` metadata, and the tests fall back to it, loading the real
-module assemblies beside the stubs. Such a run cannot execute the tests tagged
-`RequiresGame`, `RequiresGameIL` or `LiveInstall`, so it is partial evidence. Missing
-prerequisites mean not run, not passed.
+configuration. A Debug RefAsm build lays BUTR's module assemblies out as a game
+folder in `TAOM.Tests/bin/Debug/net472/refasm-game` and records that folder as
+the test DLL's `TaomGameFolder` metadata, with its `TaomGameRefs` mode, so both
+test commands load only the stub module assemblies: `BANNERLORD_GAME_DIR` and
+`BANNERLORD_OVERRIDE_DIR` need not be unset on a machine that has the game.
+Adding `-c Release` to one step and not the others tests a stale or missing DLL.
+An unfiltered run executes the tests tagged `RequiresGame` on stubs and fails.
+The three commands leave out the tests tagged `RequiresGame` (the unit step),
+`RequiresGameIL` (the gate) and `LiveInstall` (both), so it is partial evidence.
+Missing prerequisites mean not run, not passed.
 
 Capture test totals, failures and skips. Empty discovery is not success. The
 Python tool tests (`/verify` Step 2b) treat fewer than 2,500 discovered tests as broken; record skips affecting the
