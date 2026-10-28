@@ -48,7 +48,10 @@ misattributed crashes) or we migrate deliberately. The session-start hook warns 
    `git show b2e387db:crashz/report.json`; `BannerlordVersion v1.4.7.117484`) can no longer be
    triaged against a local binary.
 3. `taom-src` auto-detects the new version (fresh cache under `~/.taom-src/v<new>/`) — old
-   caches remain but are unused.
+   caches remain but are unused. Pass a fully qualified type name
+   (`TaleWorlds.CampaignSystem.Party.MobileParty`); a short name fails. It can still resolve a `SandBox.*` type
+   from the stale copy in `Modules\Coop` and prints only the cache path (#1038), so for a `SandBox.*`
+   type that looks wrong, decompile `Modules\SandBox\bin` with `ilspycmd`.
 4. **Warm the native decompiler, and read its map check.** Each new binary gets a fresh Ghidra
    project, so run `python tools/native_decompile.py --engine-method get_current_action_type`
    once for the client and once with `--dll` on the wEditor DLL: the first crash then decompiles in

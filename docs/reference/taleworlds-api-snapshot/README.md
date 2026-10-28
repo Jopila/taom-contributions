@@ -16,7 +16,7 @@ The v1.3.15 → v1.4.5 migration completed its code stages but the formal runtim
 |------|------------|
 | [`reflection-sites.md`](./reflection-sites.md) | Authoritative catalogue of every reflection touchpoint, grouped by gated / runtime-dynamic / internal. Data source for `ReflectionSiteBindingTests`. |
 | [`gamemodel-bases.md`](./gamemodel-bases.md) | Auto-generated: each `Taom*Model`, its `Default*Model` base, and the exact signature of every overridden method, as of the pinned version. |
-| [`patch-targets.md`](./patch-targets.md) | Auto-generated: each of the 220 `[HarmonyPatch]` / `TargetMethod` classes and the engine method it patches, resolved as Harmony resolves it. |
+| [`patch-targets.md`](./patch-targets.md) | Auto-generated: each `[HarmonyPatch]` / `TargetMethod` class and the engine method it patches, resolved as Harmony resolves it. The file's `Patches:` header line holds the current count (343 on 2026-10-27). A `TargetMethods()` class is recorded by its first target only (#1038). |
 | [`../../../tools/snapshot_api_surface.ps1`](../../../tools/snapshot_api_surface.ps1) | Regenerates the two auto-generated files from the installed DLLs. Auto-derives the type list from `TAOM.dll` and `TAOM.Client.dll`. |
 
 > **The generator is PowerShell 7 only, and now says so.** It uses the null-coalescing `??` operator
@@ -38,8 +38,8 @@ Runs under `dotnet test`, no game launch. TAOM.Tests references the installed `T
 
 | Test class | Covers | Granularity |
 |------------|--------|-------------|
-| `HarmonyPatchBindingTests` | All 220 `[HarmonyPatch]` / `TargetMethod` targets, resolved as Harmony does at `PatchAll`. | one assertion accumulating all failures |
-| `GameModelOverrideBindingTests` | All 46 GameModels: registered in `SubModule.cs`, override ≥1 base virtual, no shadow-without-`override`. | 2 tests |
+| `HarmonyPatchBindingTests` | Every `[HarmonyPatch]` / `TargetMethod` target, resolved as Harmony does at `PatchAll` (count: `patch-targets.md` header). | one assertion accumulating all failures |
+| `GameModelOverrideBindingTests` | Every GameModel: registered in `SubModule.cs`, override ≥1 base virtual, no shadow-without-`override` (count: `gamemodel-bases.md` header, 68 on 2026-10-27). | 2 tests |
 | `ReflectionSiteBindingTests` | The auxiliary static-engine reflection members (74 at v1.5.5) from `reflection-sites.md` Category B. | one `[DataRow]` per site |
 | `ViewModelMixinBindingTests` | Every UIExtenderEx `[ViewModelMixin("Method")]` names one non-abstract method on its target view model. | one assertion accumulating all failures |
 

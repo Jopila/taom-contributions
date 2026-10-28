@@ -35,6 +35,10 @@ characters to players. Full contract: [`docs/reference/release-process.md`](../.
 5. `git grep -l taom_test_ -- Main/_Module` prints nothing. Custom-Battle test riders show in every player's
    Custom Battle picker; delete them (with their SubModule node and their ladder and recruitment exemptions)
    before a release. The Animalia ones (#646) were removed for v2.0.31.
+**Items 6 and 6a check Mike's packages, and the packages and release folders are his** (Mike,
+2026-10-27: "Dont worry about the packaged or release folders!!! I will do that later"). Run them only
+when he asks; otherwise list them as owed for his packaging pass in the hand-over, and never write a
+release note around what a channel folder holds.
 6. Every release channel's `TAOM_Map` package carries each settlement TAOM data names; Arthedain's
    `town_AN1` to `town_AN3` are the open case. The check per channel is in
    [`release-process.md`](../../../docs/reference/release-process.md) ("TAOM_Map ships in the same release").
@@ -224,7 +228,13 @@ Rebuild at the tag before anything ships.
      never ships them. A retired binary such as `BehaviorTreeWrapper.dll` would otherwise ship; the
      packager refuses the names in `RETIRED_BINARIES` (`tools/package_release.py`), dry runs included.
 3. Package: **Mike packages through the Modding Kit editor, not Claude** (2026-09-28). Stop after the
-   prune and hand over; never write a package with the command above.
+   prune and hand over; never write a package with the command above. When he says the packages and
+   release folders are his for this release (as on 2026-10-27), stop after step 1 and prove the
+   stamps on the DLLs the build deployed instead of the step 2 dry run: every `TAOM.dll`,
+   `TAOM.Client.dll` and `TAOM.Dependencies.dll` under `<game>/Modules/{TAOM,TAOM.Dependencies}/bin`
+   must read `+<tag commit>` with no `.dirty` (`[System.Diagnostics.FileVersionInfo]::GetVersionInfo(<dll>).ProductVersion`).
+   Hand the prune, the sweep `-Apply`, gates 6 and 6a and steps 4 and 5 to him as a list; a
+   `Gaming.Desktop.x64_Shipping_Client` folder left in the install by an older build is one of them.
 4. Once his editor package exists (in `E:\LOTRAOM_Releases\<channel>\Modules\`), offer step 2's dry
    run with `--source` pointing at that folder (and `--game-root "<game>"`) before he uploads it.
    It refuses an untracked TAOM file there too, but never `AssetPackages/pack0.tpac`: in a channel

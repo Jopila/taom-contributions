@@ -691,7 +691,8 @@ to characterise. The existing try/catch around acceptance is containment, not co
   does that ([server PR #104](https://github.com/Bannerlord-Coop-Team/BannerlordCoop.DedicatedServer/pull/104),
   open), `-KeepSubModules` names them. The earlier
   remark that the appliance runs on `Microsoft.NETCore.App` against TAOM's .NET Framework 4.7.2 is
-  resolved: the staged host is .NET 6.0.36 and TAOM loads on it. In-game checks with two clients are owed. The listen-host path remains the one that carries TAOM into the spawned
+  resolved for the v1.5.5 server: the staged host is .NET 6.0.36 and TAOM loads on it (v1.5.6 moves the
+  server to .NET 8, see "Verification status"). In-game checks with two clients are owed. The listen-host path remains the one that carries TAOM into the spawned
   server process with no copying at all.
 
 ## PatchShield is skipped under co-op
@@ -765,6 +766,14 @@ half-initialised as the swallow does. Only `SAVE-LOAD`, which runs outside any m
 rethrown.
 
 ## Verification status
+
+**Bannerlord v1.5.6 (2026-10-27): co-op is blocked until Coop is rebuilt.** The installed Coop
+`GameInterface.dll` (built 2026-10-22 against v1.5.5) calls `MobileParty.HasPerk(perk, out Hero, …)`
+and the four-argument `PerkHelper.AddPerkBonusForParty`, which v1.5.6 removed, so those paths throw
+`MissingMethodException`; the rebuild belongs in `E:\repos\BannerlordCoop`. The v1.5.6 patch notes also
+move the dedicated server from .NET 6 to .NET 8, while BannerlordCoop.DedicatedServer's staging
+accepts only a .NET 6.0.x host (`scripts/prepare-dotnet-runtime.ps1`). The installed server was still
+the .NET 6 build (app 1863440, build 25805354) on 2026-10-27. Details: [v1.5.6-impact.md](../migration/v1.5.6-impact.md) "Owed".
 
 Confirmed by a player (2026-08-02):
 

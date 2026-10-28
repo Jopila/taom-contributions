@@ -670,7 +670,7 @@ re-masks at the next two-second refresh, until the tooltip is rebuilt. Vanilla's
 
 ## Changelog
 
-- 2026-10-27: field parley (#1037): a masked host's parley is refused with vanilla's nameless "Cannot parley with this party."; one postfix, no key. The veto needs the party drawn on the map.
+- 2026-10-27 (v2.0.36): field parley (#1037): a masked host's parley is refused with vanilla's nameless "Cannot parley with this party."; one postfix, no key. The veto needs the party drawn on the map.
 - 2026-10-20: hidden party orders (#848): a masked or horizon party or army tooltip shows "Orders unknown." in place of the host's orders (T19); one new key, no setting.
 - 2026-10-20: Far Watch (#847): the scout-away rule (`FogSkill`), hosts named by a scout keep their name past the horizon (`IsNameHidden`), `RaiseByScout` and `RecordScoutedSettlement`; the service takes an `IScoutIntelQuery`.
 - 2026-10-19: deep-review fixes: exact stamps also on every game menu (the tick never fires while a menu stops time), a live view that contradicts a memory replaces it, own side and plain sight judged by one predicate, the player's own siege on both sides, battle totals leave hidden parties out, the Scouting XP is also granted before a save, a masked total row is always wrapped, a thread-local frame slot, the reason row and the drawn flag follow what reached the screen.

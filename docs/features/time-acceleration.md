@@ -314,7 +314,7 @@ take effect.
 
 ## Changelog
 
-- 2026-10-27: a click while turbo is held is an ordinary click again (#1040, Patch124). v1.5.6 made
+- 2026-10-27 (v2.0.36): a click while turbo is held is an ordinary click again (#1040, Patch124). v1.5.6 made
   Left Ctrl + click a parley, and turbo is Ctrl + Space. In-game check owed.
 - 2026-09-12: the map bar Extra Fast Forward button applies the extra multiplier (#574). It had
   bound vanilla `ExecuteTimeControlChange(2)` directly, mode only, since the feature landed; #168
