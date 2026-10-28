@@ -2,7 +2,7 @@
   "high_kingdom_of_lindon": {
     "name": "{=taom_faction_high_kingdom_of_lindon_name}High Kingdom of Lindon",
     "color": "#7FAFC9FF",
-    "playable": true,
+    "playable": false,
     "game_faction": "lindon",
     "side": "free",
     "description": "{=taom_faction_high_kingdom_of_lindon_desc}The green land west of the Blue Mountains, last realm of the High Elves on the shores of Middle-earth. From the Grey Havens of Mithlond the white ships sail into the West. Círdan the Shipwright, eldest of the Eldar, keeps the fading light of the Noldor — wise, few, and each blade irreplaceable. Lindon shares the Noldor strength of Imladris.",
@@ -276,7 +276,7 @@
   "kingdom_of_rhudaur": {
     "name": "{=taom_faction_kingdom_of_rhudaur_name}Kingdom of Rhudaur",
     "color": "#603830FF",
-    "playable": true,
+    "playable": false,
     "game_faction": "rhudaur",
     "side": "neutral",
     "description": "{=taom_faction_kingdom_of_rhudaur_desc}The eastern of Arnor's three successor kingdoms, a hill realm between the Hoarwell and the Loudwater. Its Dúnedain lords hold Cameth Brin and the Angle and rule a hard people of hill-men. It stands apart from the War of the Ring, but trolls walk its fells and the orcs of Gundabad and the mountains watch every pass.",
@@ -351,7 +351,7 @@
   "kingdom_of_ered_duin": {
     "name": "{=taom_faction_kingdom_of_ered_duin_name}Kingdom of Ered Luin",
     "color": "#607888FF",
-    "playable": true,
+    "playable": false,
     "game_faction": "eredluin",
     "side": "free",
     "description": "{=taom_faction_kingdom_of_ered_duin_desc}The dwarf-halls of the Blue Mountains at the western edge of Middle-earth. Durin's Folk made Thorin's Halls in their exile, and the Broadbeams and the Firebeards keep Belegost and Nogrod again. They mine iron and sell it to the Elves of Lindon and the Men of Eriador, while the goblins of Blue Craig gnaw at their roads.",
@@ -431,7 +431,7 @@
   "kingdom_of_cardolan": {
     "name": "{=taom_faction_kingdom_of_cardolan_name}Kingdom of Cardolan",
     "color": "#28745CFF",
-    "playable": true,
+    "playable": false,
     "game_faction": "cardolan",
     "side": "neutral",
     "description": "{=taom_faction_kingdom_of_cardolan_desc}The southern of Arnor's three successor kingdoms. Its kings lie in the barrows of Tyrn Gorthad and its riders keep the plains between the Baranduin and the Greyflood. It stands apart from the War of the Ring, but Dunland, the goblins and the orcs of the mountains test its few towns every year.",
@@ -1398,7 +1398,7 @@
   "khudorom_of_khand": {
     "name": "{=taom_faction_khudorom_of_khand_name}Khudorom of Khand",
     "color": "#6E8088FF",
-    "playable": true,
+    "playable": false,
     "game_faction": "battania",
     "side": "neutral",
     "description": "{=taom_faction_khudorom_of_khand_desc}The Variag of Khand. A tradition of woodland militia blends with the Steppe Charioteers' +10% speed across open ground. Mercenary bands ride for whoever pays the most coin.",
@@ -1507,7 +1507,7 @@
   "havens_of_umbar": {
     "name": "{=taom_faction_havens_of_umbar_name}Havens of Umbar",
     "color": "#685848FF",
-    "playable": true,
+    "playable": false,
     "game_faction": "umbar",
     "side": "neutral",
     "description": "{=taom_faction_havens_of_umbar_desc}The corsair haven and Black Numenorean port-city on the southern bays. Corsair Trade slashes caravan costs, Corsair Glory adds renown, Desert Corsairs march fast across the sands — but Corsair Greed inflates every wage bill.",

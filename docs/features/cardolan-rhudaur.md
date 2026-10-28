@@ -8,6 +8,9 @@ Each has its own culture (`cardolan`, `rhudaur`), troop tree, kingdom, clans, lo
 creation and faction card. Both are **Neutral**: they stand apart from the War of the Ring, and the
 enemies at their borders are Dunland, Gundabad, the Misty Mountain orcs and the goblins.
 
+**Parked (2026-10-28):** the player cannot choose either realm at character creation until its troops have armour
+([parked realms](faction-map.md#parked-realms)).
+
 ## Why This Exists
 
 - **Mike's request (2026-10-23, #978):** one kingdom per son of Eärendur, so Arthedain is no longer

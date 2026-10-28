@@ -217,10 +217,14 @@ entry is skipped with a `[FactionUI]` warning, then one summary warning, while t
 The four realms made playable after Kysaro's pass (`kingdom_of_arthedain`, `kingdom_of_cardolan`,
 `kingdom_of_rhudaur` and Ered Luin's `kingdom_of_ered_duin`, a key kept from the old placeholder card) have a
 `faction_kingdoms.json` row only: their viewport shows the elite infantry troop, and their pin falls back to the
-region's `capital_pos` in `regions.json` (`FactionScreenCatalog`).
+region's `capital_pos` in `regions.json` (`FactionScreenCatalog`). Of the four, only Arthedain is listed today;
+the other three are parked.
 
-A key naming no playable faction is reported once. `FactionUIConfigIdsTests` pins every faction key and
-character id in these files against the shipped data.
+A key naming no playable faction is reported once per process. `FactionUIConfigIdsTests` pins every
+faction key to any faction in `factions.json` (so a misspelt key fails, but a row for a faction that is
+never playable passes and only logs), and every character id in these files against the shipped data. The [parked realms](faction-map.md#parked-realms) keep their rows, so the first
+faction screen of a launch logs that warning for `faction_characters.json`, `faction_kingdoms.json` and
+`faction_map_pos.json`.
 
 ## Key Files
 

@@ -9,6 +9,9 @@ careers and faction card. Durin's Folk hold Thorin's Halls, and in TAOM the Broa
 Firebeards hold Belegost and Nogrod again. It stands on the Free side, allied by nature to Erebor
 and Lindon, with the goblins of Blue Craig on its northern border.
 
+**Parked (2026-10-28):** the player cannot choose Ered Luin at character creation until its troops have armour
+([parked realms](faction-map.md#parked-realms)).
+
 ## Why This Exists
 
 - **Mike's request (2026-10-27):** Mike placed three towns, five castles and twenty-three villages

@@ -10,6 +10,9 @@ are full, **CC-playable** AI map-factions with settlements, clans, lords, troop 
 pools, **cultural feats**, faction-map cards, and **forever-alliance diplomacy** ties. The orc
 cultures' troops are infantry + archer lines wearing **orc armor** with mixed orc weapons.
 
+**Lindon is parked (2026-10-28):** the player cannot choose it at character creation until its troops have armour
+([parked realms](faction-map.md#parked-realms)).
+
 Authored 2026-06-01 against scene entities the map author (user) placed in the live
 `TAOM_Map` worldmap scene.
 

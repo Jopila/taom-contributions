@@ -46,7 +46,6 @@ public class FactionMapDataTests
     [DataRow("dominion_of_isengard")]
     [DataRow("overlordship_of_dol_guldur")]
     [DataRow("overlordship_of_gundabad")]
-    [DataRow("havens_of_umbar")]
     [DataRow("kingdom_of_erebor")]
     [DataRow("kingdom_of_imladris")]
     [DataRow("kingdom_of_lasgalen")]
@@ -54,14 +53,12 @@ public class FactionMapDataTests
     [DataRow("kingdom_of_rohan")]
     [DataRow("clans_of_dunland")]
     [DataRow("kingdom_of_dale")]
-    [DataRow("khudorom_of_khand")]
     [DataRow("taskralan_of_harwan")]
     [DataRow("golden_realm_of_rhun")]
     [DataRow("goblins_of_goblin_town")]
     [DataRow("kingdom_of_moria")]
-    [DataRow("high_kingdom_of_lindon")]
     [DataRow("goblins_of_blue_craig")]
-    [DataRow("kingdom_of_ered_duin")]
+    [DataRow("kingdom_of_arthedain")]
     public void PlayableFaction_HasMinimumContentSections(string factionKey)
     {
         var root = LoadFactions();
@@ -70,6 +67,30 @@ public class FactionMapDataTests
         Assert.AreEqual(true, faction.Value<bool?>("playable"),
             $"'{factionKey}' should be marked playable");
 
+        AssertMinimumContentSections(faction, factionKey);
+    }
+
+    // Realms whose troops have no armour yet: the player may not start in them until the art lands.
+    // Their cards still show on the faction map, so they keep the playable cards' content minimums.
+    [DataTestMethod]
+    [DataRow("high_kingdom_of_lindon")]
+    [DataRow("kingdom_of_ered_duin")]
+    [DataRow("kingdom_of_cardolan")]
+    [DataRow("kingdom_of_rhudaur")]
+    [DataRow("havens_of_umbar")]
+    [DataRow("khudorom_of_khand")]
+    public void WorkInProgressFaction_IsNotPlayable(string factionKey)
+    {
+        var faction = LoadFactions()[factionKey] as JObject;
+        Assert.IsNotNull(faction, $"faction key '{factionKey}' missing from factions.json");
+        Assert.AreEqual(false, faction.Value<bool?>("playable"),
+            $"'{factionKey}' has no armour yet and must stay unplayable");
+
+        AssertMinimumContentSections(faction, factionKey);
+    }
+
+    private static void AssertMinimumContentSections(JObject faction, string factionKey)
+    {
         AssertArrayLength(faction, "perks", min: 2, factionKey);
         AssertArrayLength(faction, "bonuses", min: 3, factionKey);
         AssertArrayLength(faction, "special_units", min: 1, factionKey);

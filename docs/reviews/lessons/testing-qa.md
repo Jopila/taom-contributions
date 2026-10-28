@@ -2337,3 +2337,13 @@ TaleWorlds DLLs. A clean run gave 9, and the record also named the wrong class f
   (`GameAssembliesResolutionTests`), so the run cannot mix. List failures with their class (the trx, or the stack
   frame), never a method name alone.
 - **Source:** [rca-nogame-gate-2026-10-28.md](../rca-nogame-gate-2026-10-28.md) finding 4; #1038 item 14.
+
+### Key a content gate on what the player sees, not on the flag a change flips (2026-10-28)
+Parking six realms meant removing four of them from `PlayableFaction_HasMinimumContentSections`, because that test
+also asserts `playable: true`. Their cards still show on the faction map, so their content lost its only check, and
+the restore step did not put it back.
+- **Why missed:** one test held two checks, the state and the content, so a change to the state carried the content
+  check away with it.
+- **Prevent:** keep the content assertions in a helper that every state's test calls (`AssertMinimumContentSections`
+  in `FactionMapDataTests`). When a change moves an entity between states, ask which checks still apply to it.
+- **Source:** [rca-parked-realms-2026-10-28.md](../rca-parked-realms-2026-10-28.md) finding 1.

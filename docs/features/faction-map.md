@@ -91,6 +91,20 @@ One entry per faction id. Fields:
 | `strengths` / `weaknesses` | string[] | Displayed in info panel. Wrap each in `{=KEY}default`. |
 | `difficulty` | int | 1–7 scale; 0 omits difficulty line. `1=Very Easy`, `2=Easy`, `3=Medium`, `4=Medium-Hard`, `5=Hard`, `6=Very Hard`, `7=Extreme`. The label text comes from `FactionSelectionService.FormatDifficultyText` which returns `{=taom_faction_difficulty_N}default`. |
 
+### Parked realms
+
+A realm that is on the campaign map but not ready for the player has `"playable": false`. Six are
+parked until their troops have armour (2026-10-28): Lindon (`high_kingdom_of_lindon`), Ered Luin
+(`kingdom_of_ered_duin`), Cardolan (`kingdom_of_cardolan`), Rhudaur (`kingdom_of_rhudaur`), Umbar
+(`havens_of_umbar`) and Khand (`khudorom_of_khand`). On the faction map a parked realm behaves like
+any other realm that is not playable: it shows its border and lore card, shows no banner, and cannot
+be confirmed. The faction screen does not list it. Its kingdom, lords and settlements still run in
+the campaign, because only character creation reads this flag. `WorkInProgressFaction_IsNotPlayable`
+in `FactionMapDataTests` pins the six and holds their cards to the playable content minimums; to
+restore a realm, set its flag to `true` and move its row to `PlayableFaction_HasMinimumContentSections`.
+The Advanced Starting Options menu still offers the six kingdoms for a King, Vassal or Mercenary
+start.
+
 ### Localization
 
 Every player-facing string in `factions.json` is wrapped in `{=KEY}default` format using the convention `taom_faction_<faction_json_key>_<section>_<index>` (e.g. `taom_faction_stewardship_of_gondor_perk_0_name`). At runtime, `FactionDisplayHelper.Localize(string)` wraps each VM-bound string in `new TextObject(s).ToString()`, which resolves `{=KEY}` against the GameTextManager. Plain English strings pass through unchanged.

@@ -76,13 +76,13 @@ public class FactionUIConfigIdsTests
         return provider.Config;
     }
 
-    private static HashSet<string> PlayableFactionKeys(string moduleData)
+    private static HashSet<string> FactionKeys(string moduleData)
     {
         var pathService = Substitute.For<IPathService>();
         pathService.ModuleDataPath.Returns(moduleData);
         var provider = new FactionConfigProvider(pathService, Substitute.For<IModLogger>());
         var factions = provider.LoadFactions();
-        return new HashSet<string>(factions.Where(kv => kv.Value.Playable).Select(kv => kv.Key), StringComparer.Ordinal);
+        return new HashSet<string>(factions.Keys, StringComparer.Ordinal);
     }
 
     private static HashSet<string> NpcCharacterIds(string xmlText)
@@ -142,59 +142,59 @@ public class FactionUIConfigIdsTests
         repoIds.Contains(characterId) || (retagged.Contains(characterId) && vanillaIds.Contains(characterId));
 
     [TestMethod]
-    public void FactionCharactersJson_EveryFactionKey_IsAPlayableFaction()
+    public void FactionCharactersJson_EveryFactionKey_NamesAFaction()
     {
         var md = FindRepoModuleData();
         if (md == null) { Assert.Inconclusive("Repo ModuleData path not found - run from repo root"); return; }
 
-        var playable = PlayableFactionKeys(md);
+        var factions = FactionKeys(md);
         var config = RealFactionScreenConfig(md);
-        var unknown = config.ViewportCharacters.Keys.Where(k => !playable.Contains(k)).ToList();
+        var unknown = config.ViewportCharacters.Keys.Where(k => !factions.Contains(k)).ToList();
 
         Assert.AreEqual(0, unknown.Count,
-            $"faction_characters.json keys not a playable faction in factions.json: {string.Join(", ", unknown)}");
+            $"faction_characters.json keys naming no faction in factions.json: {string.Join(", ", unknown)}");
     }
 
     [TestMethod]
-    public void FactionKingdomsJson_EveryFactionKey_IsAPlayableFaction()
+    public void FactionKingdomsJson_EveryFactionKey_NamesAFaction()
     {
         var md = FindRepoModuleData();
         if (md == null) { Assert.Inconclusive("Repo ModuleData path not found - run from repo root"); return; }
 
-        var playable = PlayableFactionKeys(md);
+        var factions = FactionKeys(md);
         var config = RealFactionScreenConfig(md);
-        var unknown = config.Kingdoms.Keys.Where(k => !playable.Contains(k)).ToList();
+        var unknown = config.Kingdoms.Keys.Where(k => !factions.Contains(k)).ToList();
 
         Assert.AreEqual(0, unknown.Count,
-            $"faction_kingdoms.json keys not a playable faction in factions.json: {string.Join(", ", unknown)}");
+            $"faction_kingdoms.json keys naming no faction in factions.json: {string.Join(", ", unknown)}");
     }
 
     [TestMethod]
-    public void FactionMapPosJson_EveryFactionKey_IsAPlayableFaction()
+    public void FactionMapPosJson_EveryFactionKey_NamesAFaction()
     {
         var md = FindRepoModuleData();
         if (md == null) { Assert.Inconclusive("Repo ModuleData path not found - run from repo root"); return; }
 
-        var playable = PlayableFactionKeys(md);
+        var factions = FactionKeys(md);
         var config = RealFactionScreenConfig(md);
-        var unknown = config.MapPositions.Keys.Where(k => !playable.Contains(k)).ToList();
+        var unknown = config.MapPositions.Keys.Where(k => !factions.Contains(k)).ToList();
 
         Assert.AreEqual(0, unknown.Count,
-            $"faction_map_pos.json keys not a playable faction in factions.json: {string.Join(", ", unknown)}");
+            $"faction_map_pos.json keys naming no faction in factions.json: {string.Join(", ", unknown)}");
     }
 
     [TestMethod]
-    public void FactionViewportJson_EveryFactionKey_IsAPlayableFaction()
+    public void FactionViewportJson_EveryFactionKey_NamesAFaction()
     {
         var md = FindRepoModuleData();
         if (md == null) { Assert.Inconclusive("Repo ModuleData path not found - run from repo root"); return; }
 
-        var playable = PlayableFactionKeys(md);
+        var factions = FactionKeys(md);
         var config = RealFactionScreenConfig(md);
-        var unknown = config.ViewportTweaks.Keys.Where(k => !playable.Contains(k)).ToList();
+        var unknown = config.ViewportTweaks.Keys.Where(k => !factions.Contains(k)).ToList();
 
         Assert.AreEqual(0, unknown.Count,
-            $"faction_viewport.json keys not a playable faction in factions.json: {string.Join(", ", unknown)}");
+            $"faction_viewport.json keys naming no faction in factions.json: {string.Join(", ", unknown)}");
     }
 
     [TestMethod]
