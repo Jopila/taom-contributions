@@ -32,7 +32,7 @@ namespace TaleWorlds.Engine {
    if(ThrowHeight) throw new InvalidOperationException("simulated scene transition");
    h=Height; normal=Normal;
   }
-  public bool GetHeightAtPoint(Vec2 p,BodyFlags mask,out float h) {
+  public bool GetHeightAtPoint(Vec2 p,BodyFlags mask,ref float h) {
    CollisionCalls++; Mask=mask;
    if(ThrowHeight) throw new InvalidOperationException("simulated collision query failure");
    h=CollisionHit?Height:0; return CollisionHit;

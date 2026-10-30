@@ -287,7 +287,7 @@ public sealed class SupplyRouteVisualService : ISupplyRouteVisualService
                     else
                         // Same land collision mask as SandBox.MapScene.GetHeightAtPoint (1.4.8).
                         scene.GetHeightAtPoint(position,
-                            BodyFlags.Moveable | BodyFlags.OnlyCollideWithRaycast, out height);
+                            BodyFlags.Moveable | BodyFlags.OnlyCollideWithRaycast, ref height);
                 }
                 catch (Exception)
                 {

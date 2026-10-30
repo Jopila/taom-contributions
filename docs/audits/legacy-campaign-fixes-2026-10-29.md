@@ -67,6 +67,29 @@ owning behavior so late cleanup cannot clear another campaign's ownership.
 - Still outstanding: gameplay coverage of desertion across a battle boundary,
   repeated campaign reloads and resource spending, Uruk armor in a live mission,
   and any port/build/runtime validation on Bannerlord 1.5.x.
-- Self-review only. No independent review, maintainer acceptance or merge is
-  claimed. No game binaries, saves, raw logs, crash dumps or private paths are
-  included in this contribution.
+- The initial submission was self-reviewed; the subsequent maintainer review is
+  recorded below. No maintainer acceptance or merge is claimed. No game binaries,
+  saves, raw logs, crash dumps or private paths are included in this contribution.
+
+## PR #1064 review follow-up (2026-10-30)
+
+[Haterade's review](https://github.com/haterade22/TAOM/pull/1064#pullrequestreview-5712895030)
+identified a compile-time mismatch missed by the initial signature checks:
+`Scene.GetHeightAtPoint` takes `ref float height`, whereas both the source call
+and the harness fake used `out`. The production call and fake now use `ref`.
+The initialized height, terrain guard, collision mask and fallback behavior are
+unchanged.
+
+- Changing only the fake to `ref` first made `Run.ps1` fail with **CS1620** and
+  exit 1. After correcting the production call, the same command passed all
+  **44 behavioral + 2 XML checks**, exit 0.
+- Reflection of the installed 1.4.8 `TaleWorlds.Engine.dll` confirmed that the
+  third parameter is `System.Single&`, with `IsOut == false`. Its SHA-256 is
+  `BFD5DB82D92F75EF15A5EB9A9F0C9391412566933193122DB1684019ED704D68`.
+- A separate minimal call compiled with PowerShell 7's Roslyn and references to
+  the installed `TaleWorlds.Engine`, `TaleWorlds.Library` and `TaleWorlds.DotNet`
+  assemblies rejected `out height` with **CS1620** and accepted `ref height`.
+  The probe methods and native engine methods were not invoked.
+- Full solution build and MSTest remain **not run**: the .NET SDK is unavailable.
+  The signature probe does not replace a .NET Framework 4.7.2 solution build or
+  gameplay validation. No module was deployed and no new gameplay test was run.
